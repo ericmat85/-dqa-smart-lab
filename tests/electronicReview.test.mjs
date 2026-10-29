@@ -8,7 +8,7 @@ const accounts = [{id:'l1',name:'一階',role:ROLE.LEVEL1,status:'啟用中'},{i
 function setup() {
   const request = {id:'case',ownerId:'owner',supervisorId:'manager',status:'已核准',signatureRecords:[]};
   const data = new Map([[REQUEST_KEY,JSON.stringify([request])],['dqa-shared-demo-accounts-v1',JSON.stringify(accounts)]]);
-  const storage = {getItem:key=>data.get(key),setItem:(key,value)=>data.set(key,value)};
+  const storage = {getItem:key=>data.get(key),setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)};
   return {request,storage,read:()=>JSON.parse(storage.getItem(REQUEST_KEY))[0]};
 }
 const decide = (storage,request,accountId,extra={}) => reviewElectronicRequest({id:request.id,expectedRevision:reviewRevision(request),accountId,signature,comment:'checked',returnIt:false,...extra},storage);
@@ -62,4 +62,20 @@ test('self review, disabled accounts, missing signature and storage failures are
   const denied={getItem:storage.getItem,setItem(){throw Error('quota');}};
   assert.throws(()=>decide(denied,request,'l1'));
   assert.equal(read().lmsReview,undefined);
+});
+
+test('a new two-stage approved request becomes schedulable once, without fixture rows',async()=>{
+ const {syncScheduleLifecycle}=await import('../src/scheduleLifecycle.mjs');
+ const {request,storage}=setup();
+ const initial={...request,productCode:'NEW',testItems:['低溫試驗'],quantity:'2'};
+ storage.setItem(REQUEST_KEY,JSON.stringify([initial]));
+ storage.setItem('dqa-schedules-demo-v1','[]');
+ syncScheduleLifecycle(storage,Date.parse('2026-11-06T10:00:00+08:00'));
+ assert.deepEqual(JSON.parse(storage.getItem('dqa-schedules-demo-v1')),[]);
+ const first=decide(storage,initial,'l1');const second=decide(storage,first,'l2');assert.equal(second.status,'待排程');
+ syncScheduleLifecycle(storage,Date.parse('2026-11-06T10:00:00+08:00'));
+ let rows=JSON.parse(storage.getItem('dqa-schedules-demo-v1'));
+ assert.equal(rows.length,1);assert.equal(rows[0].requestId,initial.id);assert.equal(rows[0].title,'低溫試驗');assert.equal(rows[0].quantity,'2');assert.equal(rows[0].status,'未排程');
+ syncScheduleLifecycle(storage,Date.parse('2026-11-06T10:00:01+08:00'));
+ rows=JSON.parse(storage.getItem('dqa-schedules-demo-v1'));assert.equal(rows.length,1);
 });
