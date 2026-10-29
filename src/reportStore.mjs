@@ -1,0 +1,11 @@
+import {caseResetVersion,caseResetActive} from './resetCases.mjs';
+import {reportMetadata} from './reportRules.mjs';
+const DB='dqa_lab_demo_reports';
+function openDb(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB,2);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains('reports'))request.result.createObjectStore('reports',{keyPath:'requestId'});if(!request.result.objectStoreNames.contains('reportIndex')){const index=request.result.createObjectStore('reportIndex',{keyPath:'requestId'});const cursor=request.transaction.objectStore('reports').openCursor();cursor.onsuccess=()=>{if(cursor.result){const meta=reportMetadata(cursor.result.value);if(meta)index.put(meta);cursor.result.continue();}};}};request.onerror=()=>reject(request.error);request.onsuccess=()=>resolve(request.result);});}
+export async function getReport(requestId){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reports','readonly'),request=tx.objectStore('reports').get(requestId);request.onsuccess=()=>resolve(request.result||null);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
+export async function allReports(){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reportIndex','readonly'),request=tx.objectStore('reportIndex').getAll();request.onsuccess=()=>resolve(request.result);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
+export async function saveReport(report,expectedRevision,epoch){
+ const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(['reports','reportIndex'],'readwrite'),store=tx.objectStore('reports'),request=store.get(report.requestId);let error;
+ request.onsuccess=()=>{if(epoch!==undefined&&(caseResetActive()||caseResetVersion()!==epoch)){error=Error("系統已重設，停止儲存報告。");tx.abort();return;}const current=request.result;if((expectedRevision===null&&current?.stage)||(typeof expectedRevision==='string'&&current?.revision!==expectedRevision)){error=Error('報告已更新或已提交，請重新開啟視窗。');tx.abort();return;}store.put(report);const meta=reportMetadata(report);if(meta)tx.objectStore('reportIndex').put(meta);};
+ tx.oncomplete=()=>{db.close();resolve(report);};tx.onabort=tx.onerror=()=>{db.close();reject(error||tx.error||Error('報告儲存失敗。'));};});
+}

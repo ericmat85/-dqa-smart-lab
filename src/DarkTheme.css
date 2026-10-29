@@ -1,0 +1,62 @@
+/* Shared graphite palette. Accents identify each system without tinting every surface. */
+:is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.lab-login-dark,.system-header-dark){
+ --page:#0e151e;--surface:#17212d;--soft:#1d2a38;--border:#2b3b4b;
+ --text:#e7edf5;--muted:#a0b0c2;--blue:#91adff;--primary:#91adff;
+ --night-header:#121d29;--night-raised:#1b2836;--night-input:#101b27;
+ --night-accent:#a7b4ff;--night-fill:#485cb2;--night-selected:#263454;
+ --rq-page:var(--page);--rq-card:var(--surface);--rq-border:var(--border);--rq-muted:var(--muted);
+ --shadow:0 8px 28px #00000020;color-scheme:dark;
+}
+.rq-theme-dark{--night-accent:#7ed7c6;--night-fill:#19796f;--night-selected:#193c3d}
+:is(.lab-theme-dark,.lab-login-dark){--night-accent:#9ac2ff;--night-fill:#365fa8;--night-selected:#203956}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.lab-login-dark){background:var(--page)!important;color:var(--text)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.lab-login-dark) :is(.dashboard-topbar,.rq-topbar,.lab-global-header,.sidebar,.rq-sidebar,.lab-sidebar,.rq-login-header,.lab-login-header){background:var(--night-header)!important;border-color:var(--border)!important;color:var(--text)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.lab-login-dark) :is(.live-panel,.live-metric,.panel,.template-page,.rq-panel,.rq-card,.rq-stat-card,.rq-kpis>div,.lab-panel,.lab-stats>div,.template-kpi,.request-kpi,.template-form,.account-summary>div,.rq-entry-card,.rq-login-card,.lab-login-card,.request-modal,.rq-form-modal,.rq-request-detail-modal,.lab-modal,.lab-operation-dialog,.eq-profile,.eq-profile-modal,.equipment-info-modal,.report-case-panel){background:var(--surface)!important;border-color:var(--border)!important;color:var(--text)!important;box-shadow:var(--shadow)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(h1,h2,h3,h4,strong,b,dd){color:var(--text)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-muted,.rq-footer,.rq-side-caption,.lab-sidebar-label,.lab-topbar p,.rq-panel-head p,.lab-panel-heading p,.rq-kpis span,.rq-kpis small,.lab-stats span,.live-panel header p,.welcome-block span,.template-heading p,.rq-form-header p,.request-modal-header p,.eq-profile-fields dt,.report-case-panel details){color:var(--muted)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-eyebrow,.lab-eyebrow,.live-panel-heading>div>small,.management-section-heading small){color:var(--night-accent)!important}
+
+/* Readable table copy and quiet dividers; keep headers distinct from data. */
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) table{color:var(--text)!important;border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) table th{background:var(--night-raised)!important;color:#b8c7d8!important;border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) table td{background:var(--surface)!important;color:#ccd8e6!important;border-color:#263646!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) table td :is(small,.lab-trial-hours){color:var(--muted)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) table tbody tr:hover>td{background:#1c2b3b!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-panel-head,.lab-panel-heading,.rq-form-header,.rq-form-footer,.request-modal-header,.request-modal-footer,.eq-profile-tabs,.rq-detail-section,.rq-detail-grid>div,.rq-notice,.approval-steps,.nav-group-separated){border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-form-body-reference,.request-form-preview,.rq-approval,.rq-form-footer,.request-preview-text,.rq-detail-section h3,.rq-request-detail-status,.report-progress,.management-toolbar,.account-toolbar,.lab-system-rules>div,.request-preview-grid>div){background:var(--night-input)!important;border-color:var(--border)!important;color:var(--text)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-side-note,.lab-side-note,.template-info,.rq-demo-hint,.rq-process-note,.rq-review-callout,.lab-notice,.rq-notice,.lab-demo-banner){background:#1b2c3b!important;border-color:#304559!important;color:#b2c8dc!important;box-shadow:none}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-nav,.nav-item,.lab-sidebar>button){color:#b1c2d5!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-nav.active,.nav-item.active,.lab-sidebar>button.active){background:var(--night-selected)!important;color:var(--night-accent)!important;box-shadow:inset 3px 0 var(--night-accent)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-nav,.nav-item,.lab-sidebar>button):hover{background:var(--night-raised)!important;color:var(--text)!important}
+
+/* Inputs and secondary controls should never turn into bright white blocks. */
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.lab-login-dark) :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:var(--night-input)!important;color:var(--text)!important;border-color:#35495e!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(input,textarea)::placeholder{color:#8d9fb4;opacity:1}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-btn-light,.rq-btn:not(.rq-btn-primary):not(.rq-btn-danger),.template-btn.secondary,.btn-outline,.outline-btn,.lab-modal-actions>button:not(.lab-primary),.report-actions>button:not(.report-primary),.data-pagination button,.theme-toggle,.rq-close,.rq-form-close,.request-modal-close){background:var(--night-raised)!important;color:#d6e2ef!important;border-color:#35495e!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.template-btn:not(.secondary):not(.danger),.rq-btn-primary,.lab-primary,.report-primary,.lab-actions button:not(.lab-danger)){background:var(--night-fill)!important;border-color:var(--night-fill)!important;color:#fff!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.lab-actions .lab-danger,.rq-btn-danger,.template-btn.danger,.clear-cases-button,.profile-logout-button){background:#35252f!important;color:#ffb0b9!important;border-color:#6c3f50!important;box-shadow:none}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.clear-cases-button,.lab-danger,.rq-btn-danger):hover{background:#49303b!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-link,.lab-request-link,.request-id-link,.live-data-link,.lab-back){color:var(--night-accent)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .data-pagination button[aria-current=page]{background:var(--night-selected)!important;color:var(--night-accent)!important;border-color:var(--night-accent)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-status,.template-status,.lab-status,.lab-review-indicator){background:#26364a;color:#c7daef;border-color:#38506a}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-status.good,.status-已完成,.status-完成,.status-待機中){background:#193b34;color:#94e0c5!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-status.pending,.status-待審核,.status-待核准,.status-未排程,.status-待確認){background:#3d3322;color:#ebce95!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.status-取消,.status-有衝突,.rq-status.warning){background:#422a35;color:#f1a8b8!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.report-checks,.rq-flow .done){background:#19352f;color:#a0d9c7;border-color:#31584b}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .lab-warning{background:#3b3023;color:#f0d19f!important;border-color:#645036}
+
+/* Shared notification menus, personal dialogs, and native review dialogs. */
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .system-header-actions{--surface:#17212d;--text:#e7edf5;--muted:#a0b0c2;--border:#2b3b4b;--soft:#1d2a38}
+.system-header-dark.shared-personal-settings{--surface:#17212d;--text:#e7edf5;--muted:#a0b0c2;--border:#2b3b4b;--soft:#1d2a38;background:var(--surface);color:var(--text)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.popup-menu,.notification-menu,.lab-operation-dialog){background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.notification-menu-header,.notification-menu-footer,.lab-operation-dialog header,.lab-operation-dialog footer){background:var(--night-raised)!important;border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .notification-item{background:var(--surface);border-color:var(--border)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .profile-settings-button{background:var(--night-raised);color:var(--text);border-color:var(--border)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .avatar{background:#304561;color:#c4dbff}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :focus-visible{outline-color:var(--night-accent);outline-offset:3px}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .live-donut>div{background:var(--surface)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .live-bar-tooltip{background:var(--night-raised);color:var(--text);border-color:var(--border)}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .dqa-signature-record{background:var(--night-raised);border-color:var(--border)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) .dqa-signature-history>p{color:var(--muted)!important}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) ::-webkit-scrollbar{width:9px;height:9px}
+#root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) ::-webkit-scrollbar-thumb{background:#3b4c60;border-radius:8px;border:2px solid var(--surface)}

@@ -1,0 +1,19 @@
+import './ScheduleArrangement.css';
+import AiScheduleButton from './AiScheduleButton.jsx';
+import {equipmentMatches,enabledExecutors} from './scheduleEquipment.mjs';
+
+export default function ScheduleArrangement({editing,form,onChange,equipment,accounts,onRecommend,message,onRefresh}) {
+  const selected=equipment.find(row=>row.id===form.equipmentId);
+  const executors=enabledExecutors(accounts);
+  const update=patch=>onChange({...form,...patch});
+  return <section className="schedule-arrangement" aria-label="設備與排程安排">
+    <header className="schedule-arrangement-header"><div><span>RESOURCE & SCHEDULE</span><h4>設備與排程安排</h4><p>選擇待機設備，安排執行人與試驗日期</p></div><AiScheduleButton onRecommend={onRecommend}/></header>
+    <div className="schedule-arrangement-hint"><span>待機設備 <b>{equipment.filter(row=>row.status==='待機中').length}</b>／{equipment.length} 台</span><button type="button" onClick={onRefresh}>重新讀取設備狀態 ↻</button></div>
+    <div className="schedule-arrangement-content"><section className="schedule-arrangement-device"><div className="schedule-arrangement-step"><span>01</span><h5>選擇實驗設備</h5></div><label>設備選擇 *<select value={form.equipmentId||''} onChange={event=>{const row=equipment.find(item=>item.id===event.target.value);update({equipmentId:row?.id||'',eq:row?.name||''});}}><option value="">請選擇待機中的適用設備</option>{equipment.map(row=><option key={row.id} value={row.id} disabled={row.status!=='待機中'||!equipmentMatches(editing.title,row)}>{row.id} · {row.name} · 【{row.status}】{!equipmentMatches(editing.title,row)?' · 類型不適用':''}</option>)}</select></label>
+      {selected?<div className="schedule-arrangement-machine"><span className={`equipment-status equipment-status-${['使用中','待機中','維護中','校驗中'].indexOf(selected.status)}`}>{selected.status}</span><strong>{selected.name}</strong><p>{selected.model} · {selected.location}</p><dl><div><dt>樣品容量</dt><dd>{selected.capacity} 件</dd></div><div><dt>設備負責人</dt><dd>{selected.owner}</dd></div></dl><p className="schedule-arrangement-spec">{selected.specification}</p>{selected.status!=='待機中'&&<p role="alert">目前設備無法加入排程，請重新選擇待機設備。</p>}</div>:<div className="schedule-arrangement-empty">選擇設備後顯示規格與容量</div>}
+      <small>使用中、維護中與校驗中的設備不可選用。</small></section>
+      <section className="schedule-arrangement-timing"><div className="schedule-arrangement-step"><span>02</span><h5>人員與試驗時段</h5></div><div className="schedule-arrangement-grid"><label>執行人 *<select value={form.ownerId||''} onChange={event=>{const row=executors.find(item=>item.id===event.target.value);update({ownerId:row?.id||'',owner:row?.name||''});}}><option value="">請選擇執行人</option>{executors.map(row=><option key={row.id} value={row.id}>{row.name}（{row.role}）</option>)}</select></label><label>樣品編號 *<input value={form.sampleCode} onChange={event=>update({sampleCode:event.target.value})} placeholder="請輸入樣品編號"/></label><label>開始日期 *<input type="date" value={form.time} onChange={event=>update({time:event.target.value})}/></label><label>預計完成日期 *<input type="date" min={form.time||undefined} value={form.end} onChange={event=>update({end:event.target.value})}/></label></div><label>排程備註<textarea rows={3} value={form.note} onChange={event=>update({note:event.target.value})} placeholder="治具需求、執行注意事項或其他安排"/></label></section></div>
+    {message&&<div className="schedule-arrangement-message" role="status">{message}</div>}
+    <footer>AI 依設備類型、狀態、容量及設備／人員時段進行 Demo 規則推薦；確認後按「儲存排程」才會套用。</footer>
+  </section>;
+}

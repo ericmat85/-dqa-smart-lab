@@ -1,0 +1,87 @@
+/* Match RequestApp dashboard geometry; LabApp retains its own blue and dark palettes. */
+.lab-shell{font-family:Inter,"Noto Sans TC",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;display:grid;grid-template-columns:208px minmax(0,1fr);grid-template-rows:76px 1fr}
+.lab-shell button,.lab-shell input,.lab-shell textarea,.lab-shell select{font:inherit}
+.lab-shell .lab-global-header{height:76px;min-height:76px;padding:0 26px;gap:20px}
+.lab-shell .lab-company{gap:12px;min-width:0}
+.lab-shell .lab-logo{width:40px;height:40px;flex-shrink:0;border-radius:12px;font-size:14px}
+.lab-shell .lab-company strong{font-size:15px}
+.lab-shell .lab-company small{font-size:11px;margin-top:3px}
+.lab-shell .lab-header-actions{gap:10px}
+.lab-shell .lab-theme-pill{height:42px;padding:0 12px;gap:9px}
+.lab-shell .lab-avatar{width:36px;height:36px;font-size:13px}
+.lab-shell .lab-notification-trigger{width:34px;height:38px}
+.lab-shell .lab-profile-trigger{gap:9px;padding:2px 0 2px 4px}
+.lab-shell .lab-profile-name{font-size:12px}
+.lab-shell .lab-dropdown{border-radius:12px;padding:16px;box-shadow:0 12px 32px #15345c18}
+.lab-shell .lab-sidebar{padding:22px 18px;gap:8px;align-items:stretch;flex-direction:column}
+.lab-shell .lab-sidebar-label{font-size:10px;letter-spacing:1.3px;margin:0 0 6px}
+.lab-shell .lab-sidebar>button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 13px;border-radius:9px;font-size:14px;font-weight:650;cursor:pointer}
+.lab-shell .lab-sidebar>button>span{width:18px;flex:0 0 18px;text-align:center}
+.lab-shell .lab-sidebar .lab-back{font-size:12px}
+.lab-shell .lab-side-note{margin:22px 0 0;padding:13px;border:0;border-radius:10px;font-size:11px;line-height:1.8}
+.lab-shell .lab-main{padding:28px 30px 80px;min-width:0}
+.lab-shell .lab-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:24px}
+.lab-shell .lab-eyebrow{display:block;font-size:10px;font-weight:800;letter-spacing:1.4px;margin:0 0 8px}
+.lab-shell .lab-topbar h1{font-size:25px;margin:4px 0 8px;line-height:1.3}
+.lab-shell .lab-topbar p{font-size:12px;line-height:1.7;margin:0}
+.lab-shell .lab-stats{gap:14px;margin-bottom:22px}
+.lab-shell .lab-stats>div{padding:20px;border-radius:13px;box-shadow:0 5px 15px #163a5c05}
+.lab-shell .lab-stats span{font-size:12px}
+.lab-shell .lab-stats strong{display:block;font-size:29px;margin:12px 0 8px;line-height:1.2}
+.lab-shell .lab-panel{border-radius:13px;margin-bottom:20px;overflow:hidden;box-shadow:0 5px 15px #163a5c04}
+.lab-shell .lab-panel-heading{padding:20px;gap:20px;align-items:center;border-bottom:1px solid #e5ebf3}
+.lab-shell .lab-panel-heading h2{font-size:16px;margin:0 0 6px}
+.lab-shell .lab-panel-heading p{font-size:11px;line-height:1.7;margin:0}
+.lab-shell .lab-table-wrap{width:100%;overflow:auto}
+.lab-shell .lab-panel table{width:100%;border-collapse:collapse}
+.lab-shell .lab-panel th{padding:13px 16px;font-size:10px;font-weight:800;white-space:nowrap}
+.lab-shell .lab-panel td{padding:13px 16px;font-size:11px;line-height:1.6}
+.lab-shell .lab-panel td small{margin-top:4px;font-size:10px}
+.lab-shell .lab-request-link{font-size:11px;text-decoration:none}
+.lab-shell .lab-request-link:hover{text-decoration:underline}
+.lab-shell .lab-actions{gap:8px;align-items:center}
+.lab-shell .lab-actions button{padding:6px 11px;border-radius:9px;font-size:12px;font-weight:650}
+.lab-shell .lab-status{padding:5px 8px;border-radius:20px;font-size:10px;font-weight:750}
+.lab-shell .lab-review-indicator{padding:5px 8px;border-radius:8px;font-size:10px}
+.lab-shell .lab-modal-backdrop{background:#10243d80;padding:20px;z-index:1500}
+.lab-shell .lab-modal{width:min(100%,500px);max-height:calc(100dvh - 40px);overflow-y:auto;padding:28px;border-radius:16px;box-shadow:0 25px 80px #0a1f3b40;gap:16px}
+.lab-shell .lab-modal.report-submit-modal{width:min(100%,660px)}
+.lab-shell .lab-modal h2{font-size:22px;line-height:1.4;margin:0}
+.lab-shell .lab-modal p{font-size:12px;line-height:1.7}
+.lab-shell .lab-modal textarea{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.6;resize:vertical}
+.lab-shell .lab-modal-actions{gap:9px;align-items:center;margin-top:14px}
+.lab-shell .lab-modal-actions button{padding:10px 14px;border-radius:9px;font-size:12px;font-weight:650}
+.lab-shell :focus-visible{outline:2px solid #2867c7;outline-offset:3px}
+.lab-theme-dark .lab-panel-heading{border-color:#40516a}
+@media(max-width:900px){
+ .lab-shell{grid-template-columns:175px minmax(0,1fr)}
+ .lab-shell .lab-sidebar{padding:18px 12px}
+ .lab-shell .lab-main{padding:22px 18px 80px}
+ .lab-shell .lab-stats.lab-stats-with-scheduled{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lab-shell .lab-panel-heading{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:620px){
+ .lab-shell{display:flex;flex-direction:column}
+ .lab-shell .lab-global-header{height:auto;min-height:70px;padding:12px;align-items:flex-start;gap:12px}
+ .lab-shell .lab-company{gap:8px}
+ .lab-shell .lab-company strong{font-size:13px;white-space:nowrap}
+ .lab-shell .lab-company small{max-width:145px;font-size:10px}
+ .lab-shell .lab-header-actions{gap:5px;flex-wrap:nowrap;justify-content:flex-end}
+ .lab-shell .lab-theme-pill{height:36px;padding:0 8px;gap:6px;font-size:11px}
+ .lab-shell .lab-theme-pill>span:nth-child(2){display:none}
+ .lab-shell .lab-theme-pill i{width:32px}
+ .lab-shell .lab-theme-pill i.is-dark b{transform:translateX(10px)}
+ .lab-shell .lab-notification-trigger{width:28px}
+ .lab-shell .lab-profile-name{display:none}
+ .lab-shell .lab-sidebar{width:100%;min-height:0;padding:8px;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:8px;border-right:0}
+ .lab-shell .lab-sidebar-label,.lab-shell .lab-side-note{display:none}
+ .lab-shell .lab-sidebar>button{width:auto;flex-shrink:0;white-space:nowrap;padding:10px}
+ .lab-shell .lab-sidebar .lab-back{margin:0}
+ .lab-shell .lab-main{padding:20px 12px 80px}
+ .lab-shell .lab-stats{gap:8px}
+ .lab-shell .lab-stats>div{padding:13px}
+ .lab-shell .lab-stats strong{font-size:24px}
+ .lab-shell .lab-modal-backdrop{padding:12px}
+ .lab-shell .lab-modal{padding:18px;max-height:calc(100dvh - 24px)}
+ .lab-shell .lab-modal-actions{flex-wrap:wrap}
+}

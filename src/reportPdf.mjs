@@ -1,0 +1,34 @@
+import {excelModule} from './reportWorkbook.mjs';
+const clean=value=>Array.from(String(value??'')).filter(char=>char.charCodeAt(0)>=32||char==='\n'||char==='\t').join('');
+export async function reportToPdf(bytes,{fontBytes,requestId=''}={}){
+ const [{PDFDocument,rgb},kit,Excel]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit'),excelModule()]);
+ if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('PDF 中文字型載入失敗，尚未封存。');fontBytes=await response.arrayBuffer();}
+ const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:true});const book=new Excel.Workbook();await book.xlsx.load(bytes);
+ function wrap(text,size,width){const lines=[];for(const paragraph of clean(text).split('\n')){let line='';for(const char of paragraph){if(line&&font.widthOfTextAtSize(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);}return lines;}
+ let pageNumber=0;
+ for(const sheet of book.worksheets.filter(row=>row.state==='visible'||!row.state)){
+  if(sheet.rowCount>2000||sheet.columnCount>50)throw Error('工作表超過 Demo PDF 轉換上限。');
+  const landscape=sheet.pageSetup.orientation==='landscape'||sheet.columnCount>10,W=landscape?842:595,H=landscape?595:842,margin=36;
+  const count=Math.max(1,sheet.columnCount),nativeWidths=Array.from({length:count},(_,i)=>(sheet.getColumn(i+1).width||12)*7*.75),scale=(W-margin*2)/nativeWidths.reduce((a,b)=>a+b,0),widths=nativeWidths.map(width=>width*scale),x=[margin];widths.forEach(width=>x.push(x.at(-1)+width));
+  const merges=(sheet.model.merges||[]).map(range=>{const [a,b]=range.split(':').map(address=>sheet.getCell(address));return {first:a.address,row:a.row,col:a.col,endRow:b.row,endCol:b.col};});
+  let page,y,positions=new Map();const images=sheet.getImages();
+  async function drawImages(){for(const image of images){const row=Math.floor(image.range.tl.row)+1,position=positions.get(row);if(!position)continue;const media=book.getImage(image.imageId);let data=media.buffer;if(!data&&media.base64){const encoded=media.base64.split(',').at(-1);data=Uint8Array.from(atob(encoded),char=>char.charCodeAt(0));}if(!data)continue;const picture=media.extension==='jpeg'?await document.embedJpg(data):await document.embedPng(data);const col=Math.floor(image.range.tl.col),width=(image.range.ext?.width||210)*.75*scale,height=(image.range.ext?.height||65)*.75*scale;page.drawImage(picture,{x:x[col]||margin,y:position-height,width,height});}}
+  function newPage(){page=document.addPage([W,H]);pageNumber++;y=H-margin-24;positions=new Map();page.drawText(clean(`DQA｜${sheet.name}`),{x:margin,y:H-margin,font,size:10,color:rgb(.25,.32,.45)});page.drawText(clean(`${requestId} · ${pageNumber}`),{x:margin,y:18,font,size:8,color:rgb(.45,.5,.6)});}
+  newPage();
+  for(let rowIndex=1;rowIndex<=sheet.rowCount;rowIndex++){
+   const row=sheet.getRow(rowIndex),cells=[];let height=Math.max(18,row.height||20);
+   for(let col=1;col<=count;col++){
+    const cell=row.getCell(col);if(cell.isMerged&&cell.master.address!==cell.address)continue;
+    const merge=merges.find(range=>range.first===cell.address),endCol=merge?.endCol||col,width=x[endCol]-x[col-1],size=Math.min(18,Math.max(7,(cell.font?.size||10)*Math.min(1,scale))),text=cell.value instanceof Date?cell.value.toISOString().slice(0,10):cell.text;
+    const lines=wrap(text,size,width-8);height=Math.max(height,lines.length*(size+3)+8);cells.push({cell,col,width,size,lines,merge});
+   }
+   if(height>H-margin*2-30)throw Error(`工作表「${sheet.name}」第 ${rowIndex} 列過高，請分段後再封存。`);
+   if(y-height<margin){await drawImages();newPage();}
+   positions.set(rowIndex,y);
+   for(const {cell,col,width,size,lines}of cells){let color=rgb(1,1,1);const argb=cell.fill?.fgColor?.argb;if(argb&&argb.length>=6){const hex=argb.slice(-6);color=rgb(parseInt(hex.slice(0,2),16)/255,parseInt(hex.slice(2,4),16)/255,parseInt(hex.slice(4,6),16)/255);}page.drawRectangle({x:x[col-1],y:y-height,width,height,borderWidth:.35,borderColor:rgb(.83,.87,.92),color});lines.forEach((line,index)=>{if(line)page.drawText(line,{x:x[col-1]+4,y:y-5-size-index*(size+3),size,font,color:rgb(.12,.2,.32)});});}
+   y-=height;
+  }
+  await drawImages();
+ }
+ document.setTitle(`試驗報告 ${requestId}`);document.setProducer('DQA LMS Demo 報告封存');return new Uint8Array(await document.save());
+}

@@ -1,0 +1,4 @@
+.dashboard-shell>.sidebar{padding-top:10px}
+.sidebar-brand.live-sidebar-brand.colong-sidebar-brand{display:flex;align-items:center;min-height:58px;padding:0 0 12px;margin-bottom:8px;min-width:0}
+.colong-sidebar-brand img{display:block;width:100%;height:auto;object-fit:contain;background:transparent;border-radius:0;box-sizing:border-box;padding:0}
+@media(max-width:900px){.sidebar-brand.live-sidebar-brand.colong-sidebar-brand{padding:0 0 10px}.colong-sidebar-brand img{max-width:220px}}
