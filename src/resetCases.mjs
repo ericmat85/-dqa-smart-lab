@@ -18,7 +18,7 @@ export async function resetSystemCases(storage=window.localStorage,database=glob
  const equipment=equipmentRaw===null?DEMO_EQUIPMENT:JSON.parse(equipmentRaw);if(!Array.isArray(equipment))throw Error('設備台帳無法讀取，尚未清除案件。');
  const id=crypto.randomUUID();storage.setItem(CASE_RESET_KEY,JSON.stringify({id,phase:'clearing'}));
  try{
-  const transaction={requests:'[]',reviews:'[]',schedules:'[]',labRequests:'[]',labAudit:'[]',labOperations:'[]',borrows:'[]',cancellations:'{}',equipment:JSON.stringify(equipment?.map(row=>row.status==='使用中'&&row.currentRequest?{...row,status:'待機中',currentRequest:''}:row)||[])};
+  const transaction={requests:'[]',reviews:'[]',schedules:'[]',labRequests:'[]',labAudit:'[]',labOperations:'[]',borrows:'[]',cancellations:'{}',equipment:JSON.stringify(equipment?.map(row=>((row.status==='使用中'&&row.currentRequest)||(row.status==='借用'&&row.activeBorrowId))?{...row,status:'待機中',currentRequest:'',activeBorrowId:null,borrower:'',borrowReturnDate:''}:row)||[])};
   commitLifecycleTransaction(storage,transaction);
   await clearReports(database);
   storage.setItem(CASE_RESET_KEY,JSON.stringify({id,phase:'done',at:new Date().toISOString()}));
