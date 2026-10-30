@@ -94,7 +94,7 @@ test('manager returns without signature and requester can edit and resubmit from
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].status)).toBe('待主管簽核');
  await page.getByPlaceholder('請輸入核准說明或退件補正事項…').fill('請補充條件');
  await page.getByRole('button',{name:'退回補正',exact:true}).click();
- await requestLogin(page);await page.getByRole('button',{name:/我的委託單/}).click();
+ await requestLogin(page);await page.getByRole('button',{name:/我的委託\/借用/}).click();
  await page.getByRole('button',{name:'編輯並重新送出',exact:true}).click();
  await page.getByLabel('產品代碼',{exact:false}).fill('MVP-RETURNED');
  await page.getByLabel('上傳簽名檔',{exact:true}).check();await page.getByRole('button',{name:'使用預設簽名',exact:true}).click();

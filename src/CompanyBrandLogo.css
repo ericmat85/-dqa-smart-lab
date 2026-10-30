@@ -1,3 +1,6 @@
-.company-brand-logo{display:flex;align-items:center;width:250px;max-width:100%;min-width:0;flex-shrink:1}
+.company-brand-logo{display:flex;align-items:center;justify-content:flex-start;text-align:left;width:250px;max-width:100%;min-width:0;flex-shrink:1;margin-right:auto}
 .company-brand-logo img{display:block;width:100%;height:auto;max-height:58px;object-fit:contain;object-position:left center}
+.company-brand-logo-dark{background:#fff;border-radius:4px}
+.rq-login-card>.company-brand-logo,.login-card>.company-brand-logo,.lab-login-card>.company-brand-logo{align-self:flex-start;margin:0 auto 18px 0}
+.colong-sidebar-brand .company-brand-logo{width:100%;justify-content:flex-start}
 @media(max-width:620px){.company-brand-logo{width:175px}.company-brand-logo img{max-height:44px}}
