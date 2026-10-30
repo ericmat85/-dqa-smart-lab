@@ -17,9 +17,7 @@ test('schedule equipment reads the shared twenty-machine catalog and updated sta
 test('manual scheduling validates status, equipment type, capacity, executor and dates',()=>{
   assert.equal(validate().status,'已排程');
   assert.equal(validate({editing:{...editing,requestStatus:'待審查'}}).status,'已排程');
-  const rescheduled=validate({editing:{...editing,status:'已完成',completedAt:'old',equipmentReleaseHandledAt:'old'}});
-  assert.equal(rescheduled.completedAt,undefined);
-  assert.equal(rescheduled.equipmentReleaseHandledAt,undefined);
+  assert.throws(()=>validate({editing:{...editing,status:'已完成',completedAt:'old',equipmentReleaseHandledAt:'old'}}),/試驗已完成/);
   for(const status of ['使用中','維護中','校驗中'])assert.throws(()=>validate({equipment:[{...equipment[0],status}]}));
   assert.throws(()=>validate({equipment:[{...equipment[0],capacity:2}]}));
   assert.throws(()=>validate({equipment:[{...equipment[0],name:'鹽霧試驗機'}]}));
