@@ -1,3 +1,4 @@
+import {returnBorrowEquipment} from './borrowApprovals.mjs';
 import {PaginatedTable} from './Pagination.jsx';
 import CategoryViews from './CategoryViews.jsx';
 import EquipmentInfoModal from './EquipmentInfoModal.jsx';
@@ -8,7 +9,7 @@ import useDemoPersistence from './useDemoPersistence.js';
 import './EquipmentPage.css';
 
 const KEY = 'dqa-equipment-demo-v1';
-const statuses = ['使用中','待機中','維護中','校驗中','暫停中'];
+const statuses = ['使用中','待機中','維護中','校驗中','暫停中','借用'];
 function readEquipment() {
   try {
     const stored=JSON.parse(window.localStorage.getItem(KEY) || 'null');
@@ -28,7 +29,7 @@ export default function EquipmentPage({ currentUser }) {
   const [statusError,setStatusError] = useState('');
   const [notice,setNotice] = useState('');
   const statusEquipment=equipment.find(row=>row.id===statusForm?.id);
-  const openStatusChange=(row)=>{setSelectedId(null);setForm(null);setStatusError('');setStatusForm({id:row?.id || '',status:row?.status==='維護中' || row?.status==='校驗中' ? '待機中' : '維護中',reason:''});};
+  const openStatusChange=(row)=>{setSelectedId(null);setForm(null);setStatusError('');setStatusForm({id:row?.id || '',expectedBorrowId:row?.activeBorrowId,status:row?.status==='維護中' || row?.status==='校驗中' || row?.status==='借用' ? '待機中' : '維護中',reason:''});};
   const submitStatusChange=event=>{
     event.preventDefault();
     try {
@@ -36,8 +37,10 @@ export default function EquipmentPage({ currentUser }) {
       const current=raw ? JSON.parse(raw) : equipment;
       if (!Array.isArray(current)) throw Error('設備資料無法讀取，請重新載入後再試。');
       setEquipment(current);
-      const next=changeEquipmentStatus(current,{...statusForm,expectedStatus:statusEquipment?.status,actor:currentUser?.name,actorId:currentUser?.id});
-      try {window.localStorage.setItem(KEY,JSON.stringify(next));}
+      const borrowed=current.find(m=>m.id===statusForm.id)?.status==='借用';
+      if(borrowed&&statusForm.status!=='待機中')throw Error('借用設備請先確認歸還。');
+      const next=borrowed?returnBorrowEquipment({equipmentId:statusForm.id,expectedBorrowId:statusForm.expectedBorrowId,actorId:currentUser?.id,comment:statusForm.reason}):changeEquipmentStatus(current,{...statusForm,expectedStatus:statusEquipment?.status,actor:currentUser?.name,actorId:currentUser?.id});
+      try {if(!borrowed)window.localStorage.setItem(KEY,JSON.stringify(next));}
       catch {throw Error('無法儲存設備狀態，請確認瀏覽器空間或權限後再試。');}
       setEquipment(next);
       setNotice((next.find(row=>row.id===statusForm.id)?.name || statusForm.id)+' 已變更為'+statusForm.status+(statusForm.status==='待機中'?'，完成紀錄已儲存。':'，已記錄開始時間。'));
@@ -53,8 +56,8 @@ export default function EquipmentPage({ currentUser }) {
   },[]);
 
   const selected=equipment.find(row=>row.id===selectedId);
-  const categories=[...new Set(equipment.map(row=>row.category))];
-  const visible=equipment.filter(row => (status==='全部' || row.status===status) && (category==='全部' || row.category===category) && [row.id,row.name,row.category,row.model,row.serial,row.location,row.owner].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
+  const categories=[...new Set(equipment.map(row=>row.category||'未分類'))];
+  const visible=equipment.filter(row => (status==='全部' || row.status===status) && (category==='全部' || (row.category||'未分類')===category) && [row.id,row.name,row.category,row.model,row.serial,row.location,row.owner].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
   useEffect(() => {
     if (!selectedId && !form && !statusForm) return;
     const escape=event=>{if(event.key==='Escape'){setSelectedId(null);setForm(null);setStatusForm(null);}};
@@ -71,7 +74,7 @@ export default function EquipmentPage({ currentUser }) {
     const current=latest.find(row=>row.id===form.editingId);
     if(form.editingId && !current){setFormError('設備資料已更新，請重新開啟編輯。');return;}
     if (!form.editingId && latest.some(row=>row.id===id)) {setFormError('設備編號已存在，請使用獨立編號。');return;}
-    const next={...current,...form,activeService:current?.activeService || null,currentRequest:current?.currentRequest || '',status:form.editingId ? current.status : '待機中',records:current?.records || form.records,id,name:form.name.trim(),capacity:Number(form.capacity),usableVolumeLitres:form.usableVolumeLitres===null||form.usableVolumeLitres===undefined||String(form.usableVolumeLitres).trim()===''?null:Number(form.usableVolumeLitres),dailyHours:Number(form.dailyHours)};
+    const next={...current,...form,activeService:current?.activeService || null,currentRequest:current?.currentRequest || '',activeBorrowId:current?.activeBorrowId||null,borrower:current?.borrower||'',borrowReturnDate:current?.borrowReturnDate||'',status:form.editingId ? current.status : '待機中',records:current?.records || form.records,id,name:form.name.trim(),capacity:Number(form.capacity),usableVolumeLitres:form.usableVolumeLitres===null||form.usableVolumeLitres===undefined||String(form.usableVolumeLitres).trim()===''?null:Number(form.usableVolumeLitres),dailyHours:Number(form.dailyHours)};
     if(next.usableVolumeLitres!==null&&(!Number.isFinite(next.usableVolumeLitres)||next.usableVolumeLitres<=0)){setFormError('可用空間須為正數（L），未知時請留空。');return;}
     if (!Number.isInteger(next.capacity) || next.capacity<1 || next.dailyHours<=0 || next.dailyHours>24) {setFormError('樣品容量需為正整數，每日可用時數需大於 0 且不超過 24。');return;}
     delete next.editingId;
@@ -94,10 +97,10 @@ export default function EquipmentPage({ currentUser }) {
     <header className="request-modal-header"><div><h3 id="equipment-status-title">設備狀態變更</h3><p>開始維護／校驗，完成後恢復待機</p></div><button type="button" className="request-modal-close" aria-label="關閉狀態變更" onClick={()=>setStatusForm(null)}>×</button></header>
     <form className="request-modal-body" onSubmit={submitStatusChange}>
       <p className="template-info">可選擇全部設備。開始維護或校驗時記錄起始時間，結束時請填寫處理結果，系統將保存完整紀錄。</p>
-      <label className="equipment-text-field">選擇設備 *<select className="template-select" required value={statusForm.id} onChange={event=>{setStatusError('');const row=equipment.find(item=>item.id===event.target.value);setStatusForm({...statusForm,id:event.target.value,status:row?.status==='維護中' || row?.status==='校驗中' ? '待機中' : '維護中'});}}><option value="">請選擇設備（{equipment.length} 台）</option>{equipment.map(row=><option key={row.id} value={row.id}>{row.id} · {row.name} · 【{row.status}】 · {row.location}</option>)}</select></label>
+      <label className="equipment-text-field">選擇設備 *<select className="template-select" required value={statusForm.id} onChange={event=>{setStatusError('');const row=equipment.find(item=>item.id===event.target.value);setStatusForm({...statusForm,id:event.target.value,expectedBorrowId:row?.activeBorrowId,status:row?.status==='維護中' || row?.status==='校驗中' || row?.status==='借用' ? '待機中' : '維護中'});}}><option value="">請選擇設備（{equipment.length} 台）</option>{equipment.map(row=><option key={row.id} value={row.id}>{row.id} · {row.name} · 【{row.status}】 · {row.location}</option>)}</select></label>
       {!equipment.length && <p role="status">目前沒有設備可供變更。</p>}
       {statusEquipment && <div className="equipment-transition-summary"><strong>{statusEquipment.name}</strong><p>負責人：{statusEquipment.owner} · 目前狀態：{statusEquipment.status}</p></div>}
-      <label className="equipment-text-field">變更為 *<select className="template-select" value={statusForm.status} onChange={event=>setStatusForm({...statusForm,status:event.target.value})}>{['待機中','維護中','校驗中'].filter(value=>value!==statusEquipment?.status).map(value=><option key={value} disabled={statusEquipment?.status==='使用中' && value==='校驗中'}>{value}{statusEquipment?.status==='使用中' && value==='校驗中' ? '（使用中不可校驗）' : ''}</option>)}</select></label>
+      <label className="equipment-text-field">變更為 *<select className="template-select" value={statusForm.status} onChange={event=>setStatusForm({...statusForm,status:event.target.value})}>{(statusEquipment?.status==='借用'?['待機中']:['待機中','維護中','校驗中']).filter(value=>value!==statusEquipment?.status).map(value=><option key={value} disabled={statusEquipment?.status==='使用中' && value==='校驗中'}>{value}{statusEquipment?.status==='使用中' && value==='校驗中' ? '（使用中不可校驗）' : ''}</option>)}</select></label>
       <label className="equipment-text-field">{statusEquipment?.status==='維護中' || statusEquipment?.status==='校驗中' ? '完成處理結果／變更原因 *' : '變更原因 *'}<textarea className="template-input" rows={3} required value={statusForm.reason} onChange={event=>setStatusForm({...statusForm,reason:event.target.value})} placeholder="例如：定期保養、異常檢查或年度校驗"/></label>
       <p className="equipment-result-count">操作者：{currentUser?.name || '未登入'} · 確認後自動記錄時間</p>
       {statusError && <p role="alert" className="equipment-status-error">{statusError}</p>}

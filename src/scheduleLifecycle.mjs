@@ -20,7 +20,7 @@ export function reconcileSchedules(schedules,equipment,now) {
  });
  for(const row of next.filter(item=>resourceBusy(item,now))){
   const machines=nextEquipment.filter(machine=>usesEquipment(row,machine));
-  if(machines.some(machine=>(['維護中','校驗中'].includes(machine.status)||machine.status==='暫停中'&&!row.pauseStartedAt))){row.status='有衝突';row.scheduleIssue='設備暫停、維護或校驗中，無法進行試驗／準備。';continue;}
+  if(machines.some(machine=>(['維護中','校驗中','借用'].includes(machine.status)||machine.status==='暫停中'&&!row.pauseStartedAt))){row.status='有衝突';row.scheduleIssue='設備借用、暫停、維護或校驗中，無法進行試驗／準備。';continue;}
   for(const machine of machines){
    const phase=scheduleProgress(row,now);if(phase.end)machine.estimatedEnd=new Date(phase.end).toISOString();
    if(machine.status==='待機中'){

@@ -12,6 +12,7 @@ export function formatServiceDuration(milliseconds) {
 export function changeEquipmentStatus(equipment, { id, status, reason, actor, actorId, expectedStatus, at = new Date().toISOString() }) {
   const selected=equipment.find(row=>row.id===id);
   if (!selected) throw Error('請選擇要變更的設備。');
+  if(selected.status==='借用')throw Error('借用中的設備須由 LMS 確認歸還，不可直接變更狀態。');
   if(selected.status==='暫停中')throw Error('請先在排程管理恢復或中止暫停中的試驗，再變更設備狀態。');
   if (expectedStatus && selected.status!==expectedStatus) throw Error('設備狀態已更新，請重新確認後再提交。');
   if (!['待機中',...serviceStatuses].includes(status)) throw Error('請選擇待機中、維護中或校驗中。');
