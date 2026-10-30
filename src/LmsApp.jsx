@@ -1979,7 +1979,7 @@ function DashboardPage({
 
   return (
 
-    <div className={`dashboard-shell ${dark ? "theme-dark" : "theme-light"} ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+    <div className={`dashboard-shell ${dark ? "theme-dark" : "theme-light"} ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${active === "schedule" ? "is-schedule-page" : ""}`}>
 
       <Sidebar
 
