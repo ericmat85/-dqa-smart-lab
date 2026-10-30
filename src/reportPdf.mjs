@@ -1,10 +1,13 @@
-import {reportBounds,cellText} from './reportLayout.mjs';
+import {generalProfile,refreshHeaderReferences} from './reportProfiles.mjs';
+import {drawGeneralReport} from './generalReportPdf.mjs';
+import {reportBounds,cellText,normalizeReportMerges} from './reportLayout.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 const clean=value=>Array.from(String(value??'')).filter(char=>char.charCodeAt(0)>=32||char==='\n'||char==='\t').join('');
 export async function reportToPdf(bytes,{fontBytes,requestId=''}={}){
  const [{PDFDocument,rgb},kit,Excel]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit'),excelModule()]);
  if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('PDF 中文字型載入失敗，尚未封存。');fontBytes=await response.arrayBuffer();}
- const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:false});const book=new Excel.Workbook();await book.xlsx.load(bytes);
+ const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:false});const book=new Excel.Workbook();await book.xlsx.load(bytes);normalizeReportMerges(book);
+ if(generalProfile(book)){refreshHeaderReferences(book);await drawGeneralReport({book,document,font,rgb,requestId});document.setTitle(`一般性能試驗報告 ${requestId}`);return new Uint8Array(await document.save());}
  function wrap(text,size,width){const lines=[];for(const paragraph of clean(text).split('\n')){let line='';for(const char of paragraph){if(line&&font.widthOfTextAtSize(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);}return lines;}
  let pageNumber=0;
  for(const sheet of book.worksheets.filter(row=>row.state==='visible'||!row.state)){

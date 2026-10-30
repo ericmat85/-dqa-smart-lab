@@ -199,3 +199,31 @@ test('a stale draft editor cannot overwrite a newer saved revision',async({page}
  await expect(page.getByText('草稿已在其他頁面更新，請重新開啟後編輯。')).toBeVisible();
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].productCode)).toBe('NEWER-VALUE');
 });
+
+test('general performance upload recognizes the supplied blank template and submits filled data in its original layout',async({page})=>{
+ test.setTimeout(60000);
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
+ await page.getByRole('button',{name:'建立已完成範例（假資料）',exact:true}).click();
+ const id=await page.evaluate(()=>{
+  const records=JSON.parse(localStorage.getItem('dqa-request-demo-v2'));records[0].testItems=['一般性能試驗'];localStorage.setItem('dqa-request-demo-v2',JSON.stringify(records));return records[0].id;
+ });
+ await page.reload();await page.getByRole('button',{name:'提交報告',exact:true}).click();
+ await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'下載本案 Excel 範本',exact:true}).click();
+ expect((await download).suggestedFilename()).toContain(id);
+ await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+ await expect(page.getByText(id+'-DEMO.xlsx',{exact:true})).toBeVisible();
+ await expect(page.locator('#lab-report-file')).toBeEnabled();
+ await page.locator('#lab-report-file').setInputFiles('public/templates/general-performance-v1.xlsx');
+ await page.getByRole('button',{name:'提交',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('報告未通過');
+ await expect(page.locator('.report-checks')).toContainText('報告編號對應本案');
+ await expect(page.locator('.report-checks')).toContainText('合格／不合格擇一勾選');
+ await expect(page.getByText(/16,?384 欄/)).toHaveCount(0);
+ await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+ await page.getByRole('button',{name:'提交',exact:true}).click();
+ await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
+ const meta=await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).reportInfo,id);
+ expect(meta.check.profileId).toBe('general-performance-v1');expect(errors).toEqual([]);
+});

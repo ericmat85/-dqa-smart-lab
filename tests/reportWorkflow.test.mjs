@@ -75,3 +75,22 @@ test('submission uses system signature positions and ignores caller overrides',a
  await submitReportWorkflow({requestId:id,file:await upload(source()),actorId:'U003',signature,cells:{level3:'Z99'},minimumMs:0},storage,repository);
  assert.deepEqual((await repository.get(id)).cells,{level3:'A21',level2:'D21',executor:'G21'});
 });
+
+test('general performance template keeps its signature blocks and archives seven report pages',async()=>{
+ const {storage,repository,id,source}=fixture();
+ const requests=JSON.parse(storage.getItem('dqa-request-demo-v2'));requests[0].testItems=['一般性能試驗'];storage.setItem('dqa-request-demo-v2',JSON.stringify(requests));
+ const bytes=await createReportTemplate(source(),true,{templateBytes:await readFile('public/templates/general-performance-v1.xlsx')});
+ let meta=await submitReportWorkflow({requestId:id,file:new File([bytes],'general.xlsx'),actorId:'U003',signature,minimumMs:0},storage,repository);
+ meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL2',signature,expectedRevision:meta.revision},storage,repository);
+ meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL3',signature,expectedRevision:meta.revision},storage,repository);
+ const report=await repository.get(id),Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(report.signedExcel);
+ const sheet=book.getWorksheet('1.1一般性能試驗-1');
+ assert.equal(sheet.getImages().length,3);assert.equal(sheet.getRow(54).height,17.25);
+ assert.deepEqual(sheet.getImages().map(row=>[Math.floor(row.range.tl.col),Math.floor(row.range.tl.row)]),[[31,53],[18,53],[5,53]]);
+ assert.match(sheet.getCell('F54').text,/三階/);assert.match(sheet.getCell('S54').text,/二階/);assert.match(sheet.getCell('AF54').text,/陳/);
+ assert.equal(sheet.getCell('AC13').text.length>0,true);assert.equal(sheet.getCell('AK3').text,`DQA-${id}`);
+ meta=await confirmReportViewed({requestId:id,actorId:'DEMO-SUPERVISOR',expectedRevision:meta.revision,fontBytes:await readFile('public/fonts/NotoSansCJKtc-Regular.otf')},storage,repository);
+ assert.equal(meta.stage,'archived');assert.equal(meta.pdfSections.find(row=>row.kind==='report').pageCount,7);
+ const {PDFDocument,PDFName}=await import('pdf-lib');const stored=await repository.get(id),pdf=await PDFDocument.load(stored.reportPdf);
+ assert.equal(pdf.getPageCount(),7);assert.equal(pdf.getPages()[0].node.Resources().lookup(PDFName.of('XObject')).keys().length,3);
+});
