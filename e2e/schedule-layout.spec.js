@@ -2,18 +2,18 @@ import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
 for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,540]]){
- test(`schedule layout ${width}x${height}: ordinary table scrolling, groups and AI clearance`,async({page})=>{
+ test(`schedule layout ${width}x${height}: all columns visible without horizontal scrolling, groups and AI clearance`,async({page})=>{
   await page.setViewportSize({width,height});
   await page.addInitScript(({accounts,equipment})=>{
    localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));
    localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(equipment));
    for(const key of ['dqa-request-demo-v2','dqa-lms-reviews-v1','dqa_lab_demo_requests_v1','dqa-lab-operations-v1'])localStorage.setItem(key,'[]');
-   localStorage.setItem('dqa-schedules-demo-v1',JSON.stringify(Array.from({length:8},(_,index)=>({id:`LAYOUT-${index}`,requestId:`REQ-LAYOUT-${index}`,productCode:'DEMO-產品代碼',title:'低溫試驗及長文字可完整換行'.repeat(6),quantity:2,eq:'環境試驗箱 #03',equipmentId:'EQ-003',ownerId:'U003',owner:'陳工程師',sampleCode:'SAMPLE-LAYOUT-TEST',time:'2099-11-07',end:'2099-11-08',status:'已排程'}))));
+   localStorage.setItem('dqa-schedules-demo-v1',JSON.stringify(Array.from({length:54},(_,index)=>({id:`LAYOUT-${index}`,requestId:`REQ-LAYOUT-${index}`,productCode:'DEMO-產品代碼',title:'低溫試驗及長文字可完整換行'.repeat(6),quantity:2,eq:'環境試驗箱 #03',equipmentId:'EQ-003',ownerId:'U003',owner:'陳工程師',sampleCode:'SAMPLE-LAYOUT-TEST',time:'2099-11-07',end:'2099-11-08',status:'已排程'}))));
    sessionStorage.setItem('dqa-lms-account-id','U001');
   },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
   await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();
   async function checkTable(){
-   const region=page.getByRole('region',{name:'排程表格，可水平捲動'}).filter({visible:true}).first();
+   const region=page.getByRole('region',{name:'排程表格'}).filter({visible:true}).first();
    await expect(region).toBeVisible();
    await expect(region.locator('tbody tr').first().locator('td').nth(2)).toHaveCSS('white-space','normal');
    const data=await region.evaluate(element=>({scroll:element.scrollWidth,client:element.clientWidth,right:element.getBoundingClientRect().right,pageWidth:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
@@ -21,21 +21,20 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
    const button=region.getByRole('button',{name:'編輯排程',exact:true}).first();
    await button.scrollIntoViewIfNeeded();await button.click({trial:true});
    const before=await button.boundingBox();
-   await region.evaluate(element=>{element.scrollLeft=0;});
-   const atStart=await button.boundingBox();
-   await region.evaluate(element=>{element.scrollLeft=element.scrollWidth;});
-   const atEnd=await button.boundingBox();
-   expect(before.width).toBeGreaterThan(50);
+   expect(data.scroll).toBeLessThanOrEqual(data.client+1);
+   expect(before.width).toBeGreaterThan(20);
    await expect(region.locator('thead th').last()).not.toHaveCSS('position','sticky');
-   await expect(region.locator('thead th').last()).not.toHaveCSS('position','fixed');
    await expect(region.locator('tbody tr').first().locator('td').last()).toHaveCSS('position','static');
-   if(data.scroll>data.client)expect(atStart.x-atEnd.x).toBeGreaterThan(2);
+   const atEnd=before;
    const launcher=await page.getByRole('button',{name:'展開AI智能助理'}).boundingBox();
    expect(atEnd.x+atEnd.width).toBeLessThanOrEqual(launcher.x);
    await button.click();await expect(page.getByRole('heading',{name:/編輯試驗排程/})).toBeVisible();
    await expect(page.getByLabel('設備選擇')).toBeVisible();
    await page.getByRole('dialog',{name:/編輯試驗排程/}).getByRole('button',{name:'關閉',exact:true}).click();
-   if(data.scroll>data.client){await region.focus();await region.evaluate(element=>{element.scrollLeft=0;});await page.keyboard.press('ArrowRight');await expect.poll(()=>region.evaluate(element=>element.scrollLeft)).toBeGreaterThan(0);}
+   await expect(region.locator('tbody tr')).toHaveCount(20);
+   await region.getByRole('button',{name:'第 3 頁',exact:true}).click();await expect(region.locator('tbody tr')).toHaveCount(14);
+   await expect(region).toContainText('REQ-LAYOUT-53');
+   await region.getByRole('button',{name:'第 1 頁',exact:true}).click();await expect(region.locator('tbody tr')).toHaveCount(20);
   }
   await checkTable();
   await page.evaluate(()=>window.scrollTo(0,0));
