@@ -14,9 +14,13 @@ test('portal mobile and zoom-equivalent narrow windows keep every entry accessib
 test('portal highlight follows hover and keyboard focus with one red marker and gray inactive arrows',async({page})=>{
  await page.goto('/');const cards=page.locator('.portal-card'),red='rgb(230, 22, 61)',gray='rgb(139, 150, 172)';
  await expect(page.locator('.portal-card.is-marker')).toHaveClass(/portal-card-request/);await expect(page.locator('.portal-card.is-highlighted')).toHaveCount(0);
+ await expect(page.locator('.portal-card-number')).toHaveCount(0);
+ const textColors=await cards.evaluateAll(elements=>elements.map(card=>[card.querySelector('strong'),card.querySelector('.portal-card-kicker'),card.querySelector('.portal-card-desc'),card.querySelector('.portal-card-bottom')].map(el=>getComputedStyle(el).color)));
+ const iconColors=['rgb(22, 163, 74)','rgb(124, 58, 237)','rgb(37, 99, 235)',red];
+ const iconBackgrounds=['rgb(232, 249, 238)','rgb(242, 234, 255)','rgb(234, 242, 255)','rgb(255, 240, 243)'];
  for(const card of await cards.all())await expect(card.locator('.portal-card-bottom b')).toHaveCSS('color',gray);
  for(let i=0;i<4;i++){
-  const card=cards.nth(i);await card.hover();await expect(page.locator('.portal-card.is-marker')).toHaveCount(1);await expect(card).toHaveClass(/is-marker/);await expect(card.locator('strong')).toHaveCSS('color',red);await expect(card.locator('.portal-card-icon')).toHaveCSS('color',red);await expect(card.locator('.portal-card-icon')).toHaveCSS('background-color','rgb(255, 240, 243)');await expect(card.locator('.portal-card-bottom b')).toHaveCSS('color',red);
+  const card=cards.nth(i);await card.hover();await expect(page.locator('.portal-card.is-marker')).toHaveCount(1);await expect(card).toHaveClass(/is-marker/);for(const [index,selector] of ['strong','.portal-card-kicker','.portal-card-desc','.portal-card-bottom'].entries())await expect(card.locator(selector)).toHaveCSS('color',textColors[i][index]);await expect(card.locator('.portal-card-icon')).toHaveCSS('color',iconColors[i]);await expect(card.locator('.portal-card-icon')).toHaveCSS('background-color',iconBackgrounds[i]);await expect(card.locator('.portal-card-bottom b')).toHaveCSS('color',red);
   for(let j=0;j<4;j++)if(i!==j){await expect(cards.nth(j).locator('.portal-card-icon')).toHaveCSS('color',gray);await expect(cards.nth(j).locator('.portal-card-bottom b')).toHaveCSS('color',gray);}
  }
  await page.locator('.portal-header').hover();await expect(page.locator('.portal-card.is-highlighted')).toHaveCount(0);await expect(page.locator('.portal-card.is-marker')).toHaveClass(/portal-card-request/);
