@@ -426,7 +426,7 @@ export function LoginPage({
 
   return (
 
-    <div className={`app login-page entry-login ${dark ? "theme-dark" : "theme-light"}`}>
+    <div data-system={system.id} className={`app login-page entry-login ${dark ? "theme-dark" : "theme-light"}`}>
 
       <header className="home-header">
 

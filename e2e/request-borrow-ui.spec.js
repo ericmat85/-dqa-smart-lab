@@ -10,10 +10,11 @@ async function login(page){
  },INITIAL_ACCOUNTS);
  await page.goto('/request/login');await page.getByRole('button',{name:'登入系統',exact:false}).click();await expect(page).toHaveURL(/request\/dashboard$/);
 }
-test('green approval and reading tabs match the sidebar; request and borrow use the same floating frame at desktop sizes',async({page})=>{
- await login(page);await page.getByRole('button',{name:'待簽核/查閱',exact:false}).click();
- const sidebarColor=await page.locator('.rq-nav.active').evaluate(el=>getComputedStyle(el).color);
- await expect(page.getByRole('tab',{name:'簽核清單',exact:true})).toHaveCSS('color',sidebarColor);await page.getByRole('tab',{name:'查閱清單',exact:true}).click();await expect(page.getByRole('tab',{name:'查閱清單',exact:true})).toHaveCSS('color',sidebarColor);
+test('requester has no review entry; request and borrow use the same floating frame at desktop sizes',async({page})=>{
+ await login(page);
+ await expect(page.locator('.rq-sidebar').getByRole('button',{name:'待簽核/查閱',exact:false})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'前往查閱清單'})).toHaveCount(0);
+ await expect(page.getByRole('tab',{name:'簽核清單',exact:true})).toHaveCount(0);
  for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[390,844]]){
   await page.setViewportSize({width,height});await page.locator('.rq-sidebar').getByRole('button',{name:'新增委託單',exact:false}).click();
   const request=page.getByRole('dialog',{name:'新增委託單',exact:true});await expect(request).toBeVisible();const rq=await request.boundingBox();expect(rq.width).toBeLessThan(width);expect(rq.y).toBeGreaterThan(0);expect(rq.y+rq.height).toBeLessThanOrEqual(height);
