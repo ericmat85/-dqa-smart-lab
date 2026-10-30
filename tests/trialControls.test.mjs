@@ -54,3 +54,9 @@ test('pause control stays visible with an explicit reason before starting or wit
  assert.equal(trialPauseAvailability(manager,{status:'暫停中',pauseStartedAt:new Date(now).toISOString()},now,s).enabled,true);
  assert.match(trialPauseAvailability(engineer,{status:'試驗中'},now,s).reason,/lv1/);
 });
+test('accelerator skips orphaned legacy LMS trials instead of completing cases without electronic sources',()=>{
+ const s=fixture();s.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{id:'LEGACY',scheduleId:'OLD',acceptedAt:new Date(now).toISOString(),status:'已排程'}]));
+ const result=accelerateTrial({actorId:engineer.id,signature:sig,now},s);assert.notEqual(result.id,'LEGACY');assert.equal(result.stage,'running');assert.equal(read(s,'dqa_lab_demo_requests_v1').find(r=>r.id==='LEGACY').status,'已排程');
+ assert.ok(read(s,'dqa-request-demo-v2').find(r=>r.id===result.id).supervisorId);
+ assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now:now+1000},s).stage,'completed');
+});

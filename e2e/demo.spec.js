@@ -354,3 +354,15 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'恢復試驗',exact:true}).click();
  await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
 });
+
+test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{
+ await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
+ await page.evaluate(()=>{localStorage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{id:'LEGACY-ORPHAN',project:'舊版 Demo',test:'高溫儲存試驗',status:'已完成'}]));});await page.reload();
+ await page.getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByRole('alert')).toContainText('沒有對應的電子委託資料');
+ await page.getByRole('button',{name:'建立完整流程 Demo 案件',exact:true}).click();await expect(page.getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
+ const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].id);
+ await page.locator('.lab-table-wrap tbody tr').filter({hasText:id}).getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByText('通過 AI 全檢（Demo 規則模擬）',{exact:false})).toBeVisible();await page.getByRole('button',{name:'提交',exact:true}).click();
+ await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id===id).status,id)).toBe('待審核');
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1')).find(r=>r.id==='LEGACY-ORPHAN').status)).toBe('已完成');
+});
