@@ -14,3 +14,9 @@
 瀏覽器環境為 Linux Chromium 的指定 CSS viewport，並非原生 Windows 實機。Windows DPI／縮放與捲軸外觀仍需人工驗收。沒有隱藏整頁 overflow 來掩蓋超寬，也沒有刪除欄位。
 
 此修復 PR 以 codex/demo-phase2 為 base，避免混入未合併的前兩階段。未合併任何 PR 或修改 main。Preview 依既有 Vercel Git 整合產生，不變更存取保護；沒有 Vercel 查詢憑證時不猜測或宣稱已取得 Preview 網址。
+
+## 部署版本核對
+
+使用者回報的 `dqa-smart-lab-git-codex-demo-mvp-nov6-ericmat85.vercel.app` 是第一階段分支別名，該分支不含本次 UI 修正；刷新舊分支網址不會切換到修復分支。驗收時應在 Vercel 部署列表篩選 `codex/fix-schedule-layout`，確認包含 `037a758` 或後續提交，再開啟其 Preview。無須關閉 Authentication。
+
+另補測 1280×640、960×540 的有效 CSS viewport（縮放情境），兩項通過。這不是原生 Windows 實機測試。環境代理拒絕讀取 Vercel 網址，故未宣稱遠端版本已驗證。

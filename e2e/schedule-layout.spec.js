@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
-for(const [width,height] of [[1366,768],[1440,900],[1920,1080]]){
+for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,540]]){
  test(`schedule layout ${width}x${height}: local scroll, sticky actions, groups and AI clearance`,async({page})=>{
   await page.setViewportSize({width,height});
   await page.addInitScript(({accounts,equipment})=>{
