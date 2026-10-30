@@ -371,52 +371,6 @@
 .rq-judgement-mode .rq-radio-row label { white-space: nowrap; }
 
 
-/* Dedicated full-page create-request screen (replaces modal presentation) */
-.rq-request-page-shell {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  overflow: auto;
-  display: block;
-  padding: 0;
-  background: var(--rq-bg, #f3f6fb);
-}
-.rq-request-page-shell .rq-request-page {
-  position: relative;
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  max-height: none;
-  min-height: 100%;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-}
-.rq-request-page-shell .rq-form-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  flex: 0 0 auto;
-  background: var(--rq-surface, #fff);
-}
-.rq-request-page-shell .rq-form-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  max-height: none;
-}
-.rq-request-page-shell .rq-form-actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  flex: 0 0 auto;
-  background: var(--rq-surface, #fff);
-}
-
-
 /* 委託單查看資訊彈跳視窗 */
 .rq-request-detail-backdrop{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(16,36,61,.55)}
 .rq-request-detail-modal{display:flex;flex-direction:column;width:min(100%,1040px);max-height:calc(100vh - 36px);overflow:hidden;background:#fff;border-radius:16px;box-shadow:0 25px 80px #0a1f3b40;color:#15345c}
@@ -533,3 +487,17 @@ body:has(.rq-theme-dark) .rq-delete-confirm-modal .rq-btn-light{background:#2938
 .rq-review-top .schedule-view-tabs{flex-wrap:wrap}
 .rq-review-top :focus-visible{outline:2px solid #8d7ed5;outline-offset:3px}
 .rq-kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+/* Request portal uses the same green as the active sidebar item. */
+.rq-app .rq-review-top .schedule-view-tabs button[aria-selected=true]{color:#008d84}
+.rq-app .rq-review-top .schedule-view-tabs button[aria-selected=true]:after{background:#008d84}
+.rq-app .rq-review-top .schedule-view-tabs button[aria-selected=true]>span{background:#e5f5f3;color:#008d84}
+.rq-app .rq-review-top :focus-visible{outline-color:#008d84}
+.rq-entry-backdrop.rq-app{min-height:0;padding:24px;background:rgba(16,36,61,.55)!important;z-index:1200}
+.rq-entry-backdrop .rq-entry-dialog{width:min(1120px,calc(100vw - 48px));max-height:calc(100dvh - 48px);height:auto;min-height:0;border-radius:16px;overflow:hidden}
+.rq-entry-dialog .rq-form-header,.rq-entry-dialog .rq-form-footer{flex-shrink:0}
+.rq-entry-dialog .rq-form-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+.rq-entry-dialog .rq-form-header>div{min-width:0}
+@media(max-width:620px){.rq-entry-backdrop.rq-app{padding:12px}.rq-entry-backdrop .rq-entry-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);height:auto;border-radius:14px}.rq-entry-dialog .rq-form-header{padding:14px}.rq-entry-dialog .rq-form-header h2{font-size:19px}.rq-entry-dialog .rq-form-header>div:last-child{flex-wrap:wrap}.rq-entry-dialog .rq-form-footer{padding:12px;gap:8px}.rq-entry-dialog .rq-form-footer>div{flex-wrap:wrap;justify-content:flex-end}}
+.rq-entry-dialog .rq-entry-grid>label.rq-entry-grid-one{grid-column:1/-1;margin-top:0}
+.rq-entry-backdrop.rq-theme-dark{--rq-card:var(--surface,#1f2937);--rq-page:var(--page,#111827);--rq-text:var(--text,#e5edf8);--rq-muted:var(--muted,#b4c4d8);--rq-border:var(--border,#40516a)}

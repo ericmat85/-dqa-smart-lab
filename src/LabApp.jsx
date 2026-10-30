@@ -213,7 +213,7 @@ export default function LabApp({ path, navigate }) {
     <div className={`lab-login-shell ${dark ? "lab-login-dark" : ""}`}>
       <header className="lab-login-header"><CompanyBrandLogo dark={dark}/><button type="button" className="lab-theme-pill" onClick={toggleTheme} aria-label="切換淺色或深色模式"><span>{dark ? "☾" : "☼"}</span><span>{dark ? "深色模式" : "淺色模式"}</span><i className={dark ? "is-dark" : ""}><b /></i></button></header>
       <main className="lab-login-main"><form className="lab-login-card" onSubmit={e => { e.preventDefault(); login(); }}>
-        <div className="lab-login-icon">CL</div><div className="lab-eyebrow">DQA LAB SYSTEM</div>
+        <CompanyBrandLogo dark={dark}/><div className="lab-eyebrow">DQA LAB SYSTEM</div>
         <h1>造隆實驗室系統</h1><p className="lab-login-description">試驗接收、執行與歷程管理</p>
         <label htmlFor="lab-username">登入帳號</label><input id="lab-username" autoComplete="username" placeholder="請輸入您的帳號" value={username} onChange={e => setUsername(e.target.value)} />
         <label htmlFor="lab-password">密碼</label><div className="lab-login-password"><input id="lab-password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="請輸入您的密碼" value={password} onChange={e => setPassword(e.target.value)} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "隱藏密碼" : "顯示密碼"} aria-pressed={showPassword}>{showPassword ? "隱藏" : "顯示"}</button></div>
@@ -235,7 +235,7 @@ export default function LabApp({ path, navigate }) {
         <div className="lab-sidebar-label">WORKSPACE</div>
         <button className={tab === "requests" ? "active" : ""} aria-current={tab === 'requests'?'page':undefined} onClick={() => setTab("requests")}><span aria-hidden="true">▤</span>試驗委託與接收</button>
         <button className={tab === "audit" ? "active" : ""} aria-current={tab === 'audit'?'page':undefined} onClick={() => setTab("audit")}><span aria-hidden="true">◷</span>操作歷程</button>
-        <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>setTab("archive")}><span aria-hidden="true">▣</span>報告資料庫</button>}</><div className="lab-demo-banner lab-side-note">展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</div>
+        <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>setTab("archive")}><span aria-hidden="true">▣</span>資料庫</button>}</><div className="lab-demo-banner lab-side-note">展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</div>
         <button className="lab-back" onClick={navigateHome}>← 返回系統入口</button>
       </aside>
       <main className="lab-main">

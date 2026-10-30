@@ -1,3 +1,4 @@
+import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import {canControlTrial,isActiveTrial,trialPauseAvailability} from './trialPermissions.mjs';
 import {setTrialPaused} from './trialControls.mjs';
 import ReportArchive from './ReportArchive.jsx';
@@ -88,7 +89,7 @@ const NAV_ITEMS = [
 
   { id: "maintenance", icon: "▧", label: "物料管理" },
 
-  { id: "archive", icon: "▣", label: "報告資料庫" },
+  { id: "archive", icon: "▣", label: "資料庫" },
 
   { id: "reports", icon: "▥", label: "報表分析" },
 
@@ -108,29 +109,7 @@ const DEMO_PASSWORD = "demo1234";
 
 
 
-function CompanyBrand() {
-
-  return (
-
-    <div className="company-brand">
-
-      <div className="company-logo">CL</div>
-
-      <div className="company-name">
-
-        <strong>造隆股份有限公司</strong>
-
-        <span>Chao-Long Motor Co., Ltd.</span>
-
-      </div>
-
-    </div>
-
-  );
-
-}
-
-
+function CompanyBrand() { return <CompanyBrandLogo/>; }
 
 function ThemeToggle({ dark, onToggle }) {
 
@@ -460,7 +439,7 @@ export function LoginPage({
 
       <main className="login-card">
 
-        <div className="login-card-icon">CL</div>
+        <CompanyBrandLogo dark={dark}/>
 
         <p className="eyebrow">SECURE SYSTEM ACCESS</p>
 
@@ -628,7 +607,7 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
 
-        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><img src={`${import.meta.env.BASE_URL}branding/colong-sidebar-transparent.png?v=transparent-large-2`} width="676" height="150" alt="COLONG IntelliEnergy Technology Co., Ltd." /></div>
+        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><CompanyBrandLogo dark/></div>
 
 
 
