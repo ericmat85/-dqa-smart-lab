@@ -314,7 +314,7 @@ test('request review tabs separate reading from all requests and history filters
  await page.reload();
  await expect(page.locator('.rq-kpis>div').filter({has:page.getByText('待查閱',{exact:true})}).locator('strong')).toHaveText('1');
  await page.getByRole('button',{name:'待簽核/查閱',exact:false}).click();
- await expect(page.getByRole('heading',{name:'簽核清單',exact:true})).toBeVisible();
+ await expect(page.getByRole('tab',{name:'簽核清單',exact:true})).toBeVisible();
  await expect(page.locator('.rq-table')).toContainText('SIGN-CASE');
  await expect(page.locator('.rq-table')).not.toContainText('READ-CASE');
  await page.getByRole('tab',{name:'查閱清單',exact:true}).click();
