@@ -18,7 +18,7 @@ export function scheduleProgress(row,now) {
   if(start===null||end===null||end<=start)return {phase:'invalid',label:'日期待確認'};
   const frozenEnd=baseEnd,clock=(paused?Date.parse(row.pauseStartedAt):now)-Number(row.pauseTotalMs||0);
   const fraction=Math.max(0,Math.min(1,(clock-start)/(frozenEnd-start)));
-  if(row.status==='已完成')return {phase:'elapsed',label:'已完成',fraction:1,start,end};
+  if(row.status==='已完成'){const actual=timestamp(row.completedAt);return {phase:'elapsed',label:'已完成',fraction:1,start,end:actual!==null&&actual>=start&&actual<=end?actual:end};}
   if(paused)return {phase:"paused",label:"暫停中（結束時間順延）",fraction,start,end};
   return {phase:now<start?'waiting':now>=end?'elapsed':'running',label:now<start?'尚未開始':now>=end?'已完成':'試驗時程進行中',fraction,start,end};
 }

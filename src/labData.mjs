@@ -68,7 +68,7 @@ export function deriveLabMetrics(snapshot,now=Date.now()) {
   const week=calendarWindow(now);
   const weekMs=week.end-week.start;
   const equipmentUsage=snapshot.equipment.map(machine=>{
-    const intervals=schedules.filter(row=>usesEquipment(row,machine)&&['已排程','試驗中','進行中','已完成'].includes(row.status)).flatMap(row=>{
+    const intervals=schedules.filter(row=>usesEquipment(row,machine)&&['已排程','試驗中','進行中','暫停中','已完成'].includes(row.status)).flatMap(row=>{
       const bounds=scheduleProgress(row,now);
       return bounds.start!==undefined&&bounds.start<week.end&&bounds.end>week.start?[[Math.max(bounds.start,week.start),Math.min(bounds.end,week.end)]]:[];
     });
@@ -80,7 +80,7 @@ export function deriveLabMetrics(snapshot,now=Date.now()) {
     const occupiedMs=items.reduce((sum,row)=>sum+row.occupiedMs,0),calendarMs=items.length*weekMs;
     return {category,count:items.length,occupiedMs,calendarMs,rate:calendarMs?occupiedMs/calendarMs*100:0};
   });
-  const counts=Object.fromEntries(['未排程','已排程','試驗中','已完成','有衝突','取消','待核准'].map(status=>[status,schedules.filter(row=>row.status===status).length]));
+  const counts=Object.fromEntries(['未排程','已排程','試驗中','暫停中','已完成','有衝突','取消','待核准'].map(status=>[status,schedules.filter(row=>row.status===status).length]));
   const finished=schedules.filter(row=>row.status==='已完成').map(row=>({row,at:row.completedAt?Date.parse(row.completedAt):scheduleProgress(row,now).end}));
   const completedThisWeek=finished.filter(item=>item.at>=week.start&&item.at<Math.min(week.end,now+1)).length;
   const using=snapshot.equipment.filter(row=>row.status==='使用中').length;
