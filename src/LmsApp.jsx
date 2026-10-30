@@ -1,3 +1,5 @@
+import ReportArchive from './ReportArchive.jsx';
+import {canOpenReportArchive} from './reportArchive.mjs';
 import {usesEquipment} from './scheduleResources.mjs';
 import useSystemTheme from './useSystemTheme.js';
 import SystemHeaderActions from './SystemHeaderActions.jsx';
@@ -83,6 +85,8 @@ const NAV_ITEMS = [
   { id: "equipment", icon: "♧", label: "設備管理" },
 
   { id: "maintenance", icon: "▧", label: "物料管理" },
+
+  { id: "archive", icon: "▣", label: "報告資料庫" },
 
   { id: "reports", icon: "▥", label: "報表分析" },
 
@@ -628,7 +632,7 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
         <nav className="sidebar-nav">
 
-          {NAV_ITEMS.filter(item=>canAccessLmsPage(currentUser,item.id)&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
+          {NAV_ITEMS.filter(item=>canAccessLmsPage(currentUser,item.id)&&(item.id!=='archive'||canOpenReportArchive(currentUser,'lms'))&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
 
             <div
 
@@ -652,7 +656,7 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
               >
 
-                <span className="nav-icon">{item.icon}</span>
+                <span aria-hidden="true" className="nav-icon">{item.icon}</span>
 
                 <span>{item.label}</span>
 
@@ -2016,7 +2020,7 @@ function DashboardPage({
 
         <div className="dashboard-content">{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
 
-          {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "requests" ? (
+          {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
             <RequestsPage initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />
           ) : active === "schedule" ? (
             <SchedulePage currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
