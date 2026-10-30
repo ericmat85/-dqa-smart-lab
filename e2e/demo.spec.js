@@ -353,6 +353,7 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'恢復試驗',exact:true}).click();
  await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
+ await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();const completedRow=page.locator('.schedule-table tbody tr').filter({hasText:id});await expect(completedRow).toHaveCount(0);await expect(page.getByRole('button',{name:'已完成',exact:false})).toHaveCount(0);expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).find(r=>r.requestId===id).status,id)).toBe('已完成');expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id===id).status,id)).toBe('已完成');
 });
 
 test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{

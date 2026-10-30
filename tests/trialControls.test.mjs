@@ -60,3 +60,7 @@ test('accelerator skips orphaned legacy LMS trials instead of completing cases w
  assert.ok(read(s,'dqa-request-demo-v2').find(r=>r.id===result.id).supervisorId);
  assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now:now+1000},s).stage,'completed');
 });
+test('completed trial cannot be scheduled again even if an old editor calls validation',async()=>{
+ const {validateSchedule}=await import('../src/scheduleEquipment.mjs');
+ assert.throws(()=>validateSchedule({editing:{status:'已完成'},form:{},equipment:[],accounts:[],rows:[]}),/試驗已完成/);
+});
