@@ -55,7 +55,7 @@ export async function confirmReportViewed({requestId,actorId,expectedRevision,fo
  const reportPdf=await reportToPdf(report.signedExcel,{requestId,fontBytes});
  const dossier=await buildCasePdf({request:source,reportBytes:reportPdf,fontBytes});ensureEpoch(storage,epoch);
  if(!canConfirmReport(actor(storage,actorId),report,request(storage,requestId)))throw Error('帳號權限或案件狀態已變更。');
- const at=new Date().toISOString(),next={...report,revision:crypto.randomUUID(),stage:'archived',pdf:buffer(dossier.bytes),reportPdf:buffer(reportPdf),pdfSections:dossier.sections,pdfName:`${requestId}-結案文件-DEMO.pdf`,confirmedAt:at,confirmedBy:account.name,archivedAt:at,history:[...report.history,{id:crypto.randomUUID(),at,actor:account.name,action:'確認查閱，合併委託單與含三方圖片簽名之報告，Demo PDF 封存至本機'}]};
+ const at=new Date().toISOString(),next={...report,revision:crypto.randomUUID(),stage:'archived',pdf:buffer(dossier.bytes),reportPdf:buffer(reportPdf),pdfSections:dossier.sections,pdfName:`${requestId}-結案文件-DEMO.pdf`,confirmedAt:at,confirmedBy:account.name,confirmedById:account.id,archivedAt:at,history:[...report.history,{id:crypto.randomUUID(),at,actor:account.name,action:'確認查閱，合併委託單與含三方圖片簽名之報告，Demo PDF 封存至本機'}]};
  await repository.save(next,report.revision,epoch);ensureEpoch(storage,epoch);projectReportState(next,storage);return reportMetadata(next);
 }
 

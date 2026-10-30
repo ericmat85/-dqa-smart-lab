@@ -1,15 +1,20 @@
+import {fillGeneralDemo} from './generalDemoData.mjs';
+import {applyReportPresentation,reportDate} from './reportPresentation.mjs';
 import {generalProfile,inspectGeneralReport,refreshHeaderReferences,isGeneralRequest,GENERAL_COVER,GENERAL_DETAIL,GENERAL_PAGE_ENDS} from './reportProfiles.mjs';
 import {reportBounds,cellText,normalizeReportMerges} from './reportLayout.mjs';
 import {DEFAULT_SIGNATURE_CELLS} from './reportRules.mjs';
 export async function excelModule(){const module=await import('exceljs/dist/exceljs.min.js');return module.default;}
-export async function createReportTemplate(request={},demo=false,{templateBytes}={}){
- if(isGeneralRequest(request))return createGeneralTemplate(request,demo,templateBytes);
+export async function createReportTemplate(request={},demo=false,options={}){
+ if(isGeneralRequest(request))return createGeneralTemplate(request,demo,options);
  const Excel=await excelModule(),book=new Excel.Workbook(),sheet=book.addWorksheet('試驗報告');
  sheet.columns=[12,12,12,12,12,12,12,12,12].map(width=>({width}));
  sheet.mergeCells('A1:I1');sheet.getCell('A1').value=`DQA SMART LAB｜${(request.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告'}（Demo）`;sheet.getCell('A1').font={size:18,bold:true};sheet.getRow(1).height=32;
  sheet.mergeCells('A2:I2');sheet.getCell('A2').value=demo?'DEMO 流程展示資料，非正式試驗結果。':'請依委託內容與實際試驗紀錄填寫。';
- const fields=[['委託編號',request.id,'產品名稱',request.productCode||request.product],['試驗項目',(request.testItems||[]).join('、'),'報告編號',request.id?`RPT-${request.id}`:''],['設備',request.execution?.equipment,'樣品數量',request.quantity],['試驗條件',demo?'DEMO 高溫儲存流程驗證':'','試驗時數',request.execution?.hours||''],['開始時間',request.execution?.plannedStart,'結束時間',request.execution?.completedAt],['試驗依據',request.specification,'測試人員',request.execution?.operator]];
+ const elapsed=(Date.parse(request.execution?.completedAt||request.execution?.plannedEnd)-Date.parse(request.execution?.plannedStart))/3600000;
+ const hours=Number(request.execution?.hours)||((Number.isFinite(elapsed)&&elapsed>=0)?elapsed:'');
+ const fields=[['委託編號',request.id,'產品名稱',request.productCode||request.product],['試驗項目',(request.testItems||[]).join('、'),'報告編號',request.id?`RPT-${request.id}`:''],['設備',request.execution?.equipment,'樣品數量',request.quantity],['試驗條件',demo?`DEMO：${request.specification||(request.testItems||[]).join('、')||'流程驗證'}`:'','試驗時數',hours],['開始時間',request.execution?.plannedStart,'結束時間',request.execution?.completedAt],['試驗依據',request.specification,'測試人員',request.execution?.operator]];
  fields.forEach(([a,b,c,d],index)=>{const row=index+4;sheet.getCell(`A${row}`).value=a;sheet.mergeCells(`B${row}:C${row}`);sheet.getCell(`B${row}`).value=b||'';sheet.getCell(`D${row}`).value=c;sheet.mergeCells(`E${row}:I${row}`);sheet.getCell(`E${row}`).value=d||'';});
+ sheet.getCell('E7').numFmt='0.00';
  sheet.getRow(11).values=['樣品編號','外觀檢查','功能檢查','試驗結果','備註','判定'];
  if(demo)sheet.getRow(12).values=[request.execution?.sampleCode||'SAMPLE-DEMO','DEMO 正常','DEMO 正常','DEMO 完成','僅供流程測試','DEMO 合格'];
  for(const [row,label,value]of [[16,'試驗結果摘要',demo?'DEMO：試驗流程完成，結果供系統功能展示。':''],[17,'異常紀錄',demo?'DEMO 無異常':'']]){sheet.getCell(`A${row}`).value=label;sheet.mergeCells(`B${row}:I${row}`);sheet.getCell(`B${row}`).value=value;sheet.getRow(row).height=36;}
@@ -19,6 +24,7 @@ export async function createReportTemplate(request={},demo=false,{templateBytes}
 
  sheet.eachRow({includeEmpty:true},row=>{row.eachCell({includeEmpty:true},cell=>{cell.alignment={vertical:'middle',wrapText:true};cell.border={top:{style:'thin',color:{argb:'FFDCE4EF'}},bottom:{style:'thin',color:{argb:'FFDCE4EF'}},left:{style:'thin',color:{argb:'FFDCE4EF'}},right:{style:'thin',color:{argb:'FFDCE4EF'}}};});if(!row.height)row.height=24;});
  sheet.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:1,printArea:'A1:I24'};
+ applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 export async function inspectReport(bytes,requestId,fileName,request){
@@ -53,10 +59,11 @@ export async function stampReport(bytes,{sheetName,cells=DEFAULT_SIGNATURE_CELLS
  const actorCell=profile?cell:sheet.getCell(cell.row+1,cell.col);
  if(profile){actorCell.font={size:7};actorCell.alignment={vertical:'bottom',wrapText:true};}
  actorCell.value=`${actor}｜${new Date(at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})}`;
+ applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 
-async function createGeneralTemplate(request,demo,templateBytes){
+async function createGeneralTemplate(request,demo,{templateBytes,specimenImages}={}){
  const Excel=await excelModule(),book=new Excel.Workbook();
  if(!templateBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}templates/general-performance-v1.xlsx`);if(!response.ok)throw Error('一般性能試驗範本載入失敗，請稍後重試。');templateBytes=await response.arrayBuffer();}
  await book.xlsx.load(templateBytes);normalizeReportMerges(book);
@@ -65,15 +72,22 @@ async function createGeneralTemplate(request,demo,templateBytes){
  sheet.getCell('AK3').value=`DQA-${request.id}`;
  sheet.getCell('F11').value=request.productName||request.project||request.productCode||'';
  sheet.getCell('F13').value=request.productCode||request.product||'';
+ for(const [address,value]of [['AC9',request.customer],['N15',request.productVersion],['AG15',request.pcbaVersion],['N16',request.softwareVersion],['AG16',request.manufactureDate],['N17',request.quantity],['N18',request.execution?.sampleCode]])sheet.getCell(address).value=value||'';
  sheet.getCell('AC13').value=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
- sheet.getCell('AF11').value=request.execution?.plannedStart?.slice(0,10)||'';
- sheet.getCell('AM11').value=request.execution?.completedAt?.slice(0,10)||'';
+ sheet.getCell('AF11').value=reportDate(request.execution?.plannedStart);
+ sheet.getCell('AM11').value=reportDate(request.execution?.completedAt);
  for(const address of ['V118','AA118','AF118','AK118'])detail.getCell(address).value=null;
  for(const address of ['AF48','AL48'])sheet.getCell(address).value='□';
  for(const address of ['F54','S54','AF54'])sheet.getCell(address).value=null;
- if(demo){sheet.getCell('A40').value='DEMO：一般性能試驗流程展示，結果 OK；非正式試驗結果。';sheet.getCell('W40').value='DEMO ONLY: simulated result OK, not a real test result.';sheet.getCell('AF48').value='☑';detail.getCell('Q82').value='DEMO 22 km/hr';}
+ if(demo)await fillGeneralDemo(book,request,{specimenImages});
+ // Restore this case's fields after applying the approved fictitious example.
+ sheet.getCell('AK3').value=`DQA-${request.id}`;
+ sheet.getCell('F11').value=request.productName||request.project||request.productCode||'';sheet.getCell('F13').value=request.productCode||request.product||'';
+ for(const [address,value]of [['AC9',request.customer],['N15',request.productVersion],['AG15',request.pcbaVersion],['N16',request.softwareVersion],['AG16',request.manufactureDate],['N18',request.execution?.sampleCode||`${request.id}（樣品依序編號）`]])sheet.getCell(address).value=value||'';
+ sheet.getCell('AC13').value=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});sheet.getCell('AF11').value=reportDate(request.execution?.plannedStart);sheet.getCell('AM11').value=reportDate(request.execution?.completedAt);
  sheet.getCell('F50').value='試驗報告版次：T-01｜DQA Demo 圖片簽名，無正式電子簽章效力。';
  for(const row of GENERAL_PAGE_ENDS.slice(0,-1))detail.getRow(row).addPageBreak();
  refreshHeaderReferences(book);book.calcProperties.fullCalcOnLoad=true;
+ applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
