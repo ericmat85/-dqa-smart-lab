@@ -2,18 +2,20 @@ import {DEFAULT_SIGNATURE_CELLS} from './reportRules.mjs';
 export async function excelModule(){const module=await import('exceljs/dist/exceljs.min.js');return module.default;}
 export async function createReportTemplate(request={},demo=false){
  const Excel=await excelModule(),book=new Excel.Workbook(),sheet=book.addWorksheet('試驗報告');
- sheet.columns=[18,22,22,22,22,18].map(width=>({width}));
- sheet.mergeCells('A1:F1');sheet.getCell('A1').value='DQA SMART LAB｜試驗報告單';sheet.getCell('A1').font={size:18,bold:true};sheet.getRow(1).height=32;
- sheet.mergeCells('A2:F2');sheet.getCell('A2').value=demo?'DEMO 流程展示資料，非正式試驗結果。':'請依委託內容與實際試驗紀錄填寫。';
+ sheet.columns=[12,12,12,12,12,12,12,12,12].map(width=>({width}));
+ sheet.mergeCells('A1:I1');sheet.getCell('A1').value=`DQA SMART LAB｜${(request.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告'}（Demo）`;sheet.getCell('A1').font={size:18,bold:true};sheet.getRow(1).height=32;
+ sheet.mergeCells('A2:I2');sheet.getCell('A2').value=demo?'DEMO 流程展示資料，非正式試驗結果。':'請依委託內容與實際試驗紀錄填寫。';
  const fields=[['委託編號',request.id,'產品名稱',request.productCode||request.product],['試驗項目',(request.testItems||[]).join('、'),'報告編號',request.id?`RPT-${request.id}`:''],['設備',request.execution?.equipment,'樣品數量',request.quantity],['試驗條件',demo?'DEMO 高溫儲存流程驗證':'','試驗時數',request.execution?.hours||''],['開始時間',request.execution?.plannedStart,'結束時間',request.execution?.completedAt],['試驗依據',request.specification,'測試人員',request.execution?.operator]];
- fields.forEach(([a,b,c,d],index)=>{const row=index+4;sheet.getCell(`A${row}`).value=a;sheet.mergeCells(`B${row}:C${row}`);sheet.getCell(`B${row}`).value=b||'';sheet.getCell(`D${row}`).value=c;sheet.mergeCells(`E${row}:F${row}`);sheet.getCell(`E${row}`).value=d||'';});
+ fields.forEach(([a,b,c,d],index)=>{const row=index+4;sheet.getCell(`A${row}`).value=a;sheet.mergeCells(`B${row}:C${row}`);sheet.getCell(`B${row}`).value=b||'';sheet.getCell(`D${row}`).value=c;sheet.mergeCells(`E${row}:I${row}`);sheet.getCell(`E${row}`).value=d||'';});
  sheet.getRow(11).values=['樣品編號','外觀檢查','功能檢查','試驗結果','備註','判定'];
  if(demo)sheet.getRow(12).values=[request.execution?.sampleCode||'SAMPLE-DEMO','DEMO 正常','DEMO 正常','DEMO 完成','僅供流程測試','DEMO 合格'];
- for(const [row,label,value]of [[16,'試驗結果摘要',demo?'DEMO：試驗流程完成，結果供系統功能展示。':''],[17,'異常紀錄',demo?'DEMO 無異常':'']]){sheet.getCell(`A${row}`).value=label;sheet.mergeCells(`B${row}:F${row}`);sheet.getCell(`B${row}`).value=value;sheet.getRow(row).height=36;}
+ for(const [row,label,value]of [[16,'試驗結果摘要',demo?'DEMO：試驗流程完成，結果供系統功能展示。':''],[17,'異常紀錄',demo?'DEMO 無異常':'']]){sheet.getCell(`A${row}`).value=label;sheet.mergeCells(`B${row}:I${row}`);sheet.getCell(`B${row}`).value=value;sheet.getRow(row).height=36;}
  sheet.getCell('A18').value='填寫人';sheet.mergeCells('B18:C18');sheet.getCell('B18').value=request.execution?.operator||'';sheet.getCell('D18').value='報告日期';sheet.mergeCells('E18:F18');sheet.getCell('E18').value=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
- sheet.mergeCells('A20:C20');sheet.getCell('A20').value='二階主管簽名';sheet.mergeCells('D20:F20');sheet.getCell('D20').value='三階主管簽名';sheet.getRow(21).height=60;sheet.getRow(22).height=28;
+ sheet.mergeCells('A20:C20');sheet.getCell('A20').value='承認：三階主管';sheet.mergeCells('D20:F20');sheet.getCell('D20').value='確認：二階主管';sheet.mergeCells('G20:I20');sheet.getCell('G20').value='作成：執行人員';sheet.getRow(21).height=60;sheet.getRow(22).height=28;
+ sheet.mergeCells('A24:I24');sheet.getCell('A24').value='Demo 圖片簽名：無正式電子簽章效力；此為簡化展示版型。';
+
  sheet.eachRow({includeEmpty:true},row=>{row.eachCell({includeEmpty:true},cell=>{cell.alignment={vertical:'middle',wrapText:true};cell.border={top:{style:'thin',color:{argb:'FFDCE4EF'}},bottom:{style:'thin',color:{argb:'FFDCE4EF'}},left:{style:'thin',color:{argb:'FFDCE4EF'}},right:{style:'thin',color:{argb:'FFDCE4EF'}}};});if(!row.height)row.height=24;});
- sheet.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:1,printArea:'A1:F23'};
+ sheet.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:1,printArea:'A1:I24'};
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 export async function inspectReport(bytes,requestId,fileName){
@@ -30,8 +32,9 @@ export async function inspectReport(bytes,requestId,fileName){
 export async function stampReport(bytes,{sheetName,cells=DEFAULT_SIGNATURE_CELLS,level,signature,actor,at}){
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('主管電子簽名為必填。');
  const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(bytes);const sheet=book.getWorksheet(sheetName);if(!sheet)throw Error('指定工作表不存在。');
- const target=cells[`level${level}`];if(!/^[A-Z]{1,2}\d{1,4}$/.test(target||''))throw Error('簽名位置格式錯誤。');const cell=sheet.getCell(target);if(cell.row<20||cell.row>1998||cell.col>48)throw Error('簽名位置須在第 20 列以後，避免覆蓋報告內容。');
- const other=sheet.getCell(cells[level===2?'level3':'level2']);if(Math.abs(cell.col-other.col)<3&&Math.abs(cell.row-other.row)<2)throw Error('二、三階簽名位置不可重疊。');
+ const target=level==='executor'?cells.executor:cells[`level${level}`];if(!/^[A-Z]{1,2}\d{1,4}$/.test(target||''))throw Error('簽名位置格式錯誤。');const cell=sheet.getCell(target);if(cell.row<20||cell.row>1998||cell.col>48)throw Error('簽名位置須在第 20 列以後，避免覆蓋報告內容。');
+ for(const address of Object.values(cells).filter(address=>address!==target)){const other=sheet.getCell(address);if(Math.abs(cell.col-other.col)<3&&Math.abs(cell.row-other.row)<2)throw Error('三方簽名位置不可重疊。');}
+ if(level==='executor')sheet.getCell('E18').value=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
  const image=book.addImage({base64:signature,extension:/^data:image\/jpeg/i.test(signature)?'jpeg':'png'});sheet.getRow(cell.row).height=Math.max(sheet.getRow(cell.row).height||20,60);sheet.addImage(image,{tl:{col:cell.col-1,row:cell.row-1},ext:{width:210,height:65},editAs:'oneCell'});
  sheet.getCell(cell.row+1,cell.col).value=`${actor}｜${new Date(at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})}`;
  return new Uint8Array(await book.xlsx.writeBuffer());

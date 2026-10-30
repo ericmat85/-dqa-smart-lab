@@ -28,6 +28,7 @@ export const DEMO_EQUIPMENT = definitions.map((row,index) => {
   const day = String(index % 20 + 1).padStart(2,'0');
   return {
     id:`EQ-${number}`, name, category, model, specification, location, status, capacity,
+    usableVolumeLitres: /環境試驗箱|恆溫恆濕|高溫爐/.test(name) ? capacity*20 : null,
     manufacturer:'DQA 示範設備廠（虛構）', serial:`DEMO-2026-${number}`,
     owner:['陳工程師','林工程師','王工程師','黃小明'][index % 4],
     purchasedAt:`2024-03-${day}`, lastCalibration:`2026-06-${day}`, nextCalibration:`2027-06-${day}`,

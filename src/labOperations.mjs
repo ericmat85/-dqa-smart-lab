@@ -1,9 +1,9 @@
+import {usesEquipment,resourceBusy} from './scheduleResources.mjs';
 import {returnLabCancellations} from './labCancellationReturn.mjs';
 import {DEMO_SCHEDULES} from './demoSchedules.mjs';
 import {accessSystem,canApproveOperationalRequest} from './demoPermissions.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
-import {effectiveScheduleStatus} from './scheduleProgress.mjs';
 import {commitLifecycleTransaction,recoverLifecycleTransaction} from './scheduleLifecycle.mjs';
 export const LAB_OPERATIONS_KEY='dqa-lab-operations-v1';
 const LAB_KEY='dqa_lab_demo_requests_v1',AUDIT_KEY='dqa_lab_demo_audit_v1',SCHEDULE_KEY='dqa-schedules-demo-v1',EQUIPMENT_KEY='dqa-equipment-demo-v1';
@@ -55,8 +55,8 @@ export function decideLabOperation({id,actorId,approve,comment='',signature=''},
  if(approve&&operation.action==='interrupt'){
   const next=schedules.map(item=>item.requestId===operation.requestId?{...item,status:'未排程',time:'',end:'',approvalHold:undefined,interruption:{at,actor:actor.name,actorId,reason:operation.reason,previousStart:item.time,previousEnd:item.end}}:item);
   const equipment=list(memory,EQUIPMENT_KEY,DEMO_EQUIPMENT).map(machine=>{
-   const matches=item=>item.equipmentId?item.equipmentId===machine.id:item.eq===machine.name;
-   if(machine.status!=='使用中'||!affected.some(matches)||(machine.currentRequest&&machine.currentRequest!==operation.requestId)||next.some(item=>matches(item)&&effectiveScheduleStatus(item,now)==='試驗中'))return machine;
+   const matches=item=>usesEquipment(item,machine);
+   if(machine.status!=='使用中'||!affected.some(matches)||(machine.currentRequest&&machine.currentRequest!==operation.requestId)||next.some(item=>matches(item)&&resourceBusy(item,now)))return machine;
    return {...machine,status:'待機中',currentRequest:'',records:[{id:crypto.randomUUID(),date:at,type:'中斷核准／設備釋放',actor:actor.name,actorId,result:'使用中 → 待機中',detail:`${operation.requestId}：${operation.reason}`},...(machine.records||[])]};
   });memory.setItem(SCHEDULE_KEY,JSON.stringify(next));memory.setItem(EQUIPMENT_KEY,JSON.stringify(equipment));
  }

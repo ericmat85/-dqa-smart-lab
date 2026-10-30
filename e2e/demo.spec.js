@@ -10,7 +10,11 @@ test.beforeEach(async({page})=>{
   for(const key of ['dqa-request-demo-v2','dqa-lms-reviews-v1','dqa-schedules-demo-v1','dqa_lab_demo_requests_v1','dqa_lab_demo_audit_v1','dqa-lab-operations-v1','dqa-borrow-requests-v1'])localStorage.setItem(key,'[]');
   localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(equipment));
   localStorage.setItem('dqa-completed-flow-provisioned-v1',JSON.stringify({created:false}));
-  for(const account of accounts)localStorage.setItem(`dqa-default-signature-v1:${account.id}`,signature);
+  for(const account of accounts){
+   const canvas=document.createElement('canvas');canvas.width=480;canvas.height=100;
+   const context=canvas.getContext('2d');context.fillStyle='#fff';context.fillRect(0,0,480,100);context.fillStyle='#17365e';context.font='28px sans-serif';context.fillText(`DEMO ${account.name}`,12,60);
+   localStorage.setItem(`dqa-default-signature-v1:${account.id}`,canvas.toDataURL('image/png')||signature);
+  }
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT,signature});
 });
 async function lmsLogin(page,email='huangxm@example.com'){
@@ -132,3 +136,65 @@ test('assistant reveals characters progressively and retains completed answers',
 });
 
 test.afterEach(async({page})=>{expect(await page.pageErrors()).toEqual([]);});
+
+test('report is returned, revised, signed by two supervisors and archived with request-first PDF',async({page})=>{
+ test.setTimeout(90000);
+ await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
+ await page.getByRole('button',{name:'建立已完成範例（假資料）',exact:true}).click();
+ await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
+ const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
+ async function submit(){
+  await page.goto('/lab/login');
+  if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
+  await page.getByRole('button',{name:'提交報告',exact:true}).click();
+  await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+  await page.getByRole('button',{name:'提交',exact:true}).click();
+  await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
+ }
+ async function openReview(email){
+  await lmsLogin(page,email);await page.locator('.sidebar').getByRole('button',{name:/試驗委託/}).click();
+  await page.getByRole('button',{name:'審核',exact:true}).click();
+ }
+ await submit();await openReview('level2@example.com');
+ await page.getByLabel('退回原因（退回時必填）').fill('DEMO：請補充結果');await page.getByRole('button',{name:'退回報告',exact:true}).click();
+ await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已完成');
+ await submit();
+ for(const email of ['level2@example.com','level3@example.com']){
+  await openReview(email);await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
+ }
+ await requestLogin(page,true);await page.getByRole('button',{name:'查看',exact:true}).first().click();
+ await expect(page.getByText('Demo 圖片簽名，不具正式電子簽章效力；結案 PDF 順序：委託單 → 試驗報告。')).toBeVisible();
+ await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();
+ await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
+ const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true}).click();
+ const download=await downloadEvent;await download.saveAs(test.info().outputPath('closure-demo.pdf'));expect(download.suggestedFilename()).toBe(`${id}-結案文件-DEMO.pdf`);
+ const info=await page.evaluate(async id=>{
+  const {getReport}=await import('/src/reportStore.mjs');const report=await getReport(id);return {stage:report.stage,sections:report.pdfSections,history:report.history,revision:report.revisionNumber};
+ },id);
+ expect(info.stage).toBe('archived');expect(info.sections.map(row=>row.kind)).toEqual(['request','report']);expect(info.revision).toBe(2);expect(info.history.some(row=>row.action.includes('退回'))).toBe(true);
+ await page.reload();await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已結案');
+});
+
+test('two-machine scheduling checks space and buffers and saves a sample allocation',async({page})=>{
+ await page.goto('/');await page.evaluate(()=>{
+  localStorage.setItem('dqa-request-demo-v2',JSON.stringify([{id:'MULTI',productCode:'MULTI',testItems:['低溫試驗'],quantity:5,status:'待排程',lmsReview:{approval:2}}]));
+  localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(['A','B'].map(id=>({id,name:`環境試驗箱 ${id}`,status:'待機中',capacity:3,usableVolumeLitres:30,specification:'-40～150°C'}))));
+ });
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await page.getByRole('button',{name:'編輯排程',exact:true}).click();
+ await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByLabel('每件樣品使用空間 L（選填）').fill('10');
+ await page.getByLabel('準備時間（分鐘）').fill('60');await page.getByLabel('清理時間（分鐘）').fill('90');
+ await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});await page.getByRole('button',{name:'儲存排程',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
+ const schedule=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0]);
+ expect(schedule.equipmentIds.length).toBe(2);expect(schedule.allocations.map(row=>row.quantity)).toEqual([3,2]);expect(schedule.preparationMinutes).toBe(60);expect(schedule.cleanupMinutes).toBe(90);
+});
+
+test('a stale draft editor cannot overwrite a newer saved revision',async({page})=>{
+ await requestLogin(page);await demoRequest(page);await page.getByRole('button',{name:'儲存草稿',exact:true}).click();
+ await page.getByRole('button',{name:'編輯草稿',exact:true}).click();
+ await page.getByLabel('產品代碼',{exact:false}).fill('STALE-VALUE');
+ await page.evaluate(()=>{const rows=JSON.parse(localStorage.getItem('dqa-request-demo-v2'));rows[0].productCode='NEWER-VALUE';localStorage.setItem('dqa-request-demo-v2',JSON.stringify(rows));});
+ await page.getByRole('button',{name:'儲存草稿',exact:true}).click();
+ await expect(page.getByText('草稿已在其他頁面更新，請重新開啟後編輯。')).toBeVisible();
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].productCode)).toBe('NEWER-VALUE');
+});

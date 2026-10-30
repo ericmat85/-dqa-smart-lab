@@ -1,3 +1,4 @@
+import {usesEquipment,resourceBusy,reservationWindow} from './scheduleResources.mjs';
 import {mergeApprovedSchedules} from './scheduleRequest.mjs';
 import {scheduleProgress,effectiveScheduleStatus} from './scheduleProgress.mjs';
 import {SCHEDULE_KEY,EQUIPMENT_KEY} from './scheduleEquipment.mjs';
@@ -8,42 +9,35 @@ import {storageDelta,applyStorageDelta} from './storageDelta.mjs';
 import {updateRequestExecution} from './requestExecution.mjs';
 
 export function reconcileSchedules(schedules,equipment,now) {
-  const at=new Date(now).toISOString();
-  let nextEquipment=equipment.map(row=>({...row}));
-  const machineFor=row=>nextEquipment.find(item=>row.equipmentId?item.id===row.equipmentId:item.name===row.eq);
-  const next=schedules.map(original=>{
-    const row={...original};
-    if(['已排程','試驗中','進行中'].includes(row.status)){
-      const phase=scheduleProgress(row,now);
-      row.status=effectiveScheduleStatus(row,now);
-      if(row.status==='已完成')row.completedAt=new Date(phase.end).toISOString();
-    }
-    return row;
-  });
-  const matches=(row,machine)=>row.equipmentId?row.equipmentId===machine.id:row.eq===machine.name;
-  for(const row of next.filter(item=>item.status==='試驗中')){
-    const machine=machineFor(row);
-    if(!machine)continue;
-    if(['維護中','校驗中'].includes(machine.status)){
-      row.status='有衝突';row.scheduleIssue=`設備目前為${machine.status}，無法開始試驗。`;
-      continue;
-    }
-    if(machine.status==='待機中'){
-      machine.status='使用中';machine.currentRequest=row.requestId;
-      machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗開始',actor:'系統',result:'待機中 → 使用中',detail:`${row.requestId} 到達排程開始時間。`},...(machine.records||[])];
-    }
+ const at=new Date(now).toISOString(),nextEquipment=equipment.map(row=>({...row}));
+ const next=schedules.map(original=>{
+  const row={...original};
+  if(['已排程','試驗中','進行中'].includes(row.status)){
+   const phase=scheduleProgress(row,now);row.status=effectiveScheduleStatus(row,now);
+   if(row.status==='已完成')row.completedAt=new Date(phase.end).toISOString();
   }
-  for(const row of next.filter(item=>item.status==='已完成'&&!item.equipmentReleaseHandledAt)){
-    const machine=machineFor(row);
-    if(machine&&next.some(item=>item.status==='試驗中'&&matches(item,machine)))continue;
-    // Maintenance and calibration remain in force, even when a scheduled period has ended.
-    if(machine?.status==='使用中'&&(!machine.currentRequest||machine.currentRequest===row.requestId||next.some(item=>item.status==='已完成'&&item.requestId===machine.currentRequest&&matches(item,machine)))){
-      machine.status='待機中';machine.currentRequest='';
-      machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗完成／設備釋放',actor:'系統',result:'使用中 → 待機中',detail:`${row.requestId} 試驗日程已結束，設備恢復待機。`},...(machine.records||[])];
-    }
-    row.equipmentReleaseHandledAt=at;
+  return row;
+ });
+ for(const row of next.filter(item=>resourceBusy(item,now))){
+  const machines=nextEquipment.filter(machine=>usesEquipment(row,machine));
+  if(machines.some(machine=>['維護中','校驗中'].includes(machine.status))){row.status='有衝突';row.scheduleIssue='設備維護或校驗中，無法進行試驗／準備。';continue;}
+  for(const machine of machines)if(machine.status==='待機中'){
+   machine.status='使用中';machine.currentRequest=row.requestId;
+   machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗開始／準備',actor:'系統',result:'待機中 → 使用中',detail:`${row.requestId} 進入設備保留時段。`},...(machine.records||[])];
   }
-  return {schedules:next,equipment:nextEquipment};
+ }
+ for(const row of next.filter(item=>['已完成','已結案'].includes(item.status)&&!item.equipmentReleaseHandledAt)){
+  const window=reservationWindow(row);if(window&&now<window.end)continue;
+  for(const machine of nextEquipment.filter(machine=>usesEquipment(row,machine))){
+   if(next.some(item=>usesEquipment(item,machine)&&resourceBusy(item,now)))continue;
+   if(machine.status==='使用中'&&(!machine.currentRequest||machine.currentRequest===row.requestId||next.some(item=>['已完成','已結案'].includes(item.status)&&item.requestId===machine.currentRequest&&usesEquipment(item,machine)))){
+    machine.status='待機中';machine.currentRequest='';
+    machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗完成／設備釋放',actor:'系統',result:'使用中 → 待機中',detail:`${row.requestId} 試驗與清理保留時段已結束。`},...(machine.records||[])];
+   }
+  }
+  row.equipmentReleaseHandledAt=at;
+ }
+ return {schedules:next,equipment:nextEquipment};
 }
 
 const JOURNAL='dqa-schedule-lifecycle-pending-v1';

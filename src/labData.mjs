@@ -1,3 +1,4 @@
+import {usesEquipment} from './scheduleResources.mjs';
 import {DEMO_SCHEDULES} from './demoSchedules.mjs';
 import {ALL_DEMO_REQUESTS} from './demoLmsRequests.mjs';
 import {INITIAL_ELECTRONIC_REQUESTS} from './demoElectronicRequests.mjs';
@@ -67,7 +68,7 @@ export function deriveLabMetrics(snapshot,now=Date.now()) {
   const week=calendarWindow(now);
   const weekMs=week.end-week.start;
   const equipmentUsage=snapshot.equipment.map(machine=>{
-    const intervals=schedules.filter(row=>(row.equipmentId?row.equipmentId===machine.id:row.eq===machine.name)&&['已排程','試驗中','進行中','已完成'].includes(row.status)).flatMap(row=>{
+    const intervals=schedules.filter(row=>usesEquipment(row,machine)&&['已排程','試驗中','進行中','已完成'].includes(row.status)).flatMap(row=>{
       const bounds=scheduleProgress(row,now);
       return bounds.start!==undefined&&bounds.start<week.end&&bounds.end>week.start?[[Math.max(bounds.start,week.start),Math.min(bounds.end,week.end)]]:[];
     });
@@ -85,7 +86,7 @@ export function deriveLabMetrics(snapshot,now=Date.now()) {
   const using=snapshot.equipment.filter(row=>row.status==='使用中').length;
   const issues=[...snapshot.issues];
   for(const row of schedules){
-    if(!['取消','已完成'].includes(row.status)&&!snapshot.equipment.some(eq=>row.equipmentId?eq.id===row.equipmentId:eq.name===row.eq))issues.push({id:`equipment-${row.id}`,type:'排程設備',detail:`${row.requestId||row.id} 未關聯設備台帳中的機台`,target:'schedules'});
+    if(!['取消','已完成'].includes(row.status)&&!snapshot.equipment.some(eq=>usesEquipment(row,eq)))issues.push({id:`equipment-${row.id}`,type:'排程設備',detail:`${row.requestId||row.id} 未關聯設備台帳中的機台`,target:'schedules'});
     if(row.status==='有衝突')issues.push({id:`conflict-${row.id}`,type:'排程衝突',detail:`${row.requestId||row.id}：${row.scheduleIssue||'排程待確認'}`,target:'schedules'});
   }
   const today=getRequestDate(new Date(now));

@@ -79,3 +79,13 @@ test('a new two-stage approved request becomes schedulable once, without fixture
  syncScheduleLifecycle(storage,Date.parse('2026-11-06T10:00:01+08:00'));
  rows=JSON.parse(storage.getItem('dqa-schedules-demo-v1'));assert.equal(rows.length,1);
 });
+
+test('a reviewer cannot switch levels after a returned correction round',()=>{
+ const {request,storage}=setup();
+ const returned=decide(storage,request,'l1',{returnIt:true,signature:'',comment:'補正'});
+ const pending={...returned,status:'已核准',lmsReview:null};storage.setItem(REQUEST_KEY,JSON.stringify([pending]));
+ const changed=[...accounts.map(row=>row.id==='l1'?{...row,role:ROLE.LEVEL2}:row),{id:'another',name:'另一位一階',role:ROLE.LEVEL1,status:'啟用中'}];
+ storage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(changed));
+ const first=decide(storage,pending,'another');
+ assert.throws(()=>decide(storage,first,'l1'),/無權/);
+});

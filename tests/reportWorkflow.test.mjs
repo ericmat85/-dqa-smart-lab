@@ -23,7 +23,7 @@ test('real Excel submission, two distinct supervisor signatures, requester confi
  await assert.rejects(confirmReportViewed({requestId:id,actorId:'DEMO-SUPERVISOR',expectedRevision:meta.revision},storage,repository));
  meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL3',signature,expectedRevision:meta.revision},storage,repository);assert.equal(meta.stage,'view');assert.equal(source().status,'待查閱');
  const stored=await repository.get(id),Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(stored.signedExcel);const sheet=book.getWorksheet(stored.sheetName);
- assert.equal(sheet.getImages().length,2);assert.deepEqual(sheet.getImages().map(row=>[Math.floor(row.range.tl.col),Math.floor(row.range.tl.row)]),[[0,20],[3,20]]);assert.match(sheet.getCell('A22').text,/二階/);assert.match(sheet.getCell('D22').text,/三階/);
+ assert.equal(sheet.getImages().length,3);assert.deepEqual(sheet.getImages().map(row=>[Math.floor(row.range.tl.col),Math.floor(row.range.tl.row)]),[[6,20],[3,20],[0,20]]);assert.match(sheet.getCell('A22').text,/三階/);assert.match(sheet.getCell('D22').text,/二階/);assert.match(sheet.getCell('G22').text,/陳/);
  const original=new Excel.Workbook();await original.xlsx.load(stored.original);assert.equal(original.worksheets[0].getImages().length,0);
  syncScheduleLifecycle(storage,Date.parse('2026-11-01T01:30:00+08:00'));assert.equal(source().status,'待查閱');assert.equal(JSON.parse(storage.getItem('dqa_lab_demo_requests_v1'))[0].status,'待查閱');
  await assert.rejects(confirmReportViewed({requestId:id,actorId:'DEMO-REQUESTER',expectedRevision:meta.revision},storage,repository));
@@ -49,4 +49,30 @@ test('invalid or duplicate submission never advances the source case',async()=>{
  const {storage,repository,id,source}=fixture();await assert.rejects(submitReportWorkflow({requestId:id,file:new File([await createReportTemplate(source())],'report.xlsx'),signature,actorId:'U003',minimumMs:0},storage,repository));assert.equal(await repository.get(id),null);assert.equal(source().status,'已完成');
  await submitReportWorkflow({requestId:id,file:await upload(source()),signature,actorId:'U003',minimumMs:0},storage,repository);
  await assert.rejects(submitReportWorkflow({requestId:id,file:await upload(source()),signature,actorId:'U003',minimumMs:0},storage,repository));assert.equal(source().status,'待審核');
+});
+
+test('report return keeps review history, restarts signatures and creates an ordered closure dossier',async()=>{
+ const {returnReportWorkflow}=await import('../src/reportWorkflow.mjs');const {storage,repository,id,source}=fixture();
+ let meta=await submitReportWorkflow({requestId:id,file:await upload(source()),actorId:'U003',signature,minimumMs:0},storage,repository);
+ await assert.rejects(returnReportWorkflow({requestId:id,actorId:'DEMO-LEVEL2',comment:' ',expectedRevision:meta.revision},storage,repository));
+ meta=await returnReportWorkflow({requestId:id,actorId:'DEMO-LEVEL2',comment:'補充結果',expectedRevision:meta.revision},storage,repository);
+ assert.equal(meta.stage,'returned');assert.equal(source().status,'已完成');assert.equal(meta.returnReason,'補充結果');
+ meta=await submitReportWorkflow({requestId:id,file:await upload(source()),actorId:'U003',signature,minimumMs:0},storage,repository);assert.equal(meta.revisionNumber,2);assert.ok(meta.history.some(row=>row.action.includes('補充結果')));
+ meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL2',signature,expectedRevision:meta.revision},storage,repository);
+ meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL3',signature,expectedRevision:meta.revision},storage,repository);
+ meta=await confirmReportViewed({requestId:id,actorId:'DEMO-SUPERVISOR',expectedRevision:meta.revision,fontBytes:await readFile('public/fonts/NotoSansCJKtc-Regular.otf')},storage,repository);
+ assert.deepEqual(meta.pdfSections.map(row=>row.kind),['request','report']);assert.equal(meta.pdfSections[0].firstPage,1);assert.equal(meta.pdfSections[1].firstPage,meta.pdfSections[0].pageCount+1);
+ const {PDFDocument}=await import('pdf-lib'),report=await repository.get(id);const pdf=await PDFDocument.load(report.pdf);assert.equal(pdf.getPageCount(),meta.pdfSections.reduce((total,row)=>total+row.pageCount,0));assert.match(meta.pdfName,/結案文件-DEMO/);
+});
+test('role changes never allow the same actor to review a different level in the same case',()=>{
+ const source={ownerId:'OWNER',supervisorId:'SUP',signatureRecords:[{stage:1,decision:'核准',actorId:'CHANGED'}]};
+ assert.equal(canReviewReport({id:'CHANGED',role:'二階主管',status:'啟用中'},{stage:'level2',submitterId:'LAB',approvals:[]},source),false);
+ assert.equal(canReviewReport({id:'CHANGED',role:'三階主管',status:'啟用中'},{stage:'level3',submitterId:'LAB',approvals:[],priorApprovals:[{actorId:'CHANGED',level:2}]},{ownerId:'OWNER'}),false);
+});
+
+test('signature anchors enforce three distinct positions in the agreed left-to-right order',async()=>{
+ const {storage,repository,id,source}=fixture();
+ const file=await upload(source());
+ for(const cells of [{level2:'A21',level3:'D21',executor:'G21'},{level2:'D21',level3:'A21',executor:'A21'},{level2:'D21',level3:'A21',executor:'G24'}])await assert.rejects(submitReportWorkflow({requestId:id,file,actorId:'U003',signature,cells,minimumMs:0},storage,repository));
+ assert.equal(await repository.get(id),null);
 });
