@@ -26,3 +26,20 @@ test('portal highlight follows hover and keyboard focus with one red marker and 
  await page.locator('.portal-header').hover();await expect(page.locator('.portal-card.is-highlighted')).toHaveCount(0);await expect(page.locator('.portal-card.is-marker')).toHaveClass(/portal-card-request/);
  await cards.nth(1).focus();await expect(cards.nth(1)).toHaveClass(/is-highlighted/);await expect(cards.nth(1).locator('.portal-card-bottom b')).toHaveCSS('color',red);await page.keyboard.press('Enter');await expect(page).toHaveURL(/lms\/login$/);
 });
+test('five portal themes rotate every 15 seconds, wrap, pause and allow manual selection',async({page})=>{
+ await page.clock.install();await page.clock.pauseAt(new Date());await page.goto('/');
+ const intro=page.getByRole('region',{name:'平台主題輪播'});
+ const tags=['流程串聯','電子委託','資源協作','試驗追蹤','報告留存'];
+ await expect(intro.locator('.portal-overline')).toHaveText(tags[0]);
+ await page.clock.fastForward(14999);await expect(intro.locator('.portal-overline')).toHaveText(tags[0]);
+ await page.clock.fastForward(1);await expect(intro.locator('.portal-overline')).toHaveText(tags[1]);
+ for(let i=2;i<5;i++){await page.clock.fastForward(15000);await expect(intro.locator('.portal-overline')).toHaveText(tags[i]);}
+ await page.clock.fastForward(15000);await expect(intro.locator('.portal-overline')).toHaveText(tags[0]);
+ await page.getByRole('button',{name:'暫停主題輪播',exact:true}).click();await page.clock.fastForward(30000);await expect(intro.locator('.portal-overline')).toHaveText(tags[0]);
+ await page.getByRole('button',{name:'第 4 張：試驗追蹤',exact:true}).click();await expect(intro.locator('.portal-overline')).toHaveText(tags[3]);
+ await page.getByRole('button',{name:'播放主題輪播',exact:true}).click();await page.clock.fastForward(15000);await expect(intro.locator('.portal-overline')).toHaveText(tags[4]);
+ for(const [width,height]of [[1366,768],[1440,900],[1920,1080],[960,600]]){
+  await page.setViewportSize({width,height});
+  for(let i=0;i<5;i++){await page.getByRole('button',{name:`第 ${i+1} 張：${tags[i]}`,exact:true}).click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight)).toBe(true);}
+ }
+});
