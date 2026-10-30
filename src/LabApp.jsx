@@ -230,7 +230,6 @@ export default function LabApp({ path, navigate }) {
         <button className="lab-back" onClick={navigateHome}>← 返回系統入口</button>
       </aside>
       <main className="lab-main">
-        <header className="lab-topbar"><div><span className="lab-eyebrow">DQA LAB SYSTEM</span><h1>{tab === "requests" ? "實驗室工作台" : tab === "archive" ? "報告資料庫" : "操作歷程"}</h1><p>管理試驗接收、執行進度與操作紀錄。</p></div></header>
         {lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{notice && <div className="lab-notice" role="status">{notice}</div>}
         {tab === "archive" ? <ReportArchive actor={account} system="lab"/> : tab === "requests" ? <>
