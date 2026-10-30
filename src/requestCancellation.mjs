@@ -1,3 +1,5 @@
+import {canControlTrial,isActiveTrial} from './trialPermissions.mjs';
+import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {usesEquipment,resourceBusy} from './scheduleResources.mjs';
 import {SCHEDULE_KEY,EQUIPMENT_KEY} from './scheduleEquipment.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
@@ -28,6 +30,8 @@ export function stopRequestSchedules({scheduleId,requestId,actor,actorId,reason,
   if(![schedules,equipment,requests,reviews].every(Array.isArray))throw Error('無法讀取資料，尚未取消委託。');
   const selected=schedules.find(row=>row.id===scheduleId&&row.requestId===requestId);
   if(!selected)throw Error('找不到對應的委託排程，請重新開啟。');
+  const account=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS)).find(a=>a.id===actorId);
+  if(schedules.some(r=>r.requestId===requestId&&isActiveTrial(r,now))&&!canControlTrial(account,storage))throw Error('僅 lv1 一階主管可中止進行中的試驗。');
   if(cancellations[requestId]&&schedules.filter(row=>row.requestId===requestId).every(row=>row.status==='取消'))return {schedules,equipment};
   const at=new Date(now).toISOString();
   const cancellation={requestId,actor,actorId,at,reason:String(reason||'').trim()||'使用者確認中止排程並取消整張委託'};

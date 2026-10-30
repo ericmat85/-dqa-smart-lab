@@ -1,3 +1,4 @@
+import {canControlTrial} from './trialPermissions.mjs';
 import {createCompletedDemoFlow} from './completedDemoFlow.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
@@ -14,7 +15,7 @@ function actorFor(storage,id,system){
  return a;
 }
 export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storage=window.localStorage){
- recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lms');
+ recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lms');if(!canControlTrial(actor,storage))throw Error('僅 lv1 一階主管可暫停或恢復試驗。');
  const schedules=read(storage,'dqa-schedules-demo-v1'),row=schedules.find(r=>r.id===scheduleId),lab=read(storage,'dqa_lab_demo_requests_v1'),receipt=lab.find(r=>r.scheduleId===scheduleId);
  if(!row||!receipt?.acceptedAt||receipt.reservationId!==row.reservationId||receipt.scheduledStart!==row.time||receipt.scheduledEnd!==row.end||row.reportInfo?.stage||read(storage,'dqa-lab-operations-v1').some(r=>r.requestId===row.requestId&&r.status==='待審核'))throw Error('案件未接收、已送報告或有待核准申請，無法暫停／恢復。');
  if(paused?Boolean(row.pauseStartedAt)||scheduleProgress(row,now).phase!=='running':!row.pauseStartedAt||row.status!=='暫停中')throw Error('試驗狀態已變更，請重新開啟排程。');
@@ -34,10 +35,12 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
 export function accelerateTrial({actorId,signature,now=Date.now()},storage=window.localStorage){
  recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lab');
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
- const running=lab.find(r=>r.demoAccelerator&&r.status==='試驗中');
+ const sources=read(storage,'dqa-request-demo-v2');
+ const completeSource=id=>sources.some(r=>r.id===id&&r.ownerId&&r.supervisorId&&!['取消','已結案'].includes(r.status));
+ const running=lab.find(r=>completeSource(r.id)&&r.demoAccelerator&&r.status==='試驗中');
  if(running)return {id:running.id,stage:'completed',row:completeLabTrial({requestId:running.id,actorId,signature,now},storage)};
- if(lab.some(r=>r.demoAccelerator&&r.status==='暫停中'))throw Error('加速中的試驗已暫停，請先在排程管理恢復試驗。');
- const receipt=lab.find(r=>r.acceptedAt&&['已排程','試驗中'].includes(r.status)&&!r.reportInfo?.stage&&!read(storage,'dqa-lab-operations-v1').some(o=>o.requestId===r.id&&o.status==='待審核'));
+ if(lab.some(r=>completeSource(r.id)&&r.demoAccelerator&&r.status==='暫停中'))throw Error('加速中的試驗已暫停，請先在排程管理恢復試驗。');
+ const receipt=lab.find(r=>completeSource(r.id)&&r.acceptedAt&&['已排程','試驗中'].includes(r.status)&&!r.reportInfo?.stage&&!read(storage,'dqa-lab-operations-v1').some(o=>o.requestId===r.id&&o.status==='待審核'));
  if(!receipt){const result=createCompletedDemoFlow({viewerId:actorId,signature,now,newExample:true,halfway:true},storage);return {id:result.id,stage:'running'};}
  const row=schedules.find(r=>r.id===receipt.scheduleId&&r.reservationId===receipt.reservationId);
  if(!row||!['已排程','試驗中','進行中'].includes(row.status)||row.pauseStartedAt)throw Error('原排程已變更，請重新整理。');
