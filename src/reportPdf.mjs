@@ -3,7 +3,7 @@ const clean=value=>Array.from(String(value??'')).filter(char=>char.charCodeAt(0)
 export async function reportToPdf(bytes,{fontBytes,requestId=''}={}){
  const [{PDFDocument,rgb},kit,Excel]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit'),excelModule()]);
  if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('PDF 中文字型載入失敗，尚未封存。');fontBytes=await response.arrayBuffer();}
- const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:true});const book=new Excel.Workbook();await book.xlsx.load(bytes);
+ const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:false});const book=new Excel.Workbook();await book.xlsx.load(bytes);
  function wrap(text,size,width){const lines=[];for(const paragraph of clean(text).split('\n')){let line='';for(const char of paragraph){if(line&&font.widthOfTextAtSize(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);}return lines;}
  let pageNumber=0;
  for(const sheet of book.worksheets.filter(row=>row.state==='visible'||!row.state)){
@@ -23,7 +23,9 @@ export async function reportToPdf(bytes,{fontBytes,requestId=''}={}){
     const lines=wrap(text,size,width-8);height=Math.max(height,lines.length*(size+3)+8);cells.push({cell,col,width,size,lines,merge});
    }
    if(height>H-margin*2-30)throw Error(`工作表「${sheet.name}」第 ${rowIndex} 列過高，請分段後再封存。`);
-   if(y-height<margin){await drawImages();newPage();}
+   const signatureNext=images.some(image=>Math.floor(image.range.tl.row)+1===rowIndex+1);
+   const required=signatureNext?height+Math.max(60,sheet.getRow(rowIndex+1).height||20)+30:height;
+   if(y-required<margin){await drawImages();newPage();}
    positions.set(rowIndex,y);
    for(const {cell,col,width,size,lines}of cells){let color=rgb(1,1,1);const argb=cell.fill?.fgColor?.argb;if(argb&&argb.length>=6){const hex=argb.slice(-6);color=rgb(parseInt(hex.slice(0,2),16)/255,parseInt(hex.slice(2,4),16)/255,parseInt(hex.slice(4,6),16)/255);}page.drawRectangle({x:x[col-1],y:y-height,width,height,borderWidth:.35,borderColor:rgb(.83,.87,.92),color});lines.forEach((line,index)=>{if(line)page.drawText(line,{x:x[col-1]+4,y:y-5-size-index*(size+3),size,font,color:rgb(.12,.2,.32)});});}
    y-=height;

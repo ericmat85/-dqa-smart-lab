@@ -13,9 +13,9 @@ import {syncScheduleLifecycle,commitLifecycleTransaction,recoverLifecycleTransac
 import {getRequestDate} from './requestDate.mjs';
 export const DEMO_FLOW_MARKER='dqa-completed-flow-provisioned-v1';
 const read=(storage,key,fallback=[])=>{const rows=JSON.parse(storage.getItem(key)||JSON.stringify(fallback));if(!Array.isArray(rows))throw Error('示範流程無法讀取現有資料，尚未建立案件。');return rows;};
-export function createCompletedDemoFlow({signature,viewerId,now=Date.now()},storage=window.localStorage){
+export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newExample=false},storage=window.localStorage){
  recoverLifecycleTransaction(storage);
- const marker=storage.getItem(DEMO_FLOW_MARKER);if(marker)return {...JSON.parse(marker),created:false};
+ const marker=storage.getItem(DEMO_FLOW_MARKER);if(marker&&!newExample)return {...JSON.parse(marker),created:false};
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('缺少 Demo 測試簽名。');
  const accounts=read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS),viewer=accounts.find(row=>row.id===viewerId);
  const requester=accounts.find(row=>row.role==='委託者'&&row.status==='啟用中'&&(!viewer||viewer.role==='委託者'?(!viewer||row.id===viewer.id):viewer.role==='委託者主管'?row.supervisorId===viewer.id:true)&&accounts.some(actor=>actor.id===row.supervisorId&&actor.role==='委託者主管'&&actor.status==='啟用中'));

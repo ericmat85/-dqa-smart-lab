@@ -1,7 +1,7 @@
 name: Demo checks
 on:
   pull_request:
-    branches: [main]
+    branches: [main, codex/demo-mvp-nov6]
   workflow_dispatch:
 permissions:
   contents: read

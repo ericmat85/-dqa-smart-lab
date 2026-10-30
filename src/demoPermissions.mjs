@@ -23,9 +23,15 @@ export function canReview(account, request, storage) {
  const custom=customRole(account,storage);
  const level=custom?custom.level:LEVELS.get(account?.role);
  if (!accessSystem(account,'lms',storage) || !level || (custom&&!custom.pages.includes('requests')) || request?.status !== '待審查') return false;
- if (level !== (request.approval ?? 0) + 1) return false;
+ if (level !== (request.approval ?? 0) + 1 || reviewedAtOtherLevel(account.id,level,request)) return false;
  const id=account.id;
  if ((request.participantIds || []).includes(id)) return false;
  if ((request.approvals || []).some(a => a.actorId === id)) return false;
  return true;
+}
+
+// Repeated review at the same level in a new correction round is allowed; changing levels is not.
+export function reviewedAtOtherLevel(actorId,level,request={}) {
+ const records=[...(request.signatureRecords||[]).filter(row=>['核准','退回'].includes(row.decision)).map(row=>({actorId:row.actorId,level:Number(row.stage)})),...(request.approvalRecords||[]).map(row=>({...row,level:Number(row.stage)})),...(request.approvals||[]).map(row=>({...row,level:Number(row.level??row.stage)})),...(request.reportInfo?.approvals||[])];
+ return records.some(row=>row.actorId===actorId&&[1,2,3].includes(Number(row.level))&&Number(row.level)!==level);
 }

@@ -22,3 +22,10 @@ test('fixture preserves unrelated cases and survives cleanup without auto-recrea
 test('missing workflow participants never create a partial example',()=>{
  const store=storage();store.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(INITIAL_ACCOUNTS.filter(row=>row.role!=='二階主管')));assert.throws(()=>createCompletedDemoFlow({viewerId:'DEMO-SUPERVISOR',signature,now},store));assert.equal(store.getItem('dqa-request-demo-v2'),'[]');assert.equal(store.getItem(DEMO_FLOW_MARKER),null);
 });
+
+test('explicit completed examples can be created again without replacing existing cases',()=>{
+ const store=storage();const first=createCompletedDemoFlow({viewerId:'U003',signature,now},store);
+ const second=createCompletedDemoFlow({viewerId:'U003',signature,now,newExample:true},store);
+ assert.notEqual(first.id,second.id);const requests=JSON.parse(store.getItem('dqa-request-demo-v2'));
+ assert.equal(requests.length,2);assert.ok(requests.every(row=>row.status==='已完成'&&row.demoFlow.simulated));
+});

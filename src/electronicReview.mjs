@@ -16,7 +16,7 @@ export function reviewElectronicRequest({ id, accountId, expectedRevision, retur
   const previous = request.lmsReview || { approval: 0, approvalRecords: [], history: [] };
   if (request.status !== '已核准' || !canReview(actor, {
     status: '待審查', approval: previous.approval,
-    participantIds: [request.ownerId, request.supervisorId], approvals: previous.approvalRecords,
+    participantIds: [request.ownerId, request.supervisorId], approvals: previous.approvalRecords,signatureRecords:getSignatureHistory(request),reportInfo:request.reportInfo,
   },storage)) throw Error('此帳號無權審核目前階段，或已參與本案件簽核。');
   if (!returnIt && !/^data:image\/(png|jpeg);base64,/i.test(signature || '')) throw Error('核准前請先完成電子簽名。');
   const reason = String(comment || '').trim();
