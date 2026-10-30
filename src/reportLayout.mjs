@@ -2,6 +2,8 @@
 // Keep real data, merged regions, images and the declared print area instead.
 export function cellText(cell){
  const source=cell.isMerged?cell.master:cell;
+ const value=typeof source.value==='number'?source.value:source.value?.result;
+ if(typeof value==='number'&&/^0\.0{1,2}$/.test(source.numFmt||''))return value.toFixed(source.numFmt.length-2);
  return source.value==null?'':source.text;
 }
 function rangeEnd(range){

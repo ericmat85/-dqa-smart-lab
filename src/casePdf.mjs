@@ -1,3 +1,4 @@
+import {applyReportPresentation} from './reportPresentation.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {reportToPdf} from './reportPdf.mjs';
 import {getSignatureHistory} from './signatureHistory.mjs';
@@ -19,6 +20,7 @@ export async function requestToPdf(request,{fontBytes}={}) {
   }
  });
  sheet.eachRow({includeEmpty:true},item=>item.eachCell({includeEmpty:true},cell=>{cell.alignment={wrapText:true,vertical:'middle'};}));
+ applyReportPresentation(book);
  return reportToPdf(await book.xlsx.writeBuffer(),{fontBytes,requestId:request.id});
 }
 export async function buildCasePdf({request,reportBytes,fontBytes}) {
