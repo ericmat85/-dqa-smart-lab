@@ -1231,4 +1231,4 @@ table thead th[aria-sort] { outline: none; }
   }
 }
 .schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(5,minmax(0,1fr))}.template-status.status-試驗中{background:#e3f3ee;color:#368d77}@media(max-width:1000px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(6,minmax(0,1fr))}.template-status.status-已完成{background:#e4f4ec;color:#318166}@media(max-width:1100px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(5,minmax(0,1fr))}.template-status.status-已完成{background:#e4f4ec;color:#318166}@media(max-width:1100px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(2,minmax(0,1fr))}}
