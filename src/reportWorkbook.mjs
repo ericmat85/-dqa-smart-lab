@@ -1,3 +1,4 @@
+import {reportBounds,cellText} from './reportLayout.mjs';
 import {DEFAULT_SIGNATURE_CELLS} from './reportRules.mjs';
 export async function excelModule(){const module=await import('exceljs/dist/exceljs.min.js');return module.default;}
 export async function createReportTemplate(request={},demo=false){
@@ -22,9 +23,11 @@ export async function inspectReport(bytes,requestId,fileName){
  const checks=[];if(!/\.xlsx$/i.test(fileName))throw Error('請使用 .xlsx 檔案；舊 .xls 請先另存為 .xlsx。');if(bytes.byteLength>10*1024*1024)throw Error('檔案上限為 10 MB。');
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('無法讀取 Excel，檔案可能損壞、加密或格式不正確。');}
  const sheet=book.worksheets.find(row=>row.state==='visible'||!row.state);if(!sheet)throw Error('報告沒有可讀取的工作表。');
- if(book.worksheets.some(ws=>ws.rowCount>2000||ws.columnCount>50))throw Error('Demo 報告上限為每張工作表 2,000 列、50 欄。');
- const id=String(sheet.getCell('B4').text||'').trim();checks.push({label:'委託編號一致',ok:id===requestId,detail:id||'B4 尚未填寫'});
- const result=String(sheet.getCell('B16').text||'').trim()||String(sheet.getCell('D12').text||'').trim();checks.push({label:'試驗結果已填寫',ok:Boolean(result),detail:result?'已填寫結果／摘要':'請填寫 B16 結果摘要或 D12 試驗結果'});
+ if(/篩檢條件|生成來源|上傳作業說明/.test(fileName))throw Error('這是規則／篩檢條件參考表，並非已填寫的試驗報告。請使用「下載本案 Excel 範本」填寫後上傳；正式報告範本尚未接入此 Demo。');
+ book.eachSheet(ws=>reportBounds(ws));
+ if(!cellText(sheet.getCell('A1')).includes('DQA SMART LAB｜'))throw Error('目前支援本案簡化 Demo 報告範本。請點選「下載本案 Excel 範本」填寫後上傳；正式報告版型尚未接入，無法安全套用簽名。');
+ const id=String(cellText(sheet.getCell('B4'))||'').trim();checks.push({label:'委託編號一致',ok:id===requestId,detail:id||'B4 尚未填寫'});
+ const result=String(cellText(sheet.getCell('B16'))||'').trim()||String(cellText(sheet.getCell('D12'))||'').trim();checks.push({label:'試驗結果已填寫',ok:Boolean(result),detail:result?'已填寫結果／摘要':'請填寫 B16 結果摘要或 D12 試驗結果'});
  let uncached=false,external=false;book.eachSheet(ws=>ws.eachRow(row=>row.eachCell(cell=>{if(cell.value&&typeof cell.value==='object'&&cell.value.formula){if(cell.value.result===undefined)uncached=true;if(/\[[^\]]+\]/.test(cell.value.formula))external=true;}})));
  checks.push({label:'公式具有已計算結果',ok:!uncached,detail:uncached?'請用 Excel 計算並儲存檔案後重新上傳':'通過'});checks.push({label:'無外部活頁簿公式連結',ok:!external,detail:external?'請移除外部檔案公式連結':'通過'});
  return {ok:checks.every(row=>row.ok),checks,sheetName:sheet.name,engine:'Demo 規則式防呆檢查'};

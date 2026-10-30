@@ -21,15 +21,11 @@ export function projectReportState(report,storage=window.localStorage){
  const schedules=read(storage,'dqa-schedules-demo-v1').map(row=>row.requestId===report.requestId?{...row,status:report.stage==='archived'?'已結案':row.status,reportInfo:meta}:row);
  commitLifecycleTransaction(storage,{requests:JSON.stringify(requests.map(row=>row.id===report.requestId?{...row,status,reportInfo:meta,execution:row.execution?{...row.execution,reportSubmitted:report.stage!=='returned'}:row.execution}:row)),labRequests:JSON.stringify(lab),schedules:JSON.stringify(schedules)});return true;
 }
-export async function submitReportWorkflow({requestId,file,signature,actorId,cells=DEFAULT_SIGNATURE_CELLS,onProgress=()=>{},minimumMs=1000},storage=window.localStorage,repository=repo){
+export async function submitReportWorkflow({requestId,file,signature,actorId,onProgress=()=>{},minimumMs=1000},storage=window.localStorage,repository=repo){
  const epoch=caseResetVersion(storage),started=Date.now(),account=actor(storage,actorId),source=request(storage,requestId),lab=read(storage,'dqa_lab_demo_requests_v1').find(row=>row.id===requestId);
  if(!accessSystem(account,'lab',storage)||!source||!lab||lab.status!=='已完成')throw Error('案件尚未完成、已提交或此帳號無提交權限。');
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('請先完成電子簽名。');if(!file)throw Error('請選擇 Excel 檔案。');
- for(const cell of Object.values(cells))if(!/^[A-Z]{1,2}(?:[2-9]\d|\d{3,4})$/.test(cell||''))throw Error('簽名位置請填寫第 20 列以後的儲存格，例如 A21、D21。');if(cells.level2===cells.level3)throw Error('兩位主管簽名位置不可相同。');
- if(new Set(Object.values(cells)).size!==3||!cells.executor||!cells.level2||!cells.level3)throw Error('請設定三個互不重疊的主管及執行人員簽名位置。');
- const anchor=address=>{const match=address.match(/^([A-Z]+)(\d+)$/);return {column:Array.from(match[1]).reduce((n,char)=>n*26+char.charCodeAt(0)-64,0),row:Number(match[2])};};
- const anchors=[cells.level3,cells.level2,cells.executor].map(anchor);
- if(!anchors.every(item=>item.row===anchors[0].row)||anchors[0].column>=anchors[1].column||anchors[1].column>=anchors[2].column)throw Error('三方簽名須同列，並由左至右為三階、二階、執行人員。');
+ const cells={...DEFAULT_SIGNATURE_CELLS};
  const existing=await repository.get(requestId);if(existing?.stage&&existing.stage!=='returned')throw Error('此報告已提交，請重新整理案件狀態。');
  onProgress(20,'讀取 Excel 檔案');const bytes=new Uint8Array(await file.arrayBuffer());onProgress(45,'檢查委託編號、試驗結果與公式');const check=await inspectReport(bytes,requestId,file.name);
  if(!check.ok){const error=Error('報告未通過防呆檢查，請修正後重新提交。');error.check=check;throw error;}
