@@ -46,3 +46,11 @@ test('only enabled lv1 controls trial decisions, including custom lv1 with sched
  s.setItem('dqa-custom-roles-v1',JSON.stringify([{name:'自訂lv1',level:1,pages:['dashboard']}]));assert.equal(canControlTrial({...manager,role:'自訂lv1'},s),false);
  const r=accelerateTrial({actorId:engineer.id,signature:sig,now},s);const row=read(s,'dqa-schedules-demo-v1')[0];const {stopRequestSchedules}=await import('../src/requestCancellation.mjs');assert.throws(()=>stopRequestSchedules({scheduleId:row.id,requestId:r.id,actor:engineer.name,actorId:engineer.id,reason:'不能中止',now},s),/lv1/);
 });
+test('pause control stays visible with an explicit reason before starting or without lv1 access',async()=>{
+ const {trialPauseAvailability}=await import('../src/trialPermissions.mjs');const s=fixture();
+ for(const status of ['未排程','有衝突','已完成','取消']){const state=trialPauseAvailability(manager,{status},now,s);assert.equal(state.enabled,false);assert.match(state.reason,new RegExp(status));}
+ assert.equal(trialPauseAvailability(manager,{status:'已排程',time:'2026-11-01',end:'2026-11-02'},now,s).enabled,false);
+ assert.equal(trialPauseAvailability(manager,{status:'試驗中',time:'2026-10-30',end:'2026-10-31'},now,s).enabled,true);
+ assert.equal(trialPauseAvailability(manager,{status:'暫停中',pauseStartedAt:new Date(now).toISOString()},now,s).enabled,true);
+ assert.match(trialPauseAvailability(engineer,{status:'試驗中'},now,s).reason,/lv1/);
+});
