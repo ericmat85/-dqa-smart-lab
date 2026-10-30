@@ -52,9 +52,9 @@ export async function buildWorkbookView(bytes){
   const images=[];
   for(const item of sheet.getImages()){
    const media=book.getImage(item.imageId);
-   if(!media||!['png','jpeg','jpg'].includes(media.extension)){warnings.add('部分圖片格式無法在瀏覽器顯示，請下載 Excel 核對。');continue;}
+   if(!media||!['png','jpeg','jpg'].includes(media.extension)){warnings.add('部分圖片格式無法在瀏覽器顯示，請由報告填寫人員核對原始 Excel。');continue;}
    let data=media.buffer;if(!data&&media.base64)data=Uint8Array.from(atob(media.base64.split(',').at(-1)),char=>char.charCodeAt(0));
-   if(!data){warnings.add('部分圖片缺少內容，請下載 Excel 核對。');continue;}
+   if(!data){warnings.add('部分圖片缺少內容，請由報告填寫人員核對原始 Excel。');continue;}
    const anchor=item.range.tl,col=Math.floor(anchor.col),row=Math.floor(anchor.row);
    const left=(x[col]||0)+(anchor.col-col)*(widths[col]||0),top=(y[row]||0)+(anchor.row-row)*(heights[row]||0);
    const end=item.range.br,endCol=end?Math.floor(end.col):0,endRow=end?Math.floor(end.row):0;

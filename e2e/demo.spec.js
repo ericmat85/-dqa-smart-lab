@@ -166,10 +166,12 @@ test('report is returned, revised, signed by two supervisors and archived with r
  }
  await requestLogin(page,true);await page.getByRole('button',{name:'查看',exact:true}).first().click();
  await expect(page.getByText('Demo 圖片簽名，不具正式電子簽章效力；結案 PDF 順序：委託單 → 試驗報告。')).toBeVisible();
+ await expect(page.getByRole('button',{name:'下載簽核 Excel',exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
  expect(await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');return Boolean((await getReport(id)).pdf);},id)).toBe(false);
  await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
+ await expect(page.getByRole('button',{name:'下載簽核 Excel',exact:true})).toHaveCount(0);
  const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true}).click();
  const download=await downloadEvent;await download.saveAs(test.info().outputPath('closure-demo.pdf'));expect(download.suggestedFilename()).toBe(`${id}-結案文件-DEMO.pdf`);
  const info=await page.evaluate(async id=>{
