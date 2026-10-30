@@ -1,3 +1,4 @@
+import {mergeApprovedSchedules} from './scheduleRequest.mjs';
 import {scheduleProgress,effectiveScheduleStatus} from './scheduleProgress.mjs';
 import {SCHEDULE_KEY,EQUIPMENT_KEY} from './scheduleEquipment.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
@@ -98,12 +99,12 @@ export function syncScheduleLifecycle(storage,now) {
   const operations=JSON.parse(storage.getItem('dqa-lab-operations-v1')||'[]');
   if(!Array.isArray(operations))throw Error('無法讀取實驗室申請。');
   const pendingCancel=new Map(operations.filter(row=>['cancel','interrupt'].includes(row.action)&&row.status==='待審核').map(row=>[row.requestId,row]));
-  const heldSchedules=schedules.map(row=>pendingCancel.has(row.requestId)&&!['取消','待核准'].includes(row.status)?{...row,status:'待核准',approvalHold:{operationId:pendingCancel.get(row.requestId).id,previousStatus:row.status}}:row);
+  const sourceRaw=storage.getItem('dqa-request-demo-v2');
+  const source=sourceRaw===null?[]:JSON.parse(sourceRaw);if(!Array.isArray(source))throw Error('無法讀取電子委託資料。');
+  const heldSchedules=mergeApprovedSchedules(schedules,source).map(row=>pendingCancel.has(row.requestId)&&!['取消','待核准'].includes(row.status)?{...row,status:'待核准',approvalHold:{operationId:pendingCancel.get(row.requestId).id,previousStatus:row.status}}:row);
   const receipt=returnUnreceivedSchedules(heldSchedules,equipment,lab,now);
   const result=reconcileSchedules(receipt.schedules,receipt.equipment,now);
   const nextSchedules=JSON.stringify(result.schedules),nextEquipment=JSON.stringify(result.equipment);
-  const sourceRaw=storage.getItem('dqa-request-demo-v2');
-  const source=sourceRaw===null?[]:JSON.parse(sourceRaw);if(!Array.isArray(source))throw Error('無法讀取電子委託資料。');
   const nextSource=sourceRaw===null?null:JSON.stringify(updateRequestExecution(source,result.schedules,lab,now));
   if(saved!==null&&nextSchedules===raw&&nextEquipment===JSON.stringify(equipment)&&nextSource===sourceRaw)return Boolean(pending);
   const transaction={schedules:nextSchedules,equipment:nextEquipment};

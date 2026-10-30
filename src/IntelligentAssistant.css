@@ -8,3 +8,7 @@
 @keyframes intelligent-slide-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:600px){.intelligent-assistant .intelligent-panel{width:calc(100vw - 28px);max-height:calc(100dvh - 132px)}}
 @media(prefers-reduced-motion:reduce){.intelligent-assistant .intelligent-launcher{transition:none}.intelligent-assistant .intelligent-panel{animation:none}}
+
+.intelligent-typing-cursor{display:inline-block;margin-left:2px;color:#6660bf;animation:intelligent-cursor-blink 1s step-end infinite}
+@keyframes intelligent-cursor-blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.intelligent-typing-cursor{animation:none}}

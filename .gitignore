@@ -34,3 +34,7 @@ backups/
 # Credentials
 *.pem
 *.key
+
+# Browser test artifacts
+/test-results/
+/playwright-report/

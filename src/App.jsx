@@ -1,7 +1,8 @@
 import {CASE_RESET_KEY} from './resetCases.mjs';
 import React, { useCallback, useEffect, useState } from "react";
 import RequestApp from "./RequestApp.jsx";
-import LmsApp from "./LmsApp.jsx";
+import LmsApp, { LoginPage } from "./LmsApp.jsx";
+import useSystemTheme from "./useSystemTheme.js";
 import LabApp from "./LabApp.jsx";
 import "./App.css";
 
@@ -19,7 +20,8 @@ export default function App() {
   useEffect(() => {
     const onPopState = () => setPath(getPath());
     window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    window.addEventListener("dqa:navigate", onPopState);
+    return () => { window.removeEventListener("popstate", onPopState); window.removeEventListener("dqa:navigate", onPopState); };
   }, []);
 
   const navigate = useCallback((nextPath, replace = false) => {
@@ -33,24 +35,16 @@ export default function App() {
     return <RequestApp />;
   }
 
-  // /lms 根路徑導向 LMS 入口；根路徑 / 顯示四大系統入口。
-  if (path === "/lms") {
-    return <LmsApp key="lms-home" />;
-  }
-  if (path.startsWith("/lms/")) {
-    return <LmsApp key="lms" />;
+  if (path === "/lms" || path.startsWith("/lms/")) {
+    return <LmsApp path={path} navigate={navigate} />;
   }
 
-  // These routes are reserved for the other two systems.
-  // Their dedicated apps/components can be connected here when available.
   if (path.startsWith("/lab/") || path === "/lab") {
     return <LabApp path={path} navigate={navigate} />;
   }
   if (path.startsWith("/validation/") || path === "/validation") {
     return (
-      <PlaceholderPage
-        title="驗證計畫"
-        message="此入口網址已設定為 /validation/login，但目前 App.jsx 尚未連接專屬系統元件。"
+      <ValidationLogin
         onBack={() => navigate("/")}
       />
     );
@@ -59,25 +53,16 @@ export default function App() {
   return <PortalHome navigate={navigate} />;
 }
 
-function PlaceholderPage({ title, message, onBack }) {
+function ValidationLogin({ onBack }) {
+  const { dark, toggleTheme } = useSystemTheme();
   return (
-    <main style={{
-      minHeight: "100vh", display: "grid", placeItems: "center",
-      padding: 24, background: "#f4f7fc", color: "#17253b",
-      fontFamily: '"DM Sans", "Noto Sans TC", sans-serif'
-    }}>
-      <section style={{
-        width: "min(520px, 100%)", background: "#fff", padding: 32,
-        border: "1px solid #e0e8f2", borderRadius: 14, textAlign: "center"
-      }}>
-        <h1 style={{ marginTop: 0 }}>{title}</h1>
-        <p style={{ color: "#718096", lineHeight: 1.8 }}>{message}</p>
-        <button onClick={onBack} style={{
-          border: 0, borderRadius: 8, padding: "11px 18px",
-          background: "#2867c7", color: "#fff", cursor: "pointer"
-        }}>返回四大入口</button>
-      </section>
-    </main>
+    <LoginPage
+      system={{ id: 'validation', title: 'DQA 驗證計畫' }}
+      dark={dark}
+      onToggle={toggleTheme}
+      onBack={onBack}
+      preview
+    />
   );
 }
 

@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/lms/:path*", "destination": "/index.html" },
+    { "source": "/request/:path*", "destination": "/index.html" },
+    { "source": "/lab/:path*", "destination": "/index.html" },
+    { "source": "/validation/:path*", "destination": "/index.html" }
+  ]
+}

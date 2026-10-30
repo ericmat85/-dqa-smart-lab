@@ -3,6 +3,7 @@ import SystemHeaderActions from './SystemHeaderActions.jsx';
 import useReportSnapshot from './useReportSnapshot.js';
 import './CompanyLogo.css';
 import {ReportCasePanel} from './ReportUi.jsx';
+import {getRequestDate} from './requestDate.mjs';
 import {caseResetVersion} from './resetCases.mjs';
 import LabOperationApproval from './LabOperationReviews.jsx';
 import {requestApprovalRows} from './requestApprovalRows.mjs';
@@ -360,7 +361,7 @@ function HomePage({ dark, onToggle, onEnter }) {
 
 
 
-function LoginPage({
+export function LoginPage({
 
   system,
 
@@ -371,6 +372,8 @@ function LoginPage({
   onLogin,
 
   onBack,
+
+  preview = false,
 
 }) {
 
@@ -387,6 +390,8 @@ function LoginPage({
   function handleSubmit(event) {
 
     event.preventDefault();
+
+    if (preview) return;
 
     setError("");
 
@@ -456,7 +461,7 @@ function LoginPage({
 
         <p className="login-description">
 
-          請輸入您的電子郵件與密碼以繼續
+          {preview ? "驗證計畫系統暫未開放" : "請輸入您的電子郵件與密碼以繼續"}
 
         </p>
 
@@ -469,6 +474,8 @@ function LoginPage({
           <input
 
             id="login-email"
+
+            disabled={preview}
 
             type="email"
 
@@ -491,6 +498,8 @@ function LoginPage({
           <input
 
             id="login-password"
+
+            disabled={preview}
 
             type="password"
 
@@ -520,9 +529,9 @@ function LoginPage({
 
 
 
-          <button type="submit" className="login-submit">
+          <button type="submit" className="login-submit" disabled={preview}>
 
-            登入系統 <span>→</span>
+            {preview ? "暫未開放" : "登入系統"} <span>→</span>
 
           </button>
 
@@ -530,7 +539,7 @@ function LoginPage({
 
 
 
-        <button
+        {!preview && <button
 
           type="button"
 
@@ -542,7 +551,7 @@ function LoginPage({
 
           {helpLabel}
 
-        </button>
+        </button>}
 
 
 
@@ -568,7 +577,7 @@ function LoginPage({
 
         <p className="login-note">
 
-          競賽原型 · 尚未連接正式帳號驗證服務
+          {preview ? "虛擬登入入口 · 尚未開發，未連接帳號驗證" : "競賽原型 · 尚未連接正式帳號驗證服務"}
 
         </p>
 
@@ -1875,7 +1884,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    const machine=catalog.find(item=>row.equipmentId?item.id===row.equipmentId:item.name===row.eq);
    const executor=accounts.find(item=>row.ownerId?item.id===row.ownerId:item.name===row.owner);
    setEditing(row);setScheduleMessage(catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
-   setEditForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||''});
+   setEditForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{}});
  }
  function autoScheduleCurrent(){
    if(!editing||!editForm)return;
@@ -1894,7 +1903,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
      const rows=latestSchedules(),current=rows.find(row=>row.id===editing.id);
      if(!current||JSON.stringify(current)!==JSON.stringify(editing))throw Error('此案件排程已更新，請重新開啟編輯。');
      const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
-     const proposal=validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows});
+     const proposal=validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows,today:getRequestDate()});
      const updated=rows.map(row=>row.id===editing.id?proposal:row);
      try{window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
      setScheduleRows(updated);setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
@@ -1909,7 +1918,8 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const conflicts=displayScheduleRows.filter(r=>r.status==="有衝突").length;
  const scheduled=displayScheduleRows.filter(r=>r.status==="已排程").length;
  const equipmentUtilization = (() => {
-  const windowStart="2026-10-25", windowEnd="2026-11-07";
+  const windowStart=getRequestDate();
+  const windowEnd=new Date(Date.parse(`${windowStart}T00:00:00Z`)+13*86400000).toISOString().slice(0,10);
   const equipmentCount=new Set(equipmentOptions).size;
   const occupied=new Set();
   displayScheduleRows.filter(r=>["已排程","試驗中"].includes(r.status)&&r.eq&&r.time).forEach(r=>{
@@ -2047,7 +2057,7 @@ function DashboardPage({
 
 
 
-export default function App() {
+export default function App({ path, navigate }) {
 
   const {dark,toggleTheme}=useSystemTheme();
 
@@ -2058,7 +2068,14 @@ export default function App() {
   });
   useEffect(() => { window.localStorage.setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); window.localStorage.setItem("dqa-admin-huang-migration-v1", "1"); window.localStorage.setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(() => {
+    try { return window.sessionStorage.getItem('dqa-lms-account-id') || ''; } catch { return ''; }
+  });
+  const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
+  useEffect(() => {
+    if (path !== '/lms/login' && path !== '/lms/dashboard') navigate('/lms/login', true);
+    else if (path === '/lms/dashboard' && !currentUser) navigate('/lms/login', true);
+  }, [path, currentUser, navigate]);
 
   const [selectedSystem, setSelectedSystem] = useState(null);
 
@@ -2134,7 +2151,7 @@ export default function App() {
 
   function returnHome() {
     // 返回入口首頁需要讓最外層 App.jsx 接手路由，不能只修改 history。
-    window.location.assign("/");
+    navigate("/");
   }
 
 
@@ -2189,9 +2206,10 @@ export default function App() {
 
 
 
-    setCurrentUser(account);
-
-    window.history.pushState({}, "", "/lms/dashboard");
+    try { window.sessionStorage.setItem('dqa-lms-account-id', account.id); }
+    catch { setError('瀏覽器禁止保存登入狀態，請允許本機儲存後再試。'); return; }
+    setCurrentUserId(account.id);
+    navigate('/lms/dashboard');
 
   }
 
@@ -2199,17 +2217,18 @@ export default function App() {
 
   function logout() {
 
-    setCurrentUser(null);
+    try { window.sessionStorage.removeItem('dqa-lms-account-id'); } catch { /* State still clears in this tab. */ }
+    setCurrentUserId('');
 
     setSelectedSystem(null);
 
-    window.history.pushState({}, "", "/lms/login");
+    navigate("/lms/login", true);
 
   }
 
 
 
-  const path = window.location.pathname;
+
 
 
 
