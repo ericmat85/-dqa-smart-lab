@@ -70,9 +70,8 @@ test('role changes never allow the same actor to review a different level in the
  assert.equal(canReviewReport({id:'CHANGED',role:'三階主管',status:'啟用中'},{stage:'level3',submitterId:'LAB',approvals:[],priorApprovals:[{actorId:'CHANGED',level:2}]},{ownerId:'OWNER'}),false);
 });
 
-test('signature anchors enforce three distinct positions in the agreed left-to-right order',async()=>{
+test('submission uses system signature positions and ignores caller overrides',async()=>{
  const {storage,repository,id,source}=fixture();
- const file=await upload(source());
- for(const cells of [{level2:'A21',level3:'D21',executor:'G21'},{level2:'D21',level3:'A21',executor:'A21'},{level2:'D21',level3:'A21',executor:'G24'}])await assert.rejects(submitReportWorkflow({requestId:id,file,actorId:'U003',signature,cells,minimumMs:0},storage,repository));
- assert.equal(await repository.get(id),null);
+ await submitReportWorkflow({requestId:id,file:await upload(source()),actorId:'U003',signature,cells:{level3:'Z99'},minimumMs:0},storage,repository);
+ assert.deepEqual((await repository.get(id)).cells,{level3:'A21',level2:'D21',executor:'G21'});
 });

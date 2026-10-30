@@ -147,6 +147,7 @@ test('report is returned, revised, signed by two supervisors and archived with r
   await page.goto('/lab/login');
   if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
   await page.getByRole('button',{name:'提交報告',exact:true}).click();
+  await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
   await page.getByRole('button',{name:'提交',exact:true}).click();
   await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
