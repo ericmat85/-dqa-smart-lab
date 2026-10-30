@@ -88,7 +88,7 @@ const NAV_ITEMS = [
 
   { id: "maintenance", icon: "▧", label: "物料管理" },
 
-  { id: "archive", icon: "▣", label: "報告資料庫" },
+  { id: "archive", icon: "▣", label: "資料庫" },
 
   { id: "reports", icon: "▥", label: "報表分析" },
 

@@ -179,12 +179,12 @@ test('report is returned, revised, signed by two supervisors and archived with r
  },id);
  expect(info.stage).toBe('archived');expect(info.sections.map(row=>row.kind)).toEqual(['request','report']);expect(info.revision).toBe(2);expect(info.history.some(row=>row.action.includes('退回'))).toBe(true);
  await page.reload();await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已結案');
- await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();
+ await page.locator('.rq-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();
  await expect(page.locator('.archive-page')).toContainText(id);await expect(page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true})).toBeVisible();
  const fileEvent=page.waitForEvent('download');await page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true}).click();expect((await fileEvent).suggestedFilename()).toBe(`${id}-結案文件-DEMO.pdf`);
  await page.goto('/lab/login');if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
- await page.locator('.lab-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
- await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
+ await page.locator('.lab-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
  await page.locator('.archive-page').getByRole('button',{name:'查看 PDF',exact:true}).click();await expect(page.getByRole('dialog',{name:'結案 PDF 預覽'})).toBeVisible();await page.getByRole('button',{name:'關閉預覽',exact:true}).click();
 
 });
@@ -281,12 +281,12 @@ test('general performance upload recognizes the supplied blank template and subm
   await page.screenshot({path:test.info().outputPath(email==='level2@example.com'?'excel-review-stage2.png':'excel-review-stage3.png')});
   await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
  }
- await requestLogin(page,true);await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
+ await requestLogin(page,true);await page.locator('.rq-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
  await page.locator('.rq-sidebar').getByRole('button',{name:/待簽核\/查閱/}).click();await page.getByRole('tab',{name:'查閱清單',exact:true}).click();await page.getByRole('button',{name:'查看',exact:true}).first().click();
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
  const archived=await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');const report=await getReport(id);return {stage:report.stage,sections:report.pdfSections};},id);expect(archived.stage).toBe('archived');expect(archived.sections.find(row=>row.kind==='report').pageCount).toBe(7);
- await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);expect(errors).toEqual([]);
+ await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);expect(errors).toEqual([]);
  await page.locator('.archive-page').getByRole('button',{name:id,exact:true}).click();await expect(page.getByRole('dialog',{name:id+'｜委託單資訊'})).toBeVisible();await expect(page.getByRole('list',{name:'簽核流程',exact:true})).toBeVisible();await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();
  const archiveDownload=page.waitForEvent('download');await page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true}).click();await (await archiveDownload).saveAs(test.info().outputPath('general-archived-demo.pdf'));
  await page.screenshot({path:test.info().outputPath('report-archive-page.png')});
@@ -298,9 +298,9 @@ test('custom role archive entry is hidden unless explicitly granted',async({page
   const accounts=JSON.parse(localStorage.getItem('dqa-shared-demo-accounts-v1'));accounts.push({id:'ARCHIVE-LIMITED',name:'Demo archive reader',email:'archive-limited@example.com',role:'ARCHIVE-LIMITED',status:'啟用中',department:'DEMO'});localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));
   localStorage.setItem('dqa-custom-roles-v1',JSON.stringify([{id:'A',name:'ARCHIVE-LIMITED',level:0,pages:['dashboard'],manageAccounts:false}]));
  });
- await lmsLogin(page,'archive-limited@example.com');await expect(page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true})).toHaveCount(0);
+ await lmsLogin(page,'archive-limited@example.com');await expect(page.locator('.sidebar').getByRole('button',{name:'資料庫',exact:true})).toHaveCount(0);
  await page.evaluate(()=>{const roles=JSON.parse(localStorage.getItem('dqa-custom-roles-v1'));roles[0].pages.push('archive');localStorage.setItem('dqa-custom-roles-v1',JSON.stringify(roles));});
- await page.reload();await page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
+ await page.reload();await page.locator('.sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
 });
 
 test('request review tabs separate reading from all requests and history filters by field',async({page})=>{
