@@ -1884,6 +1884,8 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    return rows;
  }
  function openEditor(row){
+   const latest=scheduleRows.find(item=>item.id===row.id)||row;
+   if(["已完成","已結案"].includes(effectiveScheduleStatus(latest,Date.now()))){setNotice("試驗已結束，不可編輯排程。");return;}
    if(row.status==='取消'){setNotice('此委託已取消，無法重新安排排程。');return;}
    row=scheduleRows.find(item=>item.id===row.id)||row;
    let catalog=[];
@@ -1908,6 +1910,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    try{
      const equipment=readScheduleEquipment();setEquipmentCatalog(equipment);
      const rows=latestSchedules(),current=rows.find(row=>row.id===editing.id);
+     if(current&&['已完成','已結案'].includes(effectiveScheduleStatus(current,Date.now())))throw Error('試驗已結束，不可儲存排程。');
      if(!current||JSON.stringify(current)!==JSON.stringify(editing))throw Error('此案件排程已更新，請重新開啟編輯。');
      const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
      if(isActiveTrial({...current,status:effectiveScheduleStatus(current,Date.now())})&&!canControlTrial(liveAccounts.find(a=>a.id===currentUser?.id)))throw Error('僅 lv1 一階主管可儲存進行中試驗的排程。');

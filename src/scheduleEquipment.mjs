@@ -70,6 +70,7 @@ function allocateSamples(machines,form,quantity){
  return allocations;
 }
 export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
+ if(editing.status==='已完成')throw Error('試驗已完成，不可重新安排排程。');
  if(editing.reportInfo?.stage||editing.status==="已結案")throw Error("報告已提交，不可重新安排排程。");
  if(editing.status==='待核准')throw Error('此案件待核准，請先處理申請。');
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');

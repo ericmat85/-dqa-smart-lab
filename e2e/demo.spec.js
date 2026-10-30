@@ -353,6 +353,7 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'恢復試驗',exact:true}).click();
  await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
+ await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();const completedRow=page.locator('.schedule-table tbody tr').filter({hasText:id});await expect(completedRow).toContainText('試驗已結束');await expect(completedRow.getByRole('button',{name:'編輯排程',exact:true})).toHaveCount(0);
 });
 
 test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{
