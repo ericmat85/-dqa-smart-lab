@@ -527,3 +527,7 @@ body:has(.rq-theme-dark) .rq-delete-confirm-modal .rq-btn-light{background:#2938
 .rq-theme-dark .rq-progress-section { background:#182b40; border-color:#344b61; }
 .rq-theme-dark .rq-progress-step small { color:#adbfce; }
 @media (max-width:600px) { .rq-progress-steps { grid-template-columns:1fr; gap:16px; } .rq-progress-step { align-items:flex-start; text-align:left; padding-left:48px; min-height:38px; gap:2px; } .rq-progress-dot { position:absolute; left:0; top:0; } .rq-progress-step:not(:last-child)::after { top:34px; left:16px; width:2px; height:calc(100% + 16px); } }
+
+.rq-review-tabs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.rq-review-tabs [aria-selected="true"]{background:#e5f5f3;color:#007e76;border-color:#009c91}
+.rq-kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
