@@ -2,11 +2,11 @@ import {scheduleProgress} from './scheduleProgress.mjs';
 export function updateRequestExecution(requests,schedules,lab,now){
  return requests.map(request=>{
   if(request.status==='取消'||request.reportInfo?.stage)return request;
-  const receipt=lab.find(row=>row.id===request.id&&['已排程','試驗中','已完成'].includes(row.status));
+  const receipt=lab.find(row=>row.id===request.id&&['已排程','試驗中','暫停中','已完成'].includes(row.status));
   if(!receipt)return request;
   const schedule=schedules.find(row=>row.requestId===request.id&&row.id===receipt.scheduleId&&row.reservationId===receipt.reservationId&&row.time===receipt.scheduledStart&&row.end===receipt.scheduledEnd);
-  if(!schedule||!['已排程','試驗中','進行中','已完成'].includes(schedule.status))return request;
-  const status=schedule.status==='已完成'?'已完成':['試驗中','進行中'].includes(schedule.status)?'執行中':'已排程';
+  if(!schedule||!['已排程','試驗中','進行中','暫停中','已完成'].includes(schedule.status))return request;
+  const status=schedule.status==='已完成'?'已完成':['試驗中','進行中','暫停中'].includes(schedule.status)?'執行中':'已排程';
   const bounds=scheduleProgress({...schedule,status:'已排程'},now);
   const execution={scheduleId:schedule.id,reservationId:schedule.reservationId,status,equipment:schedule.eq,operator:schedule.owner,sampleCode:schedule.sampleCode||receipt.sampleIds||'',plannedStart:schedule.time,plannedEnd:schedule.end,acceptedAt:receipt.acceptedAt,startedAt:status!=='已排程'&&bounds.start!==undefined?new Date(bounds.start).toISOString():'',completedAt:status==='已完成'?schedule.completedAt||new Date(bounds.end).toISOString():'',reportSubmitted:Boolean(receipt.reportSubmitted)};
   const history=request.executionHistory||[];

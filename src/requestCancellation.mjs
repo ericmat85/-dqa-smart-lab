@@ -32,13 +32,13 @@ export function stopRequestSchedules({scheduleId,requestId,actor,actorId,reason,
   const at=new Date(now).toISOString();
   const cancellation={requestId,actor,actorId,at,reason:String(reason||'').trim()||'使用者確認中止排程並取消整張委託'};
   const affected=schedules.filter(row=>row.requestId===requestId);
-  const nextSchedules=schedules.map(row=>row.requestId===requestId?{...row,status:'取消',previousStatus:row.status,cancellation}:row);
+  const nextSchedules=schedules.map(row=>row.requestId===requestId?{...row,status:'取消',pauseStartedAt:null,previousStatus:row.status,cancellation}:row);
   const matches=usesEquipment;
   const nextEquipment=equipment.map(machine=>{
-    if(machine.status!=='使用中'||!affected.some(row=>matches(row,machine)))return machine;
+    if(!['使用中','暫停中'].includes(machine.status)||!affected.some(row=>matches(row,machine)))return machine;
     if(machine.currentRequest&&machine.currentRequest!==requestId)return machine;
     if(nextSchedules.some(row=>row.requestId!==requestId&&matches(row,machine)&&resourceBusy(row,now)))return machine;
-    return {...machine,status:'待機中',currentRequest:'',records:[{id:crypto.randomUUID(),date:at,type:'中止排程／設備釋放',actor,actorId,result:'使用中 → 待機中',detail:`${requestId} 已取消：${cancellation.reason}`},...(machine.records||[])]};
+    return {...machine,status:'待機中',currentRequest:'',estimatedEnd:'',records:[{id:crypto.randomUUID(),date:at,type:'中止排程／設備釋放',actor,actorId,result:`${machine.status} → 待機中`,detail:`${requestId} 已取消：${cancellation.reason}`},...(machine.records||[])]};
   });
   const nextCancellations={...cancellations,[requestId]:cancellation};
   const nextRequests=requests.map(row=>row.id===requestId?{

@@ -1,3 +1,4 @@
+import {reservationWindow,usesEquipment} from './scheduleResources.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {INITIAL_ELECTRONIC_REQUESTS} from './demoElectronicRequests.mjs';
 import {ALL_DEMO_REQUESTS} from './demoLmsRequests.mjs';
@@ -13,7 +14,7 @@ import {syncScheduleLifecycle,commitLifecycleTransaction,recoverLifecycleTransac
 import {getRequestDate} from './requestDate.mjs';
 export const DEMO_FLOW_MARKER='dqa-completed-flow-provisioned-v1';
 const read=(storage,key,fallback=[])=>{const rows=JSON.parse(storage.getItem(key)||JSON.stringify(fallback));if(!Array.isArray(rows))throw Error('示範流程無法讀取現有資料，尚未建立案件。');return rows;};
-export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newExample=false},storage=window.localStorage){
+export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newExample=false,halfway=false},storage=window.localStorage){
  recoverLifecycleTransaction(storage);
  const marker=storage.getItem(DEMO_FLOW_MARKER);if(marker&&!newExample)return {...JSON.parse(marker),created:false};
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('缺少 Demo 測試簽名。');
@@ -36,6 +37,7 @@ export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newEx
   }
  }
  if(!proposal)throw Error('找不到適用的待機設備與可用執行人，尚未建立範例。');
+ if(halfway){start=now-12*3600000;finish=now+12*3600000;proposal={...proposal,time:new Date(start).toISOString(),end:new Date(finish).toISOString(),demoAccelerator:true};const w=reservationWindow(proposal,now);if(schedules.some(r=>usesEquipment(r,machine)&&['已排程','試驗中','進行中','暫停中','待核准'].includes(r.status)&&(()=>{const other=reservationWindow(r,now);return other&&other.start<w.end&&w.start<other.end;})()))throw Error('Demo 試驗的設備時段有衝突，請先安排並接收一筆可用排程。');}
  const data=new Map([['dqa-shared-demo-accounts-v1',JSON.stringify(accounts)],['dqa-request-demo-v2','[]'],['dqa-schedules-demo-v1','[]'],['dqa-equipment-demo-v1',JSON.stringify([machine])],['dqa_lab_demo_requests_v1','[]'],['dqa_lab_demo_audit_v1','[]'],['dqa-lab-operations-v1','[]']]);
  const memory={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key)};
  const steps=[];const step=(label,at)=>steps.push({id:crypto.randomUUID(),label,at:new Date(at).toISOString()});
@@ -50,7 +52,7 @@ export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newEx
  memory.setItem('dqa-schedules-demo-v1',JSON.stringify([proposal]));memory.setItem('dqa_lab_demo_requests_v1',JSON.stringify(mergeLabSchedules([],[proposal],start-300000)));step('安排設備、執行人及試驗日程',start-300000);
  confirmLabReceipt({requestId:id,actorId:operator.id,now:start-60000},memory);syncScheduleLifecycle(memory,start-60000);step('實驗室確認接收，顯示已排程',start-60000);
  syncScheduleLifecycle(memory,start+1000);memory.setItem('dqa_lab_demo_requests_v1',JSON.stringify(mergeLabSchedules(read(memory,'dqa_lab_demo_requests_v1'),read(memory,'dqa-schedules-demo-v1'),start+1000)));step('到達開始時間，試驗中',start+1000);
- completeLabTrial({requestId:id,actorId:operator.id,signature,now:finish},memory);step('試驗完成，結果可供委託者主管查閱',finish);
+ if(!halfway){completeLabTrial({requestId:id,actorId:operator.id,signature,now:finish},memory);step('試驗完成，結果可供委託者主管查閱',finish);}else{syncScheduleLifecycle(memory,now);memory.setItem('dqa_lab_demo_requests_v1',JSON.stringify(mergeLabSchedules(read(memory,'dqa_lab_demo_requests_v1'),read(memory,'dqa-schedules-demo-v1'),now).map(r=>({...r,demoAccelerator:true}))));step('Demo 試驗加速至 50%',now);}
  request=read(memory,'dqa-request-demo-v2')[0];request.demoFlow={steps,simulated:true,provisionedAt:new Date(now).toISOString()};
  const result={id,productCode:request.productCode,supervisorId:supervisor.id,supervisor:supervisor.name,provisionedAt:new Date(now).toISOString(),created:true};
  const completedMachine=read(memory,'dqa-equipment-demo-v1')[0];

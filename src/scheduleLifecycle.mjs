@@ -20,18 +20,21 @@ export function reconcileSchedules(schedules,equipment,now) {
  });
  for(const row of next.filter(item=>resourceBusy(item,now))){
   const machines=nextEquipment.filter(machine=>usesEquipment(row,machine));
-  if(machines.some(machine=>['維護中','校驗中'].includes(machine.status))){row.status='有衝突';row.scheduleIssue='設備維護或校驗中，無法進行試驗／準備。';continue;}
-  for(const machine of machines)if(machine.status==='待機中'){
+  if(machines.some(machine=>(['維護中','校驗中'].includes(machine.status)||machine.status==='暫停中'&&!row.pauseStartedAt))){row.status='有衝突';row.scheduleIssue='設備暫停、維護或校驗中，無法進行試驗／準備。';continue;}
+  for(const machine of machines){
+   const phase=scheduleProgress(row,now);if(phase.end)machine.estimatedEnd=new Date(phase.end).toISOString();
+   if(machine.status==='待機中'){
    machine.status='使用中';machine.currentRequest=row.requestId;
    machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗開始／準備',actor:'系統',result:'待機中 → 使用中',detail:`${row.requestId} 進入設備保留時段。`},...(machine.records||[])];
   }
+ }
  }
  for(const row of next.filter(item=>['已完成','已結案'].includes(item.status)&&!item.equipmentReleaseHandledAt)){
   const window=reservationWindow(row);if(window&&now<window.end)continue;
   for(const machine of nextEquipment.filter(machine=>usesEquipment(row,machine))){
    if(next.some(item=>usesEquipment(item,machine)&&resourceBusy(item,now)))continue;
    if(machine.status==='使用中'&&(!machine.currentRequest||machine.currentRequest===row.requestId||next.some(item=>['已完成','已結案'].includes(item.status)&&item.requestId===machine.currentRequest&&usesEquipment(item,machine)))){
-    machine.status='待機中';machine.currentRequest='';
+    machine.status='待機中';machine.currentRequest='';machine.estimatedEnd='';
     machine.records=[{id:crypto.randomUUID(),date:at,type:'試驗完成／設備釋放',actor:'系統',result:'使用中 → 待機中',detail:`${row.requestId} 試驗與清理保留時段已結束。`},...(machine.records||[])];
    }
   }

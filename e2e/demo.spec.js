@@ -140,7 +140,7 @@ test.afterEach(async({page})=>{expect(await page.pageErrors()).toEqual([]);});
 test('report is returned, revised, signed by two supervisors and archived with request-first PDF',async({page})=>{
  test.setTimeout(90000);
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
- await page.getByRole('button',{name:'建立已完成範例（假資料）',exact:true}).click();
+ await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
  await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
  async function submit(){
@@ -218,7 +218,7 @@ test('general performance upload recognizes the supplied blank template and subm
  await page.setViewportSize({width:1366,height:768});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
- await page.getByRole('button',{name:'建立已完成範例（假資料）',exact:true}).click();
+ await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
  const id=await page.evaluate(()=>{
   const records=JSON.parse(localStorage.getItem('dqa-request-demo-v2'));records[0].testItems=['一般性能試驗'];localStorage.setItem('dqa-request-demo-v2',JSON.stringify(records));return records[0].id;
  });
@@ -332,4 +332,24 @@ test('request review tabs separate reading from all requests and history filters
  await page.getByLabel('篩選欄位').selectOption('dueDate');
  await page.locator('.rq-filter-row input').fill('2026-11-06');
  await expect(page.locator('.rq-table')).toContainText('HISTORY-CASE');
+});
+
+test('Demo accelerator reaches halfway, equipment can be viewed, pause survives reload and resume allows completion',async({page})=>{
+ await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
+ await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
+ await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');
+ await expect(page.getByRole('progressbar',{name:'試驗日程',exact:true})).toHaveAttribute('aria-valuenow','50');
+ const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
+ await page.getByRole('button',{name:'設備狀態',exact:true}).click();await expect(page.getByRole('dialog',{name:'試驗設備狀態'})).toBeVisible();
+ await page.getByRole('dialog',{name:'試驗設備狀態'}).getByRole('button').first().click();await expect(page.locator('.eq-profile-fields')).toContainText('預估結束時間');
+ await page.goto('/lms/login');await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'暫停試驗',exact:true}).click();
+ await expect(page.locator('.schedule-table tbody tr').filter({hasText:id})).toContainText('暫停中');
+ await page.reload();await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await expect(page.locator('.schedule-table tbody tr').filter({hasText:id})).toContainText('暫停中');
+ await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('暫停中');await expect(page.getByRole('button',{name:'試驗完成',exact:true})).toHaveCount(0);
+ await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'恢復試驗',exact:true}).click();
+ await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
 });

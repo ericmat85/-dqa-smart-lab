@@ -7,7 +7,7 @@ export function returnUnreceivedSchedules(schedules,equipment,lab,now){
   const progress=scheduleProgress(row,now);if(progress.start===undefined||now<progress.start)return row;
   const receipt=lab.find(item=>item.id===row.requestId&&(!item.scheduleId||item.scheduleId===row.id));
   const datesMatch=receipt&&receipt.scheduledStart===row.time&&receipt.scheduledEnd===row.end&&receipt.reservationId===row.reservationId;
-  const accepted=receipt&&['已排程','試驗中','已完成','待審核','待查閱','已結案'].includes(receipt.status)&&datesMatch;
+  const accepted=receipt&&['已排程','試驗中','暫停中','已完成','待審核','待查閱','已結案'].includes(receipt.status)&&datesMatch;
   if(accepted)return row;
   const receiptReturn={at,reason:'已到試驗開始時間，實驗室尚未確認接收，系統自動退回待排程。',previousStart:row.time,previousEnd:row.end};
   returned.push({requestId:row.requestId,scheduleId:row.id,...receiptReturn});

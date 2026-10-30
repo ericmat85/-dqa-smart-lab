@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import './EquipmentInfoModal.css';
 
 const tabs=[['overview','基本資料'],['specification','技術規格'],['service','校驗保養'],['history','操作紀錄']];
-const statusList=['使用中','待機中','維護中','校驗中'];
+const statusList=['使用中','待機中','維護中','校驗中','暫停中'];
 const show=value=>value===undefined || value===null || value==='' ? '—' : value;
 function Fields({ rows }) {
   return <dl className="eq-profile-fields">{rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{show(value)}</dd></div>)}</dl>;
@@ -53,7 +53,7 @@ export default function EquipmentInfoModal({ equipment, onClose, onEdit, onStatu
         {tab==='overview' && <>
           <div className="eq-profile-metrics"><div><span>最大樣品數</span><strong>{show(eq.capacity)}<small>件</small></strong></div><div><span>每日可用時間</span><strong>{show(eq.dailyHours)}<small>小時</small></strong></div><div><span>本月使用率 <small>DEMO</small></span><strong>{utilization}<small>%</small></strong><div className="eq-profile-meter" role="meter" aria-label="本月使用率（示範）" aria-valuemin={0} aria-valuemax={100} aria-valuenow={utilization}><span style={{width:`${utilization}%`}} /></div></div></div>
           <section className="eq-profile-section"><div className="eq-profile-section-title"><h3>設備基本資料</h3><span>獨立設備台帳</span></div><Fields rows={[
-            ['設備編號',eq.id],['設備名稱',eq.name],['設備分類',eq.category],['型號',eq.model],['製造商',eq.manufacturer],['設備序號',eq.serial],['購置日期',eq.purchasedAt],['目前委託',eq.currentRequest],
+            ['設備編號',eq.id],['設備名稱',eq.name],['設備分類',eq.category],['型號',eq.model],['製造商',eq.manufacturer],['設備序號',eq.serial],['購置日期',eq.purchasedAt],['目前委託',eq.currentRequest],['預估結束時間',eq.estimatedEnd?new Date(eq.estimatedEnd).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'—'],
           ]}/></section>
           <div className="eq-profile-note"><strong>操作注意事項</strong><p>{show(eq.notes)}</p></div>
         </>}
