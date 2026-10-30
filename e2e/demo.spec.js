@@ -42,14 +42,14 @@ async function useSignature(page){
 }
 test('four portals, direct links, return and browser history stay in the correct system',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- for(const [name,path,title] of [['電子委託單系統','request','電子委託單系統'],['DQA LMS 實驗室管理系統','lms','DQA LMS'],['造隆實驗室系統','lab','造隆實驗室系統'],['驗證計畫','validation','DQA 驗證計畫']]){
+ for(const [name,path,title] of [['電子委託系統','request','電子委託單系統'],['DQA 實驗室管理系統','lms','DQA LMS'],['COLONG 實驗室','lab','造隆實驗室系統'],['設計品質管理','validation','DQA 設計品質管理']]){
   await page.goto('/');await page.getByRole('button',{name:new RegExp(name)}).click();
   await expect(page).toHaveURL(new RegExp(`/${path}/login$`));await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();
   await page.reload();await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();
   if(path==='validation')await expect(page.getByRole('button',{name:'暫未開放'})).toBeDisabled();
   await page.getByRole('button',{name:/返回系統/}).click();await expect(page).toHaveURL(/\/$/);
  }
- await page.getByRole('button',{name:/DQA LMS 實驗室管理系統/}).click();await page.goBack();await expect(page.getByRole('heading',{name:/讓每一次試驗/})).toBeVisible();
+ await page.getByRole('button',{name:/DQA 實驗室管理系統/}).click();await page.goBack();await expect(page.getByRole('heading',{name:/讓每一次試驗/})).toBeVisible();
  expect(errors).toEqual([]);
 });
 test('LMS rejects wrong credentials, retains login on reload, switches pages and logs out',async({page})=>{
