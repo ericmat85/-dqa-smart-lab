@@ -282,7 +282,7 @@ test('general performance upload recognizes the supplied blank template and subm
   await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
  }
  await requestLogin(page,true);await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
- await page.locator('.rq-sidebar').getByRole('button',{name:'全部委託單',exact:true}).click();await page.getByRole('button',{name:'查看',exact:true}).first().click();
+ await page.locator('.rq-sidebar').getByRole('button',{name:/待簽核\/查閱/}).click();await page.getByRole('tab',{name:'查閱清單',exact:true}).click();await page.getByRole('button',{name:'查看',exact:true}).first().click();
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
  const archived=await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');const report=await getReport(id);return {stage:report.stage,sections:report.pdfSections};},id);expect(archived.stage).toBe('archived');expect(archived.sections.find(row=>row.kind==='report').pageCount).toBe(7);
@@ -301,4 +301,35 @@ test('custom role archive entry is hidden unless explicitly granted',async({page
  await lmsLogin(page,'archive-limited@example.com');await expect(page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true})).toHaveCount(0);
  await page.evaluate(()=>{const roles=JSON.parse(localStorage.getItem('dqa-custom-roles-v1'));roles[0].pages.push('archive');localStorage.setItem('dqa-custom-roles-v1',JSON.stringify(roles));});
  await page.reload();await page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
+});
+
+test('request review tabs separate reading from all requests and history filters by field',async({page})=>{
+ await requestLogin(page,true);
+ const supervisor=INITIAL_ACCOUNTS.find(a=>a.email==='supervisor@example.com');
+ const requester=INITIAL_ACCOUNTS.find(a=>a.email==='requester@example.com');
+ await page.evaluate(({supervisor,requester})=>{
+  const base={supervisorId:supervisor.id,requesterId:requester.id,requester:requester.name,productCode:'FILTER-PRODUCT',project:'歷程專案',testItems:['一般性能試驗'],dueDate:'2026-11-06'};
+  localStorage.setItem('dqa-request-demo-v2',JSON.stringify([{...base,id:'READ-CASE',status:'待查閱'},{...base,id:'SIGN-CASE',status:'待主管簽核'},{...base,id:'HISTORY-CASE',status:'已結案'},{...base,id:'OTHER-CASE',supervisorId:'someone-else',status:'待查閱'}]));
+ },{supervisor,requester});
+ await page.reload();
+ await expect(page.locator('.rq-kpis>div').filter({has:page.getByText('待查閱',{exact:true})}).locator('strong')).toHaveText('1');
+ await page.getByRole('button',{name:'待簽核/查閱',exact:false}).click();
+ await expect(page.getByRole('heading',{name:'簽核清單',exact:true})).toBeVisible();
+ await expect(page.locator('.rq-table')).toContainText('SIGN-CASE');
+ await expect(page.locator('.rq-table')).not.toContainText('READ-CASE');
+ await page.getByRole('tab',{name:'查閱清單',exact:true}).click();
+ await expect(page.locator('.rq-table')).toContainText('READ-CASE');
+ await expect(page.locator('.rq-table')).not.toContainText('OTHER-CASE');
+ await page.getByRole('button',{name:'全部委託單',exact:false}).click();
+ await expect(page.locator('.rq-table')).not.toContainText('READ-CASE');
+ await page.getByRole('button',{name:'案件歷程',exact:false}).click();
+ await expect(page.locator('.rq-filter-row select')).toHaveCount(1);
+ await page.getByLabel('篩選欄位').selectOption('product');
+ await page.locator('.rq-filter-row input').fill('歷程專案');
+ await expect(page.locator('.rq-table')).toContainText('HISTORY-CASE');
+ await page.getByLabel('篩選欄位').selectOption('id');
+ await expect(page.locator('.rq-table')).not.toContainText('HISTORY-CASE');
+ await page.getByLabel('篩選欄位').selectOption('dueDate');
+ await page.locator('.rq-filter-row input').fill('2026-11-06');
+ await expect(page.locator('.rq-table')).toContainText('HISTORY-CASE');
 });
