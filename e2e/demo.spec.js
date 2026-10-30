@@ -49,7 +49,7 @@ test('four portals, direct links, return and browser history stay in the correct
   if(path==='validation')await expect(page.getByRole('button',{name:'暫未開放'})).toBeDisabled();
   await page.getByRole('button',{name:/返回系統/}).click();await expect(page).toHaveURL(/\/$/);
  }
- await page.getByRole('button',{name:/DQA LMS 實驗室管理系統/}).click();await page.goBack();await expect(page.getByRole('heading',{name:/可靠度試驗/})).toBeVisible();
+ await page.getByRole('button',{name:/DQA LMS 實驗室管理系統/}).click();await page.goBack();await expect(page.getByRole('heading',{name:/讓每一次試驗/})).toBeVisible();
  expect(errors).toEqual([]);
 });
 test('LMS rejects wrong credentials, retains login on reload, switches pages and logs out',async({page})=>{

@@ -37,3 +37,8 @@ test('saved reservations switch from scheduled to running exactly at their start
   assert.equal(effectiveScheduleStatus({...row,time:''},Date.now()),'未排程');
   assert.equal(effectiveScheduleStatus({...row,status:'有衝突'},Date.now()),'有衝突');
 });
+test('early completion displays the actual finish timestamp without changing the reservation rule',()=>{
+ const at='2026-10-28T03:00:00Z';const completed={...row,status:'已完成',completedAt:at};
+ assert.equal(scheduleProgress(completed,Date.parse(at)).end,Date.parse(at));
+ assert.equal(scheduleProgress({...completed,completedAt:'bad'},Date.parse(at)).end,scheduleProgress(row,Date.parse(at)).end);
+});
