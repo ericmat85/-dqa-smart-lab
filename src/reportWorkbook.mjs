@@ -8,7 +8,7 @@ export async function createReportTemplate(request={},demo=false,{templateBytes}
  sheet.columns=[12,12,12,12,12,12,12,12,12].map(width=>({width}));
  sheet.mergeCells('A1:I1');sheet.getCell('A1').value=`DQA SMART LAB｜${(request.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告'}（Demo）`;sheet.getCell('A1').font={size:18,bold:true};sheet.getRow(1).height=32;
  sheet.mergeCells('A2:I2');sheet.getCell('A2').value=demo?'DEMO 流程展示資料，非正式試驗結果。':'請依委託內容與實際試驗紀錄填寫。';
- const fields=[['委託編號',request.id,'產品名稱',request.productCode||request.product],['試驗項目',(request.testItems||[]).join('、'),'報告編號',request.id?`RPT-${request.id}`:''],['設備',request.execution?.equipment,'樣品數量',request.quantity],['試驗條件',demo?'DEMO 高溫儲存流程驗證':'','試驗時數',request.execution?.hours||''],['開始時間',request.execution?.plannedStart,'結束時間',request.execution?.completedAt],['試驗依據',request.specification,'測試人員',request.execution?.operator]];
+ const fields=[['委託編號',request.id,'產品名稱',request.productCode||request.product],['試驗項目',(request.testItems||[]).join('、'),'報告編號',request.id?`RPT-${request.id}`:''],['設備',request.execution?.equipment,'樣品數量',request.quantity],['試驗條件',demo?`DEMO：${request.specification||(request.testItems||[]).join('、')||'流程驗證'}`:'','試驗時數',request.execution?.hours||''],['開始時間',request.execution?.plannedStart,'結束時間',request.execution?.completedAt],['試驗依據',request.specification,'測試人員',request.execution?.operator]];
  fields.forEach(([a,b,c,d],index)=>{const row=index+4;sheet.getCell(`A${row}`).value=a;sheet.mergeCells(`B${row}:C${row}`);sheet.getCell(`B${row}`).value=b||'';sheet.getCell(`D${row}`).value=c;sheet.mergeCells(`E${row}:I${row}`);sheet.getCell(`E${row}`).value=d||'';});
  sheet.getRow(11).values=['樣品編號','外觀檢查','功能檢查','試驗結果','備註','判定'];
  if(demo)sheet.getRow(12).values=[request.execution?.sampleCode||'SAMPLE-DEMO','DEMO 正常','DEMO 正常','DEMO 完成','僅供流程測試','DEMO 合格'];
@@ -65,6 +65,7 @@ async function createGeneralTemplate(request,demo,templateBytes){
  sheet.getCell('AK3').value=`DQA-${request.id}`;
  sheet.getCell('F11').value=request.productName||request.project||request.productCode||'';
  sheet.getCell('F13').value=request.productCode||request.product||'';
+ for(const [address,value]of [['AC9',request.customer],['N15',request.productVersion],['AG15',request.pcbaVersion],['N16',request.softwareVersion],['AG16',request.manufactureDate],['N17',request.quantity],['N18',request.execution?.sampleCode]])sheet.getCell(address).value=value||'';
  sheet.getCell('AC13').value=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
  sheet.getCell('AF11').value=request.execution?.plannedStart?.slice(0,10)||'';
  sheet.getCell('AM11').value=request.execution?.completedAt?.slice(0,10)||'';
