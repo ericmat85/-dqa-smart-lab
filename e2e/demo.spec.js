@@ -337,12 +337,13 @@ test('request review tabs separate reading from all requests and history filters
 test('Demo accelerator reaches halfway, equipment can be viewed, pause survives reload and resume allows completion',async({page})=>{
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
  await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
- await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');
+ await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await expect(page.getByRole('button',{name:'試驗完成',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'申請中斷',exact:true})).toHaveCount(0);
  await expect(page.getByRole('progressbar',{name:'試驗日程',exact:true})).toHaveAttribute('aria-valuenow','50');
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
  await page.getByRole('button',{name:'設備狀態',exact:true}).click();await expect(page.getByRole('dialog',{name:'試驗設備狀態'})).toBeVisible();
  await page.getByRole('dialog',{name:'試驗設備狀態'}).getByRole('button').first().click();await expect(page.locator('.eq-profile-fields')).toContainText('預估結束時間');
- await page.goto('/lms/login');await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();await expect(page.getByRole('button',{name:'暫停試驗',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'中止排程',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeDisabled();
+ await page.goto('/lms/login');await lmsLogin(page,'level1@example.com');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
  await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'暫停試驗',exact:true}).click();
  await expect(page.locator('.schedule-table tbody tr').filter({hasText:id})).toContainText('暫停中');

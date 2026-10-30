@@ -12,7 +12,7 @@ import {prepareDemoReport,passedDemoReview,DEMO_REVIEW_PASSED} from './demoRepor
 import {createReportTemplate,inspectReport} from './reportWorkbook.mjs';
 import useReportSnapshot,{refreshReportSnapshot} from './useReportSnapshot.js';
 import {createDemoApprovalSignature} from './demoApprovalSignature.mjs';
-import {confirmLabReceipt,completeLabTrial} from './labReceipts.mjs';
+import {confirmLabReceipt} from './labReceipts.mjs';
 import {submitLabOperation,applyLabOperationResults} from './labOperations.mjs';
 import ScheduleTimeline from './ScheduleTimeline.jsx';
 import useScheduleLifecycle from './useScheduleLifecycle.js';
@@ -141,6 +141,7 @@ export default function LabApp({ path, navigate }) {
   const openAction = (item, type) => { setSelected(item); setAction(type); setReason(""); setLabSignature(""); setReportFile(null); setModalError(""); setNotice(""); setReportCheck(null); setReportProgress(0); setReportMessage(""); };
   const performAction = () => {
     if (!selected) return;
+    if (!["confirm","cancel"].includes(action)) { setModalError("試驗中的決策請由 lv1 主管在編輯排程處理。"); return; }
     if ((action === "cancel" || action === "interrupt") && !reason.trim()) {
       setModalError("此操作必須填寫原因。");
       return;
@@ -150,9 +151,6 @@ export default function LabApp({ path, navigate }) {
       try{const receipt=confirmLabReceipt({requestId:selected.id,actorId:account.id,expected:{scheduleId:selected.scheduleId,reservationId:selected.reservationId,time:selected.scheduledStart,end:selected.scheduledEnd}});
        setRequests(previous=>previous.map(row=>row.id===receipt.id?receipt:row));setAudit(readStorage(AUDIT_KEY,[]));refreshLabSnapshot();setNotice('確認接收已儲存，等待排程開始。');setDownloadProgress(0);setDownloadJob({id:selected.id});setSelected(null);
       }catch(error){setModalError(error.message);}return;
-    }
-    if(action==='complete'){
-      try{const completed=completeLabTrial({requestId:selected.id,actorId:account.id,signature:labSignature});setRequests(previous=>previous.map(row=>row.id===completed.id?completed:row));setAudit(readStorage(AUDIT_KEY,[]));refreshLabSnapshot();setNotice('試驗已完成，LMS 與設備狀態已同步。');setSelected(null);}catch(error){setModalError(error.message);}return;
     }
     if(action==='cancel'||action==='interrupt'){
       try{const operation=submitLabOperation({requestId:selected.id,action,reason,signature:labSignature,actorId:account.id});
@@ -246,7 +244,7 @@ export default function LabApp({ path, navigate }) {
           <section className="lab-panel"><div className="lab-panel-heading"><div><h2>試驗委託清單</h2><p>確認接收、試驗執行與主管審核申請</p></div><button type="button" className="lab-primary" onClick={addReportExample}>Demo試驗加速器</button></div>
             <div className="lab-table-wrap"><PaginatedTable><thead><tr><th>委託編號</th><th>專案／試驗</th><th>設備</th><th>樣品編號</th><th>試驗日程</th><th>狀態</th><th>操作</th></tr></thead><tbody>{requests.filter(item=>item.status!=="已結案").map(item => <tr key={item.id}>
               <td><button type="button" className="lab-request-link" onClick={() => setDetail(item)}>{item.id}</button></td><td>{item.project}<small>{item.test}</small><small className="lab-trial-hours">{item.hours} h</small></td><td>{item.equipment}</td><td>{sampleNumbers(item)}</td><td><ScheduleTimeline row={sharedSnapshot.schedules.find(row=>row.id===item.scheduleId||row.requestId===item.id)||{time:item.scheduledStart,end:item.scheduledEnd,status:item.status==='取消'?'取消':'已排程'}}/></td><td><span className={`lab-status ${item.status === "試驗中" ? "running" : ""}`}>{item.status}</span>{item.reportInfo?.stage!=='returned'&&passedDemoReview(item.reportInfo?.check)&&<small className="report-demo-review-badge">{DEMO_REVIEW_PASSED}</small>}{item.lastOperationStatus==='已退回'&&<small>申請已退回，請查看操作歷程</small>}</td>
-              <td><div className="lab-actions">{item.status==='已排程'&&!item.pendingOperationId&&<span className="lab-review-indicator">已接收，等待開始</span>}{item.pendingOperationId?<span className="lab-review-indicator">待一階主管審核</span>:null}{!item.pendingOperationId&&item.status === "待確認" && <><button onClick={() => openAction(item,"confirm")}>確認接收</button><button className="lab-danger" onClick={() => openAction(item,"cancel")}>申請取消</button></>}{['試驗中','暫停中'].includes(item.status)&&<button type="button" onClick={()=>{setEquipmentRequest(item.id);setEquipmentChoice(null);}}>設備狀態</button>}{!item.pendingOperationId&&item.status === "試驗中" && <><button onClick={() => openAction(item,"complete")}>試驗完成</button><button className="lab-danger" onClick={() => openAction(item,"interrupt")}>申請中斷</button></>}{item.status === "已完成" && <button type="button" onClick={() => openAction(item,"submitReport")}>提交報告</button>}</div></td>
+              <td><div className="lab-actions">{item.status==='已排程'&&!item.pendingOperationId&&<span className="lab-review-indicator">已接收，等待開始</span>}{item.pendingOperationId?<span className="lab-review-indicator">待一階主管審核</span>:null}{!item.pendingOperationId&&item.status === "待確認" && <><button onClick={() => openAction(item,"confirm")}>確認接收</button><button className="lab-danger" onClick={() => openAction(item,"cancel")}>申請取消</button></>}{['試驗中','暫停中'].includes(item.status)&&<button type="button" onClick={()=>{setEquipmentRequest(item.id);setEquipmentChoice(null);}}>設備狀態</button>}{item.status === "已完成" && <button type="button" onClick={() => openAction(item,"submitReport")}>提交報告</button>}</div></td>
             </tr>)}</tbody></PaginatedTable></div>
           </section>
         </> : <section className="lab-panel"><div className="lab-panel-heading"><div><h2>本機操作歷程</h2><p>示範用追加紀錄，尚未具備正式後端不可竄改稽核機制</p></div></div><div className="lab-table-wrap"><PaginatedTable><thead><tr><th>時間</th><th>委託編號</th><th>操作</th><th>操作者</th><th>原因</th><th>簽名</th></tr></thead><tbody>{audit.length ? audit.map(event => <tr key={event.id}><td>{event.time}</td><td><button type="button" className="lab-request-link" onClick={()=>setDetail(requests.find(row=>row.id===event.requestId)||{id:event.requestId})}>{event.requestId}</button></td><td>{event.action}</td><td>{event.actor}</td><td>{event.reason}</td><td>{event.signature ? <SignatureHistory records={auditSignatures([event], event.requestId)} /> : "舊紀錄未提供簽名"}</td></tr>) : <tr><td colSpan="6">尚無操作紀錄</td></tr>}</tbody></PaginatedTable></div></section>}
