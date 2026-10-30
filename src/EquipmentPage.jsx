@@ -8,7 +8,7 @@ import useDemoPersistence from './useDemoPersistence.js';
 import './EquipmentPage.css';
 
 const KEY = 'dqa-equipment-demo-v1';
-const statuses = ['使用中','待機中','維護中','校驗中'];
+const statuses = ['使用中','待機中','維護中','校驗中','暫停中'];
 function readEquipment() {
   try {
     const stored=JSON.parse(window.localStorage.getItem(KEY) || 'null');

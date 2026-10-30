@@ -45,7 +45,7 @@ export function enabledExecutors(accounts) {
 export function findScheduleConflict(rows,proposal) {
  const period=reservationWindow(proposal);if(!period)return undefined;
  return rows.find(row=>{
-  if(row.id===proposal.id||!['已排程','試驗中','進行中','待核准','已完成','已結案'].includes(row.status))return false;
+  if(row.id===proposal.id||!['已排程','試驗中','進行中','暫停中','待核准','已完成','已結案'].includes(row.status))return false;
   const other=reservationWindow(row);if(!other||period.start>=other.end||other.start>=period.end)return false;
   const ids=equipmentIds(row),proposed=equipmentIds(proposal);
   return (ids.length&&proposed.length?ids.some(id=>proposed.includes(id)):row.eq===proposal.eq)||
