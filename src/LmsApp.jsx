@@ -384,7 +384,7 @@ export function LoginPage({
 
 }) {
 
-  const [email, setEmail] = useState(() => system.id === "lms" ? "huangxm@example.com" : "");
+  const [email, setEmail] = useState(() => system.id === "lms" ? "level1@example.com" : "");
 
   const [password, setPassword] = useState(() => system.id === "lms" ? DEMO_PASSWORD : "");
 
