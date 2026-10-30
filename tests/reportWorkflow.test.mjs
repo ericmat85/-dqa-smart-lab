@@ -15,6 +15,7 @@ const upload=async request=>new File([await createReportTemplate(request,true)],
 test('real Excel submission, two distinct supervisor signatures, requester confirmation and Chinese PDF archive',async()=>{
  const {storage,repository,id,source}=fixture();
  const progress=[];let meta=await submitReportWorkflow({requestId:id,file:await upload(source()),actorId:'U003',signature,minimumMs:0,onProgress:value=>progress.push(value)},storage,repository);
+ assert.equal((await repository.get(id)).pdf,undefined);
  assert.equal(meta.stage,'level2');assert.equal(source().status,'待審核');assert.deepEqual(progress,[20,45,80,100]);
  assert.ok(!storage.getItem('dqa-request-demo-v2').includes('signedExcel'));assert.ok(!storage.getItem('dqa-request-demo-v2').includes('submitterSignature'));
  await assert.rejects(approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL3',signature,expectedRevision:meta.revision},storage,repository));
@@ -22,6 +23,7 @@ test('real Excel submission, two distinct supervisor signatures, requester confi
  await assert.rejects(approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL2',signature,expectedRevision:first},storage,repository));
  await assert.rejects(confirmReportViewed({requestId:id,actorId:'DEMO-SUPERVISOR',expectedRevision:meta.revision},storage,repository));
  meta=await approveReportWorkflow({requestId:id,actorId:'DEMO-LEVEL3',signature,expectedRevision:meta.revision},storage,repository);assert.equal(meta.stage,'view');assert.equal(source().status,'待查閱');
+ assert.equal((await repository.get(id)).pdf,undefined);
  const stored=await repository.get(id),Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(stored.signedExcel);const sheet=book.getWorksheet(stored.sheetName);
  assert.equal(sheet.getImages().length,3);assert.deepEqual(sheet.getImages().map(row=>[Math.floor(row.range.tl.col),Math.floor(row.range.tl.row)]),[[6,20],[3,20],[0,20]]);assert.match(sheet.getCell('A22').text,/三階/);assert.match(sheet.getCell('D22').text,/二階/);assert.match(sheet.getCell('G22').text,/陳/);
  const original=new Excel.Workbook();await original.xlsx.load(stored.original);assert.equal(original.worksheets[0].getImages().length,0);
@@ -43,7 +45,7 @@ test('report checks reject mismatched IDs, missing results, invalid Excel and un
 test('disabled accounts, wrong roles, self review and duplicate signatures cannot approve',()=>{
  const source={ownerId:'owner',supervisorId:'supervisor'},report={stage:'level2',submitterId:'lab',approvals:[]},actor=INITIAL_ACCOUNTS.find(row=>row.id==='DEMO-LEVEL2');
  assert.equal(canReviewReport(actor,report,source),true);assert.equal(canReviewReport({...actor,status:'已停用'},report,source),false);assert.equal(canReviewReport({...actor,id:'owner'},report,source),false);assert.equal(canReviewReport({...actor,id:'lab'},report,source),false);assert.equal(canReviewReport(actor,{...report,approvals:[{actorId:actor.id}]},source),false);assert.equal(canReviewReport(actor,report,{...source,status:'取消'}),false);
- assert.equal(canConfirmReport({id:'supervisor',status:'啟用中'},{stage:'view'},source),true);assert.equal(canConfirmReport({id:'owner',status:'啟用中'},{stage:'view'},source),false);
+ assert.equal(canConfirmReport({id:'supervisor',status:'啟用中',role:'委託者主管'},{stage:'view'},source),true);assert.equal(canConfirmReport({id:'owner',status:'啟用中'},{stage:'view'},source),false);assert.equal(canConfirmReport({id:'supervisor',role:'實驗室工程師',status:'啟用中'},{stage:'view'},source),false);
 });
 test('invalid or duplicate submission never advances the source case',async()=>{
  const {storage,repository,id,source}=fixture();await assert.rejects(submitReportWorkflow({requestId:id,file:new File([await createReportTemplate(source())],'report.xlsx'),signature,actorId:'U003',minimumMs:0},storage,repository));assert.equal(await repository.get(id),null);assert.equal(source().status,'已完成');
@@ -92,5 +94,5 @@ test('general performance template keeps its signature blocks and archives seven
  meta=await confirmReportViewed({requestId:id,actorId:'DEMO-SUPERVISOR',expectedRevision:meta.revision,fontBytes:await readFile('public/fonts/NotoSansCJKtc-Regular.otf')},storage,repository);
  assert.equal(meta.stage,'archived');assert.equal(meta.pdfSections.find(row=>row.kind==='report').pageCount,7);
  const {PDFDocument,PDFName}=await import('pdf-lib');const stored=await repository.get(id),pdf=await PDFDocument.load(stored.reportPdf);
- assert.equal(pdf.getPageCount(),7);assert.equal(pdf.getPages()[0].node.Resources().lookup(PDFName.of('XObject')).keys().length,3);
+ assert.equal(pdf.getPageCount(),7);assert.equal(pdf.getPages()[0].node.Resources().lookup(PDFName.of('XObject')).keys().length,4);
 });

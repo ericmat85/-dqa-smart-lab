@@ -1,10 +1,13 @@
+import ReportArchive from './ReportArchive.jsx';
+import {canOpenReportArchive} from './reportArchive.mjs';
 import {createCompletedDemoFlow} from './completedDemoFlow.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import useSystemTheme from './useSystemTheme.js';
 import SystemHeaderActions from './SystemHeaderActions.jsx';
 import ClearCasesButton from './ClearCasesButton.jsx';
 import {submitReportWorkflow} from './reportWorkflow.mjs';
-import {createReportTemplate} from './reportWorkbook.mjs';
+import {prepareDemoReport,passedDemoReview,DEMO_REVIEW_PASSED} from './demoReportPreparation.mjs';
+import {createReportTemplate,inspectReport} from './reportWorkbook.mjs';
 import useReportSnapshot,{refreshReportSnapshot} from './useReportSnapshot.js';
 import {createDemoApprovalSignature} from './demoApprovalSignature.mjs';
 import {confirmLabReceipt,completeLabTrial} from './labReceipts.mjs';
@@ -165,11 +168,31 @@ export default function LabApp({ path, navigate }) {
   async function downloadCaseTemplate(id,demo=false){
     setPreparingReport(true);setModalError('');setReportCheck(null);
     try{
-    const source=sharedSnapshot.electronic.find(row=>row.id===id)||{id};
-    const bytes=await createReportTemplate(source,demo);
-    if(demo){setReportFile(new File([bytes],id+'-DEMO.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));setSignatureMode('upload');setLabSignature(createDemoApprovalSignature('測試人員簽名（DEMO）'));return;}
+    const source=sharedSnapshot.electronic.find(row=>row.id===id);
+    if(!source)throw Error('找不到本案委託資料，請重新開啟案件。');
+    if(demo){
+      setReportFile(null);
+      const prepared=await prepareDemoReport(source);
+      setReportFile(new File([prepared.bytes],prepared.fileName,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+      setSignatureMode('upload');setLabSignature(createDemoApprovalSignature(`${account.name}（DEMO）`));setReportCheck(prepared.check);return;
+    }
+    const bytes=await createReportTemplate(source);
     const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const link=document.createElement('a');link.href=url;link.download='試驗報告單_'+id+'.xlsx';link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
-    }finally{setPreparingReport(false);}
+    }catch(error){setReportCheck(error.check||null);throw error;}finally{setPreparingReport(false);}
+  }
+  function downloadPreparedReport(){
+    if(!reportFile)return;
+    const url=URL.createObjectURL(reportFile),link=document.createElement('a');link.href=url;link.download=reportFile.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }
+  async function previewReportCheck(){
+    if(!reportFile||!selected||preparingReport||submitting)return;
+    setPreparingReport(true);setReportCheck(null);setModalError('');
+    try{
+      const source=sharedSnapshot.electronic.find(row=>row.id===selected.id);
+      if(!source)throw Error('找不到本案委託資料，請重新開啟案件。');
+      const check=await inspectReport(new Uint8Array(await reportFile.arrayBuffer()),selected.id,reportFile.name,source);
+      setReportCheck(check);if(!check.ok)setModalError('報告未通過目前規則，請修正後重新檢查。');
+    }catch(error){setModalError(error.message);}finally{setPreparingReport(false);}
   }
   const submitReport = async () => {
     if(preparingReport||submitting)return;
@@ -203,14 +226,14 @@ export default function LabApp({ path, navigate }) {
         <div className="lab-sidebar-label">WORKSPACE</div>
         <button className={tab === "requests" ? "active" : ""} aria-current={tab === 'requests'?'page':undefined} onClick={() => setTab("requests")}><span aria-hidden="true">▤</span>試驗委託與接收</button>
         <button className={tab === "audit" ? "active" : ""} aria-current={tab === 'audit'?'page':undefined} onClick={() => setTab("audit")}><span aria-hidden="true">◷</span>操作歷程</button>
-        <div className="lab-demo-banner lab-side-note">展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</div>
+        <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>setTab("archive")}><span aria-hidden="true">▣</span>報告資料庫</button>}</><div className="lab-demo-banner lab-side-note">展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</div>
         <button className="lab-back" onClick={navigateHome}>← 返回系統入口</button>
       </aside>
       <main className="lab-main">
-        <header className="lab-topbar"><div><span className="lab-eyebrow">DQA LAB SYSTEM</span><h1>{tab === "requests" ? "實驗室工作台" : "操作歷程"}</h1><p>管理試驗接收、執行進度與操作紀錄。</p></div></header>
+        <header className="lab-topbar"><div><span className="lab-eyebrow">DQA LAB SYSTEM</span><h1>{tab === "requests" ? "實驗室工作台" : tab === "archive" ? "報告資料庫" : "操作歷程"}</h1><p>管理試驗接收、執行進度與操作紀錄。</p></div></header>
         {lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{notice && <div className="lab-notice" role="status">{notice}</div>}
-        {tab === "requests" ? <>
+        {tab === "archive" ? <ReportArchive actor={account} system="lab"/> : tab === "requests" ? <>
           <div className="lab-stats lab-stats-with-scheduled">
             <div><span>待確認</span><strong>{requests.filter(x => x.status === "待確認").length}</strong></div>
             <div><span>已排程</span><strong>{requests.filter(x=>x.status === "已排程").length}</strong></div>
@@ -219,7 +242,7 @@ export default function LabApp({ path, navigate }) {
           </div>
           <section className="lab-panel"><div className="lab-panel-heading"><div><h2>試驗委託清單</h2><p>確認接收、試驗執行與主管審核申請</p></div><button type="button" className="lab-primary" onClick={addReportExample}>建立已完成範例（假資料）</button></div>
             <div className="lab-table-wrap"><PaginatedTable><thead><tr><th>委託編號</th><th>專案／試驗</th><th>設備</th><th>樣品編號</th><th>試驗日程</th><th>狀態</th><th>操作</th></tr></thead><tbody>{requests.filter(item=>item.status!=="已結案").map(item => <tr key={item.id}>
-              <td><button type="button" className="lab-request-link" onClick={() => setDetail(item)}>{item.id}</button></td><td>{item.project}<small>{item.test}</small><small className="lab-trial-hours">{item.hours} h</small></td><td>{item.equipment}</td><td>{sampleNumbers(item)}</td><td><ScheduleTimeline row={sharedSnapshot.schedules.find(row=>row.id===item.scheduleId||row.requestId===item.id)||{time:item.scheduledStart,end:item.scheduledEnd,status:item.status==='取消'?'取消':'已排程'}}/></td><td><span className={`lab-status ${item.status === "試驗中" ? "running" : ""}`}>{item.status}</span>{item.lastOperationStatus==='已退回'&&<small>申請已退回，請查看操作歷程</small>}</td>
+              <td><button type="button" className="lab-request-link" onClick={() => setDetail(item)}>{item.id}</button></td><td>{item.project}<small>{item.test}</small><small className="lab-trial-hours">{item.hours} h</small></td><td>{item.equipment}</td><td>{sampleNumbers(item)}</td><td><ScheduleTimeline row={sharedSnapshot.schedules.find(row=>row.id===item.scheduleId||row.requestId===item.id)||{time:item.scheduledStart,end:item.scheduledEnd,status:item.status==='取消'?'取消':'已排程'}}/></td><td><span className={`lab-status ${item.status === "試驗中" ? "running" : ""}`}>{item.status}</span>{item.reportInfo?.stage!=='returned'&&passedDemoReview(item.reportInfo?.check)&&<small className="report-demo-review-badge">{DEMO_REVIEW_PASSED}</small>}{item.lastOperationStatus==='已退回'&&<small>申請已退回，請查看操作歷程</small>}</td>
               <td><div className="lab-actions">{item.status==='已排程'&&!item.pendingOperationId&&<span className="lab-review-indicator">已接收，等待開始</span>}{item.pendingOperationId?<span className="lab-review-indicator">待一階主管審核</span>:null}{!item.pendingOperationId&&item.status === "待確認" && <><button onClick={() => openAction(item,"confirm")}>確認接收</button><button className="lab-danger" onClick={() => openAction(item,"cancel")}>申請取消</button></>}{!item.pendingOperationId&&item.status === "試驗中" && <><button onClick={() => openAction(item,"complete")}>試驗完成</button><button className="lab-danger" onClick={() => openAction(item,"interrupt")}>申請中斷</button></>}{item.status === "已完成" && <button type="button" onClick={() => openAction(item,"submitReport")}>提交報告</button>}</div></td>
             </tr>)}</tbody></PaginatedTable></div>
           </section>
@@ -228,7 +251,7 @@ export default function LabApp({ path, navigate }) {
       <ClearCasesButton />
       {detail && <RequestInfoModal account={account} request={labRequestInformation(detail,sharedSnapshot)} onClose={()=>setDetail(null)}/>}
       {downloadJob && <div className="lab-modal-backdrop"><section className="lab-modal" role="dialog" aria-modal="true" aria-labelledby="download-title"><h2 id="download-title">取得試驗報告單</h2><p>委託編號：{downloadJob.id}</p><p>正在準備 Excel 範本</p><div style={{height:12,background:"#e5edf8",borderRadius:8,overflow:"hidden"}} role="progressbar" aria-label="下載準備進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={downloadProgress}><div style={{height:"100%",width:`${downloadProgress}%`,background:"#286bc4"}} /></div><p>{downloadProgress}%</p>{downloadProgress === 100 && <><p>已開始下載空白範本，請依委託資料填寫。</p><div className="lab-modal-actions"><button onClick={()=>downloadCaseTemplate(downloadJob.id).catch(error=>setNotice(error.message))}>重新下載</button><button className="lab-primary" onClick={() => setDownloadJob(null)}>關閉</button></div></>}</section></div>}
-      {selected && <div className="lab-modal-backdrop" role="presentation" onMouseDown={e => { if (!submitting && !preparingReport && e.target === e.currentTarget) setSelected(null); }}><section className={`lab-modal ${action==="submitReport"?"report-submit-modal":""}`} role="dialog" aria-modal="true" aria-labelledby="lab-modal-title"><h2 id="lab-modal-title">{({confirm:"確認接收",cancel:"申請取消",interrupt:"申請試驗中斷",complete:"完成試驗",submitReport:"提交試驗報告"})[action]}</h2><p>{selected.id} · {selected.project}</p>{!['confirm','cancel'].includes(action) && <ApprovalSignature key={selected.id} label="本次操作簽名" accountId={account.id} mode={signatureMode} onModeChange={setSignatureMode} value={labSignature} onChange={setLabSignature} onError={setModalError} />}{(action === "cancel" || action === "interrupt") && <><label htmlFor="lab-reason">原因（必填）</label><textarea id="lab-reason" value={reason} onChange={e => setReason(e.target.value)} placeholder="請填寫操作原因" rows="4" /></>}{action === "submitReport" && <><div className="report-actions"><button type="button" disabled={submitting||preparingReport} onClick={()=>downloadCaseTemplate(selected.id).catch(error=>setModalError(error.message))}>下載本案 Excel 範本</button><button type="button" disabled={submitting||preparingReport} onClick={()=>downloadCaseTemplate(selected.id,true).catch(error=>setModalError(error.message))}>DEMO 填寫報告</button></div>{preparingReport&&<p role="status">正在準備本案報告範本，請稍候…</p>}<label htmlFor="lab-report-file">上傳 Excel 報告（必填）</label><input id="lab-report-file" type="file" disabled={submitting||preparingReport} accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={e=>{setReportFile(e.target.files?.[0]||null);setModalError('');setReportCheck(null);}}/><p>{reportFile?.name||'尚未選擇檔案'}</p><small>僅供 Demo：一般性能試驗使用已接入的雙工作表範本；其餘試驗暫用本案簡化範本（.xlsx，10 MB 以內）。請先下載本案範本，系統會帶入報告編號與品番。簽名位置由系統固定配置，無需設定。上傳時轉印執行人員簽名，三方由左至右為三階、二階、執行人員；不具正式電子簽章效力。Demo 僅依規則檢查欄位、判定勾選與公式，不代表所有測項完整或符合規格；PDF 支援標準表格及簽名，複雜圖表與巨集不適用。</small>{submitting&&<div className="report-progress" role="status"><p>報告防呆審查 · 規則檢查（非 AI 判讀）：{reportMessage}</p><progress max="100" value={reportProgress}/></div>}{reportCheck&&<div className="report-checks">{reportCheck.checks.map(row=><p key={row.label}>{row.ok?'✓':'!'} {row.label}：{row.detail}</p>)}</div>}</>}{modalError && <p className="lab-warning" role="alert">{modalError}</p>}{(action === "cancel" || action === "interrupt") && <p className="lab-warning">{action==='cancel'?'送出後進入 LMS 待核准，一階主管核准後才退回待排程。':'中斷申請將交由 LMS 一階主管審核。'}</p>}<div className="lab-modal-actions"><button disabled={submitting||preparingReport} onClick={() => setSelected(null)}>返回</button><button className="lab-primary" disabled={submitting||preparingReport||(action==="submitReport"&&(!reportFile||!labSignature))} onClick={action === "submitReport" ? submitReport : performAction}>{submitting ? "檢查與儲存中…" : action === "submitReport" ? "提交" : "確認送出"}</button></div></section></div>}
+      {selected && <div className="lab-modal-backdrop" role="presentation" onMouseDown={e => { if (!submitting && !preparingReport && e.target === e.currentTarget) setSelected(null); }}><section className={`lab-modal ${action==="submitReport"?"report-submit-modal":""}`} role="dialog" aria-modal="true" aria-labelledby="lab-modal-title"><h2 id="lab-modal-title">{({confirm:"確認接收",cancel:"申請取消",interrupt:"申請試驗中斷",complete:"完成試驗",submitReport:"提交試驗報告"})[action]}</h2><p>{selected.id} · {selected.project}</p>{action === "submitReport"&&<div className="report-quickfill-panel"><div className="report-actions"><button type="button" className="report-primary" disabled={submitting||preparingReport} onClick={()=>downloadCaseTemplate(selected.id,true).catch(error=>setModalError(error.message))}>DEMO 填入</button><button type="button" disabled={submitting||preparingReport} onClick={()=>downloadCaseTemplate(selected.id).catch(error=>setModalError(error.message))}>下載本案 Excel 範本</button>{reportFile&&<button type="button" disabled={submitting||preparingReport} onClick={downloadPreparedReport}>下載目前 Excel 報告</button>}</div><p>產生本案假資料 Excel、展示簽名並檢查；確認後提交送簽。</p><div className={`report-review-status ${passedDemoReview(reportCheck)?'is-passed':''}`} role="status"><strong>審查狀態：{(preparingReport||submitting)?'產生／檢查中…':passedDemoReview(reportCheck)?DEMO_REVIEW_PASSED:reportCheck?'未通過檢查':'尚未檢查'}</strong>{reportCheck&&<span>目前規則：{reportCheck.checks.filter(row=>row.ok).length}／{reportCheck.checks.length} 項通過</span>}</div><details className="report-quickfill-help"><summary>Demo 限制與出報告流程</summary><small>此為 Demo 規則模擬，未連接真正 AI；不代表正式試驗合格。圖片簽名無正式電子簽章效力。須依序完成二階、三階簽核，由委託者主管確認查閱後才產生 PDF 並封存。</small></details></div>}{!['confirm','cancel'].includes(action) && <ApprovalSignature key={selected.id} label="本次操作簽名" accountId={account.id} mode={signatureMode} onModeChange={setSignatureMode} value={labSignature} onChange={setLabSignature} onError={setModalError} />}{(action === "cancel" || action === "interrupt") && <><label htmlFor="lab-reason">原因（必填）</label><textarea id="lab-reason" value={reason} onChange={e => setReason(e.target.value)} placeholder="請填寫操作原因" rows="4" /></>}{action === "submitReport" && <>{preparingReport&&<p role="status">正在產生／檢查本案報告，請稍候…</p>}<label htmlFor="lab-report-file">上傳 Excel 報告（必填）</label><input id="lab-report-file" type="file" disabled={submitting||preparingReport} accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={e=>{setReportFile(e.target.files?.[0]||null);setModalError('');setReportCheck(null);}}/><p>{reportFile?.name||'尚未選擇檔案'}</p><div className="report-actions"><button type="button" disabled={!reportFile||submitting||preparingReport} onClick={previewReportCheck}>重新檢查報告</button></div><small>僅供 Demo：一般性能試驗使用已接入的雙工作表範本；其餘試驗暫用本案簡化範本（.xlsx，10 MB 以內）。請先下載本案範本，系統會帶入報告編號與品番。簽名位置由系統固定配置，無需設定。上傳時轉印執行人員簽名，三方由左至右為三階、二階、執行人員；不具正式電子簽章效力。Demo 僅依規則檢查欄位、判定勾選與公式，不代表所有測項完整或符合規格；PDF 支援標準表格及簽名，複雜圖表與巨集不適用。</small>{submitting&&<div className="report-progress" role="status"><p>報告防呆審查 · 規則檢查（非 AI 判讀）：{reportMessage}</p><progress max="100" value={reportProgress}/></div>}{reportCheck&&<div className="report-checks">{reportCheck.checks.map(row=><p key={row.label}>{row.ok?'✓':'!'} {row.label}：{row.detail}</p>)}</div>}</>}{modalError && <p className="lab-warning" role="alert">{modalError}</p>}{(action === "cancel" || action === "interrupt") && <p className="lab-warning">{action==='cancel'?'送出後進入 LMS 待核准，一階主管核准後才退回待排程。':'中斷申請將交由 LMS 一階主管審核。'}</p>}<div className="lab-modal-actions"><button disabled={submitting||preparingReport} onClick={() => setSelected(null)}>返回</button><button className="lab-primary" disabled={submitting||preparingReport||(action==="submitReport"&&(!reportFile||!labSignature))} onClick={action === "submitReport" ? submitReport : performAction}>{submitting ? "檢查與儲存中…" : action === "submitReport" ? "提交" : "確認送出"}</button></div></section></div>}
     </div>
   );
 }

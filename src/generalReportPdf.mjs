@@ -1,14 +1,18 @@
+import {pdfTextLayout} from './pdfTextLayout.mjs';
 import {reportBounds,cellText} from './reportLayout.mjs';
 import {GENERAL_COVER,GENERAL_DETAIL,GENERAL_PAGE_ENDS} from './reportProfiles.mjs';
 // Browser-side Demo renderer: preserve the template's merged form and manual
-// page breaks. Excel header/footer artwork and charts are not reproduced.
-export async function drawGeneralReport({book,document,font,rgb,requestId}){
+// page breaks and the known footer logo. Other Excel artwork/charts need manual review.
+export async function drawGeneralReport({book,document,font,latin,rgb,requestId}){
  if(book.worksheets.filter(sheet=>!sheet.state||sheet.state==='visible').length!==2)throw Error('一般性能報告含額外工作表，尚未封存，以免遺漏內容。');
+ const layout=pdfTextLayout(font,latin);
  const wrap=(value,size,width)=>{
   const lines=[];for(const paragraph of Array.from(String(value)).filter(char=>char.charCodeAt(0)>=32||char==='\n'||char==='\t').join('').split('\n')){
-   let line='';for(const char of paragraph){if(line&&font.widthOfTextAtSize(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);
+   let line='';for(const char of paragraph){if(line&&layout.width(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);
   }return lines;
  };
+ const footerMedia=book.media.find(item=>item.name==='image1'&&item.extension==='png');
+ const footerLogo=footerMedia?.buffer?await document.embedPng(footerMedia.buffer):null;
  let number=0;
  for(const name of [GENERAL_COVER,GENERAL_DETAIL]){
   const sheet=book.getWorksheet(name),bounds=reportBounds(sheet);
@@ -23,15 +27,19 @@ export async function drawGeneralReport({book,document,font,rgb,requestId}){
    const xs=[margin];nativeWidths.forEach(width=>xs.push(xs.at(-1)+width*scale));
    const ys=[top];heights.forEach(height=>ys.push(ys.at(-1)-height*scale));
    const page=document.addPage([W,H]);number++;
-   page.drawText(`DQA Demo | ${requestId}`,{x:margin,y:H-margin,font,size:8});
-   page.drawText(`Demo PDF｜${number}｜圖片簽名無正式電子簽章效力`,{x:margin,y:16,font,size:7});
+   layout.draw(page,`DQA Demo | ${requestId}`,{x:margin,y:H-margin,font,size:8});
+   layout.draw(page,`Demo PDF｜${number}｜圖片簽名無正式電子簽章效力`,{x:margin,y:16,font,size:7});
+   if(footerLogo)page.drawImage(footerLogo,{x:W/2-52,y:22,width:104,height:25});
    for(let row=start;row<=end;row++)for(let col=1;col<=bounds.columns;col++){
     const cell=sheet.getCell(row,col);if(cell.isMerged&&cell.master.address!==cell.address)continue;
     const merge=merges.find(item=>item.address===cell.address),lastRow=merge?.bottom||row,lastCol=merge?.right||col;
     if(lastCol>bounds.columns)continue;
     if(lastRow>end)throw Error(`工作表「${name}」${cell.address} 的合併範圍跨越分頁，請調整分頁後再封存。`);
     const x=xs[col-1],y=ys[row-start],width=xs[lastCol]-x,height=y-ys[lastRow-start+1];
-    if(cell.border&&Object.keys(cell.border).length)page.drawRectangle({x,y:y-height,width,height,borderWidth:.3,borderColor:rgb(.4,.4,.4)});
+    const argb=cell.fill?.fgColor?.argb,hex=argb?.slice(-6),color=hex?.length===6?rgb(parseInt(hex.slice(0,2),16)/255,parseInt(hex.slice(2,4),16)/255,parseInt(hex.slice(4,6),16)/255):undefined;
+    if(cell.border&&Object.keys(cell.border).length||color)page.drawRectangle({x,y:y-height,width,height,borderWidth:.3,borderColor:rgb(.4,.4,.4),...(color?{color}:{})});
+    if(cell.border?.diagonal?.up)page.drawLine({start:{x,y:y-height},end:{x:x+width,y},thickness:.3,color:rgb(.4,.4,.4)});
+    if(cell.border?.diagonal?.down)page.drawLine({start:{x,y},end:{x:x+width,y:y-height},thickness:.3,color:rgb(.4,.4,.4)});
     const value=cell.value instanceof Date?cell.value.toISOString().slice(0,10):cellText(cell);if(!String(value).trim())continue;
     let textWidth=width;
     if(!merge&&!cell.alignment?.wrapText){for(let next=col+1;next<=bounds.columns;next++){if(String(cellText(sheet.getCell(row,next))).trim())break;textWidth=xs[next]-x;}}
@@ -40,7 +48,7 @@ export async function drawGeneralReport({book,document,font,rgb,requestId}){
     if(lines.length*(size+1)>height+1)throw Error(`工作表「${name}」${cell.address} 的文字超出 PDF 欄位，請縮短內容或調整列高。`);
     const bottom=cell.alignment?.vertical==='bottom',center=cell.alignment?.vertical==='middle';
     const textHeight=lines.length*(size+1),offset=bottom?height-textHeight-1:center?(height-textHeight)/2:1;
-    lines.forEach((line,index)=>{if(!line)return;const align=cell.alignment?.horizontal,tw=font.widthOfTextAtSize(line,size);page.drawText(line,{x:align==='center'?x+(width-tw)/2:align==='right'?x+width-tw-2:x+2,y:y-offset-size-index*(size+1),font,size});});
+    lines.forEach((line,index)=>{if(!line)return;const align=cell.alignment?.horizontal,tw=layout.width(line,size);layout.draw(page,line,{x:align==='center'?x+(textWidth-tw)/2:align==='right'?x+textWidth-tw-2:x+2,y:y-offset-size-index*(size+1),font,size});});
    }
    for(const image of sheet.getImages()){
     const row=Math.floor(image.range.tl.row)+1,col=Math.floor(image.range.tl.col);if(row<start||row>end)continue;

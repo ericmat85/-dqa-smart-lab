@@ -148,7 +148,8 @@ test('report is returned, revised, signed by two supervisors and archived with r
   if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
   await page.getByRole('button',{name:'提交報告',exact:true}).click();
   await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+  await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
+  await expect(page.locator('.report-review-status')).toContainText('通過 AI 全檢（Demo 規則模擬）');
   await page.getByRole('button',{name:'提交',exact:true}).click();
   await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
  }
@@ -165,8 +166,12 @@ test('report is returned, revised, signed by two supervisors and archived with r
  }
  await requestLogin(page,true);await page.getByRole('button',{name:'查看',exact:true}).first().click();
  await expect(page.getByText('Demo 圖片簽名，不具正式電子簽章效力；結案 PDF 順序：委託單 → 試驗報告。')).toBeVisible();
+ await expect(page.getByRole('button',{name:'下載簽核 Excel',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
+ expect(await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');return Boolean((await getReport(id)).pdf);},id)).toBe(false);
  await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
+ await expect(page.getByRole('button',{name:'下載簽核 Excel',exact:true})).toHaveCount(0);
  const downloadEvent=page.waitForEvent('download');await page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true}).click();
  const download=await downloadEvent;await download.saveAs(test.info().outputPath('closure-demo.pdf'));expect(download.suggestedFilename()).toBe(`${id}-結案文件-DEMO.pdf`);
  const info=await page.evaluate(async id=>{
@@ -174,6 +179,14 @@ test('report is returned, revised, signed by two supervisors and archived with r
  },id);
  expect(info.stage).toBe('archived');expect(info.sections.map(row=>row.kind)).toEqual(['request','report']);expect(info.revision).toBe(2);expect(info.history.some(row=>row.action.includes('退回'))).toBe(true);
  await page.reload();await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已結案');
+ await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();
+ await expect(page.locator('.archive-page')).toContainText(id);await expect(page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true})).toBeVisible();
+ const fileEvent=page.waitForEvent('download');await page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true}).click();expect((await fileEvent).suggestedFilename()).toBe(`${id}-結案文件-DEMO.pdf`);
+ await page.goto('/lab/login');if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
+ await page.locator('.lab-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);
+ await page.locator('.archive-page').getByRole('button',{name:'查看 PDF',exact:true}).click();await expect(page.getByRole('dialog',{name:'結案 PDF 預覽'})).toBeVisible();await page.getByRole('button',{name:'關閉預覽',exact:true}).click();
+
 });
 
 test('two-machine scheduling checks space and buffers and saves a sample allocation',async({page})=>{
@@ -201,7 +214,8 @@ test('a stale draft editor cannot overwrite a newer saved revision',async({page}
 });
 
 test('general performance upload recognizes the supplied blank template and submits filled data in its original layout',async({page})=>{
- test.setTimeout(60000);
+ test.setTimeout(120000);
+ await page.setViewportSize({width:1366,height:768});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
  await page.getByRole('button',{name:'建立已完成範例（假資料）',exact:true}).click();
@@ -210,20 +224,81 @@ test('general performance upload recognizes the supplied blank template and subm
  });
  await page.reload();await page.getByRole('button',{name:'提交報告',exact:true}).click();
  await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
+ const quickButton=await page.getByRole('button',{name:'DEMO 填入',exact:true}).boundingBox();
+ expect(quickButton.y).toBeGreaterThan(0);expect(quickButton.y+quickButton.height).toBeLessThan(768);
+ expect((await page.locator('.report-quickfill-panel').boundingBox()).height).toBeLessThan(200);
  const download=page.waitForEvent('download');await page.getByRole('button',{name:'下載本案 Excel 範本',exact:true}).click();
  expect((await download).suggestedFilename()).toContain(id);
- await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+ await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
  await expect(page.getByText(id+'-DEMO.xlsx',{exact:true})).toBeVisible();
+ await expect(page.locator('.report-review-status')).toContainText('通過 AI 全檢（Demo 規則模擬）');
+ await page.locator('.report-quickfill-panel').scrollIntoViewIfNeeded();
+ await page.screenshot({path:test.info().outputPath('quickfill-review-ready.png')});
+ expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已完成');
+ const preparedDownload=page.waitForEvent('download');await page.getByRole('button',{name:'下載目前 Excel 報告',exact:true}).click();expect((await preparedDownload).suggestedFilename()).toBe(id+'-DEMO.xlsx');
  await expect(page.locator('#lab-report-file')).toBeEnabled();
  await page.locator('#lab-report-file').setInputFiles('public/templates/general-performance-v1.xlsx');
+ await expect(page.locator('.report-review-status')).toContainText('尚未檢查');
+ await page.getByRole('button',{name:'重新檢查報告',exact:true}).click();
+ await expect(page.locator('.report-review-status')).toContainText('未通過檢查');
  await page.getByRole('button',{name:'提交',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('報告未通過');
  await expect(page.locator('.report-checks')).toContainText('報告編號對應本案');
  await expect(page.locator('.report-checks')).toContainText('合格／不合格擇一勾選');
  await expect(page.getByText(/16,?384 欄/)).toHaveCount(0);
- await page.getByRole('button',{name:'DEMO 填寫報告',exact:true}).click();
+ await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
  await page.getByRole('button',{name:'提交',exact:true}).click();
  await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
  const meta=await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).reportInfo,id);
  expect(meta.check.profileId).toBe('general-performance-v1');expect(errors).toEqual([]);
+ await expect(page.locator('.report-demo-review-badge')).toContainText('通過 AI 全檢（Demo 規則模擬）');
+ await page.reload();await expect(page.locator('.report-demo-review-badge')).toContainText('通過 AI 全檢（Demo 規則模擬）');
+ for(const email of ['level2@example.com','level3@example.com']){
+  await lmsLogin(page,email);await page.locator('.sidebar').getByRole('button',{name:/試驗委託/}).click();
+  await page.getByRole('button',{name:id,exact:true}).click();
+  await expect(page.getByRole('dialog',{name:id+'｜委託單資訊'})).toBeVisible();
+  await expect(page.getByText('試驗執行結果',{exact:true})).toBeVisible();await expect(page.getByRole('list',{name:'簽核流程',exact:true})).toBeVisible();
+  await expect(page.locator('.report-review-dialog')).toHaveCount(0);await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();
+  await page.getByRole('button',{name:'審核',exact:true}).click();
+  const workbook=page.getByRole('region',{name:'Excel 報告唯讀檢視',exact:true});
+  expect((await page.locator('.report-review-dialog').boundingBox()).width).toBeGreaterThan(1000);
+  await expect(workbook.getByRole('tab',{name:'1.1一般性能試驗-1',exact:true})).toBeVisible();
+  await expect(workbook.locator('[data-cell="F13"]')).toHaveText('DEMO-E2E-001');
+  await expect(workbook.locator('[data-cell="AF54"]')).toContainText('陳');
+  await expect(workbook.locator('img')).toHaveCount(email==='level2@example.com'?1:2);
+  await expect(page.locator('.report-review-dialog>header')).toContainText(email==='level2@example.com'?'第二階主管審核':'第三階主管審核');
+  await page.screenshot({path:test.info().outputPath(email==='level2@example.com'?'excel-cover-stage2.png':'excel-cover-stage3.png')});
+  if(email==='level3@example.com')await expect(workbook.locator('[data-cell="S54"]')).toContainText('二階');
+  await workbook.getByRole('tab',{name:'1.1一般性能試驗-2',exact:true}).click();
+  await expect(workbook.locator('[data-cell="Q147"]')).toHaveText('0～2 Ω');await expect(workbook.locator('[data-cell="Q193"]')).toHaveText('4.90');
+  await workbook.locator('.workbook-scroll').evaluate(el=>{el.scrollTop=el.scrollHeight;el.scrollLeft=el.scrollWidth;});
+  await expect(workbook.locator('[data-cell="AK228"]')).toHaveText('N/A');
+  for(const [width,height]of [[1366,768],[1440,900],[1920,1080]]){
+   await page.setViewportSize({width,height});const footer=await page.locator('.report-review-dialog>footer').boundingBox();expect(footer.y).toBeGreaterThanOrEqual(0);expect(footer.y+footer.height).toBeLessThanOrEqual(height);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({width:1366,height:768});
+  expect(await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');return Boolean((await getReport(id)).pdf);},id)).toBe(false);
+  await page.screenshot({path:test.info().outputPath(email==='level2@example.com'?'excel-review-stage2.png':'excel-review-stage3.png')});
+  await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
+ }
+ await requestLogin(page,true);await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
+ await page.locator('.rq-sidebar').getByRole('button',{name:'全部委託單',exact:true}).click();await page.getByRole('button',{name:'查看',exact:true}).first().click();
+ await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'確認查閱並封存',exact:true}).click();await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toBeVisible({timeout:30000});
+ const archived=await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');const report=await getReport(id);return {stage:report.stage,sections:report.pdfSections};},id);expect(archived.stage).toBe('archived');expect(archived.sections.find(row=>row.kind==='report').pageCount).toBe(7);
+ await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);expect(errors).toEqual([]);
+ await page.locator('.archive-page').getByRole('button',{name:id,exact:true}).click();await expect(page.getByRole('dialog',{name:id+'｜委託單資訊'})).toBeVisible();await expect(page.getByRole('list',{name:'簽核流程',exact:true})).toBeVisible();await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();
+ const archiveDownload=page.waitForEvent('download');await page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true}).click();await (await archiveDownload).saveAs(test.info().outputPath('general-archived-demo.pdf'));
+ await page.screenshot({path:test.info().outputPath('report-archive-page.png')});
+
+});
+
+test('custom role archive entry is hidden unless explicitly granted',async({page})=>{
+ await page.goto('/');await page.evaluate(()=>{
+  const accounts=JSON.parse(localStorage.getItem('dqa-shared-demo-accounts-v1'));accounts.push({id:'ARCHIVE-LIMITED',name:'Demo archive reader',email:'archive-limited@example.com',role:'ARCHIVE-LIMITED',status:'啟用中',department:'DEMO'});localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));
+  localStorage.setItem('dqa-custom-roles-v1',JSON.stringify([{id:'A',name:'ARCHIVE-LIMITED',level:0,pages:['dashboard'],manageAccounts:false}]));
+ });
+ await lmsLogin(page,'archive-limited@example.com');await expect(page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true})).toHaveCount(0);
+ await page.evaluate(()=>{const roles=JSON.parse(localStorage.getItem('dqa-custom-roles-v1'));roles[0].pages.push('archive');localStorage.setItem('dqa-custom-roles-v1',JSON.stringify(roles));});
+ await page.reload();await page.locator('.sidebar').getByRole('button',{name:'報告資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
 });
