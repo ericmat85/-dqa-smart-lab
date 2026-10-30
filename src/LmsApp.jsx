@@ -1,3 +1,4 @@
+import {PORTAL_TITLES} from './portalLabels.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import {canControlTrial,isActiveTrial,trialPauseAvailability} from './trialPermissions.mjs';
 import {setTrialPaused} from './trialControls.mjs';
@@ -109,7 +110,7 @@ const DEMO_PASSWORD = "demo1234";
 
 
 
-function CompanyBrand() { return <CompanyBrandLogo/>; }
+function CompanyBrand({dark=false}) { return <CompanyBrandLogo dark={dark}/>; }
 
 function ThemeToggle({ dark, onToggle }) {
 
@@ -249,7 +250,7 @@ function HomePage({ dark, onToggle, onEnter }) {
 
       <header className="home-header">
 
-        <CompanyBrand />
+        <CompanyBrand dark={dark}/>
 
         <ThemeToggle dark={dark} onToggle={onToggle} />
 
@@ -429,7 +430,7 @@ export function LoginPage({
 
       <header className="home-header">
 
-        <CompanyBrand />
+        <CompanyBrand dark={dark}/>
 
         <ThemeToggle dark={dark} onToggle={onToggle} />
 
@@ -439,15 +440,13 @@ export function LoginPage({
 
       <main className="login-card">
 
-        <CompanyBrandLogo dark={dark}/>
-
         <p className="eyebrow">SECURE SYSTEM ACCESS</p>
 
-        <h1>{system.title}</h1>
+        <h1>{PORTAL_TITLES[system.id]||system.title}</h1>
 
         <p className="login-description">
 
-          {preview ? "驗證計畫系統暫未開放" : "請輸入您的電子郵件與密碼以繼續"}
+          {preview ? "設計品質管理暫未開放" : "請輸入您的電子郵件與密碼以繼續"}
 
         </p>
 
