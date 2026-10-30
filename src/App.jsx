@@ -1,3 +1,4 @@
+import {PORTAL_TITLES} from './portalLabels.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import './PortalHome.css';
 import {CASE_RESET_KEY} from './resetCases.mjs';
@@ -59,7 +60,7 @@ function ValidationLogin({ onBack }) {
   const { dark, toggleTheme } = useSystemTheme();
   return (
     <LoginPage
-      system={{ id: 'validation', title: 'DQA 設計品質管理' }}
+      system={{ id: 'validation', title: PORTAL_TITLES.validation }}
       dark={dark}
       onToggle={toggleTheme}
       onBack={onBack}
@@ -69,10 +70,10 @@ function ValidationLogin({ onBack }) {
 }
 
 const portalSystems = [
-  {path:'request',number:'01',title:'電子委託系統',role:'委託者・委託者主管',description:'從試驗需求到報告查閱，追蹤每一個關鍵進度。',action:'進入電子委託系統'},
-  {path:'lms',number:'02',title:'DQA 實驗室管理系統',role:'主管・管理人員',description:'審查需求、安排資源，讓試驗與設備有序運作。',action:'進入 DQA 實驗室管理系統'},
-  {path:'lab',number:'03',title:'COLONG 實驗室',role:'實驗室工程師・副工程師',description:'接收試驗、掌握設備狀態，完成報告提交。',action:'進入 COLONG 實驗室'},
-  {path:'validation',number:'04',title:'設計品質管理',role:'展示入口・尚未開發',description:'產品驗證規劃的未來工作空間。',action:'查看展示入口'},
+  {path:'request',number:'01',title:PORTAL_TITLES.request,role:'委託者・委託者主管',description:'從試驗需求到報告查閱，追蹤每一個關鍵進度。',action:'進入電子委託系統'},
+  {path:'lms',number:'02',title:PORTAL_TITLES.lms,role:'主管・管理人員',description:'審查需求、安排資源，讓試驗與設備有序運作。',action:'進入 DQA 實驗室管理系統'},
+  {path:'lab',number:'03',title:PORTAL_TITLES.lab,role:'實驗室工程師・副工程師',description:'接收試驗、掌握設備狀態，完成報告提交。',action:'進入 COLONG 實驗室'},
+  {path:'validation',number:'04',title:PORTAL_TITLES.validation,role:'展示入口・尚未開發',description:'產品驗證規劃的未來工作空間。',action:'查看展示入口'},
 ];
 function PortalIcon({kind='arrow'}) {
  const paths={request:'M8 3H5v18h14V7l-4-4H8m7 0v5h4M8 12h8M8 16h5',lms:'M4 4h16v16H4zM4 10h16M10 4v16M14 4v16M4 14h16',lab:'M9 3h6M10 3v7l-6 9a1.3 1.3 0 001 2h14a1.3 1.3 0 001-2l-6-9V3M7 15h10',validation:'M9 6h11M9 12h11M9 18h11M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',arrow:'M6 18 18 6M6 6h12v12'};

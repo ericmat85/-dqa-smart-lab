@@ -42,7 +42,7 @@ async function useSignature(page){
 }
 test('four portals, direct links, return and browser history stay in the correct system',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- for(const [name,path,title] of [['電子委託系統','request','電子委託單系統'],['DQA 實驗室管理系統','lms','DQA LMS'],['COLONG 實驗室','lab','造隆實驗室系統'],['設計品質管理','validation','DQA 設計品質管理']]){
+ for(const [name,path,title] of [['電子委託系統','request','電子委託系統'],['DQA 實驗室管理系統','lms','DQA 實驗室管理系統'],['COLONG 實驗室','lab','COLONG 實驗室'],['設計品質管理','validation','設計品質管理']]){
   await page.goto('/');await page.getByRole('button',{name:new RegExp(name)}).click();
   await expect(page).toHaveURL(new RegExp(`/${path}/login$`));await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();
   for(const logo of await page.locator('.company-brand-logo img').all())await expect(logo).toHaveAttribute('src',/colong-ie-transparent.png$/);
