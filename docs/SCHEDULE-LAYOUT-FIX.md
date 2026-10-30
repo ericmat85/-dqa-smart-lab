@@ -20,3 +20,7 @@
 使用者回報的 `dqa-smart-lab-git-codex-demo-mvp-nov6-ericmat85.vercel.app` 是第一階段分支別名，該分支不含本次 UI 修正；刷新舊分支網址不會切換到修復分支。驗收時應在 Vercel 部署列表篩選 `codex/fix-schedule-layout`，確認包含 `037a758` 或後續提交，再開啟其 Preview。無須關閉 Authentication。
 
 另補測 1280×640、960×540 的有效 CSS viewport（縮放情境），兩項通過。這不是原生 Windows 實機測試。環境代理拒絕讀取 Vercel 網址，故未宣稱遠端版本已驗證。
+
+## 最新介面選擇
+
+依使用者最新指示，取消狀態／操作欄凍結，使用一般表格；所有欄位隨獨立容器水平捲動，AI 避讓空間保留。原固定欄說明為歷史版本，最新驗收以一般捲動為準。

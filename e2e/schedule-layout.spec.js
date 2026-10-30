@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
 for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,540]]){
- test(`schedule layout ${width}x${height}: local scroll, sticky actions, groups and AI clearance`,async({page})=>{
+ test(`schedule layout ${width}x${height}: ordinary table scrolling, groups and AI clearance`,async({page})=>{
   await page.setViewportSize({width,height});
   await page.addInitScript(({accounts,equipment})=>{
    localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));
@@ -25,7 +25,11 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
    const atStart=await button.boundingBox();
    await region.evaluate(element=>{element.scrollLeft=element.scrollWidth;});
    const atEnd=await button.boundingBox();
-   expect(Math.abs(atStart.x-atEnd.x)).toBeLessThanOrEqual(2);expect(before.width).toBeGreaterThan(50);
+   expect(before.width).toBeGreaterThan(50);
+   await expect(region.locator('thead th').last()).not.toHaveCSS('position','sticky');
+   await expect(region.locator('thead th').last()).not.toHaveCSS('position','fixed');
+   await expect(region.locator('tbody tr').first().locator('td').last()).toHaveCSS('position','static');
+   if(data.scroll>data.client)expect(atStart.x-atEnd.x).toBeGreaterThan(2);
    const launcher=await page.getByRole('button',{name:'展開AI智能助理'}).boundingBox();
    expect(atEnd.x+atEnd.width).toBeLessThanOrEqual(launcher.x);
    await button.click();await expect(page.getByRole('heading',{name:/編輯試驗排程/})).toBeVisible();

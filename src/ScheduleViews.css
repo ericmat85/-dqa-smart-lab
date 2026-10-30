@@ -9,9 +9,8 @@
 .schedule-table-scroll .schedule-table th,.schedule-table-scroll .schedule-table td{white-space:normal;overflow-wrap:anywhere}
 .schedule-table th:first-child{width:180px}
 .schedule-table th:nth-child(7){width:220px}
-.schedule-table th:nth-last-child(2),.schedule-table tbody td:nth-last-child(2){position:sticky;right:112px;width:132px;min-width:132px;max-width:132px;z-index:2;background:var(--surface,#fff);box-shadow:-4px 0 5px #14284610}
-.schedule-table th:last-child,.schedule-table tbody td:last-child{position:sticky;right:0;width:112px;min-width:112px;max-width:112px;z-index:2;background:var(--surface,#fff)}
-.schedule-table th:nth-last-child(-n+2){z-index:3;background:var(--table-head,#eef3fa)}
+.schedule-table th:nth-last-child(2){width:132px}
+.schedule-table th:last-child{width:112px}
 .schedule-table .schedule-edit-btn{white-space:nowrap;max-width:100%}
 .schedule-table td>small{display:block}
 @media(max-width:600px){.is-schedule-page .dashboard-content{padding-right:74px}}
