@@ -25,5 +25,5 @@ test('reference documents and unsupported report layouts give actionable errors'
  const Excel=await excelModule(),book=new Excel.Workbook();book.addWorksheet('reference').getCell('XFD1').font={bold:true};
  const bytes=await book.xlsx.writeBuffer();
  await assert.rejects(inspectReport(bytes,'REQ','一般性能試驗檢查篩檢條件表_V0.0.xlsx'),/參考表/);
- await assert.rejects(inspectReport(bytes,'REQ','正式報告.xlsx'),/正式報告版型尚未接入/);
+ await assert.rejects(inspectReport(bytes,'REQ','正式報告.xlsx'),/此檔版型無法安全套用簽名/);
 });

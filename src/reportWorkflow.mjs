@@ -25,10 +25,10 @@ export async function submitReportWorkflow({requestId,file,signature,actorId,onP
  const epoch=caseResetVersion(storage),started=Date.now(),account=actor(storage,actorId),source=request(storage,requestId),lab=read(storage,'dqa_lab_demo_requests_v1').find(row=>row.id===requestId);
  if(!accessSystem(account,'lab',storage)||!source||!lab||lab.status!=='已完成')throw Error('案件尚未完成、已提交或此帳號無提交權限。');
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('請先完成電子簽名。');if(!file)throw Error('請選擇 Excel 檔案。');
- const cells={...DEFAULT_SIGNATURE_CELLS};
  const existing=await repository.get(requestId);if(existing?.stage&&existing.stage!=='returned')throw Error('此報告已提交，請重新整理案件狀態。');
- onProgress(20,'讀取 Excel 檔案');const bytes=new Uint8Array(await file.arrayBuffer());onProgress(45,'檢查委託編號、試驗結果與公式');const check=await inspectReport(bytes,requestId,file.name);
+ onProgress(20,'讀取 Excel 檔案');const bytes=new Uint8Array(await file.arrayBuffer());onProgress(45,'檢查委託編號、試驗結果與公式');const check=await inspectReport(bytes,requestId,file.name,source);
  if(!check.ok){const error=Error('報告未通過防呆檢查，請修正後重新提交。');error.check=check;throw error;}
+ const cells=check.cells||{...DEFAULT_SIGNATURE_CELLS};
  // Validate signature anchors against the actual sheet before a reviewer can get stuck on invalid locations.
  await stampReport(bytes,{sheetName:check.sheetName,cells,level:2,signature,actor:'位置驗證',at:new Date().toISOString()});
  const at=new Date().toISOString();
@@ -36,7 +36,7 @@ export async function submitReportWorkflow({requestId,file,signature,actorId,onP
  const issued=await stampReport(bytes,{sheetName:check.sheetName,cells,level:'executor',signature,actor:account.name,at});
  onProgress(80,'確認簽名位置及檔案可讀性');await new Promise(resolve=>setTimeout(resolve,Math.max(0,minimumMs-(Date.now()-started))));ensureEpoch(storage,epoch);
  if(!accessSystem(actor(storage,actorId),'lab',storage)||read(storage,'dqa_lab_demo_requests_v1').find(row=>row.id===requestId)?.status!=='已完成')throw Error('帳號權限或案件狀態已變更。');
- const report={requestId,revision:crypto.randomUUID(),stage:'level2',fileName:file.name,original:buffer(bytes),signedExcel:buffer(issued),sheetName:check.sheetName,cells,submitterId:account.id,submitter:account.name,submitterSignature:signature,submittedAt:at,approvals:[],revisionNumber:(existing?.revisionNumber||0)+1,documentKind:(source.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告',priorApprovals:[...(existing?.priorApprovals||[]),...(existing?.approvals||[])],check,history:[...(existing?.history||[]),{id:crypto.randomUUID(),at,actor:account.name,action:'提交報告並通過 Demo 防呆檢查'}]};
+ const report={requestId,revision:crypto.randomUUID(),stage:'level2',fileName:file.name,original:buffer(bytes),signedExcel:buffer(issued),sheetName:check.sheetName,profileId:check.profileId,cells,submitterId:account.id,submitter:account.name,submitterSignature:signature,submittedAt:at,approvals:[],revisionNumber:(existing?.revisionNumber||0)+1,documentKind:(source.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告',priorApprovals:[...(existing?.priorApprovals||[]),...(existing?.approvals||[])],check,history:[...(existing?.history||[]),{id:crypto.randomUUID(),at,actor:account.name,action:'提交報告並通過 Demo 防呆檢查'}]};
  await repository.save(report,existing?.revision??null,epoch);ensureEpoch(storage,epoch);projectReportState(report,storage);onProgress(100,'已提交 LMS 二階主管審核');return reportMetadata(report);
 }
 export async function approveReportWorkflow({requestId,actorId,signature,expectedRevision},storage=window.localStorage,repository=repo){
