@@ -11,13 +11,15 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
    localStorage.setItem('dqa-schedules-demo-v1',JSON.stringify(Array.from({length:54},(_,index)=>({id:`LAYOUT-${index}`,requestId:`REQ-LAYOUT-${index}`,productCode:'DEMO-產品代碼',title:'低溫試驗及長文字可完整換行'.repeat(6),quantity:2,eq:'環境試驗箱 #03',equipmentId:'EQ-003',ownerId:'U003',owner:'陳工程師',sampleCode:'SAMPLE-LAYOUT-TEST',time:'2099-11-07',end:'2099-11-08',status:'已排程'}))));
    sessionStorage.setItem('dqa-lms-account-id','U001');
   },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
-  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();
+  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();const reference=await page.locator('.dashboard-content>.panel').boundingBox();await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();
+  const panel=await page.locator('.dashboard-content>.panel').boundingBox();expect(Math.abs(panel.x-reference.x)).toBeLessThanOrEqual(1);expect(Math.abs(panel.width-reference.width)).toBeLessThanOrEqual(1);
+  await expect(page.locator('.sidebar')).toHaveCSS('background-color','rgb(96, 102, 109)');const logo=page.locator('.sidebar .company-brand-logo');await expect(logo).toHaveCSS('background-color','rgba(0, 0, 0, 0)');expect((await logo.boundingBox()).width).toBeLessThanOrEqual(170);
   async function checkTable(){
    const region=page.getByRole('region',{name:'排程表格'}).filter({visible:true}).first();
    await expect(region).toBeVisible();
    await expect(region.locator('tbody tr').first().locator('td').nth(2)).toHaveCSS('white-space','normal');
    const data=await region.evaluate(element=>({scroll:element.scrollWidth,client:element.clientWidth,right:element.getBoundingClientRect().right,pageWidth:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth}));
-   expect(data.pageWidth).toBeLessThanOrEqual(data.viewport+1);expect(data.right).toBeLessThan(width-56);
+   expect(data.pageWidth).toBeLessThanOrEqual(data.viewport+1);expect(data.right).toBeLessThanOrEqual(width);
    const button=region.getByRole('button',{name:'編輯排程',exact:true}).first();
    await button.scrollIntoViewIfNeeded();await button.click({trial:true});
    const before=await button.boundingBox();
@@ -27,7 +29,7 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
    await expect(region.locator('tbody tr').first().locator('td').last()).toHaveCSS('position','static');
    const atEnd=before;
    const launcher=await page.getByRole('button',{name:'展開AI智能助理'}).boundingBox();
-   expect(atEnd.x+atEnd.width).toBeLessThanOrEqual(launcher.x);
+   expect(atEnd.x<launcher.x+launcher.width&&atEnd.x+atEnd.width>launcher.x&&atEnd.y<launcher.y+launcher.height&&atEnd.y+atEnd.height>launcher.y).toBe(false);
    await button.click();await expect(page.getByRole('heading',{name:/編輯試驗排程/})).toBeVisible();
    await expect(page.getByLabel('設備選擇')).toBeVisible();
    await page.getByRole('dialog',{name:/編輯試驗排程/}).getByRole('button',{name:'關閉',exact:true}).click();

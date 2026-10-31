@@ -10,17 +10,17 @@ async function login(page){
  },INITIAL_ACCOUNTS);
  await page.goto('/request/login');await page.getByRole('button',{name:'登入系統',exact:false}).click();await expect(page).toHaveURL(/request\/dashboard$/);
 }
-test('requester has no review entry; request and borrow use the same floating frame at desktop sizes',async({page})=>{
+test('requester has no review entry; request uses a standalone editor and borrow remains an accessible floating form',async({page})=>{
  await login(page);
  await expect(page.locator('.rq-sidebar').getByRole('button',{name:'待簽核/查閱',exact:false})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'前往查閱清單'})).toHaveCount(0);
  await expect(page.getByRole('tab',{name:'簽核清單',exact:true})).toHaveCount(0);
  for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[390,844]]){
-  await page.setViewportSize({width,height});await page.locator('.rq-sidebar').getByRole('button',{name:'新增委託單',exact:false}).click();
-  const request=page.getByRole('dialog',{name:'新增委託單',exact:true});await expect(request).toBeVisible();const rq=await request.boundingBox();expect(rq.width).toBeLessThan(width);expect(rq.y).toBeGreaterThan(0);expect(rq.y+rq.height).toBeLessThanOrEqual(height);
+  await page.setViewportSize({width,height});if(width<1000)await page.getByRole('button',{name:'切換功能選單'}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'新增委託單',exact:false}).click();
+  const request=page.getByRole('region',{name:'委託單編輯頁'});await expect(request).toBeVisible();const rq=await request.boundingBox();expect(rq.width).toBeLessThan(width);expect(rq.y).toBeGreaterThan(0);
   await expect(request.getByRole('button',{name:'送出主管簽核 →',exact:true})).toBeVisible();await page.keyboard.press('Escape');await expect(request).toHaveCount(0);expect(await page.locator('#root').evaluate(el=>el.inert)).toBe(false);
-  await page.locator('.rq-sidebar').getByRole('button',{name:'申請借用',exact:false}).click();await page.getByRole('button',{name:'＋申請借用',exact:true}).click();
-  const borrow=page.getByRole('dialog',{name:'申請借用',exact:true});await expect(borrow).toBeVisible();const br=await borrow.boundingBox();expect(br.width).toBe(rq.width);expect(br.y).toBeGreaterThan(0);expect(br.y+br.height).toBeLessThanOrEqual(height);
+  if(width<1000)await page.getByRole('button',{name:'切換功能選單'}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'申請借用',exact:false}).click();await page.getByRole('button',{name:'＋申請借用',exact:true}).click();
+  const borrow=page.getByRole('dialog',{name:'申請借用',exact:true});await expect(borrow).toBeVisible();const br=await borrow.boundingBox();expect(br.width).toBeLessThan(width);expect(br.y).toBeGreaterThan(0);expect(br.y+br.height).toBeLessThanOrEqual(height);
   await expect(borrow.getByRole('button',{name:'送出借用申請 →',exact:true})).toBeVisible();await page.screenshot({path:test.info().outputPath(`borrow-modal-${width}.png`)});await page.keyboard.press('Escape');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
 });
