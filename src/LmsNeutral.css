@@ -10,7 +10,7 @@
 .dashboard-shell.is-schedule-page .dashboard-content{padding:22px;box-sizing:border-box}
 .dashboard-shell .dashboard-content>.panel{width:100%;max-width:none;box-sizing:border-box}
 .dashboard-shell .template-page{width:100%;max-width:none;box-sizing:border-box}
-.dashboard-shell :is(button,[role=button],input,select,textarea):hover,
+.dashboard-shell :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])),
 [data-system=lms]:is(.system-header-actions,.shared-personal-settings) :is(button,input,select,textarea):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 .dashboard-shell :is(button,input,select,textarea):focus-visible,[data-system=lms] :is(button,input,select,textarea):focus-visible{outline:2px solid #737b85;outline-offset:3px}
 .dashboard-shell :is(.template-btn,.schedule-edit-btn,.intelligent-launcher):not(.danger):not(.secondary){background:#737b85!important;border-color:#737b85!important;color:#fff!important}
@@ -40,7 +40,7 @@
 #root .dashboard-shell.theme-dark{--night-fill:#737b85;--night-selected:#797f86;--night-accent:#fff}
 #root .dashboard-shell.theme-dark .sidebar button{color:#fff!important}
 #root .dashboard-shell.theme-dark .sidebar button:is(.active,:hover){background:#797f86!important;color:#fff!important}
-#root .dashboard-shell :is(button,[role=button],input,select,textarea):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+#root .dashboard-shell :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 #root .dashboard-shell .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
 #root .dashboard-shell .system-header-actions .avatar{background:#ede9fe;color:#6d5bd0}
 
@@ -49,7 +49,7 @@
 #root .dashboard-shell.theme-dark table th[aria-sort]{background:#34304e!important;color:#c4b5fd!important}
 #root .dashboard-shell .schedule-chart-button{background:#737b85!important;color:#fff!important;border-color:#737b85!important}
 #root .dashboard-shell .schedule-chart-button svg{color:inherit;stroke:currentColor}
-#root .dashboard-shell.theme-dark :is(button,[role=button],input,select,textarea):hover:not(:disabled):not(.profile-button){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+#root .dashboard-shell.theme-dark :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])):not(:disabled):not(.profile-button){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 
 /* Neutral page canvas, white SVG navigation, and a purple assistant accent. */
 #root .dashboard-shell.theme-light .dashboard-content{background:#f3f4f6}
@@ -59,3 +59,9 @@
 .dashboard-shell #request-review-panel:focus-visible{outline:2px solid #737b85;outline-offset:3px}
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher{background:#7c3aed!important;border-color:#7c3aed!important;color:#fff!important}
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher:hover{background:#6d28d9!important}
+
+/* Classification tabs are the orange-red exception to neutral hover frames. */
+#root .dashboard-shell [role=tab]:hover:not(:disabled){color:#c2410c!important;background:#fff2eb!important;border-color:#ea580c!important;box-shadow:0 0 0 1px #ea580c!important}
+#root .dashboard-shell [role=tab]:hover:not(:disabled) :is(strong,span,svg){color:inherit!important}
+#root .dashboard-shell [role=tab]:hover:not(:disabled)::after{background:#ea580c!important}
+#root .dashboard-shell.theme-dark [role=tab]:hover:not(:disabled){color:#ff9a70!important;background:#402a23!important}
