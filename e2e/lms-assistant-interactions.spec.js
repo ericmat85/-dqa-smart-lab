@@ -18,7 +18,7 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed 
  await expect(page.locator('.lms-assistant-dock')).toHaveCount(0);
  const symbol=await launcher.locator('.intelligent-launcher-symbol').boundingBox(),label=await launcher.locator('.intelligent-launcher-label').boundingBox();
  expect(symbol.x+symbol.width).toBeLessThanOrEqual(label.x);expect(Math.abs(symbol.y+symbol.height/2-label.y-label.height/2)).toBeLessThanOrEqual(1);
- expect(position.y).toBe(height-56);expect(position.x).toBe(width-84);
+ expect(position.y).toBe(height-56);expect(position.x).toBe(width-68);
  for(const name of ['儀錶板','試驗委託','排程管理']){
   await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
   await expect(avatar).toHaveCSS('background-color','rgb(237, 233, 254)');
@@ -42,7 +42,7 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed 
  await expect(headers.nth(1)).toHaveCSS('color','rgb(196, 181, 253)');
  await launcher.click();const panel=await page.getByRole('complementary',{name:'AI智能助理'}).boundingBox();
  expect(panel.y).toBeGreaterThanOrEqual(0);expect(panel.x+panel.width).toBeLessThanOrEqual(width);
- expect(panel.y+panel.height).toBeLessThanOrEqual(position.y);
+ expect(panel.y+panel.height).toBeLessThanOrEqual(height);
  expect(await page.pageErrors()).toEqual([]);
 });
 
@@ -67,4 +67,23 @@ test('FAQ focuses the newest turn; replies append and scroll down without moving
  await page.getByRole('button',{name:'展開AI智能助理'}).click();await expect(articles).toHaveCount(3);
  await expect.poll(()=>body.evaluate(el=>el.scrollHeight-el.clientHeight-el.scrollTop)).toBeLessThanOrEqual(2);
  expect(await page.pageErrors()).toEqual([]);
+});
+
+
+test('AI edge launcher moves vertically only and doubles its width while expanded',async({page})=>{
+ await page.setViewportSize({width:1280,height:720});await page.goto('/lms/dashboard');
+ const launcher=page.locator('.intelligent-launcher');
+ const before=await launcher.boundingBox();
+ await page.mouse.move(before.x+20,before.y+20);await page.mouse.down();
+ await page.mouse.move(before.x-180,before.y-180,{steps:12});await page.mouse.up();
+ const moved=await launcher.boundingBox();
+ expect(moved.x).toBe(before.x);expect(moved.y).toBe(before.y-200);
+ await expect(launcher).toHaveAttribute('aria-expanded','false');
+ await launcher.click();await expect(launcher).toHaveCSS('width','136px');
+ const expanded=await launcher.boundingBox();expect(expanded.x+expanded.width).toBe(1280);expect(expanded.y).toBe(moved.y);
+ await page.locator('.intelligent-panel').getByRole('button',{name:'收合AI智能助理'}).click();
+ await expect(launcher).toHaveCSS('width','68px');await expect(launcher).toBeFocused();
+ await launcher.press('ArrowUp');expect((await launcher.boundingBox()).y).toBe(moved.y-24);
+ await page.setViewportSize({width:375,height:300});
+ const small=await launcher.boundingBox();expect(small.y+small.height).toBeLessThanOrEqual(300);expect(small.x+small.width).toBe(375);
 });

@@ -1,7 +1,10 @@
 .company-brand-logo{display:block;position:relative;overflow:hidden;aspect-ratio:1977/451;text-align:left;width:250px;max-width:100%;min-width:0;flex-shrink:1;margin-right:auto}
 /* Display framing trims only transparent canvas margins; PNG pixels stay unchanged. */
 .company-brand-logo .company-brand-logo-image{position:absolute;display:block;width:109.7117%;height:auto;max-width:none;max-height:none;left:-5.0076%;top:-29.0466%;object-fit:contain;object-position:left center}
-.company-brand-logo-dark{background:rgba(255,255,255,.96);border-radius:4px}
+.company-brand-logo-dark{background:transparent}
+/* The wordmark starts to the right of the red emblem in the shared PNG.
+   Whiten only that region, preserving alpha and the emblem's original colors. */
+.company-brand-logo .company-brand-logo-lettering{clip-path:inset(0 0 0 26.5%);filter:brightness(0) invert(1);pointer-events:none}
 .rq-login-card>.company-brand-logo,.login-card>.company-brand-logo,.lab-login-card>.company-brand-logo{align-self:flex-start;margin:0 auto 18px 0}
 .colong-sidebar-brand .company-brand-logo{width:100%}
 @media(max-width:620px){.company-brand-logo{width:175px}}
