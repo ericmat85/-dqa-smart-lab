@@ -1,3 +1,4 @@
+import LoginCredentials from './LoginCredentials.jsx';
 import {PORTAL_TITLES} from './portalLabels.mjs';
 import {createCompletedDemoFlow} from './completedDemoFlow.mjs';
 import ReportArchive from './ReportArchive.jsx';
@@ -58,7 +59,7 @@ export default function LabApp({ path, navigate }) {
   const [username, setUsername] = useState(() => { try { const id=window.sessionStorage.getItem("dqa-lab-account-id"), a=readDemoAccounts(); const selected=a.find(x=>x.id===id&&accessSystem(x,'lab'))||a.find(x=>x.role==='實驗室工程師'&&accessSystem(x,'lab'))||a.find(x=>accessSystem(x,'lab')); return selected?.email || selected?.name || ""; } catch { return ""; } });
   const [password, setPassword] = useState("demo1234");
   const [loginError, setLoginError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+
   const [account, setAccount] = useState(() => {
     try { const id=window.sessionStorage.getItem("dqa-lab-account-id"); const accounts=readDemoAccounts(); const found=Array.isArray(accounts) ? accounts.find(a=>a.id===id) : null; return accessSystem(found,"lab") ? found : null; } catch { return null; }
   });
@@ -214,14 +215,13 @@ export default function LabApp({ path, navigate }) {
     <div className={`lab-login-shell ${dark ? "lab-login-dark" : ""}`}>
       <header className="lab-login-header"><CompanyBrandLogo dark={dark}/><button type="button" className="lab-theme-pill" onClick={toggleTheme} aria-label="切換淺色或深色模式"><span>{dark ? "☾" : "☼"}</span><span>{dark ? "深色模式" : "淺色模式"}</span><i className={dark ? "is-dark" : ""}><b /></i></button></header>
       <main className="lab-login-main"><form className="lab-login-card unified-login-form" onSubmit={e => { e.preventDefault(); login(); }}>
-        <div className="lab-eyebrow">DQA LAB SYSTEM</div>
-        <h1>{PORTAL_TITLES.lab}</h1><p className="lab-login-description">試驗接收、執行與歷程管理</p>
-        <label htmlFor="lab-username">登入帳號</label><input id="lab-username" autoComplete="username" placeholder="請輸入您的帳號" value={username} onChange={e => setUsername(e.target.value)} />
-        <label htmlFor="lab-password">密碼</label><div className="lab-login-password"><input id="lab-password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="請輸入您的密碼" value={password} onChange={e => setPassword(e.target.value)} /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "隱藏密碼" : "顯示密碼"} aria-pressed={showPassword}>{showPassword ? "隱藏" : "顯示"}</button></div>
+
+        <h1>{PORTAL_TITLES.lab}</h1>
+        <LoginCredentials accountId="lab-username" passwordId="lab-password" account={username} password={password} onAccountChange={setUsername} onPasswordChange={setPassword}/>
         {loginError && <p role="alert" className="lab-login-error">{loginError}</p>}
         <button className="lab-primary lab-login-submit" type="submit" disabled={!username.trim()}>登入系統 <span>→</span></button>
-        <button className="lab-login-return" type="button" onClick={navigateHome}>←　返回系統入口</button>
-        <small className="lab-login-note">Demo 原型：此處僅用於角色流程展示，尚未串接正式帳號驗證。</small>
+
+        <button className="lab-login-return" type="button" onClick={navigateHome}>← 返回系統首頁</button>
       </form></main>
     </div>
   );

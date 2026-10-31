@@ -15,3 +15,29 @@
 .app.entry-login .unified-login-form .help-button{margin:12px auto 0}
 .app.entry-login .unified-login-form .login-note,.lab-login-shell .unified-login-form .lab-login-note{display:block;margin:17px 0 0;padding:12px 14px;border-radius:9px;font-size:11px;line-height:1.7;text-align:center}
 @media(max-width:600px){.app.entry-login .unified-login-form,.lab-login-shell .lab-login-main .unified-login-form{padding:24px 20px}.app.entry-login .unified-login-form>h1,.lab-login-shell .unified-login-form>h1{font-size:22px}}
+
+/* Shared account, press-to-reveal password and recovery controls at every entry. */
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-credentials .login-field-label{display:block;font-size:12px;font-weight:700;line-height:normal;text-align:left;margin:15px 0 7px}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-credentials input{display:block;width:100%;height:44px;min-height:44px;box-sizing:border-box;font:inherit;font-size:13px;line-height:normal;padding:10px 12px;border:1px solid var(--border,#dce5f1);border-radius:8px;margin:0 0 2px;background:var(--surface,#fff);color:inherit}
+.login-password-field{position:relative}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-password-field input{padding-right:52px}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-password-eye{position:absolute;right:2px;top:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted,#64748b);cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-password-eye[aria-pressed=true]{color:var(--system-accent,#16a34a);background:var(--soft,#eef3f8)}
+.login-password-eye:disabled{opacity:.4;cursor:not-allowed}.login-password-eye:focus-visible{outline:2px solid var(--system-accent,#16a34a);outline-offset:-3px}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-help{text-align:center;margin:12px 0 0}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-help-button{min-height:36px;border:0;background:transparent;color:var(--system-accent,#16a34a);font:inherit;font-size:13px;padding:6px 12px;cursor:pointer}
+.login-help-button:disabled{opacity:.4;cursor:not-allowed}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-help-notice{font-size:12px;line-height:1.7;padding:10px;border-radius:8px;background:var(--soft,#eef3f8);color:inherit;margin:6px 0}
+#root .app.entry-login[data-system=lms] .login-submit{background:#16a34a!important;border-color:#16a34a!important;color:#fff!important}
+#root .app.entry-login[data-system=lms] .login-submit:hover{background:#15803d!important;border-color:#15803d!important}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .unified-login-form>h1{margin-top:0}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .unified-login-form>h1{font-size:24px;line-height:1.4;margin:0 0 12px;text-align:center}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .unified-login-form>:is(.rq-muted,.login-description,.lab-login-description){font-size:13px;line-height:1.7;margin:0 0 24px;text-align:center}
+
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:10px;position:relative}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .unified-login-form .login-options-row .login-remember-label{display:inline-flex;align-items:center;gap:8px;min-height:36px;margin:0;font-size:13px;font-weight:400;line-height:1.5;cursor:pointer;flex-shrink:0}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row input[type=checkbox]{appearance:auto;-webkit-appearance:checkbox;display:inline-block;width:16px;height:16px;min-height:16px;padding:0;margin:0;border-radius:3px;accent-color:var(--system-accent,#16a34a);flex-shrink:0}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row .login-help{margin:0;text-align:right;min-width:0}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row .login-help-button{padding:6px 0;min-height:36px}
+:is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row .login-help-notice{text-align:left;font-size:12px;max-width:240px}
+.login-remember-error{font-size:12px;line-height:1.6;color:#b42318}.theme-dark .login-remember-error,.lab-login-dark .login-remember-error,.rq-theme-dark .login-remember-error{color:#fda4af}

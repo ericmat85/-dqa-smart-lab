@@ -26,3 +26,19 @@
 .schedule-table-region .data-pagination>div{flex-wrap:wrap}
 @media(max-width:1280px){.schedule-table-region .schedule-table th,.schedule-table-region .schedule-table td{padding:10px 4px}.schedule-table-region .schedule-timeline-dates{flex-direction:column;align-items:flex-start}}
 @media(max-width:600px){.is-schedule-page .dashboard-content{padding-right:74px}}
+
+.equipment-schedule-board{display:grid;gap:16px;min-width:0}
+.equipment-schedule-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.equipment-schedule-intro h3{margin:0 0 6px;font-size:15px;color:var(--text,#243653)}
+.equipment-schedule-intro p{margin:0;color:var(--muted,#71829a);font-size:12px;line-height:1.7}
+.equipment-schedule-kpis{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted,#71829a);font-size:12px}
+.equipment-schedule-kpis>span{padding:10px 14px;border:1px solid var(--border,#e2e7f1);border-radius:8px;background:var(--surface,#fff)}
+.equipment-schedule-kpis strong{color:var(--tab-accent,#7c3aed);font-size:18px;margin:0 4px}
+.equipment-schedule-card{min-width:0;border:1px solid var(--border,#e2e7f1);border-radius:10px;overflow:hidden;background:var(--surface,#fff)}
+.equipment-schedule-header{display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:left;border:0;background:transparent;color:var(--text,#243653);cursor:pointer}
+.equipment-schedule-name{min-width:0;flex:1}.equipment-schedule-name strong{display:block;color:var(--tab-accent,#7c3aed);overflow-wrap:anywhere;font-size:14px}
+.equipment-schedule-name small{display:block;margin-top:5px;color:var(--muted,#71829a);font-size:12px}
+.equipment-schedule-count{border-radius:6px;padding:5px 8px;background:var(--tab-tint,#f2eaff);color:var(--tab-accent,#7c3aed);font-size:12px}
+.equipment-schedule-next{font-size:12px;color:var(--muted,#71829a)}
+.equipment-schedule-card .schedule-table-region{border:0;border-top:1px solid var(--border,#e2e7f1);border-radius:0}
+@media(max-width:760px){.equipment-schedule-header{flex-wrap:wrap;gap:10px}.equipment-schedule-name{flex-basis:calc(100% - 36px)}.equipment-schedule-count{margin-left:24px}.equipment-schedule-kpis{gap:6px}}

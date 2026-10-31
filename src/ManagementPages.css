@@ -30,3 +30,42 @@
 .management-page .live-panel-heading>button,.account-management .account-heading-actions{align-self:flex-start;margin-top:0;margin-left:auto;flex-shrink:0}
 @media(max-width:650px){.management-page .live-panel-heading>button,.account-management .account-heading-actions{align-self:flex-end}}
 
+
+/* Shared management workspace matches the equipment and schedule page frame. */
+.management-page.panel.generic-page,.panel.account-management{padding:18px;border:1px solid var(--border,#e0e7f2);border-radius:14px;background:var(--surface,#fff);box-sizing:border-box;min-width:0}
+.management-heading{align-items:flex-start;gap:16px}.management-heading h2,.account-management .account-page-heading h2{font-size:22px;margin:0 0 8px;letter-spacing:0}
+.management-heading p{font-size:12px;line-height:1.8;color:var(--muted,#7d8ca6);margin:0}
+#root .dashboard-shell .management-primary,#root .dashboard-shell .account-heading-actions .primary-button,#root .dashboard-shell .role-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid #7c3aed!important;border-radius:8px;padding:10px 16px;background:#7c3aed!important;color:#fff!important;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.management-primary:disabled{opacity:.45;cursor:not-allowed}
+.management-export-menu{position:relative;flex-shrink:0;align-self:flex-start}.management-export-menu>summary{list-style:none}.management-export-menu>summary::-webkit-details-marker{display:none}
+.management-export-options{position:absolute;right:0;top:calc(100% + 8px);width:min(280px,calc(100vw - 64px));z-index:20;border:1px solid var(--border,#e0e7f2);border-radius:10px;background:var(--surface,#fff);box-shadow:0 12px 30px #14284620;padding:8px}
+.management-export-options p{font-size:12px;color:var(--muted,#7d8ca6);margin:8px}
+.management-export-options button{display:block;width:100%;border:0;border-radius:6px;background:transparent;color:var(--text,#203353);padding:12px;text-align:left;cursor:pointer}
+.management-export-options button:hover{background:var(--soft,#f5f7fc)}.management-export-options small{display:block;margin-top:6px;color:var(--muted,#7d8ca6);font-size:12px}
+.management-summary{margin:20px 0}.management-summary>button{border:1px solid var(--border,#e0e7f2);border-radius:10px;background:var(--surface,#fff);padding:18px;text-align:left;cursor:pointer;color:var(--text,#203353)}
+.management-summary>button[aria-pressed=true]{border-color:var(--tab-accent,#7c3aed);background:var(--tab-tint,#f2eaff)}
+.management-page .schedule-view-tabs{margin:0 0 18px}.management-page .lab-report-controls{display:flex;flex-wrap:wrap;background:transparent;padding:0;border:0;border-radius:0;gap:10px;margin:0 0 16px}
+.management-page .lab-report-controls>input[type=search]{flex:1 1 260px;min-width:0}
+.management-fold{margin:16px 0;border:1px solid var(--border,#e0e7f2);border-radius:10px;overflow:hidden;background:var(--surface,#fff)}
+.management-fold>summary{cursor:pointer;padding:16px;font-size:14px;font-weight:600;color:var(--text,#203353)}.management-fold>summary>span{float:right;color:var(--muted,#7d8ca6);font-weight:400;font-size:12px;margin-left:12px}
+.management-column-options{display:flex;flex-wrap:wrap;gap:14px;padding:4px 16px 16px}.management-column-options label,.settings-checkbox{display:flex;align-items:center;gap:8px;font-size:12px}
+.management-page input[type=checkbox]{min-height:16px;width:16px;padding:0;accent-color:#7c3aed}
+.management-notice{padding:12px 14px;background:var(--tab-tint,#f2eaff);color:var(--tab-accent,#7c3aed);border-radius:8px;font-size:13px}.management-error{color:#b42318;font-size:13px}.theme-dark .management-error{color:#fda4af}
+.settings-fold-body{padding:0 18px 18px}.settings-fold-body p,.settings-theme-row p,.settings-home-footer p{font-size:12px;line-height:1.8;color:var(--muted,#7d8ca6)}
+.settings-theme-row,.settings-home-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.settings-theme-row{border-bottom:1px solid var(--border,#e0e7f2);padding:8px 0 18px;margin-bottom:18px}.settings-theme-row h3{font-size:14px;margin:0}
+.settings-preferences{display:grid;grid-template-columns:1fr 1fr;gap:18px}.settings-preferences>label:not(.settings-checkbox){display:flex;flex-direction:column;gap:8px;font-size:13px}.settings-preferences small{display:block;color:var(--muted,#7d8ca6);font-size:12px;line-height:1.7;margin-top:5px}.settings-checkbox{align-items:flex-start}.settings-form-actions{display:flex;gap:10px;justify-content:flex-end;grid-column:1/-1}
+.settings-home-footer{border-top:1px solid var(--border,#e0e7f2);margin-top:24px;padding-top:20px}.settings-home-footer strong{font-size:14px}.settings-home-footer p{margin:6px 0 0}
+.account-access-tabs{margin-bottom:22px}.account-role-scope{display:block;font-size:11px;color:var(--muted,#7d8ca6);margin-top:6px;line-height:1.6}
+.role-dialog.role-workspace{width:100%;max-height:none;border:0;border-radius:0;box-shadow:none;margin:0;overflow:visible}.role-workspace>header{padding:0 0 18px}.role-workspace .role-dialog-content{grid-template-columns:240px minmax(0,1fr)}.role-workspace .role-catalog{border:1px solid var(--border,#e0e7f2);border-radius:10px;padding:18px}.role-workspace form{padding:0 0 0 24px}
+@media(max-width:650px){.management-heading{flex-direction:column}.management-export-menu{align-self:flex-end}.settings-preferences{grid-template-columns:1fr}.management-fold>summary>span{float:none;display:block;margin:8px 0 0 15px}.role-workspace .role-dialog-content{grid-template-columns:1fr;gap:20px}.role-workspace form{padding:0}.management-page .lab-report-controls{display:flex}.management-page .lab-report-controls>select,.management-page .lab-report-controls>input{max-width:100%}.settings-form-actions{flex-wrap:wrap}}
+.account-management .account-page-heading{padding:0;margin:0 0 20px;border:0}
+.account-management .account-summary{margin:20px 0;gap:14px}
+.account-management .account-summary-card{border:1px solid var(--mg-line);border-radius:10px;padding:18px;background:var(--surface,#fff);text-align:left}
+.account-management .account-summary-card:nth-child(n){border-top-color:var(--mg-line)}
+.account-management .account-toolbar{padding:0;background:transparent;border:0;margin:20px 0 14px}
+.account-management .account-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.account-management .account-row-actions button{min-height:34px;border:1px solid var(--mg-line);border-radius:7px;background:var(--surface,#fff);color:var(--text,#203353);padding:7px 10px;font:inherit;font-size:12px;cursor:pointer}
+.account-management .account-role-pill{background:var(--tab-tint,#f2eaff);color:var(--tab-accent,#7c3aed)}
+.account-management .account-user-cell{display:flex;align-items:center;gap:10px}
+.account-management .account-user-cell .account-avatar{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px}
+@media(max-width:650px){.account-management .account-summary{gap:8px}.account-management .account-summary-card{padding:12px}.account-management .account-toolbar{gap:10px}}

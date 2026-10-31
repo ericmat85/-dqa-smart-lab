@@ -1,0 +1,21 @@
+/* Shared classification tabs, including dialogs and workbook sheet selectors. */
+.rq-app,[data-system=request]{--tab-accent:#16a34a;--tab-tint:#e8f9ee}
+.dashboard-shell,[data-system=lms]{--tab-accent:#7c3aed;--tab-tint:#f2eaff}
+.lab-shell,[data-system=lab]{--tab-accent:#2563eb;--tab-tint:#eaf2ff}
+[data-system=validation]{--tab-accent:#e6163d;--tab-tint:#fff0f3}
+.rq-theme-dark{--tab-accent:#86efac;--tab-tint:#173b2a}
+.dashboard-shell.theme-dark{--tab-accent:#c4b5fd;--tab-tint:#33264d}
+.lab-theme-dark{--tab-accent:#93c5fd;--tab-tint:#1e3557}
+/* State rules intentionally override legacy per-page button and hover styles. */
+html body [role=tablist]{display:flex;flex-wrap:nowrap;gap:22px;max-width:100%;overflow-x:auto;background:transparent;border:0;border-bottom:1px solid var(--border,#dfe5ef);border-radius:0;padding:0;scrollbar-width:thin}
+html body [role=tablist]>[role=tab]{position:relative;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:8px;white-space:nowrap;padding:17px 2px;border:0!important;border-radius:0;background:transparent!important;color:var(--tab-muted,#8b96ac)!important;box-shadow:none!important;font-size:13px;cursor:pointer}
+html body [role=tablist]>[role=tab]::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;background:transparent!important}
+html body [role=tablist]>[role=tab][aria-selected=true]{color:var(--tab-accent,#7c3aed)!important}
+html body [role=tablist]>[role=tab][aria-selected=true]::after{background:var(--tab-accent,#7c3aed)!important}
+html body [role=tablist]>[role=tab]:hover:not(:disabled){color:var(--tab-accent,#7c3aed)!important}
+html body [role=tablist]>[role=tab]>strong{font-weight:600;color:inherit!important}
+html body [role=tablist]>[role=tab]>span:not(.catalog-tab-icon){padding:2px 7px;border-radius:6px;background:var(--tab-badge,#f0f2f7)!important;color:var(--tab-muted,#8b96ac)!important;font-size:10px}
+html body [role=tablist]>[role=tab][aria-selected=true]>span:not(.catalog-tab-icon){background:var(--tab-tint,#f2eaff)!important;color:var(--tab-accent,#7c3aed)!important}
+html body [role=tablist]>[role=tab]:focus-visible{outline:2px solid var(--tab-accent,#7c3aed);outline-offset:-3px}
+:is(.theme-dark,.rq-theme-dark,.lab-theme-dark){--tab-muted:#a7b3c8;--tab-badge:#29364b}
+@media(max-width:600px){html body [role=tablist]{gap:18px}html body [role=tablist]>[role=tab]{padding:14px 2px}}

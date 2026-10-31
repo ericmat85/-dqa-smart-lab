@@ -42,7 +42,7 @@ test('review tabs combine classification, counts, search, pagination and keyboar
  expect(await page.pageErrors()).toEqual([]);
 });
 
-test('LMS classification tabs use orange-red hover without changing selection in either theme',async({page})=>{
+test('LMS tabs use purple selection with transparent hover in either theme',async({page})=>{
  await page.setViewportSize({width:1366,height:768});
  await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-lms-account-id','U001');},INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
@@ -51,9 +51,9 @@ test('LMS classification tabs use orange-red hover without changing selection in
   const selectedId=await selected.evaluate(el=>el.id||el.textContent);
   for(const tab of (await tablist.getByRole('tab').all()).slice(0,2)){
    await page.mouse.move(600,30);const initialColor=await tab.evaluate(el=>getComputedStyle(el).color);
-   await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(255, 154, 112)':'rgb(194, 65, 12)');
-   await expect(tab).toHaveCSS('background-color',dark?'rgb(64, 42, 35)':'rgb(255, 242, 235)');
-   await expect(tab).toHaveCSS('box-shadow','none');await expect(tab).toHaveCSS('border-top-color','rgba(0, 0, 0, 0)');
+   await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(196, 181, 253)':'rgb(124, 58, 237)');
+   await expect(tab).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+   await expect(tab).toHaveCSS('box-shadow','none');await expect(tab).toHaveCSS('border-top-width','0px');
    await expect.poll(()=>selected.evaluate(el=>el.id||el.textContent)).toBe(selectedId);
    await page.mouse.move(600,30);await expect(tab).toHaveCSS('color',initialColor);
   }
@@ -95,7 +95,7 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS gray c
  await page.locator('.system-header-actions .theme-toggle').click();
  await expect(launcher).toHaveCSS('background-color','rgb(124, 58, 237)');
  await expect(content).not.toHaveCSS('background-color','rgb(243, 244, 246)');
- await expect(page.getByRole('tab',{name:/待審查/})).toHaveCSS('color','rgb(216, 221, 227)');
+ await expect(page.getByRole('tab',{name:/待審查/})).toHaveCSS('color','rgb(196, 181, 253)');
  await expect(icons.first()).toHaveCSS('stroke','rgb(255, 255, 255)');
  expect(await page.pageErrors()).toEqual([]);
 });
