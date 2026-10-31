@@ -6,7 +6,6 @@
 .dashboard-shell .sidebar button.active{box-shadow:inset 3px 0 #d9dde1!important}
 .dashboard-shell .colong-sidebar-brand{justify-content:flex-start;padding-left:16px;padding-right:16px}
 .dashboard-shell .colong-sidebar-brand .company-brand-logo{width:170px;margin-left:0;background:transparent!important}
-.dashboard-shell .company-brand-logo-white .company-brand-logo-image{filter:url(#lms-white-lettering)}
 .dashboard-shell.is-schedule-page .dashboard-content{padding:22px;box-sizing:border-box}
 .dashboard-shell .dashboard-content>.panel{width:100%;max-width:none;box-sizing:border-box}
 .dashboard-shell .template-page{width:100%;max-width:none;box-sizing:border-box}
@@ -23,11 +22,8 @@
 .dashboard-shell .dashboard-topbar{flex-shrink:0}
 .dashboard-shell .dashboard-content{flex:1;min-height:0;overflow:auto;scroll-padding-bottom:76px}
 .dashboard-shell .dashboard-content::after{content:'';display:block;height:54px;pointer-events:none}
-.dashboard-shell .dashboard-main>.intelligent-assistant{position:fixed;right:16px;bottom:16px;z-index:75}
-.dashboard-shell .intelligent-assistant .intelligent-launcher{width:68px;height:40px;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:6px;padding:8px;border-radius:10px;box-shadow:none;transform:none}
 .dashboard-shell .intelligent-assistant .intelligent-launcher-symbol{font-size:16px}
 .dashboard-shell .intelligent-assistant .intelligent-launcher-label{font-size:13px}
-.dashboard-shell .intelligent-assistant .intelligent-panel{bottom:52px;top:auto;right:0;max-width:calc(100vw - 32px);max-height:min(700px,calc(100dvh - 140px));animation:none}
 .dashboard-shell .theme-dark .schedule-view-tabs button[aria-selected=true],.dashboard-shell.theme-dark .schedule-view-tabs button[aria-selected=true]{color:#d8dde3}
 @media(max-width:900px){.dashboard-shell.is-schedule-page .dashboard-content{padding:12px}}
 #root .dashboard-shell>.sidebar.sidebar{background:#60666d!important}
