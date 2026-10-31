@@ -10,8 +10,6 @@
 .dashboard-shell.is-schedule-page .dashboard-content{padding:22px;box-sizing:border-box}
 .dashboard-shell .dashboard-content>.panel{width:100%;max-width:none;box-sizing:border-box}
 .dashboard-shell .template-page{width:100%;max-width:none;box-sizing:border-box}
-.dashboard-shell :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])),
-[data-system=lms]:is(.system-header-actions,.shared-personal-settings) :is(button,input,select,textarea):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 .dashboard-shell :is(button,input,select,textarea):focus-visible,[data-system=lms] :is(button,input,select,textarea):focus-visible{outline:2px solid #737b85;outline-offset:3px}
 .dashboard-shell :is(.template-btn,.schedule-edit-btn,.intelligent-launcher):not(.danger):not(.secondary){background:#737b85!important;border-color:#737b85!important;color:#fff!important}
 .dashboard-shell .template-btn.secondary{color:var(--text,#294665);background:var(--surface,#fff)}
@@ -20,27 +18,25 @@
 .dashboard-shell .system-header-actions .avatar,.system-header-actions[data-system=lms] .avatar{background:#ede9fe;color:#6d5bd0}
 .shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#737b85!important;color:#fff!important;border-color:#737b85}
 .dashboard-shell .schedule-view-tabs button[aria-selected=true]{color:#60666d}.dashboard-shell .schedule-view-tabs button[aria-selected=true]:after{background:#8a9199}.dashboard-shell .schedule-view-tabs button[aria-selected=true]>span{background:#edf0f2;color:#60666d}
-/* A dedicated bottom dock keeps the compact assistant clear of every table row. */
+/* A compact fixed launcher, without a full-width bottom dock. */
 .dashboard-shell>.dashboard-main{height:100dvh;min-height:0;display:flex;flex-direction:column}
 .dashboard-shell .dashboard-topbar{flex-shrink:0}
-.dashboard-shell .dashboard-content{flex:1;min-height:0;overflow:auto}
-.dashboard-shell .lms-assistant-dock{flex:0 0 52px;display:flex;justify-content:flex-end;align-items:center;padding:6px 14px;background:var(--surface,#fff);border-top:1px solid var(--border,#dce4f0);z-index:75}
-.dashboard-shell .lms-assistant-dock>.intelligent-assistant{position:relative;inset:auto}
-.dashboard-shell .lms-assistant-dock .intelligent-launcher{width:40px;height:40px;padding:5px;border-radius:10px;box-shadow:none;transform:none;gap:1px}
-.dashboard-shell .lms-assistant-dock .intelligent-launcher-symbol{font-size:16px}
-.dashboard-shell .lms-assistant-dock .intelligent-launcher-label{font-size:11px}
-.dashboard-shell .lms-assistant-dock .intelligent-panel{bottom:48px;top:auto;right:0;max-width:calc(100vw - 28px);max-height:min(700px,calc(100dvh - 140px));animation:none}
+.dashboard-shell .dashboard-content{flex:1;min-height:0;overflow:auto;scroll-padding-bottom:76px}
+.dashboard-shell .dashboard-content::after{content:'';display:block;height:54px;pointer-events:none}
+.dashboard-shell .dashboard-main>.intelligent-assistant{position:fixed;right:16px;bottom:16px;z-index:75}
+.dashboard-shell .intelligent-assistant .intelligent-launcher{width:68px;height:40px;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:6px;padding:8px;border-radius:10px;box-shadow:none;transform:none}
+.dashboard-shell .intelligent-assistant .intelligent-launcher-symbol{font-size:16px}
+.dashboard-shell .intelligent-assistant .intelligent-launcher-label{font-size:13px}
+.dashboard-shell .intelligent-assistant .intelligent-panel{bottom:52px;top:auto;right:0;max-width:calc(100vw - 32px);max-height:min(700px,calc(100dvh - 140px));animation:none}
 .dashboard-shell .theme-dark .schedule-view-tabs button[aria-selected=true],.dashboard-shell.theme-dark .schedule-view-tabs button[aria-selected=true]{color:#d8dde3}
 @media(max-width:900px){.dashboard-shell.is-schedule-page .dashboard-content{padding:12px}}
 #root .dashboard-shell>.sidebar.sidebar{background:#60666d!important}
-.app.entry-login[data-system=lms] :is(button,input,select):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 .app.entry-login[data-system=lms] .login-submit{background:#737b85;color:white}
 .dashboard-shell .sidebar .colong-sidebar-brand .company-brand-logo{width:170px}
 /* Override shared dark-mode accents only inside the LMS workspace. */
 #root .dashboard-shell.theme-dark{--night-fill:#737b85;--night-selected:#797f86;--night-accent:#fff}
 #root .dashboard-shell.theme-dark .sidebar button{color:#fff!important}
 #root .dashboard-shell.theme-dark .sidebar button:is(.active,:hover){background:#797f86!important;color:#fff!important}
-#root .dashboard-shell :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 #root .dashboard-shell .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
 #root .dashboard-shell .system-header-actions .avatar{background:#ede9fe;color:#6d5bd0}
 
@@ -49,7 +45,6 @@
 #root .dashboard-shell.theme-dark table th[aria-sort]{background:#34304e!important;color:#c4b5fd!important}
 #root .dashboard-shell .schedule-chart-button{background:#737b85!important;color:#fff!important;border-color:#737b85!important}
 #root .dashboard-shell .schedule-chart-button svg{color:inherit;stroke:currentColor}
-#root .dashboard-shell.theme-dark :is(button,[role=button],input,select,textarea):hover:where(:not([role=tab])):not(:disabled):not(.profile-button){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
 
 /* Neutral page canvas, white SVG navigation, and a purple assistant accent. */
 #root .dashboard-shell.theme-light .dashboard-content{background:#f3f4f6}
@@ -60,8 +55,18 @@
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher{background:#7c3aed!important;border-color:#7c3aed!important;color:#fff!important}
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher:hover{background:#6d28d9!important}
 
-/* Classification tabs are the orange-red exception to neutral hover frames. */
-#root .dashboard-shell [role=tab]:hover:not(:disabled){color:#c2410c!important;background:#fff2eb!important;border-color:#ea580c!important;box-shadow:0 0 0 1px #ea580c!important}
+/* Classification tabs keep their orange-red text and tint without a hover frame. */
+#root .dashboard-shell [role=tab]:hover:not(:disabled){color:#c2410c!important;background:#fff2eb!important;border-color:transparent!important;box-shadow:none!important}
 #root .dashboard-shell [role=tab]:hover:not(:disabled) :is(strong,span,svg){color:inherit!important}
 #root .dashboard-shell [role=tab]:hover:not(:disabled)::after{background:#ea580c!important}
 #root .dashboard-shell.theme-dark [role=tab]:hover:not(:disabled){color:#ff9a70!important;background:#402a23!important}
+
+/* Remove pointer hover frames while preserving :focus-visible keyboard outlines. */
+#root .dashboard-shell :is(button,[role=button]):hover:not(:disabled),
+#root .dashboard-shell.theme-dark :is(button,[role=button]):hover:not(:disabled),
+.system-header-actions[data-system=lms] :is(button,[role=button]):hover:not(:disabled),
+.shared-personal-settings[data-system=lms] :is(button,[role=button]):hover:not(:disabled),
+.app.entry-login[data-system=lms] :is(button,[role=button]):hover:not(:disabled){border-color:transparent!important;box-shadow:none!important}
+#root .dashboard-shell :is(button,[role=button]):hover:not(:focus-visible){outline:none!important}
+#root .dashboard-shell :is(input,select,textarea):hover,
+.shared-personal-settings[data-system=lms] :is(input,select,textarea):hover{box-shadow:none!important}

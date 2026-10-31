@@ -8,18 +8,24 @@ test.beforeEach(async({page})=>{
  },INITIAL_ACCOUNTS);
 });
 
-for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS bottom dock, avatar and selected columns ${width}x${height}`,async({page})=>{
+for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed launcher, avatar and selected columns ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width,height});await page.goto('/lms/dashboard');
  const avatar=page.locator('.system-header-actions .avatar');
  const launcher=page.getByRole('button',{name:'展開AI智能助理'});
  const position=await launcher.boundingBox();
- expect(position.width).toBe(40);expect(position.height).toBe(40);
- expect(position.y).toBeGreaterThan(height-56);expect(position.x).toBeGreaterThan(width-60);
+ expect(position.width).toBe(68);expect(position.height).toBe(40);
+ await expect(page.locator('.intelligent-assistant')).toHaveCSS('position','fixed');
+ await expect(page.locator('.lms-assistant-dock')).toHaveCount(0);
+ const symbol=await launcher.locator('.intelligent-launcher-symbol').boundingBox(),label=await launcher.locator('.intelligent-launcher-label').boundingBox();
+ expect(symbol.x+symbol.width).toBeLessThanOrEqual(label.x);expect(Math.abs(symbol.y+symbol.height/2-label.y-label.height/2)).toBeLessThanOrEqual(1);
+ expect(position.y).toBe(height-56);expect(position.x).toBe(width-84);
  for(const name of ['儀錶板','試驗委託','排程管理']){
   await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
   await expect(avatar).toHaveCSS('background-color','rgb(237, 233, 254)');
   const bounds=await page.locator('.dashboard-content').boundingBox();
-  expect(bounds.y+bounds.height).toBeLessThanOrEqual(position.y);
+  expect(Math.abs(bounds.y+bounds.height-height)).toBeLessThanOrEqual(1);
+  await page.locator('.dashboard-content').evaluate(el=>el.scrollTop=el.scrollHeight);
+  const after=await launcher.boundingBox();expect(after.x).toBe(position.x);expect(after.y).toBe(position.y);
  }
  const chart=page.getByRole('button',{name:'排程管理圖表',exact:true});
  await expect(chart).toHaveCSS('background-color','rgb(115, 123, 133)');await expect(chart).toHaveCSS('color','rgb(255, 255, 255)');
