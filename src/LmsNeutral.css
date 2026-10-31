@@ -50,3 +50,12 @@
 #root .dashboard-shell .schedule-chart-button{background:#737b85!important;color:#fff!important;border-color:#737b85!important}
 #root .dashboard-shell .schedule-chart-button svg{color:inherit;stroke:currentColor}
 #root .dashboard-shell.theme-dark :is(button,[role=button],input,select,textarea):hover:not(:disabled):not(.profile-button){border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+
+/* Neutral page canvas, white SVG navigation, and a purple assistant accent. */
+#root .dashboard-shell.theme-light .dashboard-content{background:#f3f4f6}
+.dashboard-shell .sidebar .nav-icon{display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.dashboard-shell .sidebar .lms-sidebar-icon{display:block;flex-shrink:0;color:#fff}
+.dashboard-shell .request-review-tabs{border-bottom:1px solid var(--border,#e2e8f0);margin-bottom:18px;gap:24px}
+.dashboard-shell #request-review-panel:focus-visible{outline:2px solid #737b85;outline-offset:3px}
+#root .dashboard-shell .intelligent-assistant .intelligent-launcher{background:#7c3aed!important;border-color:#7c3aed!important;color:#fff!important}
+#root .dashboard-shell .intelligent-assistant .intelligent-launcher:hover{background:#6d28d9!important}

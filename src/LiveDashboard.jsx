@@ -19,7 +19,6 @@ export default function LiveDashboard({onNavigate,currentUser}) {
   const equipmentActivity=row=>Math.max(0,...[row.updatedAt,row.activeService?.startedAt,...(row.records||[]).map(record=>record.date)].map(value=>Date.parse(value)||0));
   const recentEquipment=[...snapshot.equipment].sort((a,b)=>equipmentActivity(b)-equipmentActivity(a)).slice(0,10);
   return <div className="live-lab-page live-dashboard">
-    <div className="live-dashboard-meta"><span><i/>工作資料同步中</span><button type="button" onClick={()=>onNavigate('settings')}>{metrics.issues.length?`${metrics.issues.length} 項資料提醒`:'資料狀態'} →</button></div>
     <div className="live-metric-grid">
       <MetricCard label="待排程試驗" value={metrics.counts['未排程']} detail={`另有 ${metrics.counts['有衝突']} 筆排程衝突`} icon="▤" onClick={()=>onNavigate('schedule','未排程')}/>
       <MetricCard label="試驗中" value={metrics.counts['試驗中']} detail={`${metrics.counts['已排程']} 筆已預約、尚未開始`} icon="⚗" color="teal" onClick={()=>onNavigate('schedule','試驗中')}/>
