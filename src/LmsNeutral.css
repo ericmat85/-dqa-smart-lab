@@ -1,0 +1,39 @@
+/* LMS-only neutral presentation. Status/validation colors retain their meaning. */
+.dashboard-shell{--lms-hover:#cbd0d5;--lms-button:#737b85}
+.dashboard-shell .sidebar{background:#60666d!important}
+.dashboard-shell .sidebar button{color:#fff!important;background:transparent}
+.dashboard-shell .sidebar button.active,.dashboard-shell .sidebar button:hover{background:#797f86!important;border-color:#cbd0d5!important;box-shadow:none!important}
+.dashboard-shell .sidebar button.active{box-shadow:inset 3px 0 #d9dde1!important}
+.dashboard-shell .colong-sidebar-brand{justify-content:flex-start;padding-left:16px;padding-right:16px}
+.dashboard-shell .colong-sidebar-brand .company-brand-logo{width:170px;margin-left:0;background:transparent!important}
+.dashboard-shell .company-brand-logo-white .company-brand-logo-image{filter:url(#lms-white-lettering)}
+.dashboard-shell.is-schedule-page .dashboard-content{padding:22px;box-sizing:border-box}
+.dashboard-shell .dashboard-content>.panel{width:100%;max-width:none;box-sizing:border-box}
+.dashboard-shell .template-page{width:100%;max-width:none;box-sizing:border-box}
+.dashboard-shell :is(button,[role=button],input,select,textarea):hover,
+[data-system=lms]:is(.system-header-actions,.shared-personal-settings) :is(button,input,select,textarea):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+.dashboard-shell :is(button,input,select,textarea):focus-visible,[data-system=lms] :is(button,input,select,textarea):focus-visible{outline:2px solid #737b85;outline-offset:3px}
+.dashboard-shell :is(.template-btn,.schedule-edit-btn,.intelligent-launcher):not(.danger):not(.secondary){background:#737b85!important;border-color:#737b85!important;color:#fff!important}
+.dashboard-shell .template-btn.secondary{color:var(--text,#294665);background:var(--surface,#fff)}
+.dashboard-shell .system-header-actions .profile-button,.system-header-actions[data-system=lms] .profile-button{border-color:transparent!important;background:transparent!important;box-shadow:none!important}
+.dashboard-shell .system-header-actions .profile-button:hover,.system-header-actions[data-system=lms] .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
+.dashboard-shell .system-header-actions .avatar,.system-header-actions[data-system=lms] .avatar{background:#737b85;color:#fff}
+.shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#737b85!important;color:#fff!important;border-color:#737b85}
+.dashboard-shell .schedule-view-tabs button[aria-selected=true]{color:#60666d}.dashboard-shell .schedule-view-tabs button[aria-selected=true]:after{background:#8a9199}.dashboard-shell .schedule-view-tabs button[aria-selected=true]>span{background:#edf0f2;color:#60666d}
+.dashboard-shell .dashboard-topbar>.intelligent-assistant{position:relative;inset:auto;flex-shrink:0;z-index:75;margin-left:auto}
+.dashboard-shell .dashboard-topbar .intelligent-launcher{position:static;width:auto;min-width:44px;height:40px;padding:8px 12px;display:flex;gap:5px;border-radius:9px;box-shadow:none;transform:none}
+.dashboard-shell .dashboard-topbar .intelligent-launcher-symbol,.dashboard-shell .dashboard-topbar .intelligent-launcher-label{font-size:14px}
+.dashboard-shell .dashboard-topbar .intelligent-panel{top:calc(100% + 12px);bottom:auto;right:0;max-width:calc(100vw - 32px);max-height:calc(100dvh - 110px)}
+.dashboard-shell .theme-dark .schedule-view-tabs button[aria-selected=true],.dashboard-shell.theme-dark .schedule-view-tabs button[aria-selected=true]{color:#d8dde3}
+@media(max-width:900px){.dashboard-shell.is-schedule-page .dashboard-content{padding:12px}.dashboard-shell .dashboard-topbar .intelligent-panel{position:fixed;top:84px;right:16px}}
+#root .dashboard-shell>.sidebar.sidebar{background:#60666d!important}
+.app.entry-login[data-system=lms] :is(button,input,select):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+.app.entry-login[data-system=lms] .login-submit{background:#737b85;color:white}
+.dashboard-shell .sidebar .colong-sidebar-brand .company-brand-logo{width:170px}
+/* Override shared dark-mode accents only inside the LMS workspace. */
+#root .dashboard-shell.theme-dark{--night-fill:#737b85;--night-selected:#797f86;--night-accent:#fff}
+#root .dashboard-shell.theme-dark .sidebar button{color:#fff!important}
+#root .dashboard-shell.theme-dark .sidebar button:is(.active,:hover){background:#797f86!important;color:#fff!important}
+#root .dashboard-shell :is(button,[role=button],input,select,textarea):hover{border-color:#cbd0d5!important;box-shadow:0 0 0 1px #cbd0d5!important}
+#root .dashboard-shell .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
+#root .dashboard-shell .system-header-actions .avatar{background:#737b85;color:#fff}

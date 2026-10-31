@@ -1,3 +1,4 @@
+import './LmsNeutral.css';
 import {PORTAL_TITLES} from './portalLabels.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import {canControlTrial,isActiveTrial,trialPauseAvailability} from './trialPermissions.mjs';
@@ -606,7 +607,7 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
 
-        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><CompanyBrandLogo dark/></div>
+        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><CompanyBrandLogo dark whiteText/></div>
 
 
 
@@ -674,8 +675,8 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
 
 
-function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0}}){
- return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button><div className="welcome-block"><strong>歡迎，{currentUser?.name}</strong><span>{currentUser?.role} | {currentUser?.department||'DQA 實驗室'}</span></div><SystemHeaderActions dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
+function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},children}){
+ return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button><div className="welcome-block"><strong>歡迎，{currentUser?.name}</strong><span>{currentUser?.role} | {currentUser?.department||'DQA 實驗室'}</span></div>{children}<SystemHeaderActions dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
  {title:'待審查試驗委託',detail:'等待主管審核委託內容與報告',count:notificationCounts.pendingReview,icon:'✓',onClick:()=>onNavigate?.('requests','待審查')},
  {title:'待排程試驗',detail:'等待安排設備與試驗時間',count:notificationCounts.unscheduled,icon:'◷',onClick:()=>onNavigate?.('schedule','未排程')},
  {title:'排程衝突',detail:'設備或時段重疊，需要確認',count:notificationCounts.conflicts,icon:'!',onClick:()=>onNavigate?.('schedule','有衝突')}
@@ -1998,7 +1999,7 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        />
+        ><IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/></DashboardTopbar>
 
 
 
@@ -2034,7 +2035,6 @@ function DashboardPage({
 
         </div>
 
-      <IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/>
 
       </main>
 
