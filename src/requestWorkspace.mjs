@@ -15,6 +15,10 @@ export function dueKind(request,now=new Date()){
  return request.dueDate<today?'overdue':request.dueDate<=end.toISOString().slice(0,10)?'soon':'later';
 }
 export function monthMatches(value,now=new Date()){return displayTaipei(value).slice(0,7)===getRequestDate(now).slice(0,7).replaceAll('-','/');}
+function requestInstant(value){
+ const stamp=isCalendarDate(value)?Date.parse(`${value}T00:00:00+08:00`):typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T/.test(value)&&isCalendarDate(value.slice(0,10))?Date.parse(value):NaN;
+ return Number.isFinite(stamp)?stamp:null;
+}
 export function waitingDays(request,now=new Date()){
  const value=request.report?.updatedAt||request.updatedAt||request.requesterSignatureAt||request.createdAt;
  const ms=isCalendarDate(value)?Date.parse(`${value}T00:00:00+08:00`):/^\d{4}-\d{2}-\d{2}T/.test(value||'')?Date.parse(value):NaN;
@@ -24,7 +28,7 @@ export function requestMatchesCollection(r,key,now=new Date()){
  switch(key){case'todo':return ['草稿','退件','補件中'].includes(r.status);case'deadline':return ['soon','overdue'].includes(dueKind(r,now));case'draft':return r.status==='草稿';case'returned':return ['退件','補件中'].includes(r.status);case'approval':return r.status==='待主管簽核';case'read':return r.status==='待查閱';case'executing':return r.status==='執行中';case'planning':return ['已核准','待排程','已排程'].includes(r.status);case'overdue':case'soon':return dueKind(r,now)===key;case'month':return monthMatches(r.approvalDate,now);default:return true;}
 }
 export function orderWork(items,now=new Date()){
- const rank=r=>[dueKind(r,now)==='overdue'?0:1,['急件','專案關鍵'].includes(r.priority)?0:1,r.dueDate&&isCalendarDate(r.dueDate)?r.dueDate:'9999',r.updatedAt||r.createdAt||'9999'];
+ const rank=r=>[dueKind(r,now)==='overdue'?0:1,['急件','專案關鍵'].includes(r.priority)?0:1,r.dueDate&&isCalendarDate(r.dueDate)?r.dueDate:'9999',requestInstant(r.updatedAt||r.createdAt)??Infinity];
  return [...items].sort((a,b)=>{const x=rank(a),y=rank(b);for(let i=0;i<x.length;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return String(a.id).localeCompare(String(b.id));});
 }
 export function filterRequestRows(items,{search='',field='all',status='全部狀態',from='',to='',sort='updated-desc',collection='all'},now=new Date()){
@@ -33,7 +37,7 @@ export function filterRequestRows(items,{search='',field='all',status='全部狀
  const [key,direction]=sort.split('-');
  const rows=items.filter(r=>(status==='全部狀態'||r.status===status)&&requestMatchesCollection(r,collection,now)&&String(text(r)||'').toLowerCase().includes(search.trim().toLowerCase())&&(!from||(isCalendarDate(r.dueDate)&&r.dueDate>=from))&&(!to||(isCalendarDate(r.dueDate)&&r.dueDate<=to)));
  if(sort==='work')return orderWork(rows,now);
- return rows.sort((a,b)=>{const value=r=>key==='due'?isCalendarDate(r.dueDate)?r.dueDate:null:key==='product'?r.productCode||r.product:key==='id'?r.id:key==='status'?r.status:r.updatedAt||r.createdAt;const x=value(a),y=value(b);if(!x||!y)return x? -1:y?1:0;return (String(x).localeCompare(String(y),'zh-Hant',{numeric:true})||String(a.id).localeCompare(String(b.id)))*(direction==='asc'?1:-1);});
+ return rows.sort((a,b)=>{const value=r=>key==='due'?isCalendarDate(r.dueDate)?r.dueDate:null:key==='product'?r.productCode||r.product:key==='id'?r.id:key==='status'?r.status:requestInstant(r.updatedAt||r.createdAt);const x=value(a),y=value(b);if(x==null||x===''||y==null||y==='')return x!=null&&x!==''?-1:y!=null&&y!==''?1:0;return (String(x).localeCompare(String(y),'zh-Hant',{numeric:true})||String(a.id).localeCompare(String(b.id)))*(direction==='asc'?1:-1);});
 }
 function safeDecode(value){try{return decodeURIComponent(value);}catch{return value;}}
 export function readRequestRoute(location){
