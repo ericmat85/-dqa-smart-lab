@@ -102,3 +102,13 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/lib/chromium/chromium npm run test:e2e
 - `src/requestWorkspace.mjs`
 - `src/useReportSnapshot.js`
 - `tests/requestWorkspace.test.mjs`
+
+## PR #20：CI 截圖輸出相容性修復
+
+新增測試原本把驗收截圖直接寫到本機 `/workspace/artifacts/...`。該路徑是開發環境的交付目錄，GitHub Actions runner 不保證存在或可寫；尤其原生縮放截圖使用 `writeFile`，父目錄不存在即會失敗。
+
+修正為 Playwright `test.info().outputPath(...)`，每個測試獨立存入 `test-results`。原生 CDP 截圖在寫檔前明確建立父目錄，與既有 Actions `browser-failure-evidence` 附件路徑一致。不修改測試斷言、不跳過測試、不改業務邏輯。
+
+GitHub API 讀取 run `41162034000` 回覆 `Forbidden`，無法直接確認遠端完整錯誤；此項是由程式確認的 CI 可攜性錯誤，不能據此宣稱遠端沒有其他原因。本機使用 `CI=true` 及已安裝的系統 Chromium 重跑；GitHub 的 Playwright 下載版瀏覽器與遠端新一輪結果仍以 Actions 為準。
+
+修復後驗證：`CI=true PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/lib/chromium/chromium npm run test:e2e` 全部 68 項通過（約 4.2 分鐘）；`npm test` 168 項通過；lint 與 build 完成，保留既有警告。原生 200% 與工作區截圖已確認寫入 `test-results`，不依賴開發環境交付路徑。
