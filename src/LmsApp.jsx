@@ -438,7 +438,7 @@ export function LoginPage({
 
 
 
-      <main className="login-card">
+      <main className="login-card unified-login-form">
 
         <p className="eyebrow">SECURE SYSTEM ACCESS</p>
 
