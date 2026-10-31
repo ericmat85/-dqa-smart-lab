@@ -1,0 +1,17 @@
+/* Match the request login's geometry without overriding copy or system colors. */
+.app.entry-login .unified-login-form,.lab-login-shell .lab-login-main .unified-login-form{
+ width:min(430px,calc(100vw - 32px));max-width:100%;padding:28px;border-width:1px;border-style:solid;border-radius:18px;box-sizing:border-box;box-shadow:0 18px 48px rgba(29,70,117,.10)
+}
+.app.entry-login .unified-login-form>h1,.lab-login-shell .unified-login-form>h1{font-size:24px;line-height:1.4;margin:0 0 12px;text-align:center}
+.app.entry-login .unified-login-form>.eyebrow,.lab-login-shell .unified-login-form>.lab-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.4px;margin:0 0 12px;text-align:center}
+.app.entry-login .unified-login-form>.login-description,.lab-login-shell .unified-login-form>.lab-login-description{font-size:13px;line-height:1.7;margin:0 0 24px;text-align:center}
+.app.entry-login .unified-login-form form{display:block;margin:0;text-align:left}
+.app.entry-login .unified-login-form form label,.lab-login-shell .unified-login-form label{display:block;font-size:12px;font-weight:700;line-height:normal;text-align:left;margin:15px 0 7px}
+.app.entry-login .unified-login-form form>input,.lab-login-shell .unified-login-form input{display:block;width:100%;height:44px;min-height:44px;box-sizing:border-box;font-size:13px;line-height:normal;padding:10px 12px;border-width:1px;border-style:solid;border-radius:8px;margin:0 0 2px}
+.lab-login-shell .unified-login-form .lab-login-password{margin:0}.lab-login-shell .unified-login-form .lab-login-password input{padding-right:65px}
+.app.entry-login .unified-login-form .login-submit,.lab-login-shell .unified-login-form .lab-login-submit{display:flex;align-items:center;justify-content:center;position:relative;width:100%;height:48px;min-height:48px;border-radius:9px;margin:20px 0 0;padding:10px 14px;font-size:14px;font-weight:650}
+.app.entry-login .unified-login-form .login-submit>span,.lab-login-shell .unified-login-form .lab-login-submit>span{position:absolute;right:18px}
+.app.entry-login .unified-login-form .back-button,.lab-login-shell .unified-login-form .lab-login-return{display:block;width:100%;height:44px;min-height:44px;box-sizing:border-box;margin:12px 0 0;padding:0 12px;border:0;border-radius:9px;font-size:13px}
+.app.entry-login .unified-login-form .help-button{margin:12px auto 0}
+.app.entry-login .unified-login-form .login-note,.lab-login-shell .unified-login-form .lab-login-note{display:block;margin:17px 0 0;padding:12px 14px;border-radius:9px;font-size:11px;line-height:1.7;text-align:center}
+@media(max-width:600px){.app.entry-login .unified-login-form,.lab-login-shell .lab-login-main .unified-login-form{padding:24px 20px}.app.entry-login .unified-login-form>h1,.lab-login-shell .unified-login-form>h1{font-size:22px}}

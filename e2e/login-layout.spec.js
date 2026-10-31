@@ -16,3 +16,17 @@ for(const system of ['request','lms','lab','validation']){
   expect(errors).toEqual([]);
  });
 }
+test('other login forms match request frame and field geometry while retaining their labels',async({page})=>{
+ const measure=async(cardSelector,inputSelector,labelSelector)=>page.evaluate(({cardSelector,inputSelector,labelSelector})=>{
+  const card=getComputedStyle(document.querySelector(cardSelector)),input=getComputedStyle(document.querySelector(inputSelector)),label=getComputedStyle(document.querySelector(labelSelector));
+  return {frame:[card.width,card.padding,card.borderRadius,card.borderWidth],field:[input.height,input.padding,input.borderRadius,input.fontSize],label:[label.fontSize,label.fontWeight]};
+ },{cardSelector,inputSelector,labelSelector});
+ for(const width of [1366,375]){
+  await page.setViewportSize({width,height:900});await page.goto('/request/login');const reference=await measure('.rq-login-card','.rq-login-card input','.rq-login-card .rq-label');
+  for(const system of ['lms','lab','validation']){
+   await page.goto(`/${system}/login`);const card=system==='lab'?'.lab-login-card':'.login-card';
+   expect(await measure(card,`${card} input`,`${card} label`)).toEqual(reference);
+   await expect(page.getByRole('heading',{name:PORTAL_TITLES[system],exact:true})).toBeVisible();
+  }
+ }
+});
