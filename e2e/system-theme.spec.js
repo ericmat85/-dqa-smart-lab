@@ -15,5 +15,5 @@ for(const system of ['request','lms','lab'])test(`${system} dashboard logo and s
  const theme=page.locator('.system-header-actions .theme-toggle');await theme.hover();await expect(theme).toHaveCSS('border-top-color',colors[system]);
  const profile=page.getByRole('button',{name:'個人帳號選單'});await profile.hover();await expect(profile).toHaveCSS('border-top-color',colors[system]);await profile.click();
  const settings=page.getByRole('button',{name:'⚙ 個人設定',exact:true});await settings.hover();await expect(settings).toHaveCSS('border-top-color',colors[system]);await settings.click();
- const upload=page.getByRole('button',{name:'＋ 上傳照片',exact:true});await upload.hover();await expect(upload).toHaveCSS('border-top-color',colors[system]);
+ const upload=page.getByRole('button',{name:'＋ 上傳照片',exact:true});await upload.hover();await expect(upload).toHaveCSS('border-top-color',colors[system]);await page.getByRole('button',{name:'關閉個人設定',exact:true}).click();await expect(profile).toBeFocused();
 });
