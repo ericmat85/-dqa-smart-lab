@@ -12,6 +12,7 @@ test('review tabs combine classification, counts, search, pagination and keyboar
   localStorage.setItem('dqa-borrow-requests-v1',JSON.stringify([{id:'BOR-DEMO',status:'待核准',equipment:'DEMO設備',requester:'假資料工程師',department:'假資料部門',createdAt:'2026-10-31T02:00:00Z',purpose:'測試用借用'}]));
  },INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
+ await expect(page.locator('.welcome-block')).toHaveText('實驗室管理系統');
  await page.evaluate(async()=>{
   const {saveReport}=await import('/src/reportStore.mjs');
   await saveReport({requestId:'REPORT-DEMO',stage:'level2',revision:'demo-revision',fileName:'Demo-report.xlsx',submitter:'假資料工程師',submittedAt:'2026-10-31T02:00:00Z'});
@@ -32,12 +33,48 @@ test('review tabs combine classification, counts, search, pagination and keyboar
  await search.fill('');await expect(table.locator('tbody tr')).toHaveCount(20);
  await approval.click();await expect(table.locator('tbody tr')).toHaveCount(2);await expect(table).toContainText('BOR-DEMO');await expect(table).not.toContainText('REPORT-DEMO');
  await report.click();await expect(table.locator('tbody tr')).toHaveCount(1);await expect(table).toContainText('REPORT-DEMO');
- await report.press('Home');await expect(all).toBeFocused();await expect(all).toHaveAttribute('aria-selected','true');
+ await report.press('Home');await expect(all).toBeFocused();await expect(all).toHaveAttribute('aria-selected','true');await expect(all).toHaveCSS('outline-style','solid');await expect(all).toHaveCSS('outline-width','2px');
  await all.press('ArrowRight');await expect(review).toBeFocused();await expect(review).toHaveAttribute('aria-selected','true');
  await review.press('End');await expect(report).toBeFocused();await expect(report).toHaveAttribute('aria-selected','true');
  await report.press('ArrowLeft');await expect(approval).toBeFocused();await expect(approval).toHaveAttribute('aria-selected','true');
  await expect(page.getByRole('tabpanel',{name:/待核准/})).toBeVisible();
  await search.fill('not-found');await expect(page.getByText('沒有符合條件的委託',{exact:true})).toBeVisible();
+ expect(await page.pageErrors()).toEqual([]);
+});
+
+test('LMS classification tabs use orange-red hover without changing selection in either theme',async({page})=>{
+ await page.setViewportSize({width:1366,height:768});
+ await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-lms-account-id','U001');},INITIAL_ACCOUNTS);
+ await page.goto('/lms/dashboard');
+ async function checkTabs(tablist,dark){
+  const selected=tablist.locator('[role=tab][aria-selected=true]');
+  const selectedId=await selected.evaluate(el=>el.id||el.textContent);
+  for(const tab of (await tablist.getByRole('tab').all()).slice(0,2)){
+   await page.mouse.move(600,30);const initialColor=await tab.evaluate(el=>getComputedStyle(el).color);
+   await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(255, 154, 112)':'rgb(194, 65, 12)');
+   await expect(tab).toHaveCSS('background-color',dark?'rgb(64, 42, 35)':'rgb(255, 242, 235)');
+   await expect(tab).toHaveCSS('box-shadow','none');await expect(tab).toHaveCSS('border-top-color','rgba(0, 0, 0, 0)');
+   await expect.poll(()=>selected.evaluate(el=>el.id||el.textContent)).toBe(selectedId);
+   await page.mouse.move(600,30);await expect(tab).toHaveCSS('color',initialColor);
+  }
+ }
+ for(const dark of [false,true]){
+  if(dark)await page.locator('.system-header-actions .theme-toggle').click();
+  for(const name of ['試驗委託','排程管理','設備管理','物料管理','報表分析']){
+   await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
+   await expect(page.locator('.welcome-block')).toHaveText('實驗室管理系統');
+   await checkTabs(page.getByRole('tablist').first(),dark);
+   if(name==='排程管理'){
+    await page.getByRole('button',{name:'排程管理圖表',exact:true}).click();await checkTabs(page.getByRole('tablist',{name:'甘特圖類型'}),dark);
+    await page.getByRole('button',{name:'關閉排程管理圖表',exact:true}).click();
+   }
+   if(name==='設備管理'||name==='物料管理'){
+    const kind=name==='設備管理'?'設備':'物料';
+    await page.getByRole('button',{name:`${kind}資訊`,exact:true}).first().click();await checkTabs(page.getByRole('tablist',{name:`${kind}資訊分類`}),dark);
+    await page.getByRole('dialog').getByRole('button',{name:/關閉/}).first().click();
+   }
+  }
+ }
  expect(await page.pageErrors()).toEqual([]);
 });
 

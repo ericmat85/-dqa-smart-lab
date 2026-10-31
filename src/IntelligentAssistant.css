@@ -12,3 +12,5 @@
 .intelligent-typing-cursor{display:inline-block;margin-left:2px;color:#6660bf;animation:intelligent-cursor-blink 1s step-end infinite}
 @keyframes intelligent-cursor-blink{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.intelligent-typing-cursor{animation:none}}
+
+.intelligent-ai-icon{display:block;flex:none}.intelligent-launcher-symbol{display:inline-flex;align-items:center;justify-content:center}.intelligent-panel .intelligent-panel-title{display:flex;align-items:center;gap:8px}

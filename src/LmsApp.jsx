@@ -677,7 +677,7 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
 
 
 function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},children}){
- return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button><div className="welcome-block"><strong>歡迎，{currentUser?.name}</strong><span>{currentUser?.role} | {currentUser?.department||'DQA 實驗室'}</span></div>{children}<SystemHeaderActions dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
+ return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button><div className="welcome-block"><strong>實驗室管理系統</strong></div>{children}<SystemHeaderActions dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
  {title:'待審查試驗委託',detail:'等待主管審核委託內容與報告',count:notificationCounts.pendingReview,icon:'✓',onClick:()=>onNavigate?.('requests','待審查')},
  {title:'待排程試驗',detail:'等待安排設備與試驗時間',count:notificationCounts.unscheduled,icon:'◷',onClick:()=>onNavigate?.('schedule','未排程')},
  {title:'排程衝突',detail:'設備或時段重疊，需要確認',count:notificationCounts.conflicts,icon:'!',onClick:()=>onNavigate?.('schedule','有衝突')}
@@ -2045,7 +2045,7 @@ function DashboardPage({
 
         </div>
 
-        <div className="lms-assistant-dock"><IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/></div>
+        <IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/>
 
       </main>
 
