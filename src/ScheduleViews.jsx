@@ -1,3 +1,4 @@
+import HelpTip from './HelpTip.jsx';
 import {PaginatedTable,PaginatedList} from './Pagination.jsx';
 import ScheduleTimeline from './ScheduleTimeline.jsx';
 import {useState} from 'react';
@@ -16,7 +17,6 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
   const [collapsed,setCollapsed]=useState({});
   const visible=filterScheduleRows(rows,status,search);
   const groups=groupSchedulesByExecutor(rows,accounts);
-  const allCollapsed=groups.length>0&&groups.every(group=>collapsed[group.key] ?? true);
   const categoryColors=categoryColorMap(equipment);
   const deviceGroups=groupSchedulesByEquipment(rows,equipment,now).map(group=>({...group,color:group.machine?categoryColors.get(categoryName(group.machine.category)):'#8b96ac'}));
   const tabs=[['all','全部排程',rows.length],['people','依執行人員',groups.length],['equipment','依設備排程',deviceGroups.filter(group=>group.rows.length).length]];
@@ -26,7 +26,7 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
     setView(next);document.getElementById(`schedule-view-tab-${next}`)?.focus();
   };
   return <section className="schedule-views" aria-label="排程檢視">
-    <div className="schedule-view-top"><div className="schedule-view-tabs" role="tablist" aria-label="排程檢視方式">{tabs.map(([key,label,count],index)=><button type="button" key={key} role="tab" id={`schedule-view-tab-${key}`} aria-selected={view===key} aria-controls={`schedule-view-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>chooseTab(event,index)}>{key==='all'?'▤':key==='people'?'◉':'▦'}<strong>{label}</strong><span>{count}</span></button>)}</div>{view==='people'&&<div className="schedule-group-controls"><button type="button" onClick={()=>setCollapsed(Object.fromEntries(groups.map(group=>[group.key,false])))}>全部展開</button><button type="button" disabled={allCollapsed} onClick={()=>setCollapsed(Object.fromEntries(groups.map(group=>[group.key,true])))}>全部收合</button></div>}</div>
+    <div className="schedule-view-top"><div className="schedule-view-tabs" role="tablist" aria-label="排程檢視方式">{tabs.map(([key,label,count],index)=><button type="button" key={key} role="tab" id={`schedule-view-tab-${key}`} aria-selected={view===key} aria-controls={`schedule-view-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>chooseTab(event,index)}>{key==='all'?'▤':key==='people'?'◉':'▦'}<strong>{label}</strong><span>{count}</span></button>)}</div></div>
     <div className="template-toolbar schedule-search-toolbar"><label className="schedule-search-wrap"><span aria-hidden="true">⌕</span><input type="search" value={search} onChange={event=>onSearch(event.target.value)} placeholder="搜尋委託編號、產品代碼、樣品編號、試驗項目、設備或執行人…" aria-label="搜尋排程"/></label></div>
     <div role="tabpanel" id={`schedule-view-panel-${view}`} aria-labelledby={`schedule-view-tab-${view}`} tabIndex={0}>
       {view==='all'?<ScheduleTable resetKey={`${status}:${search}`} rows={visible} onRequest={onRequest} onEdit={onEdit}/>:view==='equipment'?<EquipmentScheduleBoard groups={deviceGroups} now={now} status={status} search={search} onRequest={onRequest} onEdit={onEdit}/>:<div className="schedule-people-board"><PaginatedList items={groups} resetKey={`${status}:${search}`}>{(pageGroups,offset)=>pageGroups.map((group,pageIndex)=>{const index=offset+pageIndex;
@@ -48,7 +48,7 @@ function EquipmentScheduleBoard({groups,now,status,search,onRequest,onEdit}){
  const total=visible.reduce((sum,group)=>sum+group.items.length,0);
  const format=value=>new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
  return <div className="equipment-schedule-board">
-  <div className="equipment-schedule-intro"><div><h3>依設備掌握試驗安排</h3><p>進行中的試驗優先，其次為即將開始的安排；尚未設定時間的試驗置於最後。時間均為台灣時間。</p></div><div className="schedule-group-controls"><button type="button" onClick={()=>setCollapsed(Object.fromEntries(visible.map(group=>[group.key,false])))}>全部展開</button><button type="button" onClick={()=>setCollapsed(Object.fromEntries(visible.map(group=>[group.key,true])))}>全部收合</button></div></div>
+  <div className="equipment-schedule-intro"><div><h3>依設備掌握試驗安排<HelpTip>進行中的試驗優先，其次為即將開始的安排；尚未設定時間的試驗置於最後。時間均為台灣時間。</HelpTip></h3></div></div>
   <div className="equipment-schedule-kpis"><span>有安排設備 <strong>{visible.filter(group=>group.machine&&group.items.length).length}</strong> 台</span><span>委託 <strong>{requestCount}</strong> 件（不重複）</span><span>設備試驗安排 <strong>{total}</strong> 筆</span></div>
   <PaginatedList items={visible} resetKey={`${status}:${search}`}>{page=>page.map(group=>{
    const closed=collapsed[group.key]??true,id=`equipment-schedule-${encodeURIComponent(group.key)}`;
