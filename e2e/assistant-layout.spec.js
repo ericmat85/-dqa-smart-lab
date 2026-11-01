@@ -8,12 +8,15 @@ test.beforeEach(async({page})=>{
   localStorage.setItem('dqa-schedules-demo-v1',JSON.stringify([{id:'ALIGN',requestId:'REQ-ALIGN',title:'低溫試驗',status:'未排程',quantity:1}]));
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
 });
-for(const width of [1366,375,320])test(`assistant opens left and stays inside the viewport at ${width}px`,async({page})=>{
+for(const width of [1366,375,320])test(`expanded launcher content aligns left and the panel keeps its width at ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});await page.goto('/lms/dashboard');
  const launcher=page.locator('.intelligent-launcher');await launcher.click();await expect(launcher).toHaveCSS('width','136px');
  const panel=page.getByRole('complementary',{name:'AI智能助理'});await expect(panel).toBeVisible();
- const a=await launcher.boundingBox(),p=await panel.boundingBox();expect(p.x).toBeGreaterThanOrEqual(0);expect(p.x+p.width).toBeLessThanOrEqual(width);expect(p.y).toBeGreaterThanOrEqual(0);expect(p.y+p.height).toBeLessThanOrEqual(844);
- if(width>=360)expect(p.x+p.width).toBeLessThanOrEqual(a.x-8);else expect(p.x).toBe(8);
+ const p=await panel.boundingBox();expect(p.x).toBeGreaterThanOrEqual(0);expect(p.x+p.width).toBeLessThanOrEqual(width);expect(p.y).toBeGreaterThanOrEqual(0);expect(p.y+p.height).toBeLessThanOrEqual(844);
+ await expect(launcher).toHaveCSS('justify-content','flex-start');
+ const alignment=await launcher.evaluate(element=>{const button=element.getBoundingClientRect(),icon=element.querySelector('svg').getBoundingClientRect(),label=element.querySelector('.intelligent-launcher-label').getBoundingClientRect();return {left:icon.left-button.left,vertical:Math.abs(icon.top+icon.height/2-label.top-label.height/2),gap:label.left-icon.right};});
+ expect(alignment.left).toBe(8);expect(alignment.vertical).toBeLessThanOrEqual(1);expect(alignment.gap).toBe(6);
+ if(width<=600){expect(p.x).toBe(12);expect(p.width).toBe(width-24);expect(p.y).toBe(56);}else expect(p.width).toBe(390);
  for(const button of await panel.locator('header button,.intelligent-composer button').all()){await expect(button).toHaveCSS('align-items','center');await expect(button).toHaveCSS('justify-content','center');}
  await panel.getByRole('button',{name:'收合AI智能助理',exact:true}).click();await expect(launcher).toHaveCSS('width','68px');expect(await page.pageErrors()).toEqual([]);
 });
