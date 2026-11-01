@@ -44,12 +44,9 @@ function EquipmentScheduleBoard({groups,now,status,search,onRequest,onEdit}){
  const [collapsed,setCollapsed]=useState({});
  const query=search.trim().toLowerCase();
  const visible=groups.map(group=>({...group,items:filterScheduleRows(group.rows,status,`${group.name} ${group.key}`.toLowerCase().includes(query)?'':search)})).filter(group=>group.items.length||!query&&status==='全部');
- const requestCount=new Set(visible.flatMap(group=>group.items.map(row=>row.requestId||row.id))).size;
- const total=visible.reduce((sum,group)=>sum+group.items.length,0);
  const format=value=>new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
  return <div className="equipment-schedule-board">
-  <div className="equipment-schedule-intro"><div><h3>依設備掌握試驗安排<HelpTip>進行中的試驗優先，其次為即將開始的安排；尚未設定時間的試驗置於最後。時間均為台灣時間。</HelpTip></h3></div></div>
-  <div className="equipment-schedule-kpis"><span>有安排設備 <strong>{visible.filter(group=>group.machine&&group.items.length).length}</strong> 台</span><span>委託 <strong>{requestCount}</strong> 件（不重複）</span><span>設備試驗安排 <strong>{total}</strong> 筆</span></div>
+  <div className="equipment-schedule-intro"><div><div className="help-title-row"><h3>依設備掌握試驗安排</h3><HelpTip>進行中的試驗優先，其次為即將開始的安排；尚未設定時間的試驗置於最後。時間均為台灣時間。</HelpTip></div></div></div>
   <PaginatedList items={visible} resetKey={`${status}:${search}`}>{page=>page.map(group=>{
    const closed=collapsed[group.key]??true,id=`equipment-schedule-${encodeURIComponent(group.key)}`;
    const first=group.items[0],period=first?scheduleProgress({...first,status:'已排程'},now):null;

@@ -5,10 +5,11 @@
 .help-tip .help-tip-content{position:fixed;z-index:1000;box-sizing:border-box;max-height:50vh;overflow:auto;display:block;width:max-content;max-width:min(320px,65vw);padding:10px 13px;border:1px solid #93c5fd;border-radius:8px;background:#eff6ff;color:#172554;font:400 13px/1.65 system-ui;white-space:normal;overflow-wrap:anywhere;box-shadow:0 6px 20px #0f172a26;text-transform:none;letter-spacing:normal}
 .help-tip .help-tip-content::before{content:'';position:absolute;left:0;right:0;top:-8px;height:8px}
 
-/* A shared flex row gives the title and circle the same center line. */
-:is(h1,h2,h3,h4,h5,h6):has(> .help-tip){display:flex;align-items:center;gap:6px}
-:is(h1,h2,h3,h4,h5,h6) > .help-tip{display:inline-flex;align-items:center;justify-content:center;margin:0;line-height:1}
 .help-tip .help-tip-trigger{box-sizing:border-box;line-height:0;letter-spacing:0;text-indent:0}
 .help-tip .help-tip-question{display:block;flex:none;width:16px;height:16px;margin:0;padding:0;overflow:visible}
 .help-tip-question path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .help-tip-question circle{fill:currentColor;stroke:none}
+
+.help-title-row{display:flex;align-items:center;gap:6px;min-width:0}
+.help-title-row > :is(h1,h2,h3,h4,h5,h6){margin-block:0!important;min-width:0}
+.help-title-row > .help-tip{display:inline-flex;align-items:center;justify-content:center;margin:0;line-height:1}

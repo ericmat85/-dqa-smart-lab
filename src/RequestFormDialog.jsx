@@ -6,7 +6,7 @@ export default function RequestFormDialog({label,dark,onClose,children}){
  useEffect(()=>{
   const previous=document.activeElement,overflow=document.body.style.overflow,root=document.getElementById('root'),inert=root?.inert;
   document.body.style.overflow='hidden';if(root)root.inert=true;
-  ref.current?.querySelector('button,input,select,textarea')?.focus();
+  ref.current?.querySelector('button:not(.help-tip-trigger),input,select,textarea')?.focus();
   const keydown=event=>{
    const dialogs=document.querySelectorAll('[role="dialog"],[role="alertdialog"]');if(dialogs[dialogs.length-1]!==ref.current)return;
    if(event.key==='Escape'){event.preventDefault();closeRef.current();return;}
