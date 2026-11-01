@@ -28,7 +28,7 @@ export default function LiveDashboard({onNavigate,currentUser}) {
     <div className="live-metric-grid">
       <MetricCard label="待排程試驗" value={metrics.counts['未排程']} detail={`另有 ${metrics.counts['有衝突']} 筆排程衝突`} icon={<DashboardMetricIcon kind="pending"/>} onClick={()=>onNavigate('schedule','未排程')}/>
       <MetricCard label="試驗中" value={metrics.counts['試驗中']} detail={`${metrics.counts['已排程']} 筆已預約、尚未開始`} icon={<DashboardMetricIcon kind="running"/>} color="teal" onClick={()=>onNavigate('schedule','試驗中')}/>
-      <MetricCard label="本週完成" value={metrics.completedThisWeek} detail={`${metrics.week.from} — ${metrics.week.to}`} icon={<DashboardMetricIcon kind="completed"/>} color="gold" onClick={()=>onNavigate('schedule','已完成')}/>
+      <MetricCard label="本週完成" value={metrics.completedThisWeek} detail={`${metrics.week.from} — ${metrics.week.to}`} icon={<DashboardMetricIcon kind="completed"/>} color="orange" onClick={()=>onNavigate('schedule','已完成')}/>
       <MetricCard label="設備稼動率" value={`${activity.rate}%`} detail={`${activity.from} — ${activity.to} · 排程估算`} icon="▦" color="slate" onClick={()=>onNavigate('equipment')}/>
     </div>
     <div className="live-dashboard-charts">

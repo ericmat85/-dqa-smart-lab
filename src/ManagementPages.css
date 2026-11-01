@@ -93,3 +93,16 @@
 /* Report filters must not depend on variables scoped to the dashboard. */
 .management-page.reports-management .lab-report-controls{border:1px solid var(--mg-line,var(--border,#e0e7f2));border-radius:10px;padding:12px;background:var(--surface,#fff)}
 .management-page.reports-management .lab-report-controls>:is(input,select){border:1px solid var(--mg-line,var(--border,#e0e7f2));border-radius:8px;background:var(--surface,#fff);color:var(--text,#203353);min-height:42px;padding:10px 12px}
+.report-config>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none}
+.report-config>summary::-webkit-details-marker{display:none}
+.report-config>summary>.report-config-title{display:inline-flex;align-items:center;gap:9px;float:none;margin:0;color:var(--text,#203353);font-size:14px}
+.report-config-title svg{width:19px;height:19px;fill:var(--surface,#fff);stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.report-config>summary>.report-config-meta{display:inline-flex;align-items:center;gap:10px;float:none;margin:0;font-size:12px}
+.report-config-meta svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .15s}
+.report-config[open] .report-config-meta svg{transform:rotate(180deg)}
+.report-preferences{padding:4px 18px 20px;border-bottom:1px solid var(--border,#e0e7f2)}
+.report-config-subheading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
+.report-config-subheading h3,.report-columns-title{font-size:13px;font-weight:600;margin:0;color:var(--text,#203353)}
+.report-config-subheading>span{font-size:12px;color:var(--muted,#71829a)}
+.report-columns-title{padding:18px 18px 12px}
+@media(max-width:600px){.report-config>summary{align-items:flex-start}.report-config>summary>.report-config-title{font-size:13px}.report-preferences{padding:0 14px 18px}}

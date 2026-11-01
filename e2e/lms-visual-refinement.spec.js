@@ -56,8 +56,8 @@ test('lighter actions, export icon, larger brand and list-based settings retain 
 });
 
 test('dashboard cards fill with icon tints and report filters keep their borders',async({page})=>{
- const light=['rgb(232, 239, 255)','rgb(225, 247, 239)','rgb(255, 243, 220)','rgb(234, 240, 246)'];
- const dark=['rgb(46, 60, 87)','rgb(41, 75, 72)','rgb(79, 68, 48)','rgb(46, 60, 87)'];
+ const light=['rgb(232, 239, 255)','rgb(225, 247, 239)','rgb(255, 240, 226)','rgb(234, 240, 246)'];
+ const dark=['rgb(46, 60, 87)','rgb(41, 75, 72)','rgb(76, 51, 37)','rgb(46, 60, 87)'];
  for(const night of [false,true]){
   if(night)await page.getByRole('button',{name:'切換深色或淺色模式'}).click();
   await page.locator('.sidebar').getByRole('button',{name:'儀錶板',exact:true}).click();

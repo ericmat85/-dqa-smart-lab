@@ -38,11 +38,11 @@ test('accounts and roles share a workspace, assign custom permissions and preser
  await page.reload();await nav(page,'帳號管理');await page.getByLabel('依角色篩選').selectOption({label:'排程協作專員'});await expect(page.locator('.account-table')).toContainText('U003');
  expect(await page.pageErrors()).toEqual([]);
 });
-test('settings persist report defaults, fold large data sections and navigate home without logging out',async({page})=>{
+test('report export settings persist preferences while system settings retain appearance and health controls',async({page})=>{
  await nav(page,'系統設定');const settings=page.locator('.settings-management');
  await expect(settings.locator('.management-fold')).toHaveCount(4);await expect(settings.getByText('資料來源健檢',{exact:false}).first()).toBeVisible();
- await settings.getByLabel('報表預設日期範圍').selectOption('month');await settings.locator('.settings-checkbox input').uncheck();await settings.getByRole('button',{name:'儲存偏好'}).click();await expect(settings.getByRole('status')).toContainText('偏好已儲存');
- await nav(page,'報表分析');await expect(page.getByLabel('日期範圍')).toHaveValue('month');
+ await expect(settings.getByLabel('報表預設日期範圍')).toHaveCount(0);await nav(page,'報表分析');await page.getByText('報表顯示與匯出設定',{exact:true}).click();const preferences=page.locator('.report-preferences');await preferences.getByLabel('報表預設日期範圍').selectOption('month');await preferences.locator('.settings-checkbox input').uncheck();await preferences.getByRole('button',{name:'儲存偏好'}).click();await expect(preferences.getByRole('status')).toContainText('偏好已儲存');
+ await nav(page,'報表分析');await expect(page.getByLabel('日期範圍',{exact:true})).toHaveValue('month');
  await nav(page,'系統設定');await settings.getByRole('button',{name:'切換為深色模式'}).click();await expect(page.locator('.dashboard-shell')).toHaveClass(/theme-dark/);
  await settings.locator('.management-fold').filter({has:page.locator('summary').filter({hasText:'資料來源健檢'})}).locator('summary').first().click();await expect(settings.getByRole('columnheader',{name:'資料來源',exact:true})).toBeVisible();
  await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByText(/重新讀取本機資料/)).toBeVisible();
@@ -55,7 +55,7 @@ for(const width of [1366,375])test(`management pages fit ${width}px in both them
  for(const dark of [false,true]){
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
   for(const name of ['報表分析','帳號管理','系統設定']){
-   await nav(page,name);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   await nav(page,name);if(name==='報表分析')await page.locator('.report-config>summary').click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    await page.screenshot({path:test.info().outputPath(`management-${name}-${width}-${dark?'dark':'light'}.png`),fullPage:true});
   }
  }
