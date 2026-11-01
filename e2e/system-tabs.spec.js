@@ -1,15 +1,15 @@
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 test.beforeEach(async({page})=>{await page.addInitScript(accounts=>localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts)),INITIAL_ACCOUNTS);});
-test('request tabs stay transparent and use green selection in both themes and narrow screens',async({page})=>{
+test('request tabs stay transparent and use enterprise blue selection in both themes and narrow screens',async({page})=>{
  await page.goto('/request/login');await page.getByRole('button',{name:'登入系統',exact:false}).click();
  await page.goto('/request/requests');
  const tabs=page.getByRole('tablist',{name:'我的委託與借用'}),selected=tabs.locator('[aria-selected=true]');
  for(const dark of [false,true]){
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
-  await expect(selected).toHaveCSS('color',dark?'rgb(134, 239, 172)':'rgb(22, 163, 74)');
+  await expect(selected).toHaveCSS('color',dark?'rgb(133, 189, 255)':'rgb(8, 102, 232)');
   for(const tab of await tabs.getByRole('tab').all()){await tab.hover();await expect(tab).toHaveCSS('background-color','rgba(0, 0, 0, 0)');}
-  await expect(selected.locator('span')).toHaveCSS('background-color',dark?'rgb(23, 59, 42)':'rgb(232, 249, 238)');
+  await expect(selected.locator('span')).toHaveCSS('background-color',dark?'rgb(22, 58, 97)':'rgb(233, 242, 255)');
  }
  await page.setViewportSize({width:375,height:812});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
