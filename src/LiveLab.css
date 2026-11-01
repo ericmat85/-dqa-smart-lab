@@ -12,3 +12,16 @@
 
 
 .live-metric-icon .dashboard-metric-symbol{display:block;flex:none}
+
+/* Carry each icon's tint across its complete metric tile. */
+.live-metric-blue{--metric-tint:#e8efff}
+.live-metric-teal{--metric-tint:#e1f7ef}
+.live-metric-gold{--metric-tint:#fff3dc}
+.live-metric-slate{--metric-tint:#eaf0f6}
+.live-metric-grid>.live-metric{background:var(--metric-tint,var(--surface,#fff))}
+.live-metric-grid .live-metric-icon{background:transparent}
+.theme-dark .live-metric-blue,.theme-dark .live-metric-slate{--metric-tint:#2e3c57}
+.theme-dark .live-metric-teal{--metric-tint:#294b48}
+.theme-dark .live-metric-gold{--metric-tint:#4f4430}
+#root .dashboard-shell.theme-dark .live-metric-grid>.live-metric{background:var(--metric-tint)!important}
+.theme-dark .live-metric-grid .live-metric-icon{background:transparent}
