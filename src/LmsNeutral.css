@@ -16,7 +16,6 @@
 .dashboard-shell .system-header-actions .profile-button:hover,.system-header-actions[data-system=lms] .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
 .dashboard-shell .system-header-actions .avatar,.system-header-actions[data-system=lms] .avatar{background:#ede9fe;color:#6d5bd0}
 .shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#737b85!important;color:#fff!important;border-color:#737b85}
-.dashboard-shell .schedule-view-tabs button[aria-selected=true]{color:#60666d}.dashboard-shell .schedule-view-tabs button[aria-selected=true]:after{background:#8a9199}.dashboard-shell .schedule-view-tabs button[aria-selected=true]>span{background:#edf0f2;color:#60666d}
 /* A compact fixed launcher, without a full-width bottom dock. */
 .dashboard-shell>.dashboard-main{height:100dvh;min-height:0;display:flex;flex-direction:column}
 .dashboard-shell .dashboard-topbar{flex-shrink:0}
@@ -24,7 +23,6 @@
 .dashboard-shell .dashboard-content::after{content:'';display:block;height:54px;pointer-events:none}
 .dashboard-shell .intelligent-assistant .intelligent-launcher-symbol{font-size:16px}
 .dashboard-shell .intelligent-assistant .intelligent-launcher-label{font-size:13px}
-.dashboard-shell .theme-dark .schedule-view-tabs button[aria-selected=true],.dashboard-shell.theme-dark .schedule-view-tabs button[aria-selected=true]{color:#d8dde3}
 @media(max-width:900px){.dashboard-shell.is-schedule-page .dashboard-content{padding:12px}}
 #root .dashboard-shell>.sidebar.sidebar{background:#60666d!important}
 .app.entry-login[data-system=lms] .login-submit{background:#737b85;color:white}
@@ -51,11 +49,6 @@
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher{background:#7c3aed!important;border-color:#7c3aed!important;color:#fff!important}
 #root .dashboard-shell .intelligent-assistant .intelligent-launcher:hover{background:#6d28d9!important}
 
-/* Classification tabs keep their orange-red text and tint without a hover frame. */
-#root .dashboard-shell [role=tab]:hover:not(:disabled){color:#c2410c!important;background:#fff2eb!important;border-color:transparent!important;box-shadow:none!important}
-#root .dashboard-shell [role=tab]:hover:not(:disabled) :is(strong,span,svg){color:inherit!important}
-#root .dashboard-shell [role=tab]:hover:not(:disabled)::after{background:#ea580c!important}
-#root .dashboard-shell.theme-dark [role=tab]:hover:not(:disabled){color:#ff9a70!important;background:#402a23!important}
 
 /* Remove pointer hover frames while preserving :focus-visible keyboard outlines. */
 #root .dashboard-shell :is(button,[role=button]):hover:not(:disabled),

@@ -1,3 +1,4 @@
+import LoginCredentials from './LoginCredentials.jsx';
 import './LmsNeutral.css';
 import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import {PORTAL_TITLES} from './portalLabels.mjs';
@@ -20,7 +21,7 @@ import useLabSnapshot from './useLabSnapshot.js';
 import {requestInformation} from './labData.mjs';
 import IntelligentAssistant from './IntelligentAssistant.jsx';
 import RoleSettings from './RoleSettings.jsx';
-import {readCustomRoles,canAccessLmsPage} from './customRoles.mjs';
+import {BUILTIN_ROLES,readCustomRoles,canAccessLmsPage} from './customRoles.mjs';
 import './ManagementPages.css';
 import LiveDashboard from './LiveDashboard.jsx';
 import {labNotificationCounts} from './labNotifications.mjs';
@@ -372,7 +373,7 @@ export function LoginPage({
 
   const [error, setError] = useState("");
 
-  const [notice, setNotice] = useState("");
+
 
 
 
@@ -384,7 +385,7 @@ export function LoginPage({
 
     setError("");
 
-    setNotice("");
+
 
 
 
@@ -404,28 +405,6 @@ export function LoginPage({
 
 
 
-  function handleHelp() {
-
-    setNotice(
-
-      system.id === "request"
-
-        ? "加入委託請洽 DQA 管理員。"
-
-        : "忘記密碼請洽 DQA 管理員。"
-
-    );
-
-  }
-
-
-
-  const helpLabel =
-
-    system.id === "request" ? "加入委託" : "忘記密碼";
-
-
-
   return (
 
     <div data-system={system.id} className={`app login-page entry-login ${dark ? "theme-dark" : "theme-light"}`}>
@@ -442,67 +421,15 @@ export function LoginPage({
 
       <main className="login-card unified-login-form">
 
-        <p className="eyebrow">SECURE SYSTEM ACCESS</p>
+
 
         <h1>{PORTAL_TITLES[system.id]||system.title}</h1>
-
-        <p className="login-description">
-
-          {preview ? "設計品質管理暫未開放" : "請輸入您的電子郵件與密碼以繼續"}
-
-        </p>
 
 
 
         <form onSubmit={handleSubmit}>
 
-          <label htmlFor="login-email">登入帳號（電子郵件）</label>
-
-          <input
-
-            id="login-email"
-
-            disabled={preview}
-
-            type="email"
-
-            autoComplete="username"
-
-            placeholder="請輸入電子郵件"
-
-            value={email}
-
-            onChange={(event) => setEmail(event.target.value)}
-
-            required
-
-          />
-
-
-
-          <label htmlFor="login-password">密碼</label>
-
-          <input
-
-            id="login-password"
-
-            disabled={preview}
-
-            type="password"
-
-            autoComplete="current-password"
-
-            placeholder="請輸入密碼"
-
-            value={password}
-
-            onChange={(event) => setPassword(event.target.value)}
-
-            required
-
-          />
-
-
+          <LoginCredentials accountId="login-email" passwordId="login-password" account={email} password={password} onAccountChange={setEmail} onPasswordChange={setPassword} disabled={preview}/>
 
           {error && (
 
@@ -526,32 +453,6 @@ export function LoginPage({
 
 
 
-        {!preview && <button
-
-          type="button"
-
-          className="help-button"
-
-          onClick={handleHelp}
-
-        >
-
-          {helpLabel}
-
-        </button>}
-
-
-
-        {notice && (
-
-          <p className="form-error" role="status">
-
-            {notice}
-
-          </p>
-
-        )}
-
 
 
         <button type="button" className="back-button" onClick={onBack}>
@@ -559,14 +460,6 @@ export function LoginPage({
           ← 返回系統首頁
 
         </button>
-
-
-
-        <p className="login-note">
-
-          {preview ? "虛擬登入入口 · 尚未開發，未連接帳號驗證" : "競賽原型 · 尚未連接正式帳號驗證服務"}
-
-        </p>
 
       </main>
 
@@ -582,7 +475,7 @@ export function LoginPage({
 
 
 
-function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
+function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
   return (
 
@@ -657,12 +550,13 @@ function Sidebar({ active, onNavigate, onLogout, open, currentUser }) {
           type="button"
 
           className="logout-button"
+          aria-label="回到首頁"
 
-          onClick={onLogout}
+          onClick={onHome}
 
         >
 
-          <span className="nav-icon"><LmsSidebarIcon name="logout"/></span> 登出系統
+          <span className="nav-icon"><LmsSidebarIcon name="dashboard"/></span> 回到首頁
 
         </button>
 
@@ -701,6 +595,7 @@ function AccountManagement({ accounts, setAccounts }) {
   const [search, setSearch] = useState("");
 
   const [filter, setFilter] = useState("全部");
+  const [roleFilter,setRoleFilter]=useState('');
 
 
 
@@ -740,7 +635,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
-    return matchesSearch && matchesFilter;
+    return matchesSearch && matchesFilter && (!roleFilter||account.role===roleFilter);
 
   });
 
@@ -1068,9 +963,9 @@ function AccountManagement({ accounts, setAccounts }) {
 
         <div>
 
-          <span className="management-eyebrow">PEOPLE &amp; ACCESS</span><h2>帳號管理</h2>
+          <h2>帳號與權限管理</h2>
 
-          <p>管理 LMS 使用者資料、角色及帳號狀態。</p>
+          <p>集中管理使用者、角色與功能權限，從帳號指派到簽核層級一次完成。</p>
 
         </div>
 
@@ -1082,19 +977,19 @@ function AccountManagement({ accounts, setAccounts }) {
 
           className="primary-button"
 
-          onClick={openNewAccountForm}
+          onClick={()=>{setRoleSettingsOpen(false);openNewAccountForm();}}
 
         >
 
           ＋ 新增帳號
 
-        </button><button type="button" className="account-permission-button" onClick={()=>setRoleSettingsOpen(true)}>⚙ 權限設定</button></div>
+        </button></div>
 
       </div>
 
 
 
-      {roleSettingsOpen&&<RoleSettings roles={roles} accounts={accounts} onClose={()=>setRoleSettingsOpen(false)} onSave={setRoles}/>}
+
 <div className="account-summary">
 
         <div className="account-summary-card">
@@ -1125,6 +1020,11 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
+      <div className="schedule-view-tabs account-access-tabs" role="tablist" aria-label="帳號與權限管理">
+        {[[false,'帳號清單',accounts.length],[true,'角色與權限',BUILTIN_ROLES.length+roles.length]].map(([key,label,count])=><button type="button" key={label} role="tab" id={key?'access-tab-roles':'access-tab-accounts'} aria-selected={roleSettingsOpen===key} aria-controls={key?'access-panel-roles':'access-panel-accounts'} tabIndex={roleSettingsOpen===key?0:-1} onClick={()=>setRoleSettingsOpen(key)} onKeyDown={event=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?false:event.key==='End'?true:!roleSettingsOpen;setRoleSettingsOpen(next);document.getElementById(next?'access-tab-roles':'access-tab-accounts')?.focus();}}}><strong>{label}</strong><span>{count}</span></button>)}
+      </div>
+      <div id="access-panel-roles" role="tabpanel" aria-labelledby="access-tab-roles" hidden={!roleSettingsOpen}>{roleSettingsOpen&&<RoleSettings embedded roles={roles} accounts={accounts} onClose={()=>setRoleSettingsOpen(false)} onSave={setRoles}/>}</div>
+      <div id="access-panel-accounts" role="tabpanel" aria-labelledby="access-tab-accounts" hidden={roleSettingsOpen}>
       {notice && (
 
         <div className="account-notice" role="status">
@@ -1220,6 +1120,7 @@ function AccountManagement({ accounts, setAccounts }) {
               <select
 
                 name="role"
+                aria-label="角色"
 
                 value={formData.role}
 
@@ -1391,7 +1292,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
-      <div className="account-toolbar">
+      <div className="account-toolbar"><select aria-label="依角色篩選" value={roleFilter} onChange={event=>setRoleFilter(event.target.value)}><option value="">全部角色</option>{[...BUILTIN_ROLES,...roles.map(role=>role.name)].map(name=><option key={name}>{name}</option>)}</select>
 
         <input
 
@@ -1437,7 +1338,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
       <div className="table-scroll">
 
-        <PaginatedTable resetKey={`${search}:${filter}`} className="account-table">
+        <PaginatedTable resetKey={`${search}:${filter}:${roleFilter}`} className="account-table">
 
           <thead>
 
@@ -1503,7 +1404,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
                     {account.role}
 
-                  </span>
+                  </span><small className="account-role-scope">{roles.find(role=>role.name===account.role)?`${roles.find(role=>role.name===account.role).pages.length} 個功能頁面 · ${roles.find(role=>role.name===account.role).level?'第 '+roles.find(role=>role.name===account.role).level+' 階審查':'一般角色'}`:'系統內建角色'}</small>
 
                 </td>
 
@@ -1611,12 +1512,13 @@ function AccountManagement({ accounts, setAccounts }) {
 
       <p className="account-footer-note">
 
-        注意：此頁面為前端競賽原型。新增與修改的帳號資料只存在目前畫面的記憶體中；
+        Demo 帳號、角色與權限供流程展示，保存於目前瀏覽器；
 
-        重新整理後會恢復初始示範資料。正式版將再串接後端 API 與資料庫。
+        正式帳號驗證與權限控管需由後端服務執行。
 
       </p>
 
+      </div>
     </section>
 
   );
@@ -1931,7 +1833,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
   });
   return equipmentCount?Math.min(100,Math.round(occupied.size/(equipmentCount*14)*100)):0;
  })();
- return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><h2>試驗排程管理</h2><p>按「編輯排程」查看委託內容並安排設備；日程結束後自動完成並釋放設備。</p></div><div className="schedule-heading-actions"><button type="button" className="template-btn schedule-chart-button" onClick={()=>setShowGantt(true)}><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></button><button type="button" className="template-btn secondary schedule-history-button" onClick={()=>setShowScheduleHistory(true)}>歷史排程</button></div></div><div className="schedule-kpis schedule-kpis-timed"><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi"><span>設備使用率（14 天示範區間）</span><strong>{equipmentUtilization}%</strong></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<ScheduleViews rows={activeScheduleRows} accounts={accounts} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備對應規則與利用率僅供流程驗證，尚未接正式資料庫。</div></div>
+ return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><h2>試驗排程管理</h2><p>按「編輯排程」查看委託內容並安排設備；日程結束後自動完成並釋放設備。</p></div><div className="schedule-heading-actions"><button type="button" className="template-btn schedule-chart-button" onClick={()=>setShowGantt(true)}><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></button><button type="button" className="template-btn secondary schedule-history-button" onClick={()=>setShowScheduleHistory(true)}>歷史排程</button></div></div><div className="schedule-kpis schedule-kpis-timed"><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi"><span>設備使用率（14 天示範區間）</span><strong>{equipmentUtilization}%</strong></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<ScheduleViews rows={activeScheduleRows} accounts={accounts} equipment={equipmentCatalog} now={scheduleNow} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備對應規則與利用率僅供流程驗證，尚未接正式資料庫。</div></div>
  {showGantt&&<div className="request-modal-backdrop gantt-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setShowGantt(false)}}><section className="request-modal gantt-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-gantt-title"><header className="request-modal-header"><div><h3 id="schedule-gantt-title">排程管理圖表</h3><p>分頁檢視設備或人力排程；可瀏覽過去與未來日期</p></div><button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉排程管理圖表" onClick={()=>setShowGantt(false)}>×</button></header><div className="request-modal-body"><div className="gantt-tabs" role="tablist" aria-label="甘特圖類型"><button type="button" role="tab" aria-selected={ganttTab==="equipment"} className={ganttTab==="equipment"?"active":""} onClick={()=>setGanttTab("equipment")}>設備排程甘特圖</button><button type="button" role="tab" aria-selected={ganttTab==="people"} className={ganttTab==="people"?"active":""} onClick={()=>setGanttTab("people")}>人力排程甘特圖</button></div><div className="gantt-controls"><button type="button" className="template-btn secondary" onClick={()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()-ganttDays);setGanttStartDate(d.toISOString().slice(0,10))}}>← 前一段</button><label>起始日期 <input type="date" value={ganttStartDate} onChange={e=>e.target.value&&setGanttStartDate(e.target.value)}/></label><label>顯示天數 <select value={ganttDays} onChange={e=>setGanttDays(Number(e.target.value))}><option value={7}>7 天</option><option value={14}>14 天</option><option value={30}>30 天</option><option value={60}>60 天</option><option value={90}>90 天</option></select></label><button type="button" className="template-btn secondary" onClick={()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+ganttDays);setGanttStartDate(d.toISOString().slice(0,10))}}>下一段 →</button><button type="button" className="template-btn secondary" onClick={()=>setGanttStartDate(new Date().toISOString().slice(0,10))}>回到今天</button></div><div className="gantt-summary"><span><i className={`gantt-legend ${ganttTab}`}/>{ganttTab==="equipment"?"設備占用時段":"工程師工作時段"}</span><span><i className="gantt-legend conflict"/>衝突／待確認</span><small>{ganttStartDate} 至 {(()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+ganttDays-1);return d.toISOString().slice(0,10)})()}（Demo）</small></div><div className="gantt-scroll"><div className="gantt-board"><div className="gantt-axis" style={{gridTemplateColumns:`190px repeat(${ganttDays}, minmax(${ganttDays>30?36:58}px,1fr))`}}><div className="gantt-lane-label">{ganttTab==="equipment"?"設備":"工程師"}</div>{Array.from({length:ganttDays},(_,i)=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+i);return <div className="gantt-day" key={i}>{`${d.getMonth()+1}/${d.getDate()}`}<small>{["日","一","二","三","四","五","六"][d.getDay()]}</small></div>})}</div>{(()=>{const kind=ganttTab;const lanes=kind==="equipment"?equipmentCatalog.filter(machine=>activeScheduleRows.some(row=>usesEquipment(row,machine))).map(machine=>machine.name):[...new Set(activeScheduleRows.map(row=>row.owner).filter(Boolean))];const base=new Date(ganttStartDate+"T00:00:00");const range=ganttDays*24*60*60*1000;return <div className="gantt-group">{lanes.length===0?<div className="gantt-empty">目前沒有可顯示的{kind==="equipment"?"設備":"人力"}排程。</div>:lanes.map(lane=>{const tasks=activeScheduleRows.filter(r=>(kind==="equipment"?usesEquipment(r,equipmentCatalog.find(machine=>machine.name===lane)):r.owner===lane)&&r.time&&r.end);return <div className="gantt-row" key={lane} style={{gridTemplateColumns:`190px minmax(0,1fr)`}}><div className="gantt-lane-label" title={lane}>{lane}</div><div className="gantt-track" style={{backgroundSize:`${100/ganttDays}% 100%`,backgroundImage:`repeating-linear-gradient(to right,transparent 0,transparent calc(${100/ganttDays}% - 1px),#e8edf4 calc(${100/ganttDays}% - 1px),#e8edf4 ${100/ganttDays}%)`}}>{tasks.map(r=>{const start=new Date(r.time),end=new Date(r.end);const left=Math.max(0,Math.min(100,((start-base)/range)*100));const right=Math.max(left+Math.min(1,100/ganttDays),Math.min(100,((end-base)/range)*100));if(end<base||start>=new Date(base.getTime()+range))return null;return <button type="button" key={r.id} className={`gantt-task ${kind} ${r.status==="有衝突"?"is-conflict":""}`} style={{left:`${left}%`,width:`${Math.max(0.5,right-left)}%`}} title={`${r.id}｜${r.title}｜${r.time}–${r.end}`} onClick={()=>{setShowGantt(false);openEditor(r)}}>{r.title}</button>})}</div></div>})}</div>})()}</div></div><div className="gantt-footnote"><strong>排程判讀提醒</strong><p>可透過起始日期與日期跨度瀏覽任意過去或未來區間；左右切換不受目前 Demo 日期限制。甘特圖依現有排程資料繪製，點擊任務可開啟既有排程編輯。尚未接上正式資料庫的排程衝突計算與最佳化引擎。</p></div></div></section></div>}
  {showScheduleHistory&&<div className="request-modal-backdrop history-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setShowScheduleHistory(false)}}><section className="request-modal history-modal schedule-history-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-history-title"><div className="request-modal-header"><div><h3 id="schedule-history-title">歷史排程</h3><p>依排程管理狀態查詢排程紀錄；此處僅供檢視。</p></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史排程" onClick={()=>setShowScheduleHistory(false)}>×</button></div><div className="request-modal-body"><div className="template-toolbar history-toolbar"><input className="template-input" value={scheduleSearch} onChange={e=>setScheduleSearch(e.target.value)} placeholder="搜尋委託編號、產品代碼、試驗項目或設備…"/><select className="template-select" value={historyScheduleFilter} onChange={e=>setHistoryScheduleFilter(e.target.value)}>{[{value:"全部",label:"全部"},{value:"已排程",label:"已排程"},{value:"試驗中",label:"試驗中"},{value:"已完成",label:"已完成"},{value:"取消",label:"已取消"},{value:"未排程",label:"待排程"},{value:"有衝突",label:"排程衝突"}].map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></div><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${scheduleSearch}:${historyScheduleFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","樣品編號","試驗項目","設備","執行人","試驗日程","狀態"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={() => openRequestInfo(r)}>{r.requestId || "未關聯委託"}</button></td><td>{r.productCode||"—"}</td><td>{r.sampleCode||"—"}</td><td>{r.title}</td><td>{r.eq}</td><td>{r.owner}</td><td><ScheduleTimeline row={r}/></td><td><span className={`template-status status-${r.status}`}>{r.status==="未排程"?"待排程":r.status==="有衝突"?"排程衝突":r.status}</span></td></tr>)}</tbody></PaginatedTable>{!historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).length&&<div className="template-empty">此分類目前沒有歷史排程</div>}</div></div></section></div>}
  {editing&&editForm&&<div className="request-modal-backdrop schedule-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget){setEditing(null);setEditForm(null);}}}><section className="request-modal schedule-edit-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-edit-title"><header className="request-modal-header"><div><h3 id="schedule-edit-title">編輯試驗排程｜{editing.requestId}</h3><p>委託單內容與設備安排</p></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉" onClick={()=>{setEditing(null);setEditForm(null);}}>×</button></header><div className="request-modal-body schedule-edit-body"><details className="schedule-request-details"><summary>試驗資訊<small>{editing.requestId} · 點擊展開／收合</small></summary><div className="request-form-preview schedule-request-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{editing.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{editing.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{editing.customer||"—"}</strong></div><div><label>客戶品番</label><strong>{editing.customerPart||"—"}</strong></div><div><label>需求日期</label><strong>{editing.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{editing.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{String(editing.intent||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{String(editing.sampleSource||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{editing.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{editing.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{editing.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{editing.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{editing.testSpec||editing.title||"—"}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{editing.judgment||"—"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{editing.remarks||"—"}</div></div></details><ScheduleArrangement editing={editing} form={editForm} onChange={setEditForm} equipment={equipmentCatalog} accounts={accounts} onRecommend={autoScheduleCurrent} message={scheduleMessage} onRefresh={refreshEquipment} /><p id="trial-pause-hint" role="status">{trialPauseAvailability(currentUser,editing,scheduleNow).reason}</p><div className="template-form-actions schedule-edit-actions">{<button type="button" className="template-btn secondary" disabled={!trialPauseAvailability(currentUser,editing,scheduleNow).enabled} aria-describedby="trial-pause-hint" onClick={()=>{const paused=!editing.pauseStartedAt;if(!window.confirm(paused?'確定暫停試驗？設備將暫停占用，預估結束時間隨暫停時間往後順延。':'確定恢復試驗？暫停期間會計入預估結束時間。'))return;try{setTrialPaused({scheduleId:editing.id,actorId:currentUser?.id,paused});for(const name of ['dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));setEditing(null);setEditForm(null);setNotice(paused?'試驗與設備已暫停。':'試驗與設備已恢復，預估結束時間已順延。');}catch(error){setScheduleMessage(error.message);}}}>{editing.pauseStartedAt?'恢復試驗':'暫停試驗'}</button>}<button type="button" className="template-btn danger" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={()=>{setStopError('');setShowStopDialog(true);}}>中止排程</button><button className="template-btn" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={saveSchedule}>儲存排程</button></div></div></section></div>}
@@ -1946,6 +1848,7 @@ function DashboardPage({
   onToggle,
 
   onLogout,
+  onHome,
 
   accounts,
 
@@ -1987,7 +1890,7 @@ function DashboardPage({
 
         onNavigate={navigate}
 
-        onLogout={onLogout}
+        onHome={onHome}
 
         open={sidebarOpen}
 
@@ -2039,7 +1942,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings onNavigate={navigate} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -2242,6 +2145,7 @@ export default function App({ path, navigate }) {
         onToggle={toggleTheme}
 
         onLogout={logout}
+        onHome={returnHome}
 
         accounts={accounts}
 

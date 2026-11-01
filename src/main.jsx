@@ -5,6 +5,7 @@ import App from './App.jsx'
 import './index.css'
 import './UnifiedTypography.css'
 import './DarkTheme.css'
+import './SystemTabs.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

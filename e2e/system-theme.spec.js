@@ -2,8 +2,8 @@ import {test,expect} from '@playwright/test';
 const colors={request:'rgb(22, 163, 74)',lms:'rgb(124, 58, 237)',lab:'rgb(37, 99, 235)',validation:'rgb(230, 22, 61)'};
 for(const system of Object.keys(colors))test(`${system} login label and theme hover use entry color`,async({page})=>{
  await page.goto(`/${system}/login`);
- const eyebrow=page.locator(system==='request'?'.rq-eyebrow':system==='lab'?'.lab-login-card>.lab-eyebrow':'.login-card>.eyebrow');
- await expect(eyebrow).toHaveCSS('color',colors[system]);
+ await expect(page.locator('.rq-login-card>.rq-eyebrow,.lab-login-card>.lab-eyebrow,.login-card>.eyebrow')).toHaveCount(0);
+ await expect(page.locator('.login-help-button')).toHaveCSS('color',colors[system]);
  const theme=page.locator(system==='request'?'.rq-login-mode':system==='lab'?'.lab-theme-pill':'.theme-toggle');
  await theme.hover();await expect(theme).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':colors[system]);
 });
