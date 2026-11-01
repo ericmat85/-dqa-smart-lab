@@ -853,9 +853,9 @@ table thead th[aria-sort] { outline: none; }
 .personal-settings-cancel { border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 .personal-settings-save { border: 1px solid #4f46e5; background: #4f46e5; color: white; }
 .schedule-kpi-button { width: 100%; font: inherit; text-align: left; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
-.schedule-kpi-button:hover { border-color: #7188f4; transform: translateY(-1px); }
-.schedule-kpi-button.selected { border-color: #5267e8; box-shadow: 0 0 0 2px #5267e81c, 0 3px 10px #243d6410; background: var(--surface, #fff); }
-.schedule-kpi-button:focus-visible { outline: 3px solid #8ca0ff; outline-offset: 2px; }
+.schedule-kpi-button:hover { border-color: #f97316; transform: translateY(-1px); }
+.schedule-kpi-button.selected { border-color: #f97316; box-shadow: 0 0 0 2px #f9731626, 0 3px 10px #243d6410; background: color-mix(in srgb, var(--surface, #fff) 94%, #f97316); }
+.schedule-kpi-button:focus-visible { outline: 3px solid #fb923c; outline-offset: 2px; }
 .schedule-search-toolbar { align-items: center; margin-top: 0; }
 .schedule-search-wrap { display: flex; align-items: center; gap: 10px; flex: 1 1 360px; min-width: 220px; min-height: 40px; padding: 0 12px; border: 1px solid var(--border, #dfe7f2); border-radius: 9px; background: var(--surface, #fff); color: var(--muted, #71829a); }
 .schedule-search-wrap > span { font-size: 22px; line-height: 1; }
@@ -1232,3 +1232,6 @@ table thead th[aria-sort] { outline: none; }
 }
 .schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(5,minmax(0,1fr))}.template-status.status-試驗中{background:#e3f3ee;color:#368d77}@media(max-width:1000px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(5,minmax(0,1fr))}.template-status.status-已完成{background:#e4f4ec;color:#318166}@media(max-width:1100px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.schedule-kpis.schedule-kpis-timed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.schedule-kpi-button.selected strong{color:#c2410c}
+.theme-dark .schedule-kpi-button.selected strong{color:#fdba74}

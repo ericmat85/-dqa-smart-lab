@@ -59,3 +59,8 @@
 #root .dashboard-shell :is(button,[role=button]):hover:not(:focus-visible){outline:none!important}
 #root .dashboard-shell :is(input,select,textarea):hover,
 .shared-personal-settings[data-system=lms] :is(input,select,textarea):hover{box-shadow:none!important}
+
+/* Schedule status filters use the requested orange interaction accent. */
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button:is(:hover,.selected):not(:disabled){border-color:#f97316!important}
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button.selected:not(:disabled){box-shadow:0 0 0 2px #f9731626,0 3px 10px #243d6410!important}
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button:focus-visible{outline:3px solid #fb923c!important;outline-offset:2px}

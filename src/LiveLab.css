@@ -10,3 +10,5 @@
 /* Shared visual identity with the company logo on the login page. */
 .sidebar-company-logo{width:42px;height:42px;flex:0 0 42px;border-radius:50%;color:#fff;background:#d91e48;font-weight:800;box-shadow:inset 0 0 0 3px #ffffff66;letter-spacing:normal;font-size:14px}
 
+
+.live-metric-icon .dashboard-metric-symbol{display:block;flex:none}
