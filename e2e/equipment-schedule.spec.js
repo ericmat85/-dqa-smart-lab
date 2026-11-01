@@ -28,3 +28,26 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
  await tab.focus();await tab.press('Home');await expect(page.getByRole('tab',{name:/全部排程/})).toBeFocused();await page.getByRole('tab',{name:/全部排程/}).press('End');await expect(tab).toBeFocused();
  expect(await page.pageErrors()).toEqual([]);
 });
+
+test('device schedule cards match catalog category colors across filtering and both themes',async({page})=>{
+ const equipment=[DEMO_EQUIPMENT[0],DEMO_EQUIPMENT[1],DEMO_EQUIPMENT[8],DEMO_EQUIPMENT[10]];
+ await page.addInitScript(({accounts,equipment})=>{
+  localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(equipment));sessionStorage.setItem('dqa-lms-account-id','U001');
+  for(const key of ['dqa-request-demo-v2','dqa-lms-reviews-v1','dqa_lab_demo_requests_v1','dqa-lab-operations-v1'])localStorage.setItem(key,'[]');
+  localStorage.setItem('dqa-schedules-demo-v1',JSON.stringify(equipment.map((machine,index)=>({id:`COLOR-${index}`,requestId:`REQ-COLOR-${index}`,equipmentId:machine.id,eq:machine.name,title:'設備分類配色驗證',time:`2099-11-0${index+1}`,end:'2099-11-10',status:'已排程'}))));
+ },{accounts:INITIAL_ACCOUNTS,equipment});
+ await page.goto('/lms/dashboard');
+ for(const dark of [false,true]){
+  if(dark)await page.locator('.system-header-actions .theme-toggle').click();
+  await page.locator('.sidebar').getByRole('button',{name:'設備管理',exact:true}).click();await page.getByRole('tab',{name:/依分類/}).click();
+  const palette=await page.locator('.catalog-category-views .schedule-person-group').evaluateAll(groups=>Object.fromEntries(groups.map(group=>[group.querySelector('.schedule-person-identity strong').textContent,getComputedStyle(group.querySelector('.schedule-person-identity strong')).color])));
+  expect(new Set(Object.values(palette)).size).toBe(3);
+  await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.getByRole('tab',{name:/依設備排程/}).click();
+  for(const machine of equipment){
+   const card=page.locator('.equipment-schedule-card').filter({hasText:machine.name});
+   await expect(card.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await expect(card.locator('.equipment-schedule-count')).toHaveCSS('color',palette[machine.category]);await expect(card).toHaveCSS('border-left-color',palette[machine.category]);
+  }
+  const machine=equipment[2];await page.getByRole('searchbox',{name:'搜尋排程'}).fill(machine.name);await expect(page.locator('.equipment-schedule-card')).toHaveCount(1);await expect(page.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');
+ }
+ expect(await page.pageErrors()).toEqual([]);
+});

@@ -3,15 +3,16 @@ import {useId,useState} from 'react';
 import './ScheduleViews.css';
 import './CategoryViews.css';
 
-const colors=['#7c69cf','#4093b4','#d08c4b','#56a18c','#c57191','#6682bf'];
+import {categoryColorMap,categoryName} from './labColors.mjs';
 export default function CategoryViews({rows,visibleRows,renderTable,kind,toolbar,filterKey=''}) {
   const [view,setView]=useState('all');
   const [collapsed,setCollapsed]=useState({});
   const id=useId();
   const visibleIds=new Set(visibleRows.map(row=>row.id));
-  const categories=[...new Set(rows.map(row=>String(row.category||'').trim()||'未分類'))];
+  const categoryColors=categoryColorMap(rows);
+  const categories=[...categoryColors.keys()];
   const groups=categories.map(name=>{
-    const items=rows.filter(row=>(String(row.category||'').trim()||'未分類')===name);
+    const items=rows.filter(row=>categoryName(row.category)===name);
     return {name,total:items.length,items:items.filter(row=>visibleIds.has(row.id))};
   });
   const isClosed=name=>Object.hasOwn(collapsed,name)?collapsed[name]:true;
@@ -31,7 +32,7 @@ export default function CategoryViews({rows,visibleRows,renderTable,kind,toolbar
         const closed=isClosed(group.name);
         const panel=`${id}-category-${index}`;
         const statuses=[...new Set(group.items.map(row=>row.status))];
-        return <section key={group.name} className="schedule-person-group" style={{'--group-color':colors[index%colors.length]}}><button type="button" className="schedule-person-header" aria-expanded={!closed} aria-controls={panel} onClick={()=>setCollapsed(previous=>({...previous,[group.name]:!closed}))}><span className={`schedule-person-chevron ${closed?'closed':''}`} aria-hidden="true">⌄</span><span className="schedule-person-avatar" aria-hidden="true">▧</span><span className="schedule-person-identity"><strong>{group.name}</strong><small>{kind}分類</small></span><span className="schedule-person-count">{group.items.length}／{group.total} 筆</span><span className="schedule-person-summary catalog-category-summary">{statuses.map(status=><span key={status}>{status} {group.items.filter(row=>row.status===status).length}</span>)}</span></button><div id={panel} hidden={closed}>{group.items.length?renderTable(group.items):<div className="schedule-person-empty">目前篩選條件下沒有符合的{kind}</div>}</div></section>;
+        return <section key={group.name} className="schedule-person-group" style={{'--group-color':categoryColors.get(group.name)}}><button type="button" className="schedule-person-header" aria-expanded={!closed} aria-controls={panel} onClick={()=>setCollapsed(previous=>({...previous,[group.name]:!closed}))}><span className={`schedule-person-chevron ${closed?'closed':''}`} aria-hidden="true">⌄</span><span className="schedule-person-avatar" aria-hidden="true">▧</span><span className="schedule-person-identity"><strong>{group.name}</strong><small>{kind}分類</small></span><span className="schedule-person-count">{group.items.length}／{group.total} 筆</span><span className="schedule-person-summary catalog-category-summary">{statuses.map(status=><span key={status}>{status} {group.items.filter(row=>row.status===status).length}</span>)}</span></button><div id={panel} hidden={closed}>{group.items.length?renderTable(group.items):<div className="schedule-person-empty">目前篩選條件下沒有符合的{kind}</div>}</div></section>;
       })}</PaginatedList>{!groups.length&&<div className="schedule-view-empty">尚無{kind}分類資料</div>}</div>}
     </div><p className="schedule-view-summary">顯示 {visibleRows.length}／{rows.length} 筆{kind} · {groups.length} 個分類</p>
   </section>;
