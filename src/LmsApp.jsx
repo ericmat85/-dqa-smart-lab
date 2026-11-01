@@ -1105,7 +1105,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
                 onChange={updateField}
 
-                placeholder="例如：huangxm@example.com"
+                placeholder="例如：level0@example.com"
 
                 autoComplete="username"
 
@@ -1926,7 +1926,7 @@ function DashboardPage({
 
               setAccounts={setAccounts}
 
-            /> : <div className="template-info">帳號管理僅供系統管理員使用。</div>
+            /> : <div className="template-info">帳號管理僅供系統管理員、二階主管或授權角色使用。</div>
 
           ) : active === "dashboard" ? (
 
@@ -1934,7 +1934,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -1988,7 +1988,7 @@ export default function App({ path, navigate }) {
       const row = th.closest("tr");
       if (!table || !row || !table.tBodies.length) return;
       const columnIndex = Array.from(row.children).indexOf(th);
-      if (columnIndex < 0 || th.textContent.trim() === "操作") return;
+      if (columnIndex < 0 || ["操作","Actions"].includes(th.textContent.trim())) return;
 
       const tbody = table.tBodies[0];
       const rows = Array.from(tbody.rows);

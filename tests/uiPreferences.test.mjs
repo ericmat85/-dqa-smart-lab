@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readUiPreferences,saveUiPreferences,UI_PREFERENCES_KEY} from '../src/uiPreferences.mjs';
+import {pageSlice} from '../src/pagination.mjs';
+import {migrateAdminAccount,INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
+import {canManageAccounts,ROLE} from '../src/demoPermissions.mjs';
+import {localizeProps} from '../src/localized-jsx/localize.js';
+import {translateText} from '../src/i18n.mjs';
+const storage=()=>{const data=new Map();return {getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};};
+test('UI preferences preserve unrelated settings and reject unsupported values',()=>{const store=storage();saveUiPreferences({fontSize:'large'},store);saveUiPreferences({language:'en',pageSize:50},store);assert.deepEqual(readUiPreferences(store),{fontSize:'large',language:'en',pageSize:50});store.setItem(UI_PREFERENCES_KEY,JSON.stringify({fontSize:'xxl',language:'xx',pageSize:0}));assert.equal(readUiPreferences(store).pageSize,20);});
+test('all selectable page sizes retain every record exactly once',()=>{const rows=Array.from({length:237},(_,i)=>i);for(const size of [10,20,50,100]){const combined=[];for(let page=1;page<=pageSlice(rows,1,size).pages;page++)combined.push(...pageSlice(rows,page,size).items);assert.deepEqual(combined,rows);}assert.equal(pageSlice(rows,999,100).page,3);});
+test('administrator migration preserves IDs and custom accounts while level 2 can manage accounts',()=>{const rows=[{id:'U001',email:'huangxm@example.com',role:ROLE.ADMIN},{id:'custom',email:'own@example.com',role:ROLE.ADMIN}];const migrated=migrateAdminAccount(rows);assert.equal(migrated[0].email,'level0@example.com');assert.equal(migrated[1],rows[1]);assert.equal(rows[0].email,'huangxm@example.com');assert.equal(INITIAL_ACCOUNTS[0].email,'level0@example.com');for(const role of [ROLE.ADMIN,ROLE.LEVEL2])assert.equal(canManageAccounts({id:role,role,status:'啟用中'}),true);for(const role of [ROLE.LEVEL1,ROLE.LEVEL3,ROLE.LAB])assert.equal(canManageAccounts({id:role,role,status:'啟用中'}),false);assert.equal(canManageAccounts({id:'disabled',role:ROLE.LEVEL2,status:'已停用'}),false);});
+test('presentation localization leaves field values and stored data untouched',()=>{assert.equal(translateText('設備管理','en'),'Equipment');assert.equal(translateText('王小明','en'),'王小明');assert.equal(translateText('第 3 頁','en'),'Page 3');const original={value:'維護中',children:'維護中'};assert.equal(localizeProps('option',original).value,'維護中');assert.equal(original.children,'維護中');});

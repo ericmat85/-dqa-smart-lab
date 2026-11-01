@@ -1,7 +1,7 @@
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
+import PreferenceRoot from './PreferenceRoot.jsx'
 import './index.css'
 import './UnifiedTypography.css'
 import './DarkTheme.css'
@@ -11,6 +11,6 @@ import './SummaryTiles.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <PreferenceRoot />
   </StrictMode>,
 )

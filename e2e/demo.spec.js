@@ -18,7 +18,7 @@ test.beforeEach(async({page})=>{
   }
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT,signature});
 });
-async function lmsLogin(page,email='huangxm@example.com'){
+async function lmsLogin(page,email='level0@example.com'){
  await page.goto('/lms/login');if(await page.evaluate(()=>Boolean(sessionStorage.getItem('dqa-lms-account-id')))){await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:/登出系統/}).click();}await page.getByLabel('登入帳號（電子郵件）').fill(email);
  await page.getByLabel('密碼',{exact:true}).fill('demo1234');await page.getByRole('button',{name:'登入系統'}).click();
  await expect(page).toHaveURL(/\/lms\/dashboard$/);

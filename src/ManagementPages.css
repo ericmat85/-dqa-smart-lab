@@ -106,3 +106,8 @@
 .report-config-subheading>span{font-size:12px;color:var(--muted,#71829a)}
 .report-columns-title{padding:18px 18px 12px}
 @media(max-width:600px){.report-config>summary{align-items:flex-start}.report-config>summary>.report-config-title{font-size:13px}.report-preferences{padding:0 14px 18px}}
+.settings-appearance-controls{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.settings-appearance-controls label,.settings-rules-list label{display:flex;flex-direction:column;gap:9px;font-size:13px}
+.settings-rules-list select{max-width:240px}
+#equipment-activity-settings{scroll-margin-top:24px}
+@media(max-width:600px){.settings-appearance-controls{grid-template-columns:1fr}}
