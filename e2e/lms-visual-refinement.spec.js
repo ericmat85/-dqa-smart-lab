@@ -32,3 +32,17 @@ test('every schedule status tile filters, toggles off and uses orange selection 
   }
  }
 });
+
+test('management summary tiles share schedule styling and help artwork is centered',async({page})=>{
+ for(const name of ['排程管理','設備管理','物料管理','報表分析']){
+  await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
+  const tile=page.locator('.summary-tiles > .summary-tile').first();await expect(tile).toBeVisible();
+  await expect(tile).toHaveCSS('flex-direction','row');await expect(tile).toHaveCSS('border-radius','12px');
+  await tile.click();await expect(tile).toHaveAttribute('aria-pressed','true');await expect(tile).toHaveCSS('border-top-color','rgb(249, 115, 22)');
+  const icon=page.locator('.template-heading .help-tip-icon').first();
+  const centers=await icon.evaluate(svg=>{const mark=svg.querySelector('.help-tip-mark').getBoundingClientRect(),circle=svg.getBoundingClientRect(),button=svg.closest('button').getBoundingClientRect();return [Math.abs(mark.x+mark.width/2-circle.x-circle.width/2),Math.abs(mark.y+mark.height/2-circle.y-circle.height/2),Math.abs(button.x+button.width/2-circle.x-circle.width/2),Math.abs(button.y+button.height/2-circle.y-circle.height/2)];});
+  for(const delta of centers)expect(delta).toBeLessThan(.1);
+ }
+ await page.locator('.sidebar').getByRole('button',{name:'設備管理',exact:true}).click();await page.getByRole('button',{name:'＋ 狀態變更',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'設備狀態變更',exact:true});await expect(dialog.locator('.template-info')).toBeVisible();await expect(dialog.locator('.template-info')).toContainText('可選擇全部設備');
+});

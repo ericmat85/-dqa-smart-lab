@@ -65,7 +65,7 @@ export default function MaterialsPage({currentUser}) {
   return <section className="panel generic-page equipment-page materials-page"><div className="template-page">
     <header className="template-heading"><div><div className="help-title-row"><h2>物料管理</h2><HelpTip>管理實驗室耗材、完檢機、工具與治具</HelpTip></div></div><div className="equipment-header-actions"><button type="button" className="template-btn" onClick={()=>openEditor(null)}>＋ 新增物料</button><button type="button" className="template-btn secondary" onClick={()=>openStatus(null)}>＋ 狀態變更</button></div></header>
     {notice&&<div className="template-notice" role="status">{notice}</div>}
-    <div className="equipment-counts material-counts">{['全部',...MATERIAL_STATUSES].map(value=><button type="button" key={value} className={status===value?'active':''} aria-pressed={status===value} onClick={()=>setStatus(value)}><span>{value==='全部'?'物料品項':value}</span><strong>{value==='全部'?rows.length:rows.filter(row=>row.status===value).length}</strong></button>)}</div>
+    <div className="equipment-counts material-counts summary-tiles">{['全部',...MATERIAL_STATUSES].map(value=><button type="button" key={value} className={`summary-tile ${status===value?'active':''}`} aria-pressed={status===value} onClick={()=>setStatus(value)}><span>{value==='全部'?'物料品項':value}</span><strong>{value==='全部'?rows.length:rows.filter(row=>row.status===value).length}</strong></button>)}</div>
 
     <CategoryViews filterKey={`${search}:${category}:${status}`} rows={rows} visibleRows={visible} renderTable={renderTable} kind="物料" toolbar={catalogToolbar}/>
   </div>
