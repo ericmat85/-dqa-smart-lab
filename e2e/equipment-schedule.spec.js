@@ -13,7 +13,7 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
  await page.setViewportSize({width:1366,height:900});await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
  const tab=page.getByRole('tab',{name:/依設備排程/});await tab.click();
  const panel=page.getByRole('tabpanel',{name:/依設備排程/}),cards=panel.locator('.equipment-schedule-card');
- await expect(cards).toHaveCount(3);await expect(cards.first().locator('.equipment-schedule-count')).toHaveText('2 件委託 · 2 筆試驗');
+ await expect(cards).toHaveCount(3);await expect(cards.first().locator('.equipment-schedule-header')).toHaveAttribute('aria-expanded','false');await expect(cards.first().locator('.schedule-table-region')).toBeHidden();await panel.getByRole('button',{name:'全部展開',exact:true}).click();await expect(cards.first().locator('.equipment-schedule-count')).toHaveText('2 件委託 · 2 筆試驗');
  await expect(panel.locator('.equipment-schedule-kpis')).toContainText('委託 2 件（不重複）');
  await expect(cards.first().locator('tbody tr').first()).toContainText('REQ-NEAR');await expect(cards.first().locator('tbody tr').last()).toContainText('REQ-LATE');
  await page.setViewportSize({width,height:900});

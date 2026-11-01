@@ -15,3 +15,10 @@
 .session-timeout-dialog{box-sizing:border-box;width:min(440px,calc(100vw - 32px));padding:26px;border:1px solid #dfe5ef;border-radius:16px;color:#203353;background:white;box-shadow:0 24px 80px #14284635}
 .session-timeout-dialog::backdrop{background:#10243d80}.session-timeout-dialog h2{font-size:21px;margin:0 0 14px}.session-timeout-dialog p{font-size:14px;line-height:1.8;margin:0 0 22px}
 .session-timeout-dialog button{display:flex;align-items:center;justify-content:center;min-height:42px;margin-left:auto;border:0;border-radius:8px;background:#7c3aed;color:white;padding:10px 16px;font:inherit;cursor:pointer}
+/* Center actual action content, including icon-only and mixed icon/text buttons. */
+html body :is(.template-btn,.rq-btn,.lab-primary,.primary-button,.btn-primary,.btn-outline,.role-primary,.role-secondary,.management-primary,.back-button,.rq-return-entry,.lab-login-return,.lab-back,.personal-photo-upload-button,.personal-photo-remove-button,.personal-settings-cancel,.schedule-group-controls button,.account-row-actions button,.data-pagination button,.intelligent-panel header button,.intelligent-composer button,.schedule-ai-dialog footer button,.ai-review-button){display:inline-flex;align-items:center;justify-content:center;text-align:center;vertical-align:middle}
+html body :is(.request-modal-close,.rq-close,.eq-profile-close,.personal-settings-close,.menu-button,.rq-mobile-menu,.notification-button,.login-password-eye){display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1}
+.intelligent-ai-icon{display:block;flex:none}.schedule-ai-button strong,.schedule-ai-button small{text-align:center}.schedule-ai-button-arrow{margin-left:0}
+.schedule-arrangement input[type=date]{text-align:left;direction:ltr;min-width:0}
+.schedule-arrangement input[type=date]::-webkit-datetime-edit{text-align:left;padding:0}
+.schedule-arrangement input[type=date]::-webkit-date-and-time-value{text-align:left}

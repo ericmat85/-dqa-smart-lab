@@ -23,3 +23,9 @@
 .dashboard-shell .intelligent-assistant .intelligent-panel{position:fixed;right:148px;top:clamp(8px,var(--launcher-top),max(8px,calc(100dvh - 568px)));bottom:auto;width:min(390px,calc(100vw - 164px));max-height:calc(100dvh - 16px);height:min(560px,calc(100dvh - 16px))}
 @media(max-width:600px){.dashboard-shell .intelligent-assistant .intelligent-panel{right:12px;top:56px;width:calc(100vw - 24px);height:calc(100dvh - 72px);max-height:560px}.dashboard-shell .intelligent-assistant .intelligent-launcher{position:relative;z-index:1}}
 @media(prefers-reduced-motion:reduce){.dashboard-shell .intelligent-assistant .intelligent-launcher{transition:none}}
+/* Open toward the left of the edge launcher; fit the visual viewport when zoomed. */
+.dashboard-shell .intelligent-assistant .intelligent-panel{right:var(--assistant-panel-right);left:auto;top:var(--assistant-panel-top);bottom:auto;width:var(--assistant-panel-width);height:var(--assistant-panel-height);max-height:var(--assistant-panel-height);max-width:var(--assistant-panel-width);box-sizing:border-box;z-index:2}
+.dashboard-shell .intelligent-assistant .intelligent-launcher{display:flex;align-items:center;justify-content:center;line-height:1}
+.intelligent-panel>header{flex-shrink:0;min-width:0;gap:8px}.intelligent-panel>header>div{min-width:0}.intelligent-panel>header button{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.intelligent-panel .intelligent-panel-title{flex-wrap:wrap;font-size:14px}.intelligent-panel .intelligent-panel-title svg{flex-shrink:0}.intelligent-body{flex:1;min-height:0;overflow-wrap:anywhere}
+.intelligent-panel .intelligent-composer button{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
