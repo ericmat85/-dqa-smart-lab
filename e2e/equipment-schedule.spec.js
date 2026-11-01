@@ -1,3 +1,4 @@
+import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -10,7 +11,7 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
    {id:'NEAR',requestId:'REQ-NEAR',time:'2099-01-02',end:'2099-01-03',equipmentIds:[equipment[0].id,equipment[1].id]},
   ].map(row=>({title:'低溫試驗',quantity:1,ownerId:'U003',owner:'陳工程師',equipmentId:equipment[0].id,eq:equipment[0].name,status:'已排程',...row}))));
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT.slice(0,3)});
- await page.setViewportSize({width:1366,height:900});await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await page.setViewportSize({width:1366,height:900});await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);
  const tab=page.getByRole('tab',{name:/依設備排程/});await tab.click();
  const panel=page.getByRole('tabpanel',{name:/依設備排程/}),cards=panel.locator('.equipment-schedule-card');
  await expect(cards).toHaveCount(3);await expect(cards.first().locator('.equipment-schedule-header')).toHaveAttribute('aria-expanded','false');await expect(cards.first().locator('.schedule-table-region')).toBeHidden();await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.equipment-schedule-count')).toHaveText('2 件委託 · 2 筆試驗');
@@ -42,7 +43,7 @@ test('device schedule cards match catalog category colors across filtering and b
   await page.locator('.sidebar').getByRole('button',{name:'設備管理',exact:true}).click();await page.getByRole('tab',{name:/依分類/}).click();
   const palette=await page.locator('.catalog-category-views .schedule-person-group').evaluateAll(groups=>Object.fromEntries(groups.map(group=>[group.querySelector('.schedule-person-identity strong').textContent,getComputedStyle(group.querySelector('.schedule-person-identity strong')).color])));
   expect(new Set(Object.values(palette)).size).toBe(3);
-  await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.getByRole('tab',{name:/依設備排程/}).click();
+  await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);await page.getByRole('tab',{name:/依設備排程/}).click();
   for(const machine of equipment){
    const card=page.locator('.equipment-schedule-card').filter({hasText:machine.name});
    await expect(card.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await expect(card.locator('.equipment-schedule-count')).toHaveCSS('color',palette[machine.category]);await expect(card).toHaveCSS('border-left-color',palette[machine.category]);

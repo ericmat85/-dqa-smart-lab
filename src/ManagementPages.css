@@ -4,7 +4,7 @@
 .management-page .live-panel-heading h2,.account-management .account-page-heading h2{font-size:25px;letter-spacing:.5px;margin:7px 0 10px;color:var(--mg-ink)}
 .management-page .live-panel-heading small,.account-management .management-eyebrow{font-size:10px;font-weight:700;letter-spacing:2px;color:#8570ba}
 .management-page .live-panel-heading p,.account-management .account-page-heading p{font-size:12px;line-height:1.8;color:var(--mg-muted);margin:0}
-.management-page .btn-primary,.management-page .btn-outline,.account-management .primary-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:11px 18px;border:1px solid #7861bd;border-radius:9px;background:#7861bd;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 10px #7861bd16}
+.management-page .btn-primary,.management-page .btn-outline,.account-management .primary-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:11px 18px;border:1px solid #7861bd;border-radius:9px;background:#8652df;color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 10px #7861bd16}
 .management-page .btn-outline{color:#7861bd;background:var(--surface,#fff);box-shadow:none;border-color:var(--mg-line)}
 .management-page button:disabled{opacity:.45;cursor:not-allowed}
 .management-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 26px}
@@ -35,7 +35,7 @@
 .management-page.panel.generic-page,.panel.account-management{padding:18px;border:1px solid var(--border,#e0e7f2);border-radius:14px;background:var(--surface,#fff);box-sizing:border-box;min-width:0}
 .management-heading{align-items:flex-start;gap:16px}.management-heading h2,.account-management .account-page-heading h2{font-size:22px;margin:0 0 8px;letter-spacing:0}
 .management-heading p{font-size:12px;line-height:1.8;color:var(--muted,#7d8ca6);margin:0}
-#root .dashboard-shell .management-primary,#root .dashboard-shell .account-heading-actions .primary-button,#root .dashboard-shell .role-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid #7c3aed!important;border-radius:8px;padding:10px 16px;background:#7c3aed!important;color:#fff!important;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+#root .dashboard-shell .management-primary,#root .dashboard-shell .account-heading-actions .primary-button,#root .dashboard-shell .role-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid #8652df!important;border-radius:8px;padding:10px 16px;background:#8652df!important;color:#fff!important;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
 .management-primary:disabled{opacity:.45;cursor:not-allowed}
 .management-export-menu{position:relative;flex-shrink:0;align-self:flex-start}.management-export-menu>summary{list-style:none}.management-export-menu>summary::-webkit-details-marker{display:none}
 .management-export-options{position:absolute;right:0;top:calc(100% + 8px);width:min(280px,calc(100vw - 64px));z-index:20;border:1px solid var(--border,#e0e7f2);border-radius:10px;background:var(--surface,#fff);box-shadow:0 12px 30px #14284620;padding:8px}
@@ -69,3 +69,23 @@
 .account-management .account-user-cell{display:flex;align-items:center;gap:10px}
 .account-management .account-user-cell .account-avatar{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px}
 @media(max-width:650px){.account-management .account-summary{gap:8px}.account-management .account-summary-card{padding:12px}.account-management .account-toolbar{gap:10px}}
+
+/* Settings use sections and ruled lists instead of metric cards. */
+.settings-overview{margin:22px 0 30px}
+.settings-overview h3{font-size:14px;margin:0 0 8px}
+.settings-health-list,.settings-rules-list{margin:0}
+.settings-health-list>div,.settings-rules-list>div{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,2fr);align-items:baseline;gap:24px;padding:13px 0;border-bottom:1px solid var(--border,#e0e7f2)}
+.settings-health-list dt,.settings-rules-list dt{font-size:13px;color:var(--muted,#71829a)}
+.settings-health-list dd,.settings-rules-list dd{margin:0;font-size:14px;color:var(--text,#203353)}
+.settings-health-list dd{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.settings-health-list small{font-weight:400;color:var(--muted,#71829a);font-size:12px}
+.settings-health-list .settings-health-warning{color:#c2410c}
+.settings-management .management-fold{border:0;border-bottom:1px solid var(--border,#e0e7f2);border-radius:0;background:transparent;margin:0}
+.settings-management .management-fold>summary{padding:19px 0}
+.settings-management .settings-fold-body{padding:0 0 22px}
+.settings-management .live-source-tags{display:block}
+.settings-management .live-source-tags>span{display:block;padding:9px 0;border:0;border-bottom:1px solid var(--border,#e0e7f2);border-radius:0;background:transparent}
+.settings-rules-list p{margin:6px 0 0}
+.report-export-icon,.report-export-chevron{display:block;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.report-export-icon{width:20px;height:20px}.report-export-chevron{width:14px;height:14px}
+@media(max-width:600px){.settings-health-list>div,.settings-rules-list>div{gap:12px;grid-template-columns:minmax(100px,1fr) minmax(0,2fr)}}

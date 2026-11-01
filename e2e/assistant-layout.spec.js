@@ -1,3 +1,4 @@
+import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -28,7 +29,7 @@ test('assistant fits the visible area after mobile page zoom',async({page,contex
  const fits=await launcher.evaluate(element=>{const box=element.getBoundingClientRect(),view=visualViewport;return box.left>=view.offsetLeft&&box.right<=view.offsetLeft+view.width;});expect(fits).toBe(true);await client.send('Emulation.setPageScaleFactor',{pageScaleFactor:1});
 });
 test('AI chips are shared, schedule dates are left aligned and buttons remain centered',async({page})=>{
- await page.goto('/lms/dashboard');const chip=await page.locator('.intelligent-launcher svg').innerHTML();await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.getByRole('button',{name:'編輯排程',exact:true}).click();
+ await page.goto('/lms/dashboard');const chip=await page.locator('.intelligent-launcher svg').innerHTML();await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  const editor=page.getByRole('dialog',{name:/編輯試驗排程/});expect(await editor.locator('.schedule-ai-button-icon svg').innerHTML()).toBe(chip);
  for(const width of [1366,375]){
   await page.setViewportSize({width,height:900});

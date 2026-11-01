@@ -22,11 +22,11 @@ test('compact help follows the request title and dashboard uses three distinct v
 });
 test('every schedule status tile filters, toggles off and uses orange selection in both themes',async({page})=>{
  await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
- const tiles=page.locator('.schedule-kpi-button');await expect(tiles).toHaveCount(4);
+ const tiles=page.locator('.schedule-kpi-button');await expect(tiles).toHaveCount(4);await expect(tiles.first()).toHaveAttribute('aria-pressed','true');await tiles.first().click();
  for(const dark of [false,true]){
   if(dark)await page.getByRole('button',{name:'切換深色或淺色模式'}).click();
   for(let index=0;index<4;index++){
-   const tile=tiles.nth(index);await tile.click();await expect(tile).toHaveAttribute('aria-pressed','true');await expect(tile).toHaveCSS('border-top-color','rgb(249, 115, 22)');
+   const tile=tiles.nth(index);if(await tile.getAttribute('aria-pressed')!=='true')await tile.click();await expect(tile).toHaveAttribute('aria-pressed','true');await expect(tile).toHaveCSS('border-top-color','rgb(249, 115, 22)');
    await page.getByRole('tab',{name:/依設備排程/}).click();await expect(tile).toHaveAttribute('aria-pressed','true');
    await tile.click();await expect(tile).toHaveAttribute('aria-pressed','false');
   }
@@ -38,11 +38,19 @@ test('management summary tiles share schedule styling and help artwork is center
   await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
   const tile=page.locator('.summary-tiles > .summary-tile').first();await expect(tile).toBeVisible();
   await expect(tile).toHaveCSS('flex-direction','row');await expect(tile).toHaveCSS('border-radius','12px');
-  await tile.click();await expect(tile).toHaveAttribute('aria-pressed','true');await expect(tile).toHaveCSS('border-top-color','rgb(249, 115, 22)');
+  if(await tile.getAttribute('aria-pressed')!=='true')await tile.click();await expect(tile).toHaveAttribute('aria-pressed','true');await expect(tile).toHaveCSS('border-top-color','rgb(249, 115, 22)');
   const icon=page.locator('.template-heading .help-tip-icon').first();
   const centers=await icon.evaluate(svg=>{const mark=svg.querySelector('.help-tip-mark').getBoundingClientRect(),circle=svg.getBoundingClientRect(),button=svg.closest('button').getBoundingClientRect();return [Math.abs(mark.x+mark.width/2-circle.x-circle.width/2),Math.abs(mark.y+mark.height/2-circle.y-circle.height/2),Math.abs(button.x+button.width/2-circle.x-circle.width/2),Math.abs(button.y+button.height/2-circle.y-circle.height/2)];});
   for(const delta of centers)expect(delta).toBeLessThan(.1);
  }
  await page.locator('.sidebar').getByRole('button',{name:'設備管理',exact:true}).click();await page.getByRole('button',{name:'＋ 狀態變更',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'設備狀態變更',exact:true});await expect(dialog.locator('.template-info')).toBeVisible();await expect(dialog.locator('.template-info')).toContainText('可選擇全部設備');
+});
+
+test('lighter actions, export icon, larger brand and list-based settings retain their controls',async({page})=>{
+ await expect(page.locator('.welcome-block strong')).toHaveCSS('font-size','22px');
+ await expect(page.locator('.intelligent-launcher')).toHaveCSS('background-color','rgb(124, 58, 237)');
+ await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('button',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
+ await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();const exportButton=page.locator('.management-export-menu>summary');await expect(exportButton).toHaveCSS('background-color','rgb(134, 82, 223)');await expect(exportButton.locator('.report-export-icon')).toBeVisible();
+ await page.locator('.sidebar').getByRole('button',{name:'系統設定',exact:true}).click();const settings=page.locator('.settings-management');await expect(settings.locator('.management-summary,.lab-system-rules')).toHaveCount(0);await expect(settings.locator('.settings-health-list>div')).toHaveCount(4);await expect(settings.getByRole('button',{name:'重新檢查',exact:true})).toHaveCSS('background-color','rgb(134, 82, 223)');await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByRole('status')).toContainText('重新讀取本機資料');
 });
