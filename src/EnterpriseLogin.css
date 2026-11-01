@@ -53,3 +53,5 @@
 
 .enterprise-description>span{display:block}
 .enterprise-system-name{font-weight:700}
+
+#root .enterprise-login .enterprise-preview-note{font-size:13px;line-height:1.7;padding:12px 14px;margin:0 0 20px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--soft);color:var(--enterprise-secondary)}

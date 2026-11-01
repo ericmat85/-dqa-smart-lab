@@ -22,8 +22,8 @@ test('shared equipment information tabs inherit lab blue in both themes',async({
   ReactDOM.createRoot(host).render(React.createElement(EquipmentInfoModal,{equipment:{id:'EQ-THEME',name:'主題驗證設備',status:'待機中',records:[]},onClose:()=>{}}));
  });
  const selected=page.getByRole('tablist',{name:'設備資訊分類'}).locator('[aria-selected=true]');
- await expect(selected).toHaveCSS('color','rgb(37, 99, 235)');
+ await expect(selected).toHaveCSS('color','rgb(8, 102, 232)');
  await page.evaluate(()=>{document.querySelector('.lab-shell').classList.add('lab-theme-dark');});
- await expect(selected).toHaveCSS('color','rgb(147, 197, 253)');
+ await expect(selected).toHaveCSS('color','rgb(133, 189, 255)');
  await selected.hover();await expect(selected).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
 });

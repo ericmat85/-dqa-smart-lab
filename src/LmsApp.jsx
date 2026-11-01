@@ -422,6 +422,7 @@ export function LoginPage({
 
 
         <h1>{PORTAL_TITLES[system.id]||system.title}</h1>
+        {preview&&<p className="enterprise-preview-note" role="status">設計品質管理目前為展示入口，尚未開放登入。</p>}
 
 
 
