@@ -17,10 +17,10 @@ test.beforeEach(async({page})=>{
 async function nav(page,name){await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
 test('saved activity horizon updates schedule KPI and dashboard calculations, and survives reload',async({page})=>{
  await nav(page,'排程管理');const kpi=page.locator('.equipment-activity-kpi');await expect(kpi).toContainText('設備稼動率（14 天）');await expect(kpi.locator('strong')).toHaveText('50%');
- await nav(page,'系統設定');await page.getByLabel('設備稼動率統計天數').selectOption('7');await page.getByRole('button',{name:'儲存偏好'}).click();
+ await nav(page,'系統設定');await page.locator('#equipment-activity-settings>summary').click();await page.getByLabel('設備稼動率統計天數').selectOption('7');await page.getByRole('button',{name:'儲存偏好'}).click();
  await nav(page,'排程管理');await expect(kpi).toContainText('設備稼動率（7 天）');await expect(kpi.locator('strong')).toHaveText('100%');
  await nav(page,'儀錶板');await expect(page.locator('.live-metric').filter({hasText:'設備稼動率'})).toContainText('100%');
- await page.reload();await nav(page,'系統設定');await expect(page.getByLabel('設備稼動率統計天數')).toHaveValue('7');await page.getByLabel('設備稼動率起始日期').fill('2030-02-01');await page.getByRole('button',{name:'儲存偏好'}).click();
+ await page.reload();await nav(page,'系統設定');await page.locator('#equipment-activity-settings>summary').click();await expect(page.getByLabel('設備稼動率統計天數')).toHaveValue('7');await page.getByLabel('設備稼動率起始日期').fill('2030-02-01');await page.getByRole('button',{name:'儲存偏好'}).click();
  await nav(page,'排程管理');await expect(kpi.locator('strong')).toHaveText('0%');await expect(kpi).toContainText('2030-02-01 — 2030-02-07');
  expect(await page.pageErrors()).toEqual([]);
 });
@@ -29,7 +29,7 @@ test('personal settings use purple upload and a quiet close button with working 
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
   await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:'⚙ 個人設定',exact:true}).click();
   const dialog=page.locator('.shared-personal-settings'),upload=dialog.getByRole('button',{name:'＋ 上傳照片',exact:true}),close=dialog.getByRole('button',{name:'關閉個人設定',exact:true});
-  await expect(upload).toHaveCSS('background-color','rgb(124, 58, 237)');await expect(upload).toHaveCSS('color','rgb(255, 255, 255)');
+  await expect(upload).toHaveCSS('background-color','rgb(134, 82, 223)');await expect(upload).toHaveCSS('color','rgb(255, 255, 255)');
   await expect(dialog).toBeFocused();await close.hover();await expect(close).toHaveCSS('border-top-width','0px');await expect(close).toHaveCSS('box-shadow','none');await expect(close).toHaveCSS('outline-style','none');
   await page.keyboard.press('Tab');await expect(close).toBeFocused();await page.keyboard.press('Enter');await expect(dialog).toHaveCount(0);await expect(page.getByRole('button',{name:'個人帳號選單'})).toBeFocused();
  }

@@ -73,11 +73,23 @@ test('recommendation leaves time for lab receipt and save rejects a date already
 });
 
 
-test('sample space is required for manual save and AI recommendation',()=>{
+test('manual save requires sample space while AI fills a clearly flagged demo estimate',()=>{
  for(const value of [undefined,null,'','   ']){
   assert.throws(()=>validate({form:{...form,sampleVolumeLitres:value}}),/必填/);
-  assert.throws(()=>recommendSchedule({editing,form:{...form,sampleVolumeLitres:value},equipment,accounts,rows:[],today:'2026-10-28'}),/必填/);
+  const result=recommendSchedule({editing,form:{...form,sampleVolumeLitres:value,time:'',end:''},equipment,accounts,rows:[],today:'2026-10-28'});
+  assert.equal(result.sampleVolumeLitres,1);
+  assert.equal(result.sampleVolumeEstimated,true);
+  assert.equal(result.time,'2026-10-29');
+  assert.equal(result.end,'2026-10-31');
  }
  for(const value of [0,-1,'not-a-number',Infinity])assert.throws(()=>validate({form:{...form,sampleVolumeLitres:value}}),/正數/);
  assert.equal(validate({form:{...form,sampleVolumeLitres:.5}}).status,'已排程');
+});
+
+test('AI preserves entered sample volume and otherwise reuses the case value',()=>{
+ const recommend=(caseVolume,inputVolume)=>recommendSchedule({editing:{...editing,sampleVolumeLitres:caseVolume},form:{...form,sampleVolumeLitres:inputVolume},equipment,accounts,rows:[],today:'2026-10-28'});
+ assert.equal(recommend(2,.5).sampleVolumeLitres,.5);
+ assert.equal(recommend(2,'').sampleVolumeLitres,2);
+ assert.equal(recommend(2,'').sampleVolumeEstimated,false);
+ for(const value of [0,-1,'abc',Infinity])assert.throws(()=>recommend(2,value),/正數/);
 });

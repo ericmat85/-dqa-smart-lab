@@ -6,7 +6,7 @@ export const INITIAL_ACCOUNTS = [
 
     name: "黃小明",
 
-    email: "huangxm@example.com",
+    email: "level0@example.com",
 
     role: "系統管理員",
 
@@ -80,10 +80,13 @@ export const INITIAL_ACCOUNTS = [
 ];
 
 const KEY = 'dqa-shared-demo-accounts-v1';
+export function migrateAdminAccount(accounts){
+ return accounts.map(account=>account.id==='U001'&&account.email==='huangxm@example.com'?{...account,email:'level0@example.com'}:account);
+}
 export function readDemoAccounts() {
   try {
     const stored = JSON.parse(window.localStorage.getItem(KEY) || 'null');
-    if (Array.isArray(stored)) return stored;
+    if (Array.isArray(stored)){const next=migrateAdminAccount(stored);if(JSON.stringify(next)!==JSON.stringify(stored)){try{window.localStorage.setItem(KEY,JSON.stringify(next));}catch{/* Continue with the migrated in-memory account. */}}return next;}
   } catch { /* Keep invalid stored data intact; use defaults in memory. */ }
   return INITIAL_ACCOUNTS;
 }

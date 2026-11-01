@@ -109,7 +109,10 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
 export function recommendSchedule({editing,form,equipment,accounts,rows,today=getRequestDate()}) {
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');
   if(editing.reportInfo?.stage||['已結案','待核准'].includes(editing.status))throw Error('此案件目前無法重新安排排程。');
-  sampleVolume(form);
+  const missing=value=>value===undefined||value===null||String(value).trim()==='';
+  const sampleVolumeEstimated=missing(form.sampleVolumeLitres)&&missing(editing.sampleVolumeLitres);
+  form={...form,sampleVolumeLitres:missing(form.sampleVolumeLitres)?(missing(editing.sampleVolumeLitres)?1:editing.sampleVolumeLitres):form.sampleVolumeLitres};
+  const sampleVolumeLitres=sampleVolume(form);
   const quantity=sampleQuantity(editing.quantity),count=deviceCount(form);
   bufferMinutes(form.preparationMinutes);bufferMinutes(form.cleanupMinutes);
   const candidates=equipment.filter(row=>{
@@ -129,7 +132,7 @@ export function recommendSchedule({editing,form,equipment,accounts,rows,today=ge
       const selected=free.sort((a,b)=>effectiveCapacity(b,form)-effectiveCapacity(a,form)).slice(0,count);
       if(selected.length!==count)continue;
       try { allocateSamples(selected,form,quantity); } catch { continue; }
-      return {equipmentId:selected[0].id,equipmentIds:selected.map(row=>row.id),equipmentCount:count,eq:selected.map(row=>row.name).join('、'),ownerId:executor.id,owner:executor.name,time,end,duration};
+      return {equipmentId:selected[0].id,equipmentIds:selected.map(row=>row.id),equipmentCount:count,eq:selected.map(row=>row.name).join('、'),ownerId:executor.id,owner:executor.name,time,end,duration,sampleVolumeLitres,sampleVolumeEstimated};
     }
   }
   throw Error('一年內未找到設備與執行人皆可用的時段，請手動調整試驗期間。');

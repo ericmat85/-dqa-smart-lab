@@ -15,7 +15,7 @@
 .dashboard-shell .system-header-actions .profile-button,.system-header-actions[data-system=lms] .profile-button{border-color:transparent!important;background:transparent!important;box-shadow:none!important}
 .dashboard-shell .system-header-actions .profile-button:hover,.system-header-actions[data-system=lms] .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
 .dashboard-shell .system-header-actions .avatar,.system-header-actions[data-system=lms] .avatar{background:#ede9fe;color:#6d5bd0}
-.shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important}
+.shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#8652df!important;color:#fff!important;border-color:#8652df!important}
 /* A compact fixed launcher, without a full-width bottom dock. */
 .dashboard-shell>.dashboard-main{height:100dvh;min-height:0;display:flex;flex-direction:column}
 .dashboard-shell .dashboard-topbar{flex-shrink:0}
@@ -59,3 +59,10 @@
 #root .dashboard-shell :is(button,[role=button]):hover:not(:focus-visible){outline:none!important}
 #root .dashboard-shell :is(input,select,textarea):hover,
 .shared-personal-settings[data-system=lms] :is(input,select,textarea):hover{box-shadow:none!important}
+
+/* Schedule status filters use the requested orange interaction accent. */
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button:is(:hover,.selected):not(:disabled){border-color:#f97316!important}
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button.selected:not(:disabled){box-shadow:0 0 0 2px #f9731626,0 3px 10px #243d6410!important}
+#root .dashboard-shell .schedule-kpis button.schedule-kpi-button:focus-visible{outline:3px solid #fb923c!important;outline-offset:2px}
+
+#root .dashboard-shell .request-history-button{background:#fff!important;color:#203353!important;border-color:#dce5f0!important}

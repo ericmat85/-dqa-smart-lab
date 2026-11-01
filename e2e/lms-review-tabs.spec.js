@@ -12,7 +12,7 @@ test('review tabs combine classification, counts, search, pagination and keyboar
   localStorage.setItem('dqa-borrow-requests-v1',JSON.stringify([{id:'BOR-DEMO',status:'待核准',equipment:'DEMO設備',requester:'假資料工程師',department:'假資料部門',createdAt:'2026-10-31T02:00:00Z',purpose:'測試用借用'}]));
  },INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
- await expect(page.locator('.welcome-block')).toHaveText('實驗室管理系統');
+ await expect(page.locator('.welcome-block')).toHaveText('COLONG LMS');
  await page.evaluate(async()=>{
   const {saveReport}=await import('/src/reportStore.mjs');
   await saveReport({requestId:'REPORT-DEMO',stage:'level2',revision:'demo-revision',fileName:'Demo-report.xlsx',submitter:'假資料工程師',submittedAt:'2026-10-31T02:00:00Z'});
@@ -62,7 +62,7 @@ test('LMS tabs use purple selection with transparent hover in either theme',asyn
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
   for(const name of ['試驗委託','排程管理','設備管理','物料管理','報表分析']){
    await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();
-   await expect(page.locator('.welcome-block')).toHaveText('實驗室管理系統');
+   await expect(page.locator('.welcome-block')).toHaveText('COLONG LMS');
    await checkTabs(page.getByRole('tablist').first(),dark);
    if(name==='排程管理'){
     await page.getByRole('button',{name:'排程管理圖表',exact:true}).click();await checkTabs(page.getByRole('tablist',{name:'甘特圖類型'}),dark);

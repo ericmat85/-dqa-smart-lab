@@ -11,7 +11,7 @@ export function accessSystem(account, system, storage) {
  if (system === 'lms') return [ROLE.LEVEL1,ROLE.LEVEL2,ROLE.LEVEL3,ROLE.ADMIN].includes(account.role);
  return false;
 }
-export function canManageAccounts(account) { return account?.status === '啟用中' && (account.role === ROLE.ADMIN || customRole(account)?.manageAccounts===true); }
+export function canManageAccounts(account) { return account?.status === '啟用中' && ([ROLE.ADMIN,ROLE.LEVEL2].includes(account.role) || customRole(account)?.manageAccounts===true); }
 export function canApproveOperationalRequest(account,applicantId,storage){
  if(!account?.id||account.status!=='啟用中'||account.id===applicantId)return false;
  return account.role===ROLE.ADMIN||canReview(account,{status:'待審查',approval:0,participantIds:[applicantId]},storage);

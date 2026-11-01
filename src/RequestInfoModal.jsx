@@ -1,3 +1,4 @@
+import HelpTip from './HelpTip.jsx';
 import {displayTaipei,requestStatusClass} from './requestWorkspace.mjs';
 import {ReportCasePanel} from './ReportUi.jsx';
 import useLabSnapshot from './useLabSnapshot.js';
@@ -28,12 +29,12 @@ export default function RequestInfoModal({ request: supplied, onClose, onEdit, a
   return <div className={`rq-app ${dark?'rq-theme-dark':'rq-theme-light'}`} style={{minHeight:0}}><div className="rq-modal-backdrop rq-request-detail-backdrop" style={{zIndex:1400}} role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
     <section ref={root} tabIndex={-1} className="rq-request-detail-modal" role="dialog" aria-modal="true" aria-labelledby="rq-request-detail-title">
       <header className="rq-request-detail-header">
-        <div><p className="rq-eyebrow">ELECTRONIC TEST REQUEST</p><h2 id="rq-request-detail-title">{selected.id}｜委託單資訊</h2><p>完整委託內容、試驗需求與簽核進度</p></div>
+        <div><p className="rq-eyebrow">ELECTRONIC TEST REQUEST</p><div className="help-title-row"><h2 id="rq-request-detail-title">{selected.id}｜委託單資訊</h2><HelpTip>完整委託內容、試驗需求與簽核進度</HelpTip></div></div>
         <button type="button" className="rq-close" onClick={() => onClose()} aria-label="關閉委託單資訊">×</button>
       </header>
       <div className="rq-request-detail-body"><ReportCasePanel request={selected} account={account}/>
         {selected.cancellation && <section className="rq-detail-section"><h3>委託取消紀錄</h3><div className="rq-detail-grid"><div><label>操作者</label><p>{selected.cancellation.actor}</p></div><div><label>取消時間</label><p>{displayTaipei(selected.cancellation.at)}</p></div><div><label>中止原因</label><p>{selected.cancellation.reason}</p></div></div></section>}
-        {selected.demoFlow&&<section className="rq-detail-section"><h3>DEMO 完整流程測試</h3><p>此筆為系統模擬資料，簽名僅供流程展示。</p><PaginatedList items={selected.demoFlow.steps}>{rows=><ol>{rows.map(row=><li key={row.id} style={{fontSize:12,lineHeight:2}}>{row.label} · {displayTaipei(row.at)}</li>)}</ol>}</PaginatedList></section>}
+        {selected.demoFlow&&<section className="rq-detail-section"><div className="help-title-row"><h3>DEMO 完整流程測試</h3><HelpTip>此筆為系統模擬資料，簽名僅供流程展示。</HelpTip></div><PaginatedList items={selected.demoFlow.steps}>{rows=><ol>{rows.map(row=><li key={row.id} style={{fontSize:12,lineHeight:2}}>{row.label} · {displayTaipei(row.at)}</li>)}</ol>}</PaginatedList></section>}
         {selected.execution&&<section className="rq-detail-section"><h3>試驗執行結果</h3><div className="rq-detail-grid">{[['狀態',selected.execution.status],['設備',selected.execution.equipment],['執行人',selected.execution.operator],['樣品編號',selected.execution.sampleCode],['開始時間',displayTaipei(selected.execution.startedAt)],['完成時間',displayTaipei(selected.execution.completedAt)],['報告提交',selected.execution.reportSubmitted?'已提交':'尚未提交']].map(([label,value])=><div key={label}><label>{label}</label><p>{value||'—'}</p></div>)}</div><SignatureHistory records={auditSignatures(snapshot.labAudit,selected.id)}/></section>}
         <div className="rq-request-detail-status"><span>目前狀態</span><b className={`rq-status ${requestStatusClass(selected.status)}`}>{selected.status === '待主管簽核' ? '待簽核' : selected.status === '已核准' ? '待審查' : (selected.status || '草稿')}</b><span>委託單號：{selected.id}</span></div>
         {[

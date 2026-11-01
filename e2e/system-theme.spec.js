@@ -15,7 +15,7 @@ for(const system of ['request','lms','lab'])test(`${system} dashboard logo and s
  const theme=page.locator('.system-header-actions .theme-toggle');await theme.hover();await expect(theme).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':colors[system]);
  const profile=page.getByRole('button',{name:'個人帳號選單'});await profile.hover();await expect(profile).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':colors[system]);await profile.click();
  const settings=page.getByRole('button',{name:'⚙ 個人設定',exact:true});await settings.hover();await expect(settings).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':colors[system]);await settings.click();
- const upload=page.getByRole('button',{name:'＋ 上傳照片',exact:true});await upload.hover();await expect(upload).toHaveCSS('background-color','rgb(124, 58, 237)');await expect(upload).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':'rgb(124, 58, 237)');await page.getByRole('button',{name:'關閉個人設定',exact:true}).click();await expect(profile).toBeFocused();
+ const upload=page.getByRole('button',{name:'＋ 上傳照片',exact:true});await upload.hover();await expect(upload).toHaveCSS('background-color','rgb(134, 82, 223)');await expect(upload).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':'rgb(134, 82, 223)');await page.getByRole('button',{name:'關閉個人設定',exact:true}).click();await expect(profile).toBeFocused();
  if(system==='lms'){
   await theme.click();await theme.hover();await expect(theme).toHaveCSS('border-top-color','rgba(0, 0, 0, 0)');await expect(theme).toHaveCSS('box-shadow','none');
   await expect(page.locator('.sidebar button.active')).toHaveCSS('background-color','rgb(121, 127, 134)');

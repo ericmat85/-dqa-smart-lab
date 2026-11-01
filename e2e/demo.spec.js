@@ -1,3 +1,4 @@
+import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -17,7 +18,7 @@ test.beforeEach(async({page})=>{
   }
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT,signature});
 });
-async function lmsLogin(page,email='huangxm@example.com'){
+async function lmsLogin(page,email='level0@example.com'){
  await page.goto('/lms/login');if(await page.evaluate(()=>Boolean(sessionStorage.getItem('dqa-lms-account-id')))){await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:/登出系統/}).click();}await page.getByLabel('登入帳號（電子郵件）').fill(email);
  await page.getByLabel('密碼',{exact:true}).fill('demo1234');await page.getByRole('button',{name:'登入系統'}).click();
  await expect(page).toHaveURL(/\/lms\/dashboard$/);
@@ -56,7 +57,7 @@ test('four portals, direct links, return and browser history stay in the correct
 test('LMS rejects wrong credentials, retains login on reload, switches pages and logs out',async({page})=>{
  await page.goto('/lms/dashboard');await expect(page).toHaveURL(/\/lms\/login$/);
  await page.getByLabel('密碼',{exact:true}).fill('wrong');await page.getByRole('button',{name:'登入系統'}).click();await expect(page.getByRole('alert')).toBeVisible();
- await lmsLogin(page);await page.reload();await expect(page.locator('.welcome-block')).toHaveText('實驗室管理系統');
+ await lmsLogin(page);await page.reload();await expect(page.locator('.welcome-block')).toHaveText('COLONG LMS');
  for(const name of ['排程管理','設備管理','物料管理','報表分析'])await page.locator('.sidebar').getByRole('button',{name:new RegExp(name)}).click();
  await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:/登出系統/}).click();await expect(page).toHaveURL(/\/lms\/login$/);
  await page.goto('/lms/dashboard');await expect(page).toHaveURL(/\/lms\/login$/);
@@ -80,7 +81,7 @@ test('new request passes designated manager and two LMS reviews, then schedules 
   await page.getByRole('button',{name:'審查',exact:true}).click();await useSignature(page);await page.getByRole('button',{name:/核准/,exact:false}).last().click();
  }
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].status)).toBe('待排程');
- await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await page.getByRole('button',{name:'編輯排程',exact:true}).click();
+ await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  await page.getByLabel('每件樣品使用空間 L *',{exact:true}).fill('1');await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});
  await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
@@ -116,7 +117,7 @@ test('schedule UI requires sample space and shows a compact status above the edi
    {id:'OVEN',name:'高溫爐',status:'待機中',capacity:10,usableVolumeLitres:100,specification:'室溫＋10～250°C'},
   ]));
  });
- await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await page.getByRole('button',{name:'編輯排程',exact:true}).click();
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  await expect(page.getByRole('option',{name:/OVEN/})).toHaveAttribute('disabled','');
  await page.getByLabel('設備選擇').selectOption('SMALL');await page.getByLabel('執行人 *').selectOption('U003');
  await page.getByLabel('開始日期 *').fill('2099-11-07');await page.getByLabel('預計完成日期 *').fill('2099-11-08');
@@ -171,7 +172,7 @@ test('report is returned, revised, signed by two supervisors and archived with r
   await openReview(email);await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
  }
  await requestLogin(page,true);await page.goto('/request/reviews?tab=read');await page.getByRole('button',{name:'查看',exact:true}).first().click();
- await expect(page.getByText('Demo 圖片簽名，不具正式電子簽章效力；結案 PDF 順序：委託單 → 試驗報告。')).toBeVisible();
+ await page.locator('.report-case-panel .help-tip-trigger').first().focus();await expect(page.getByRole('tooltip')).toContainText('Demo 圖片簽名，不具正式電子簽章效力；結案 PDF 順序：委託單 → 試驗報告。');await page.keyboard.press('Escape');
  await expect(page.getByRole('button',{name:'下載簽核 Excel',exact:true})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
  expect(await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');return Boolean((await getReport(id)).pdf);},id)).toBe(false);
@@ -200,7 +201,7 @@ test('two-machine scheduling checks space and buffers and saves a sample allocat
   localStorage.setItem('dqa-request-demo-v2',JSON.stringify([{id:'MULTI',productCode:'MULTI',testItems:['低溫試驗'],quantity:5,status:'待排程',lmsReview:{approval:2}}]));
   localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(['A','B'].map(id=>({id,name:`環境試驗箱 ${id}`,status:'待機中',capacity:3,usableVolumeLitres:30,specification:'-40～150°C'}))));
  });
- await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await page.getByRole('button',{name:'編輯排程',exact:true}).click();
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByLabel('每件樣品使用空間 L *').fill('10');
  await expect(page.getByLabel('準備時間（分鐘）')).toHaveCount(0);await expect(page.getByLabel('清理時間（分鐘）')).toHaveCount(0);
  await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});await page.getByRole('button',{name:'儲存排程',exact:true}).click();
@@ -348,18 +349,18 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
  await page.getByRole('button',{name:'設備狀態',exact:true}).click();await expect(page.getByRole('dialog',{name:'試驗設備狀態'})).toBeVisible();
  await page.getByRole('dialog',{name:'試驗設備狀態'}).getByRole('button').first().click();await expect(page.locator('.eq-profile-fields')).toContainText('預估結束時間');
- await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();await expect(page.getByRole('button',{name:'暫停試驗',exact:true})).toBeDisabled();await expect(page.locator('.schedule-edit-modal header .schedule-edit-status')).toHaveText('試驗中');await expect(page.locator('#trial-pause-hint')).toHaveCount(0);await expect(page.getByRole('button',{name:'中止排程',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeDisabled();
- await page.goto('/lms/login');await lmsLogin(page,'level1@example.com');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();await expect(page.getByRole('button',{name:'暫停試驗',exact:true})).toBeDisabled();await expect(page.locator('.schedule-edit-modal header .schedule-edit-status')).toHaveText('試驗中');await expect(page.locator('#trial-pause-hint')).toHaveCount(0);await expect(page.getByRole('button',{name:'中止排程',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeDisabled();
+ await page.goto('/lms/login');await lmsLogin(page,'level1@example.com');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);
  await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'暫停試驗',exact:true}).click();
  await expect(page.locator('.schedule-table tbody tr').filter({hasText:id})).toContainText('暫停中');
- await page.reload();await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();
+ await page.reload();await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);
  await expect(page.locator('.schedule-table tbody tr').filter({hasText:id})).toContainText('暫停中');
  await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('暫停中');await expect(page.getByRole('button',{name:'試驗完成',exact:true})).toHaveCount(0);
- await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
+ await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);await page.locator('.schedule-table tbody tr').filter({hasText:id}).getByRole('button',{name:'編輯排程',exact:true}).click();
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'恢復試驗',exact:true}).click();
  await page.goto('/lab/dashboard');await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
- await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();const completedRow=page.locator('.schedule-table tbody tr').filter({hasText:id});await expect(completedRow).toHaveCount(0);await expect(page.getByRole('button',{name:'已完成',exact:false})).toHaveCount(0);expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).find(r=>r.requestId===id).status,id)).toBe('已完成');expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id===id).status,id)).toBe('已完成');
+ await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);const completedRow=page.locator('.schedule-table tbody tr').filter({hasText:id});await expect(completedRow).toHaveCount(0);await expect(page.getByRole('button',{name:'已完成',exact:false})).toHaveCount(0);expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).find(r=>r.requestId===id).status,id)).toBe('已完成');expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id===id).status,id)).toBe('已完成');
 });
 
 test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{

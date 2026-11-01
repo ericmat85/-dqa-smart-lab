@@ -1,0 +1,11 @@
+/* One visual language for schedule, equipment, material and report summaries. */
+.summary-tiles{gap:14px}
+.summary-tiles > button.summary-tile{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:78px;padding:18px;border:1px solid var(--border,#dfe7f2);border-radius:12px;background:var(--surface,#fff);color:var(--text,#172b4d);box-shadow:0 3px 10px #243d6410;text-align:left;font:inherit;cursor:pointer;transition:border-color .16s,box-shadow .16s,background .16s}
+.summary-tiles > button.summary-tile > span{display:block;margin:0;font-size:12px;line-height:1.5;color:var(--muted,#71829a)}
+.summary-tiles > button.summary-tile > strong{display:block;margin:0;font-size:26px;line-height:1.2;font-weight:700;color:var(--text,#172b4d)}
+#root .dashboard-shell .summary-tiles > button.summary-tile:is(:hover,[aria-pressed=true]):not(:disabled){border-color:#f97316!important}
+#root .dashboard-shell .summary-tiles > button.summary-tile[aria-pressed=true]{background:color-mix(in srgb,var(--surface,#fff) 94%,#f97316);box-shadow:0 0 0 2px #f9731626,0 3px 10px #243d6410!important}
+#root .dashboard-shell .summary-tiles > button.summary-tile[aria-pressed=true] > strong{color:#c2410c}
+#root .dashboard-shell.theme-dark .summary-tiles > button.summary-tile[aria-pressed=true] > strong{color:#fdba74}
+#root .dashboard-shell .summary-tiles > button.summary-tile:focus-visible{outline:3px solid #fb923c!important;outline-offset:2px}
+@media(max-width:600px){.summary-tiles{gap:9px}.summary-tiles > button.summary-tile{padding:13px;min-height:72px}.summary-tiles > button.summary-tile > strong{font-size:22px}}

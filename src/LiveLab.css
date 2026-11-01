@@ -10,3 +10,36 @@
 /* Shared visual identity with the company logo on the login page. */
 .sidebar-company-logo{width:42px;height:42px;flex:0 0 42px;border-radius:50%;color:#fff;background:#d91e48;font-weight:800;box-shadow:inset 0 0 0 3px #ffffff66;letter-spacing:normal;font-size:14px}
 
+
+.live-metric-icon .dashboard-metric-symbol{display:block;flex:none}
+
+/* Carry each icon's tint across its complete metric tile. */
+.live-metric-blue{--metric-tint:#e8efff}
+.live-metric-teal{--metric-tint:#e1f7ef}
+.live-metric-gold{--metric-tint:#fff3dc}
+.live-metric-slate{--metric-tint:#eaf0f6}
+.live-metric-grid>.live-metric{background:var(--metric-tint,var(--surface,#fff))}
+.live-metric-grid .live-metric-icon{background:transparent}
+.theme-dark .live-metric-blue,.theme-dark .live-metric-slate{--metric-tint:#2e3c57}
+.theme-dark .live-metric-teal{--metric-tint:#294b48}
+.theme-dark .live-metric-gold{--metric-tint:#4f4430}
+#root .dashboard-shell.theme-dark .live-metric-grid>.live-metric{background:var(--metric-tint)!important}
+.theme-dark .live-metric-grid .live-metric-icon{background:transparent}
+.live-metric-orange{--metric-tint:#fff0e2}
+.live-metric-icon.orange,.live-metric-orange .live-metric-arrow{color:#ea7c26}
+.live-metric-orange .live-metric-copy strong{color:#c2410c}
+.live-metric-orange .live-metric-copy>span{color:var(--live-muted)}
+.theme-dark .live-metric-orange{--metric-tint:#4c3325}
+.theme-dark .live-metric-icon.orange,.theme-dark .live-metric-orange .live-metric-arrow{color:#fb923c}
+.theme-dark .live-metric-orange .live-metric-copy strong{color:#fdba74}
+
+.interactive-status-donut{position:relative;background:none!important;flex-shrink:0}
+.interactive-status-donut>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.interactive-status-donut>svg circle[role=button]{cursor:pointer;transition:opacity .15s,stroke-width .15s}
+.interactive-status-donut>svg circle:focus-visible{outline:none;filter:drop-shadow(0 0 3px var(--text,#203353))}
+.interactive-status-donut>div{position:relative;pointer-events:none}
+.interactive-status-donut>div.is-active strong{font-size:34px}
+.live-legend>button.is-active{background:var(--soft,#f1f5f9);border-radius:8px}
+.live-legend>button.is-active>span{font-size:16px;font-weight:700}
+.live-legend>button.is-active>strong{font-size:20px}
+.live-legend>button{min-height:35px}

@@ -20,7 +20,7 @@
 .dashboard-shell .colong-sidebar-brand .company-brand-logo{width:180px;margin-left:0;margin-right:auto}
 @media(max-width:620px){.rq-app>.rq-topbar,.lab-shell>.lab-global-header{padding-left:16px}.rq-app>.rq-topbar>.company-brand-logo,.lab-shell>.lab-global-header>.company-brand-logo{width:150px}}
 /* Profile photo action and quiet pointer interaction on close controls. */
-html body .shared-personal-settings .personal-photo-upload-button{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important}
+html body .shared-personal-settings .personal-photo-upload-button{background:#8652df!important;color:#fff!important;border-color:#8652df!important}
 html body .shared-personal-settings .personal-settings-close{border:0!important;background:transparent!important;box-shadow:none!important}
 html body .shared-personal-settings:focus{outline:none}
 html body .shared-personal-settings .personal-settings-close:not(:focus-visible){outline:none!important}

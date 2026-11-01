@@ -1,9 +1,10 @@
 export const PAGE_SIZE=20;
-export function pageSlice(items,page=1) {
-  const pages=Math.max(1,Math.ceil(items.length/PAGE_SIZE));
+export function pageSlice(items,page=1,size=PAGE_SIZE) {
+  size=Number.isSafeInteger(Number(size))&&Number(size)>0?Number(size):PAGE_SIZE;
+  const pages=Math.max(1,Math.ceil(items.length/size));
   const current=Math.max(1,Math.min(pages,Math.floor(Number(page)||1)));
-  const offset=(current-1)*PAGE_SIZE;
-  return {items:items.slice(offset,offset+PAGE_SIZE),page:current,pages,offset,total:items.length};
+  const offset=(current-1)*size;
+  return {items:items.slice(offset,offset+size),page:current,pages,offset,total:items.length,size};
 }
 export function pageNumbers(page,pages) {
   if(pages<=7)return Array.from({length:pages},(_,index)=>index+1);
