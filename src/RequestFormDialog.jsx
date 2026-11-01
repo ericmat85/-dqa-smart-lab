@@ -18,5 +18,5 @@ export default function RequestFormDialog({label,dark,onClose,children}){
   document.addEventListener('keydown',keydown);
   return()=>{document.removeEventListener('keydown',keydown);document.body.style.overflow=overflow;if(root)root.inert=inert;previous?.focus?.();};
  },[]);
- return createPortal(<div className={`rq-app rq-modal-backdrop rq-entry-backdrop ${dark?'rq-theme-dark':'rq-theme-light'}`} onMouseDown={event=>{if(event.target===event.currentTarget)onClose();}}><section ref={ref} className="rq-form-modal rq-form-modal-reference rq-entry-dialog" role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}>{children}</section></div>,document.body);
+ return createPortal(<div className={`rq-app rq-enterprise rq-modal-backdrop rq-entry-backdrop ${dark?'rq-theme-dark':'rq-theme-light'}`} onMouseDown={event=>{if(event.target===event.currentTarget)onClose();}}><section ref={ref} className="rq-form-modal rq-form-modal-reference rq-entry-dialog" role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}>{children}</section></div>,document.body);
 }
