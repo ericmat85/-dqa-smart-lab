@@ -42,7 +42,7 @@ test('review tabs combine classification, counts, search, pagination and keyboar
  expect(await page.pageErrors()).toEqual([]);
 });
 
-test('LMS tabs use purple selection with transparent hover in either theme',async({page})=>{
+test('LMS tabs use enterprise blue selection with transparent hover in either theme',async({page})=>{
  await page.setViewportSize({width:1366,height:768});
  await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-lms-account-id','U001');},INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
@@ -51,7 +51,7 @@ test('LMS tabs use purple selection with transparent hover in either theme',asyn
   const selectedId=await selected.evaluate(el=>el.id||el.textContent);
   for(const tab of (await tablist.getByRole('tab').all()).slice(0,2)){
    await page.mouse.move(600,30);const initialColor=await tab.evaluate(el=>getComputedStyle(el).color);
-   await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(196, 181, 253)':'rgb(124, 58, 237)');
+   await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(133, 189, 255)':'rgb(8, 102, 232)');
    await expect(tab).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
    await expect(tab).toHaveCSS('box-shadow','none');await expect(tab).toHaveCSS('border-top-width','0px');
    await expect.poll(()=>selected.evaluate(el=>el.id||el.textContent)).toBe(selectedId);
@@ -78,24 +78,24 @@ test('LMS tabs use purple selection with transparent hover in either theme',asyn
  expect(await page.pageErrors()).toEqual([]);
 });
 
-for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS gray canvas, white icons and purple assistant ${width}x${height}`,async({page})=>{
+for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS enterprise canvas, white icons and blue bot ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width,height});await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-lms-account-id','U001');},INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
  await expect(page.locator('.live-dashboard-meta')).toHaveCount(0);
  const content=page.locator('.dashboard-content'),launcher=page.getByRole('button',{name:'展開AI智能助理'});
- await expect(content).toHaveCSS('background-color','rgb(243, 244, 246)');
- await expect(launcher).toHaveCSS('background-color','rgb(124, 58, 237)');
+ await expect(content).toHaveCSS('background-color','rgb(245, 247, 250)');
+ await expect(launcher).toHaveCSS('background-color','rgb(8, 102, 232)');
  const icons=page.locator('.sidebar .lms-sidebar-icon');expect(await icons.count()).toBeGreaterThanOrEqual(9);
  for(const icon of await icons.all()){await expect(icon).toHaveCSS('stroke','rgb(255, 255, 255)');await expect(icon).toHaveAttribute('fill','none');}
  await page.screenshot({path:test.info().outputPath(`dashboard-${width}x${height}.png`)});
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();
- await expect(content).toHaveCSS('background-color','rgb(243, 244, 246)');
+ await expect(content).toHaveCSS('background-color','rgb(245, 247, 250)');
  await page.getByRole('tab',{name:/待審查/}).click();
  await page.screenshot({path:test.info().outputPath(`request-tabs-${width}x${height}.png`)});
  await page.locator('.system-header-actions .theme-toggle').click();
- await expect(launcher).toHaveCSS('background-color','rgb(124, 58, 237)');
- await expect(content).not.toHaveCSS('background-color','rgb(243, 244, 246)');
- await expect(page.getByRole('tab',{name:/待審查/})).toHaveCSS('color','rgb(196, 181, 253)');
+ await expect(launcher).toHaveCSS('background-color','rgb(8, 102, 232)');
+ await expect(content).not.toHaveCSS('background-color','rgb(245, 247, 250)');
+ await expect(page.getByRole('tab',{name:/待審查/})).toHaveCSS('color','rgb(133, 189, 255)');
  await expect(icons.first()).toHaveCSS('stroke','rgb(255, 255, 255)');
  expect(await page.pageErrors()).toEqual([]);
 });

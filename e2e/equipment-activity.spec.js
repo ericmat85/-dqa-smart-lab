@@ -29,7 +29,7 @@ test('personal settings use purple upload and a quiet close button with working 
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
   await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:'⚙ 個人設定',exact:true}).click();
   const dialog=page.locator('.shared-personal-settings'),upload=dialog.getByRole('button',{name:'＋ 上傳照片',exact:true}),close=dialog.getByRole('button',{name:'關閉個人設定',exact:true});
-  await expect(upload).toHaveCSS('background-color','rgb(134, 82, 223)');await expect(upload).toHaveCSS('color','rgb(255, 255, 255)');
+  await expect(upload).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(upload).toHaveCSS('color','rgb(255, 255, 255)');
   await expect(dialog).toBeFocused();await close.hover();await expect(close).toHaveCSS('border-top-width','0px');await expect(close).toHaveCSS('box-shadow','none');await expect(close).toHaveCSS('outline-style','none');
   await page.keyboard.press('Tab');await expect(close).toBeFocused();await page.keyboard.press('Enter');await expect(dialog).toHaveCount(0);await expect(page.getByRole('button',{name:'個人帳號選單'})).toBeFocused();
  }

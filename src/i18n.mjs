@@ -1,5 +1,7 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+試驗進度與設備使用概況|Test progress and equipment utilization
+
 試驗規範／試驗手法|Test specification / method
 
 麵包屑|Breadcrumbs

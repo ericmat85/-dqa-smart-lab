@@ -14,7 +14,7 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
   },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
   await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();const reference=await page.locator('.dashboard-content>.panel').boundingBox();await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);
   const panel=await page.locator('.dashboard-content>.panel').boundingBox();expect(Math.abs(panel.x-reference.x)).toBeLessThanOrEqual(1);expect(Math.abs(panel.width-reference.width)).toBeLessThanOrEqual(1);
-  await expect(page.locator('.sidebar')).toHaveCSS('background-color','rgb(96, 102, 109)');const logo=page.locator('.sidebar .company-brand-logo');await expect(logo).toHaveCSS('background-color','rgba(0, 0, 0, 0)');expect((await logo.boundingBox()).width).toBeLessThanOrEqual(170);
+  await expect(page.locator('.sidebar')).toHaveCSS('background-color','rgb(16, 42, 70)');const logo=page.locator('.sidebar .company-brand-logo');await expect(logo).toHaveCSS('background-color','rgba(0, 0, 0, 0)');expect((await logo.boundingBox()).width).toBeLessThanOrEqual(170);
   async function checkTable(){
    const region=page.getByRole('region',{name:'排程表格'}).filter({visible:true}).first();
    await expect(region).toBeVisible();
