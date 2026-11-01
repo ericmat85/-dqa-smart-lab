@@ -10,7 +10,7 @@ test('all entry buttons share enterprise blue and eye icons are centered on desk
   const eye=page.getByRole('button',{name:'按住顯示密碼'});await centered(eye);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }}expect(await page.pageErrors()).toEqual([]);
 });
-test('schedule AI SVG is centered and save is purple without preparation or cleanup fields',async({page})=>{
+test('schedule AI SVG is centered and save is enterprise blue without preparation or cleanup fields',async({page})=>{
  await page.addInitScript(({accounts,equipment})=>{
   localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(equipment));sessionStorage.setItem('dqa-lms-account-id','U001');
   for(const key of ['dqa-request-demo-v2','dqa-lms-reviews-v1','dqa_lab_demo_requests_v1','dqa-lab-operations-v1'])localStorage.setItem(key,'[]');
@@ -18,6 +18,6 @@ test('schedule AI SVG is centered and save is purple without preparation or clea
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  const editor=page.getByRole('dialog',{name:/編輯試驗排程/}),icon=editor.locator('.schedule-ai-button-icon');await centered(icon);
- await expect(editor.getByLabel('準備時間（分鐘）')).toHaveCount(0);await expect(editor.getByLabel('清理時間（分鐘）')).toHaveCount(0);await expect(editor.getByRole('button',{name:'儲存排程',exact:true})).toHaveCSS('background-color','rgb(134, 82, 223)');
+ await expect(editor.getByLabel('準備時間（分鐘）')).toHaveCount(0);await expect(editor.getByLabel('清理時間（分鐘）')).toHaveCount(0);await expect(editor.getByRole('button',{name:'儲存排程',exact:true})).toHaveCSS('background-color','rgb(8, 102, 232)');
  await page.setViewportSize({width:375,height:900});await centered(icon);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(await page.pageErrors()).toEqual([]);
 });

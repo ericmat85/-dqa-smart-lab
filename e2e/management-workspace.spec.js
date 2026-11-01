@@ -18,7 +18,7 @@ test.beforeEach(async({page})=>{
 async function nav(page,name){if(await page.getByRole('button',{name:'切換側邊欄'}).isVisible()&&await page.locator('.sidebar').evaluate(el=>getComputedStyle(el).transform!=='none')&&page.viewportSize().width<=900)await page.getByRole('button',{name:'切換側邊欄'}).click();await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
 test('report export downloads valid complete Excel and Chinese PDF with column selection',async({page})=>{
  await nav(page,'報表分析');await expect(page.getByRole('heading',{name:'報表分析',exact:true})).toBeVisible();
- await page.locator('.management-export-menu>summary').click();await expect(page.locator('.management-export-menu>summary')).toHaveCSS('background-color','rgb(134, 82, 223)');
+ await page.locator('.management-export-menu>summary').click();await expect(page.locator('.management-export-menu>summary')).toHaveCSS('background-color','rgb(8, 102, 232)');
  let waiting=page.waitForEvent('download');await page.getByRole('button',{name:/Excel 活頁簿/}).click();let download=await waiting;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
  const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(await readFile(await download.path()));expect(book.worksheets[0].rowCount).toBe(26);expect(book.worksheets[1].name).toBe('匯出摘要');
  await page.locator('.management-export-menu>summary').click();waiting=page.waitForEvent('download');await page.getByRole('button',{name:/PDF 文件/}).click();download=await waiting;expect(download.suggestedFilename()).toMatch(/\.pdf$/);const pdf=await PDFDocument.load(await readFile(await download.path()));expect(pdf.getPageCount()).toBeGreaterThan(0);expect(pdf.getTitle()).toBe('試驗排程');
