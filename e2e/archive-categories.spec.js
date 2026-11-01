@@ -8,7 +8,7 @@ for(const system of ['lms','request','lab'])test(`${system} archive categories r
  await expect(tabs.getByRole('tab')).toHaveCount(4);
  for(const dark of [false,true]){
   if(dark)await page.getByRole('button',{name:'切換深色或淺色模式',exact:true}).click();
-  const colors={lms:['rgb(124, 58, 237)','rgb(196, 181, 253)'],request:['rgb(22, 163, 74)','rgb(134, 239, 172)'],lab:['rgb(37, 99, 235)','rgb(147, 197, 253)']};
+  const colors={lms:['rgb(124, 58, 237)','rgb(196, 181, 253)'],request:['rgb(8, 102, 232)','rgb(133, 189, 255)'],lab:['rgb(37, 99, 235)','rgb(147, 197, 253)']};
   await tabs.getByRole('tab',{name:'試驗報告',exact:true}).click();await expect(tabs.getByRole('tab',{name:'試驗報告',exact:true})).toHaveCSS('color',colors[system][dark?1:0]);
   for(const name of ['試驗規範','試驗手冊']){await tabs.getByRole('tab',{name,exact:true}).click();await expect(archive.getByRole('tabpanel',{name,exact:true})).toContainText(`目前沒有可查閱的${name}`);}
   await tabs.getByRole('tab',{name:'報告範本',exact:true}).click();const downloadEvent=page.waitForEvent('download');await archive.getByRole('link',{name:'下載範本'}).click();const download=await downloadEvent;expect(await download.failure()).toBeNull();expect(download.suggestedFilename()).toMatch(/\.xlsx$/);

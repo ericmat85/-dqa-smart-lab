@@ -1,0 +1,13 @@
+import {LoginSystemIcon} from './EnterpriseLoginLayout.jsx';
+import {displayTaipei,requestMatchesCollection} from './requestWorkspace.mjs';
+export function RequestBreadcrumbs({title,onHome,onOverview}){
+ return <nav className="rq-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={onOverview}>電子委託系統</button><span aria-hidden="true">›</span><strong aria-current="page">{title}</strong></nav>;
+}
+export function RequestSummary({rows,collection,onFilter}){
+ const cards=[['all','全部委託','document'],['draft','草稿','document'],['approval','待主管簽核','clock'],['executing','執行中','lab'],['completed','已完成','shield'],['returned','退回待補件','folder']];
+ return <div className="rq-request-summary" aria-label="委託狀態摘要">{cards.map(([key,label,icon])=><button key={key} type="button" aria-pressed={collection===key} onClick={()=>onFilter(collection===key?'all':key)}><span className={`rq-summary-icon rq-summary-${key}`}><LoginSystemIcon kind={icon}/></span><span className="rq-summary-copy"><span>{label}</span><strong>{rows.filter(row=>key==='completed'?row.status==='已完成':requestMatchesCollection(row,key)).length}</strong></span></button>)}</div>;
+}
+export function RequestEditorSidebar({form,signature,source,dirty,active}){
+ const checks=[['產品代碼',Boolean((form.productCode||form.product||'').trim())],['客戶名稱',Boolean(form.customer.trim())],['測試數量',Number.isSafeInteger(Number(form.quantity))&&Number(form.quantity)>0],['試驗目的',form.purpose.length>0&&(!form.purpose.some(value=>value.startsWith('其他'))||Boolean(form.purposeOther.trim()))],['試驗項目',form.testItems.length>0],['試驗規範',Boolean(form.specification.trim())],['委託者簽名',Boolean(signature)],['直屬主管',Boolean(form.supervisorId)]];
+ return <aside className="rq-editor-sidebar" aria-label="委託單資訊與填寫檢核"><section className="rq-editor-info"><h3><LoginSystemIcon kind="document"/>委託單資訊</h3><dl><div><dt>委託單號</dt><dd>{source?.id||'儲存後產生'}</dd></div><div><dt>狀態</dt><dd><span className="rq-status">{source?.status||'尚未儲存'}</span></dd></div><div><dt>建立時間</dt><dd>{source?.createdAt?displayTaipei(source.createdAt):'尚未儲存'}</dd></div><div><dt>最後更新</dt><dd>{source?.updatedAt?displayTaipei(source.updatedAt):'尚未儲存'}</dd></div><div><dt>目前區段</dt><dd>{active+1} / 5</dd></div><div><dt>儲存狀態</dt><dd>{dirty?'尚有未儲存變更':'尚未修改／已儲存'}</dd></div></dl></section><section className="rq-editor-checks"><h3><LoginSystemIcon kind="shield"/>填寫檢核</h3><ul>{checks.map(([label,filled])=><li key={label}><span className={filled?'rq-check-filled':'rq-check-pending'} aria-label={filled?'已填寫':'待填寫'}>{filled?'✓':'○'}</span>{label}</li>)}</ul><p>送簽時仍會檢查所有必填欄位；草稿可先儲存部分資訊。</p></section></aside>;
+}

@@ -1,5 +1,55 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+試驗規範／試驗手法|Test specification / method
+
+麵包屑|Breadcrumbs
+委託狀態摘要|Request status summary
+委託單資訊與填寫檢核|Request information and completion checks
+委託單資訊|Request information
+填寫檢核|Completion checklist
+草稿管理|Draft management
+基本資料|Basic information
+樣品與條件|Samples and conditions
+備註與判定|Notes and criteria
+確認送簽|Confirm and submit
+儲存後產生|Assigned after saving
+最後更新|Last updated
+目前區段|Current section
+儲存狀態|Save status
+已填寫|Filled in
+待填寫|Not filled in
+直屬主管|Direct supervisor
+送簽時仍會檢查所有必填欄位；草稿可先儲存部分資訊。|All required fields are checked on submission. Drafts may be saved with partial information.
+新增試驗委託單|New test request
+
+試驗執行|Test execution
+設備排程|Equipment scheduling
+報告管理|Report management
+委託申請|Request submission
+進度追蹤|Progress tracking
+文件管理|Document management
+實驗室數位化管理平台|Laboratory digital management platform
+實驗室管理|Laboratory management
+造隆實驗室|COLONG Laboratory
+電子委託單|Electronic test requests
+審查需求・安排資源・掌握試驗進度|Review requests · Allocate resources · Track test progress
+試驗執行・設備管理・排程監控|Test execution · Equipment management · Schedule monitoring
+報告處理・數據追溯|Report handling · Data traceability
+委託申請・簽核流程・進度追蹤|Request submission · Approval workflow · Progress tracking
+文件管理・試驗報告|Document management · Test reports
+文件控管・品質審查・異常管理|Document control · Quality review · Issue management
+稽核追溯・法規管理|Audit traceability · Compliance management
+委託審查|Request review
+狀態監控|Status monitoring
+品質審查|Quality review
+異常管理|Issue management
+稽核追溯|Audit traceability
+登入頁工具|Login tools
+系統介紹|System introduction
+切換淺色模式|Switch to light mode
+切換深色模式|Switch to dark mode
+登入說明|Sign-in help
+請使用系統管理員提供的帳號與密碼登入。忘記密碼時，請使用登入表單的密碼協助功能。|Sign in with the account and password provided by your administrator. If you forgot your password, use the password help on the sign-in form.
 帳號管理僅供系統管理員、二階主管或授權角色使用。|Account management is available to administrators, level 2 supervisors and authorized roles.
 儀錶板|Dashboard
 儀表板|Dashboard
@@ -1129,6 +1179,7 @@ export function translateText(value,language=locale){
  if(language!=='en'||typeof value!=='string')return value;
  const text=value.trim();
  if(ENGLISH_UI[text])return value.replace(text,ENGLISH_UI[text]);
+ const requestCount=text.match(/^共 (\d+) 筆(借用)? · 每頁最多 (\d+) 筆(.*)$/);if(requestCount)return `${requestCount[1]} ${requestCount[2]?'loans':'records'} · Up to ${requestCount[3]} per page${requestCount[4]?' · Due dates and workflow status are shown separately':''}`;
  const page=text.match(/^第\s*(\d+)\s*頁$/);if(page)return `Page ${page[1]}`;
  const count=text.match(/^(\d+)\s*(天|筆|項|件|台|小時|分鐘)$/);if(count)return `${count[1]} ${ENGLISH_UI[count[2]]}`;
  const empty=text.match(/^目前沒有可查閱的(.+)。$/);if(empty)return `No ${translateText(empty[1],language).toLowerCase()} available.`;
