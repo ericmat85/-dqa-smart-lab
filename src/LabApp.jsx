@@ -1,3 +1,4 @@
+import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
 import HelpTip from './HelpTip.jsx';
 import {startSession,endSession} from './idleSessions.mjs';
 import LoginCredentials from './LoginCredentials.jsx';
@@ -215,8 +216,7 @@ export default function LabApp({ path, navigate }) {
 
   if (!loggedIn || path !== "/lab/dashboard") return (
     <div className={`lab-login-shell ${dark ? "lab-login-dark" : ""}`}>
-      <header className="lab-login-header"><CompanyBrandLogo dark={dark}/><button type="button" className="lab-theme-pill" onClick={toggleTheme} aria-label="切換淺色或深色模式"><span>{dark ? "☾" : "☼"}</span><span>{dark ? "深色模式" : "淺色模式"}</span><i className={dark ? "is-dark" : ""}><b /></i></button></header>
-      <main className="lab-login-main"><form className="lab-login-card unified-login-form" onSubmit={e => { e.preventDefault(); login(); }}>
+      <EnterpriseLoginLayout system="lab" dark={dark} onToggle={toggleTheme}><form className="lab-login-card unified-login-form" onSubmit={e => { e.preventDefault(); login(); }}>
 
         <h1>{PORTAL_TITLES.lab}</h1>
         <LoginCredentials accountId="lab-username" passwordId="lab-password" account={username} password={password} onAccountChange={setUsername} onPasswordChange={setPassword}/>
@@ -224,7 +224,7 @@ export default function LabApp({ path, navigate }) {
         <button className="lab-primary lab-login-submit" type="submit" disabled={!username.trim()}>登入系統 <span>→</span></button>
 
         <button className="lab-login-return" type="button" onClick={navigateHome}>← 返回系統首頁</button>
-      </form></main>
+      </form></EnterpriseLoginLayout>
     </div>
   );
 

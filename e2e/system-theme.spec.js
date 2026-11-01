@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
 const colors={request:'rgb(22, 163, 74)',lms:'rgb(124, 58, 237)',lab:'rgb(37, 99, 235)',validation:'rgb(230, 22, 61)'};
-for(const system of Object.keys(colors))test(`${system} login label and theme hover use entry color`,async({page})=>{
+for(const system of Object.keys(colors))test(`${system} login uses blue actions and an accessible icon theme control`,async({page})=>{
  await page.goto(`/${system}/login`);
  await expect(page.locator('.rq-login-card>.rq-eyebrow,.lab-login-card>.lab-eyebrow,.login-card>.eyebrow')).toHaveCount(0);
- await expect(page.locator('.login-help-button')).toHaveCSS('color',colors[system]);
- const theme=page.locator(system==='request'?'.rq-login-mode':system==='lab'?'.lab-theme-pill':'.theme-toggle');
- await theme.hover();await expect(theme).toHaveCSS('border-top-color',system==='lms'?'rgba(0, 0, 0, 0)':colors[system]);
+ await expect(page.locator('.login-help-button')).toHaveCSS('color','rgb(8, 102, 232)');
+ const theme=page.locator('.enterprise-theme');await expect(theme).toHaveText('');await expect(theme).toHaveAttribute('title','切換深色模式');await theme.focus();await page.keyboard.press('Enter');await expect(page.locator('.enterprise-login')).toHaveClass(/enterprise-dark/);await expect(theme).toHaveAttribute('aria-label','切換淺色模式');expect(await page.evaluate(()=>localStorage.getItem('dqa-global-theme'))).toBe('dark');await page.reload();await expect(page.locator('.enterprise-login')).toHaveClass(/enterprise-dark/);
+
 });
 for(const system of ['request','lms','lab'])test(`${system} dashboard logo and settings use entry color`,async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('dqa-completed-flow-provisioned-v1',JSON.stringify({created:false})));

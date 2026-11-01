@@ -18,7 +18,9 @@ business identifiers fall back to their original text. Input values, callbacks,
 keys and stored records are never translated. Options without an explicit value
 receive their original label as a value before their visible label is translated.
 Keep both custom runtimes excluded from dependency prebundling so dictionary
-changes use the current module during development.
+changes use the current module during development. The `dqa-live-localization`
+post-config hook removes these adapters from the React plugin’s explicit
+prebundle include list as well; exclusion alone does not override that list.
 
 Equipment utilization remains in `dqa-management-preferences-v1`, independent
 of interface preferences. `ReportPreferences` saves only the fields for its

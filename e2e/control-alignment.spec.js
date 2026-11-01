@@ -2,11 +2,10 @@ import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
-const gradient='linear-gradient(100deg, rgb(0, 157, 145), rgb(7, 159, 186))';
 async function centered(outer){await expect.poll(()=>outer.evaluate(element=>{const a=element.getBoundingClientRect(),b=element.querySelector('svg').getBoundingClientRect();return Math.max(Math.abs(a.x+a.width/2-b.x-b.width/2),Math.abs(a.y+a.height/2-b.y-b.height/2));})).toBeLessThanOrEqual(1);}
-test('all entry buttons share green and eye icons are centered on desktop and mobile',async({page})=>{
+test('all entry buttons share enterprise blue and eye icons are centered on desktop and mobile',async({page})=>{
  for(const width of [1366,375]){await page.setViewportSize({width,height:900});for(const system of ['lms','request','lab','validation']){
-  await page.goto(`/${system}/login`);const button=page.getByRole('button',{name:system==='validation'?'暫未開放':'登入系統',exact:false});await expect(button).toHaveCSS('background-image',gradient);
+  await page.goto(`/${system}/login`);const button=page.getByRole('button',{name:system==='validation'?'暫未開放':'登入系統',exact:false});await expect(button).toHaveCSS('background-color','rgb(8, 102, 232)');
   const offset=await button.evaluate(element=>{const nodes=[...element.childNodes],node=nodes.find(node=>node.nodeType===Node.TEXT_NODE&&/登入系統|暫未開放/.test(node.textContent)),text=node.textContent,match=text.match(/登入系統|暫未開放/),range=document.createRange();range.setStart(node,match.index);range.setEnd(node,match.index+match[0].length);const r=range.getBoundingClientRect(),b=element.getBoundingClientRect();return {x:Math.abs(r.x+r.width/2-b.x-b.width/2),y:Math.abs(r.y+r.height/2-b.y-b.height/2)};});expect(offset.x).toBeLessThanOrEqual(2);expect(offset.y).toBeLessThanOrEqual(3);
   const eye=page.getByRole('button',{name:'按住顯示密碼'});await centered(eye);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }}expect(await page.pageErrors()).toEqual([]);

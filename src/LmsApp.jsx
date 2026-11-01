@@ -1,3 +1,4 @@
+import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
 import HelpTip from './HelpTip.jsx';
 import AssistantIcon from './AssistantIcon.jsx';
 import {startSession,endSession} from './idleSessions.mjs';
@@ -414,18 +415,9 @@ export function LoginPage({
   return (
 
     <div data-system={system.id} className={`app login-page entry-login ${dark ? "theme-dark" : "theme-light"}`}>
+      <EnterpriseLoginLayout system={system.id} dark={dark} onToggle={onToggle}>
+      <div className="login-card unified-login-form">
 
-      <header className="home-header">
-
-        <CompanyBrand dark={dark}/>
-
-        <ThemeToggle dark={dark} onToggle={onToggle} />
-
-      </header>
-
-
-
-      <main className="login-card unified-login-form">
 
 
 
@@ -467,11 +459,12 @@ export function LoginPage({
 
         </button>
 
-      </main>
+      </div>
 
 
 
-      <Footer />
+      </EnterpriseLoginLayout>
+
 
     </div>
 
