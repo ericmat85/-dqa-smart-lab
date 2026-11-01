@@ -27,3 +27,7 @@ textarea {
 button {
   cursor: pointer;
 }
+
+/* Required field marks share an accessible red in both themes. */
+.required-mark, label em:has(> .required-mark){color:#dc2626!important;font-style:normal}
+label em{color:#dc2626!important}

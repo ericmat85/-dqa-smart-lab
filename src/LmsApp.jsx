@@ -1797,7 +1797,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
      const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
      const result=recommendSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows:latestSchedules()});
      setEditForm(previous=>({...previous,...result}));
-     setScheduleMessage('已推薦 '+result.eq+'／'+result.owner+'，'+result.time+' 至 '+result.end+'（'+result.duration+' 天）。請確認後儲存。');
+     setScheduleMessage('已推薦 '+result.eq+'／'+result.owner+'，'+result.time+' 至 '+result.end+'（'+result.duration+' 天）。每件樣品使用空間 '+result.sampleVolumeLitres+' L'+(result.sampleVolumeEstimated?'（Demo 預設，請依實際樣品確認）':'')+'。請確認後儲存。');
    }catch(error){setScheduleMessage(error.message||'無法產生建議，請確認設備與人員。');}
  }
  function saveSchedule(){
