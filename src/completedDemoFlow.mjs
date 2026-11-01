@@ -33,7 +33,7 @@ export function createCompletedDemoFlow({signature,viewerId,now=Date.now(),newEx
  outer:for(let offset=0;offset<15;offset++){
   const day=getRequestDate(new Date(now-offset*86400000)),startAt=Date.parse(`${day}T00:00:00+08:00`);if(now-startAt<60000)continue;
   for(const candidate of equipment.filter(row=>row.status==='待機中'))for(const executor of enabledExecutors(accounts)){
-   try{const next=validateSchedule({editing,form:{equipmentId:candidate.id,ownerId:executor.id,sampleCode:'SAMPLE-DEMO-FLOW-001',time:day,end:day,note:'DEMO 完整流程測試；非正式試驗結果'},equipment,accounts,rows:schedules});proposal=next;machine=candidate;operator=executor;start=startAt;finish=Math.min(now,startAt+3600000);break outer;}catch{/* Find a compatible free resource and period without changing existing cases. */}
+   try{const next=validateSchedule({editing,form:{equipmentId:candidate.id,ownerId:executor.id,sampleCode:'SAMPLE-DEMO-FLOW-001',sampleVolumeLitres:1,time:day,end:day,note:'DEMO 完整流程測試；非正式試驗結果'},equipment,accounts,rows:schedules});proposal=next;machine=candidate;operator=executor;start=startAt;finish=Math.min(now,startAt+3600000);break outer;}catch{/* Find a compatible free resource and period without changing existing cases. */}
   }
  }
  if(!proposal)throw Error('找不到適用的待機設備與可用執行人，尚未建立範例。');

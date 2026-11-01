@@ -42,3 +42,12 @@
 .equipment-schedule-next{font-size:12px;color:var(--muted,#71829a)}
 .equipment-schedule-card .schedule-table-region{border:0;border-top:1px solid var(--border,#e2e7f1);border-radius:0}
 @media(max-width:760px){.equipment-schedule-header{flex-wrap:wrap;gap:10px}.equipment-schedule-name{flex-basis:calc(100% - 36px)}.equipment-schedule-count{margin-left:24px}.equipment-schedule-kpis{gap:6px}}
+
+/* Keep device scheduling colors aligned with the equipment catalog's categories. */
+.equipment-schedule-card{border-left:4px solid var(--equipment-category-color,#8b96ac)}
+.equipment-schedule-header>span:first-child,.equipment-schedule-name strong{color:var(--equipment-category-color,#8b96ac)}
+.equipment-schedule-count{color:var(--equipment-category-color,#8b96ac);background:color-mix(in srgb,var(--equipment-category-color,#8b96ac) 12%,var(--surface,#fff))}
+/* Category identity remains visible under the global dark-theme heading rules. */
+#root .dashboard-shell .equipment-schedule-name strong{color:var(--equipment-category-color,#8b96ac)}
+#root .dashboard-shell .catalog-category-views .schedule-person-identity strong{color:var(--group-color)}
+.equipment-activity-kpi small{display:block;margin-top:6px;font-size:11px;line-height:1.5;color:var(--muted,#71829a)}

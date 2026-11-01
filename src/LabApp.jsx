@@ -1,3 +1,4 @@
+import {startSession,endSession} from './idleSessions.mjs';
 import LoginCredentials from './LoginCredentials.jsx';
 import {PORTAL_TITLES} from './portalLabels.mjs';
 import {createCompletedDemoFlow} from './completedDemoFlow.mjs';
@@ -75,9 +76,9 @@ export default function LabApp({ path, navigate }) {
   }, [path, loggedIn, navigate]);
 
   const login = () => {
-    try { const all=readDemoAccounts(); const key=username.trim().toLowerCase(); const matches=Array.isArray(all)?all.filter(a=>accessSystem(a,"lab") && (String(a.email||"").toLowerCase()===key || a.name===username.trim())):[]; const found=matches.length===1?matches[0]:null; if(!found || password!=="demo1234"){setLoginError("帳號沒有實驗室權限，或密碼不正確。");return;} window.sessionStorage.setItem("dqa-lab-account-id",found.id);setAccount(found);setUsername(found.name);setLoginError("");navigate("/lab/dashboard"); } catch { setLoginError("無法讀取帳號資料。"); }
+    try { const all=readDemoAccounts(); const key=username.trim().toLowerCase(); const matches=Array.isArray(all)?all.filter(a=>accessSystem(a,"lab") && (String(a.email||"").toLowerCase()===key || a.name===username.trim())):[]; const found=matches.length===1?matches[0]:null; if(!found || password!=="demo1234"){setLoginError("帳號沒有實驗室權限，或密碼不正確。");return;} startSession('lab',found.id);setAccount(found);setUsername(found.name);setLoginError("");navigate("/lab/dashboard"); } catch { setLoginError("無法讀取帳號資料。"); }
   };
-  const logout = () => { window.sessionStorage.removeItem("dqa-lab-account-id"); setAccount(null); navigate("/lab/login", true); };
+  const logout = () => { endSession('lab'); setAccount(null); navigate("/lab/login", true); };
   const [requests, setRequests] = useState(() => readStorage(STORAGE_KEY, DEMO_REQUESTS).filter(row=>!LEGACY_DEMO_IDS.has(row.id)));
   useEffect(()=>{
     // Synchronize persisted lab work items with the shared browser schedule source.

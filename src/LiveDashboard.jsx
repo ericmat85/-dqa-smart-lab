@@ -1,3 +1,5 @@
+import useManagementPreferences from './useManagementPreferences.js';
+import {equipmentActivity as calculateEquipmentActivity} from './equipmentActivity.mjs';
 import {STATUS_COLORS} from './labColors.mjs';
 import {useState} from 'react';
 import useLabView from './useLabView.js';
@@ -9,7 +11,9 @@ import EquipmentInfoModal from './EquipmentInfoModal.jsx';
 const requestColumns=[{key:'id',label:'委託編號'},{key:'title',label:'試驗項目'},{key:'priority',label:'優先度'},{key:'status',label:'審查狀態'},{key:'department',label:'委託部門'}];
 const equipmentColumns=[{key:'id',label:'設備編號'},{key:'name',label:'設備名稱'},{key:'status',label:'狀態'},{key:'currentRequest',label:'目前委託'}];
 export default function LiveDashboard({onNavigate,currentUser}) {
-  const {snapshot,metrics}=useLabView();
+  const {snapshot,metrics,now}=useLabView();
+  const activityPreferences=useManagementPreferences();
+  const activity=calculateEquipmentActivity(metrics.schedules,snapshot.equipment,activityPreferences,now);
   const [request,setRequest]=useState(null),[equipmentId,setEquipmentId]=useState(null),[category,setCategory]=useState(null);
   const selected=snapshot.equipment.find(row=>row.id===equipmentId);
   const statusRows=Object.entries(metrics.counts).filter(([,count])=>count>0);
@@ -23,7 +27,7 @@ export default function LiveDashboard({onNavigate,currentUser}) {
       <MetricCard label="待排程試驗" value={metrics.counts['未排程']} detail={`另有 ${metrics.counts['有衝突']} 筆排程衝突`} icon="▤" onClick={()=>onNavigate('schedule','未排程')}/>
       <MetricCard label="試驗中" value={metrics.counts['試驗中']} detail={`${metrics.counts['已排程']} 筆已預約、尚未開始`} icon="⚗" color="teal" onClick={()=>onNavigate('schedule','試驗中')}/>
       <MetricCard label="本週完成" value={metrics.completedThisWeek} detail={`${metrics.week.from} — ${metrics.week.to}`} icon="◷" color="gold" onClick={()=>onNavigate('schedule','已完成')}/>
-      <MetricCard label="目前設備使用率" value={`${Math.round(metrics.equipmentRate)}%`} detail={`${metrics.using}／${snapshot.equipment.length} 台設備使用中`} icon="▦" color="slate" onClick={()=>onNavigate('equipment')}/>
+      <MetricCard label="設備稼動率" value={`${activity.rate}%`} detail={`${activity.from} — ${activity.to} · 排程估算`} icon="▦" color="slate" onClick={()=>onNavigate('equipment')}/>
     </div>
     <div className="live-dashboard-charts">
       <section className="live-panel"><header><div><h2>設備排程占用率</h2><p>本週 · 依設備分類 · {metrics.week.from} — {metrics.week.to}</p></div></header><div className="live-bar-chart"><div className="live-chart-ticks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div><div className="live-bars">{metrics.categories.map(item=><button type="button" className="live-bar-column" key={item.category} onClick={()=>setCategory(item.category)} aria-label={`${item.category}，本週排程占用率 ${item.rate.toFixed(1)}%，${item.count} 台設備`}><span className="live-bar-value">{item.rate.toFixed(1)}%</span><span className="live-bar-slot"><span style={{height:`${item.rate}%`}}/></span><span className="live-bar-label">{item.category}</span><span className="live-bar-tooltip">{item.count} 台 · {(item.occupiedMs/3600000).toFixed(1)}／{(item.calendarMs/3600000).toFixed(0)} 小時<br/>點擊查看設備</span></button>)}{!metrics.categories.length&&<div className="live-empty">尚無設備資料</div>}</div></div></section>

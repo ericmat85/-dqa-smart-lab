@@ -53,11 +53,16 @@ export function findScheduleConflict(rows,proposal) {
  });
 }
 function deviceCount(form){const count=Number(form.equipmentCount||1);if(!Number.isInteger(count)||count<1||count>4)throw Error('Demo 設備台數須為 1～4 台。');return count;}
+function sampleVolume(form){
+ const value=form.sampleVolumeLitres;
+ if(value===undefined||value===null||String(value).trim()==='')throw Error('請填寫每件樣品使用空間（L），此欄位為必填。');
+ const volume=Number(value);
+ if(!Number.isFinite(volume)||volume<=0)throw Error('每件樣品使用空間須為正數（L）。');
+ return volume;
+}
 function effectiveCapacity(machine,form){
  const capacity=Number(machine.capacity);if(!Number.isSafeInteger(capacity)||capacity<1)throw Error('設備容量無效，請先修正設備台帳。');
- const volume=form.sampleVolumeLitres;
- if(volume===undefined||volume===null||String(volume).trim()==='')return capacity;
- if(!Number.isFinite(Number(volume))||Number(volume)<=0)throw Error('每件樣品使用空間須為正數（L）。');
+ const volume=sampleVolume(form);
  const available=Number(machine.usableVolumeLitres);
  if(!Number.isFinite(available)||available<=0)throw Error('設備缺少可驗證的使用空間，請確認設備台帳。');
  return Math.min(capacity,Math.floor(available/Number(volume)));
@@ -66,7 +71,7 @@ function allocateSamples(machines,form,quantity){
  let remaining=quantity;
  const allocations=machines.map((machine,index)=>{const count=Math.max(0,Math.min(remaining-(machines.length-index-1),effectiveCapacity(machine,form)));remaining-=count;return {equipmentId:machine.id,quantity:count};});
  if(allocations.some(row=>row.quantity<1))throw Error('每台設備至少須分配一件樣品，請減少台數或確認空間。');
- if(remaining>0)throw Error(machines.length===1&&!form.sampleVolumeLitres?`樣品數量超過設備容量（${machines[0].capacity} 件）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
+ if(remaining>0)throw Error(machines.length===1&&quantity>Number(machines[0].capacity)?`樣品數量超過設備容量（${machines[0].capacity} 件）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
  return allocations;
 }
 export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
@@ -74,6 +79,7 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
  if(editing.reportInfo?.stage||editing.status==="已結案")throw Error("報告已提交，不可重新安排排程。");
  if(editing.status==='待核准')throw Error('此案件待核准，請先處理申請。');
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');
+  sampleVolume(form);
   const count=deviceCount(form),ids=equipmentIds(form);
   if(ids.length!==count)throw Error('所選設備數量與需求台數不符。');
   const machines=ids.map(id=>equipment.find(row=>row.id===id));
@@ -103,6 +109,7 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
 export function recommendSchedule({editing,form,equipment,accounts,rows,today=getRequestDate()}) {
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');
   if(editing.reportInfo?.stage||['已結案','待核准'].includes(editing.status))throw Error('此案件目前無法重新安排排程。');
+  sampleVolume(form);
   const quantity=sampleQuantity(editing.quantity),count=deviceCount(form);
   bufferMinutes(form.preparationMinutes);bufferMinutes(form.cleanupMinutes);
   const candidates=equipment.filter(row=>{

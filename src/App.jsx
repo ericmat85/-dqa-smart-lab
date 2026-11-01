@@ -1,3 +1,5 @@
+import useIdleSessions from './useIdleSessions.js';
+import SessionTimeoutDialog from './SessionTimeoutDialog.jsx';
 import {PORTAL_TITLES} from './portalLabels.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import './PortalHome.css';
@@ -35,27 +37,15 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Each system keeps its own route and login page.
-  if (path.startsWith("/request/") || path === "/request") {
-    return <RequestApp />;
-  }
+  const idle=useIdleSessions(path,navigate);
+  let content;
+  if(path.startsWith('/request/')||path==='/request')content=<RequestApp key={`request-${idle.version}`}/>;
+  else if(path==='/lms'||path.startsWith('/lms/'))content=<LmsApp key={`lms-${idle.version}`} path={path} navigate={navigate}/>;
+  else if(path.startsWith('/lab/')||path==='/lab')content=<LabApp key={`lab-${idle.version}`} path={path} navigate={navigate}/>;
+  else if(path.startsWith('/validation/')||path==='/validation')content=<ValidationLogin onBack={()=>navigate('/')}/>;
+  else content=<PortalHome navigate={navigate}/>;
+  return <>{content}{idle.notice.length>0&&<SessionTimeoutDialog systems={idle.notice} onClose={idle.dismiss}/>}</>;
 
-  if (path === "/lms" || path.startsWith("/lms/")) {
-    return <LmsApp path={path} navigate={navigate} />;
-  }
-
-  if (path.startsWith("/lab/") || path === "/lab") {
-    return <LabApp path={path} navigate={navigate} />;
-  }
-  if (path.startsWith("/validation/") || path === "/validation") {
-    return (
-      <ValidationLogin
-        onBack={() => navigate("/")}
-      />
-    );
-  }
-
-  return <PortalHome navigate={navigate} />;
 }
 
 function ValidationLogin({ onBack }) {

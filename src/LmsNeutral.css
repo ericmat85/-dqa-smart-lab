@@ -15,7 +15,7 @@
 .dashboard-shell .system-header-actions .profile-button,.system-header-actions[data-system=lms] .profile-button{border-color:transparent!important;background:transparent!important;box-shadow:none!important}
 .dashboard-shell .system-header-actions .profile-button:hover,.system-header-actions[data-system=lms] .profile-button:hover{border-color:transparent!important;box-shadow:none!important}
 .dashboard-shell .system-header-actions .avatar,.system-header-actions[data-system=lms] .avatar{background:#ede9fe;color:#6d5bd0}
-.shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#737b85!important;color:#fff!important;border-color:#737b85}
+.shared-personal-settings[data-system=lms] .personal-photo-upload-button{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important}
 /* A compact fixed launcher, without a full-width bottom dock. */
 .dashboard-shell>.dashboard-main{height:100dvh;min-height:0;display:flex;flex-direction:column}
 .dashboard-shell .dashboard-topbar{flex-shrink:0}

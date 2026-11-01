@@ -12,7 +12,7 @@ for(const system of ['lms','request','lab','validation'])test(`${system} uses un
  await page.mouse.move(box.x+20,box.y+20);await page.mouse.down();await page.mouse.move(box.x-30,box.y-30);await expect(password).toHaveAttribute('type','password');await page.mouse.up();
  await page.mouse.move(box.x+20,box.y+20);await page.mouse.down();await expect(password).toHaveAttribute('type','text');await eye.dispatchEvent('pointercancel',{pointerId:1});await expect(password).toHaveAttribute('type','password');await page.mouse.up();
  await page.getByRole('button',{name:'忘記密碼？',exact:true}).click();await expect(page.getByRole('status')).toContainText('請聯絡 DQA 管理員');
- if(system==='lms')await expect(page.getByRole('button',{name:'登入系統',exact:false})).toHaveCSS('background-color','rgb(22, 163, 74)');
+ if(system==='lms')await expect(page.getByRole('button',{name:'登入系統',exact:false})).toHaveCSS('background-image','linear-gradient(100deg, rgb(0, 157, 145), rgb(7, 159, 186))');
  expect(await page.pageErrors()).toEqual([]);
 });
 test('touch release hides the password and Enter submits the request login',async({browser})=>{

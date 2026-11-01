@@ -1,0 +1,17 @@
+/* Shared action alignment; structural navigation and data cards retain their layouts. */
+:is(.template-btn,.rq-btn,.lab-primary,.primary-button,.btn-primary,.btn-outline,.role-primary,.role-secondary,.management-primary,.back-button,.rq-return-entry,.lab-login-return,.lab-back,.personal-photo-upload-button,.personal-photo-remove-button,.personal-settings-cancel,.schedule-group-controls button,.account-row-actions button){display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center;vertical-align:middle}
+:is(.request-modal-close,.rq-close,.eq-profile-close,.personal-settings-close,.menu-button,.rq-mobile-menu,.notification-button,.login-password-eye){display:inline-flex;align-items:center;justify-content:center;line-height:1;text-align:center}
+:is(.nav-icon,.portal-card-icon,.live-metric-icon,.eq-profile-icon,.schedule-ai-button-icon,.schedule-ai-symbol,.schedule-person-avatar,.avatar,.lab-avatar,.rq-entry-number,.rq-role-choice>button>span){display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle;flex-shrink:0}
+:is(.nav-icon,.portal-card-icon,.live-metric-icon,.eq-profile-icon,.schedule-ai-button-icon,.schedule-ai-symbol,.schedule-person-avatar,.notification-button,.request-modal-close,.rq-close,.eq-profile-close) svg{display:block;flex-shrink:0}
+.schedule-ai-button-icon svg{width:22px;height:22px}.schedule-ai-symbol svg{width:32px;height:32px}
+.schedule-ai-button{align-items:center;justify-content:center}.schedule-ai-button>span:not(.schedule-ai-button-icon):not(.schedule-ai-button-arrow){display:flex;flex-direction:column;justify-content:center}
+#root .dashboard-shell .template-btn.schedule-save-button{background:#7c3aed!important;border-color:#7c3aed!important;color:white!important}
+/* All entry submit buttons share the original request-entry green gradient. */
+#root .app.entry-login .login-submit,
+#root .app.entry-login[data-system=lms] .login-submit,
+#root .app.entry-login[data-system=lms] .login-submit:is(:hover,:focus),
+#root .lab-login-shell .lab-login-submit,
+#root .rq-login-shell .rq-btn-primary{background:linear-gradient(100deg,#009d91,#079fba)!important;border-color:#009d91!important;color:white!important;display:flex;align-items:center;justify-content:center;text-align:center}
+.session-timeout-dialog{box-sizing:border-box;width:min(440px,calc(100vw - 32px));padding:26px;border:1px solid #dfe5ef;border-radius:16px;color:#203353;background:white;box-shadow:0 24px 80px #14284635}
+.session-timeout-dialog::backdrop{background:#10243d80}.session-timeout-dialog h2{font-size:21px;margin:0 0 14px}.session-timeout-dialog p{font-size:14px;line-height:1.8;margin:0 0 22px}
+.session-timeout-dialog button{display:flex;align-items:center;justify-content:center;min-height:42px;margin-left:auto;border:0;border-radius:8px;background:#7c3aed;color:white;padding:10px 16px;font:inherit;cursor:pointer}

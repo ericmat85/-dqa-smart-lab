@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readScheduleEquipment,validateSchedule,recommendSchedule,findScheduleConflict,equipmentMatches} from '../src/scheduleEquipment.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
 
-const equipment=[{id:'EQ-A',name:'環境試驗箱 A',status:'待機中',capacity:10},{id:'EQ-B',name:'環境試驗箱 B',status:'維護中',capacity:10}];
+const equipment=[{id:'EQ-A',name:'環境試驗箱 A',status:'待機中',capacity:10,usableVolumeLitres:100},{id:'EQ-B',name:'環境試驗箱 B',status:'維護中',capacity:10,usableVolumeLitres:100}];
 const accounts=[{id:'engineer',name:'工程師',role:'實驗室工程師',status:'啟用中'}];
 const editing={id:'SCH-1',requestId:'REQ-1',title:'高溫試驗',quantity:5};
-const form={equipmentId:'EQ-A',eq:'環境試驗箱 A',ownerId:'engineer',owner:'工程師',sampleCode:'SAMPLE-1',time:'2026-10-28',end:'2026-10-30',note:''};
+const form={equipmentId:'EQ-A',eq:'環境試驗箱 A',ownerId:'engineer',owner:'工程師',sampleCode:'SAMPLE-1',time:'2026-10-28',end:'2026-10-30',note:'',sampleVolumeLitres:1};
 const validate=(overrides={})=>validateSchedule({editing,form,equipment,accounts,rows:[],...overrides});
 test('schedule equipment reads the shared twenty-machine catalog and updated statuses',()=>{
   assert.equal(readScheduleEquipment({getItem:()=>null}).length,20);
@@ -49,7 +49,7 @@ test('AI does not substitute unrelated equipment when a required type is unavail
 });
 
 test('unknown tests and low-temperature tests never fall back to a hot-only oven',()=>{
- const oven={id:'OVEN',name:'高溫爐',status:'待機中',capacity:10};
+ const oven={id:'OVEN',name:'高溫爐',status:'待機中',capacity:10,usableVolumeLitres:100};
  assert.equal(equipmentMatches('低溫試驗',oven),false);
  assert.equal(equipmentMatches('高低溫試驗',oven),false);
  assert.equal(equipmentMatches('高溫試驗',oven),true);
@@ -70,4 +70,14 @@ test('recommendation leaves time for lab receipt and save rejects a date already
  const result=recommendSchedule({editing,form:{...form,time:'',end:''},equipment,accounts,rows:[],today:'2026-11-06'});
  assert.equal(result.time,'2026-11-07');
  assert.throws(()=>validateSchedule({editing,form:{...form,time:'2026-11-06',end:'2026-11-07'},equipment,accounts,rows:[],today:'2026-11-06'}),/明日/);
+});
+
+
+test('sample space is required for manual save and AI recommendation',()=>{
+ for(const value of [undefined,null,'','   ']){
+  assert.throws(()=>validate({form:{...form,sampleVolumeLitres:value}}),/必填/);
+  assert.throws(()=>recommendSchedule({editing,form:{...form,sampleVolumeLitres:value},equipment,accounts,rows:[],today:'2026-10-28'}),/必填/);
+ }
+ for(const value of [0,-1,'not-a-number',Infinity])assert.throws(()=>validate({form:{...form,sampleVolumeLitres:value}}),/正數/);
+ assert.equal(validate({form:{...form,sampleVolumeLitres:.5}}).status,'已排程');
 });

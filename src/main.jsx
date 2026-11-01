@@ -6,6 +6,7 @@ import './index.css'
 import './UnifiedTypography.css'
 import './DarkTheme.css'
 import './SystemTabs.css'
+import './ControlAlignment.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

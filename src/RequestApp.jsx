@@ -1,3 +1,4 @@
+import {startSession,endSession} from './idleSessions.mjs';
 import LoginCredentials from './LoginCredentials.jsx';
 import RequestListToolbar from './RequestListToolbar.jsx';
 import {ReportCasePanel} from './ReportUi.jsx';
@@ -174,6 +175,7 @@ export default function RequestApp() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Sync the authenticated account into the open editor.
     setForm(current => ({ ...current, requester: signedAccount.name || '', department: signedAccount.department || '' }));
   }, [formOpen, signedAccount]);
+  useEffect(()=>{if(signedAccount&&['/request/login','/request'].includes(path))go('/request/dashboard',true);},[signedAccount,path]);
   const isLoggedIn = Boolean(signedAccount) && path !== '/request/login' && path !== '/request' && path !== '/';
   const ownedRows=requests.filter(r=>canOpenReview?canAccessSupervisorRequest(r):ownsRequest(signedAccount,r));
   const baseRows=ownedRows.filter(r=>page==='history'?r.status==='已結案':page==='review'?r.status===(reviewTab==='read'?'待查閱':'待主管簽核'):(collection==='month'||r.status!=='已結案')&&(canOpenReview&&collection!=='month'?r.status!=='待查閱':true));
@@ -197,8 +199,8 @@ export default function RequestApp() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Clamp an externally shared page number after filtering.
     setListPage(last);}},[visibleRequests.length,visibleBorrows.length,myTab,listPage]);
   const notify = (s) => { setToast(s); };
-  const login = () => { const normalized=user.trim().toLowerCase(); const candidates=sharedAccounts.filter(a=>accessSystem(a,'request') && (String(a.email||'').toLowerCase()===normalized || a.name===user.trim())); const a=candidates.length===1?candidates[0]:null; if (!a || password!=='demo1234' || (role==='supervisor' ? a.role!=='委託者主管' : a.role!=='委託者')) { setLoginError('帳號、角色或密碼不正確；請使用啟用中的共用帳號。'); return; } setLoginError(''); setUser(a.name); setAccountId(a.id); sessionStorage.setItem('dqa-request-account-id',a.id); sessionStorage.setItem('dqa-request-role',role); sessionStorage.setItem('dqa-request-user',a.name); go(path.startsWith('/request/')&&!['/request/login','/request/dashboard'].includes(path.split('?')[0])?path:'/request/dashboard',true); };
-  const completeLogout = () => { setUser(role === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'); setPassword('demo1234'); sessionStorage.removeItem('dqa-request-account-id'); setAccountId(''); sessionStorage.removeItem('dqa-request-role'); sessionStorage.removeItem('dqa-request-user'); dirtyRef.current=false;setFormOpen(false);go('/request/login',true); };
+  const login = () => { const normalized=user.trim().toLowerCase(); const candidates=sharedAccounts.filter(a=>accessSystem(a,'request') && (String(a.email||'').toLowerCase()===normalized || a.name===user.trim())); const a=candidates.length===1?candidates[0]:null; if (!a || password!=='demo1234' || (role==='supervisor' ? a.role!=='委託者主管' : a.role!=='委託者')) { setLoginError('帳號、角色或密碼不正確；請使用啟用中的共用帳號。'); return; } try{startSession('request',a.id);sessionStorage.setItem('dqa-request-role',role);sessionStorage.setItem('dqa-request-user',a.name);}catch{try{endSession('request');}catch{/* Storage remains unavailable. */}setLoginError('無法保存登入狀態，請確認瀏覽器儲存權限。');return;}setLoginError('');setUser(a.name);setAccountId(a.id); go(path.startsWith('/request/')&&!['/request/login','/request/dashboard'].includes(path.split('?')[0])?path:'/request/dashboard',true); };
+  const completeLogout = () => { setUser(role === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'); setPassword('demo1234'); endSession('request'); setAccountId(''); sessionStorage.removeItem('dqa-request-role'); sessionStorage.removeItem('dqa-request-user'); dirtyRef.current=false;setFormOpen(false);go('/request/login',true); };
   const logout=()=>{if(dirtyRef.current){setLeaveTarget('logout');return;}completeLogout();};
   const openForm = () => {
     if(dirtyRef.current){setLeaveTarget('/request/new');return;}

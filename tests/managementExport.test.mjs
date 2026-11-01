@@ -18,5 +18,5 @@ test('Chinese PDF supports multiple pages and valid metadata',async()=>{
 });
 test('invalid exports and storage failures stay errors; preferences normalize',async()=>{
  await assert.rejects(buildManagementExport({type:'csv',columns,rows}),/不支援/);await assert.rejects(buildManagementExport({type:'xlsx',columns,rows:[]}),/有資料/);
- let saved;const storage={getItem:()=>saved,setItem:(_,value)=>{saved=value;}};assert.deepEqual(readManagementPreferences(storage),{reportPeriod:'all',exportSummary:true});saveManagementPreferences({reportPeriod:'month',exportSummary:false},storage);assert.equal(readManagementPreferences(storage).reportPeriod,'month');assert.equal(readManagementPreferences(storage).exportSummary,false);assert.throws(()=>saveManagementPreferences({}, {setItem(){throw Error('quota');}}),/quota/);
+ let saved;const storage={getItem:()=>saved,setItem:(_,value)=>{saved=value;}};assert.deepEqual(readManagementPreferences(storage),{reportPeriod:'all',exportSummary:true,equipmentDays:14,equipmentStart:''});saveManagementPreferences({reportPeriod:'month',exportSummary:false},storage);assert.equal(readManagementPreferences(storage).reportPeriod,'month');assert.equal(readManagementPreferences(storage).exportSummary,false);assert.throws(()=>saveManagementPreferences({}, {setItem(){throw Error('quota');}}),/quota/);
 });
