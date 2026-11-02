@@ -41,6 +41,7 @@ const entries=`
 造隆實驗室|COLONG Laboratory
 科隆實驗室|COLONG Laboratory
 實驗室操作管理|Laboratory operations management
+搜尋與篩選|Search and filters
 下一步：|Next:
 前往送簽|Go to submission
 重設會放棄本次尚未儲存的修改，確定重設？|Reset will discard your unsaved changes. Continue?

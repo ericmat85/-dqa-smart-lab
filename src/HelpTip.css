@@ -15,3 +15,12 @@
 .help-title-row{display:flex;align-items:center!important;gap:6px;min-width:0}
 .help-title-row > :is(h1,h2,h3,h4,h5,h6){margin-block:0!important;line-height:1.2;min-width:0}
 .help-title-row > .help-tip{display:inline-flex;align-items:center;justify-content:center;margin:0;line-height:1}
+
+/* Neutral information icon matching the supplied reference. */
+.help-tip .help-tip-trigger{color:#737373!important}
+.help-tip .help-tip-disc{fill:none!important;stroke:currentColor!important;stroke-width:1.7}
+.help-tip .help-tip-mark{fill:none!important;stroke:currentColor!important;stroke-width:1.7;stroke-linecap:round}
+.help-tip .help-tip-dot{fill:currentColor!important;stroke:none!important}
+.help-tip .help-tip-trigger:hover{color:#404040!important}
+:is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.enterprise-dark) .help-tip .help-tip-trigger{color:#a3a3a3!important}
+:is(.theme-dark,.rq-theme-dark,.lab-theme-dark,.enterprise-dark) .help-tip .help-tip-trigger:hover{color:#e5e5e5!important}
