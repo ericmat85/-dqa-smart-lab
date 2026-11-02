@@ -330,7 +330,7 @@ test('request review tabs separate reading from all requests and history filters
  await page.getByRole('button',{name:'全部委託單',exact:false}).click();
  await expect(page.locator('.rq-table')).not.toContainText('READ-CASE');
  await page.getByRole('button',{name:'案件歷程',exact:false}).click();
- await expect(page.getByLabel('篩選欄位')).toBeVisible();
+ await page.locator('.rq-filter-disclosure>summary').click();await expect(page.getByLabel('篩選欄位')).toBeVisible();
  await page.getByLabel('篩選欄位').selectOption('product');
  await page.locator('.rq-filter-row .rq-search').fill('歷程專案');
  await expect(page.locator('.rq-table')).toContainText('HISTORY-CASE');
