@@ -1,3 +1,4 @@
+import './WorkspacePageHeader.css';
 import WorkspaceSidebarBrand from './WorkspaceSidebarBrand.jsx';
 import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import EnterpriseLoginLayout,{LoginSystemIcon} from './EnterpriseLoginLayout.jsx';
@@ -236,7 +237,7 @@ export default function LabApp({ path, navigate }) {
   return (
     <div className={`lab-shell lab-enterprise ${dark ? "lab-theme-dark" : "lab-theme-light"}`}>
       <header className="lab-global-header"><button type="button" className="lab-mobile-menu" aria-label="切換功能選單" aria-controls="lab-navigation" aria-expanded={menuOpen} onClick={()=>setMenuOpen(value=>!value)}>☰</button>
-        <CompanyBrandLogo dark={dark}/><strong className="workspace-header-title">COLONG 實驗室</strong>
+        <CompanyBrandLogo dark={dark}/><nav className="lab-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={navigateHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>chooseTab('requests')}>COLONG 實驗室</button><span aria-hidden="true">›</span><strong aria-current="page">{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</strong></nav>
         <SystemHeaderActions compactTheme dark={dark} onToggle={toggleTheme} account={sharedSnapshot.accounts.find(row=>row.id===account.id)||account} onLogout={logout} notifications={[{title:'待接收試驗',detail:'等待實驗室確認接收',count:requests.filter(row=>row.status==='待確認').length,icon:'✓',onClick:()=>chooseTab('requests')}]}/>
       </header>
       <aside id="lab-navigation" className={`lab-sidebar ${menuOpen?'lab-menu-open':''}`} onKeyDown={event=>{if(event.key==='Escape'&&menuOpen){setMenuOpen(false);document.querySelector('.lab-mobile-menu')?.focus();}}}>
@@ -246,7 +247,7 @@ export default function LabApp({ path, navigate }) {
         <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>chooseTab("archive")}><LmsSidebarIcon name="archive"/>資料庫</button>}</><details className="workspace-sidebar-note"><summary>Demo 使用說明</summary><p>展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</p></details>
         <button className="lab-back workspace-sidebar-home" onClick={navigateHome}><LmsSidebarIcon name="dashboard"/>回到首頁</button>
       </aside>
-      <main className="lab-main"><nav className="lab-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={navigateHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>chooseTab('requests')}>COLONG 實驗室</button><span aria-hidden="true">›</span><strong aria-current="page">{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</strong></nav><div className="lab-workspace-heading"><h1>{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</h1><p>{tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
+      <main className="lab-main"><div className="lab-workspace-heading"><h1>{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</h1><p>{tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
         {lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{notice && <div className="lab-notice" role="status">{notice}</div>}
         {tab === "archive" ? <ReportArchive actor={account} system="lab"/> : tab === "requests" ? <>

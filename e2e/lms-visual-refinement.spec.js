@@ -6,7 +6,7 @@ test.beforeEach(async({page})=>{
  await page.goto('/lms/dashboard');
 });
 test('compact help follows the request title and dashboard uses three distinct vector icons',async({page})=>{
- await expect(page.locator('.welcome-block')).toHaveText('COLONG LMS');
+ await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'COLONG LMS',exact:true})).toHaveText('COLONG LMS');
  const icons=page.locator('.live-metric-icon .dashboard-metric-symbol');await expect(icons).toHaveCount(3);
  expect(new Set(await icons.evaluateAll(nodes=>nodes.map(node=>node.innerHTML))).size).toBe(3);
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();
@@ -48,7 +48,7 @@ test('management summary tiles share schedule styling and help artwork is center
 });
 
 test('lighter actions, export icon, larger brand and list-based settings retain their controls',async({page})=>{
- await expect(page.locator('.welcome-block strong')).toHaveCSS('font-size','22px');
+ await expect(page.locator('.lms-dashboard-heading h1')).toHaveCSS('font-size','22px');
  await expect(page.locator('.intelligent-launcher')).toHaveCSS('background-color','rgb(8, 102, 232)');
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('button',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
  await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();const exportButton=page.locator('.management-export-menu>summary');await expect(exportButton).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(exportButton.locator('.report-export-icon')).toBeVisible();

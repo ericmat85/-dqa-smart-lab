@@ -41,6 +41,9 @@ const entries=`
 造隆實驗室|COLONG Laboratory
 科隆實驗室|COLONG Laboratory
 實驗室操作管理|Laboratory operations management
+下一步：|Next:
+前往送簽|Go to submission
+重設會放棄本次尚未儲存的修改，確定重設？|Reset will discard your unsaved changes. Continue?
 電子委託單|Electronic test requests
 審查需求・安排資源・掌握試驗進度|Review requests · Allocate resources · Track test progress
 試驗執行・設備管理・排程監控|Test execution · Equipment management · Schedule monitoring

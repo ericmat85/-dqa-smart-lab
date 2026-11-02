@@ -1,0 +1,29 @@
+/* Compact header breadcrumb and page title hierarchy shared by all workspaces. */
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise,.lms-enterprise) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){height:48px;min-height:48px;padding:0 20px;gap:14px}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>:is(.rq-breadcrumbs,.lab-breadcrumbs,.lms-breadcrumbs){display:flex;flex:1;min-width:0;align-items:center;gap:10px;margin:0;white-space:nowrap;flex-wrap:nowrap;overflow:auto;scrollbar-width:none;font-size:12px;color:var(--enterprise-secondary)}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav button{flex-shrink:0;padding:0;min-height:30px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav strong{color:var(--enterprise-text);font-weight:600}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>.system-header-actions{flex-shrink:0}
+#root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2){display:flex;align-items:center;gap:10px;font-size:22px;line-height:1.4;font-weight:700;color:var(--enterprise-text);margin:0}
+#root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2)::before{content:'';display:block;flex:0 0 22px;width:22px;height:24px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round' d='M14 3H5v18h14V8l-5-5v5h5M8 12h8M8 16h5'/%3E%3C/svg%3E") center/contain no-repeat}
+#root :is(.rq-enterprise .rq-main,.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:18px}
+@media(min-width:1001px){#root .rq-app.rq-enterprise{grid-template-rows:48px minmax(calc(100dvh - 48px),auto)}}
+@media(min-width:721px){#root .lab-shell.lab-enterprise{grid-template-rows:48px minmax(0,1fr)}}
+@media(max-width:720px){#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise,.lms-enterprise) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){padding:0 10px;gap:6px}#root :is(.rq-topbar,.lab-global-header)>.company-brand-logo{display:none}#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav{font-size:11px;gap:6px}}
+#root .rq-enterprise .rq-editor-topline{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+#root .rq-enterprise .rq-editor-topline>.rq-form-header{flex:1;margin:0;padding:0;border:0;background:transparent;min-width:260px}
+#root .rq-enterprise .rq-editor-topline .rq-eyebrow{display:none}
+.rq-editor-top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#root .rq-enterprise .rq-editor-top-actions .rq-btn{min-height:34px;padding:7px 12px;font-size:12px}
+#root .rq-enterprise .rq-section-nav{display:flex;flex-wrap:nowrap;gap:0;overflow-x:auto;padding:0 0 14px;margin-bottom:4px;align-items:center}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action){border:0;border-radius:0;background:transparent!important;padding:0;gap:8px;min-height:34px;flex-shrink:0;color:var(--enterprise-secondary)!important;font-size:13px}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{content:'';width:44px;height:1px;background:var(--enterprise-border);margin:0 14px;flex-shrink:0}
+#root .rq-enterprise .rq-section-nav a:nth-child(5)::after{display:none}
+#root .rq-enterprise .rq-section-nav .rq-step-number{display:grid;place-items:center;width:26px;height:26px;flex:0 0 26px;border:1px solid var(--enterprise-border);border-radius:50%;color:var(--enterprise-secondary);background:var(--enterprise-card);font-weight:600}
+#root .rq-enterprise .rq-section-nav a[aria-current=step]{font-weight:700;color:var(--enterprise-text)!important}
+#root .rq-enterprise .rq-section-nav a[aria-current=step] .rq-step-number{color:#fff;background:#0866e8;border-color:#0866e8}
+#root .rq-enterprise .rq-section-nav .rq-section-action{margin-left:20px;font-size:12px;border:0;background:transparent!important}
+#root .rq-enterprise .rq-form-body>.rq-entry-card{scroll-margin-top:18px}
+@media(max-width:720px){#root .rq-enterprise .rq-editor-topline{gap:12px}#root .rq-enterprise .rq-editor-top-actions{width:100%;gap:8px}#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{width:24px;margin:0 10px}}
+#root .rq-app.rq-enterprise .rq-section-nav a[aria-current=step]{background:transparent!important;color:var(--enterprise-text)!important;border:0;box-shadow:none}
+#root .rq-app.rq-enterprise .rq-section-nav a[aria-current=step]::after{background:#7ca4d8}
