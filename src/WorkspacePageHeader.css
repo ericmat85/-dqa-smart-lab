@@ -99,3 +99,12 @@
 :is(#root,body) .rq-enterprise .rq-process-note p{display:block;margin:8px 0 0;color:var(--enterprise-secondary);font-size:13px;line-height:1.7}
 @media(max-width:1000px){#root .rq-app.rq-enterprise .rq-floating-steps{left:50%;width:min(640px,calc(100vw - 24px))}}
 @media(max-width:720px){#root .rq-app.rq-enterprise .rq-floating-steps{padding:6px;gap:4px}#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-content{flex-direction:column;gap:4px}#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-label{font-size:10px}#root .rq-app.rq-enterprise .rq-floating-steps a{padding:2px}}
+
+/* Dense notification rows retain their full description. */
+#root .rq-enterprise .rq-notifications .rq-notice{display:grid;grid-template-columns:6px minmax(0,1fr);gap:10px;align-items:start;padding:8px 14px;min-height:44px;border-color:var(--enterprise-border)}
+#root .rq-enterprise .rq-notifications .rq-notice:first-child{border-top:0}
+#root .rq-enterprise .rq-notifications .rq-notice-dot{width:6px;height:6px;margin-top:7px;background:#0866e8}
+#root .rq-enterprise .rq-notifications .rq-notice>div{display:grid;grid-template-columns:minmax(200px,240px) minmax(0,1fr);column-gap:16px;row-gap:2px;align-items:baseline}
+#root .rq-enterprise .rq-notifications .rq-notice b{font-size:13px;font-weight:600;line-height:1.5}
+#root .rq-enterprise .rq-notifications .rq-notice p{margin:0;font-size:12px;line-height:1.5;color:var(--enterprise-secondary)}
+@media(max-width:900px){#root .rq-enterprise .rq-notifications .rq-notice>div{grid-template-columns:minmax(0,1fr)}}
