@@ -38,3 +38,11 @@
 紅框標註的左側系統圖示與右側表單標題圖示，改為入口 LMS 卡片相同的表格圖示，SVG 路徑與線寬保持一致。僅替換這兩處，入口首頁未修改。
 
 [淺色截圖](reviews/slim-login-panel/lms-entry-icon-light.png)／[深色截圖](reviews/slim-login-panel/lms-entry-icon-dark.png)。實際瀏覽器確認兩處圖示路徑與入口一致；lint、正式建置、diff check、既有登入版型測試 5／5 通過。
+
+## 實驗室登入表單對齊與文字
+
+左側標題依指定改為「科隆實驗室」，副標改為「實驗室操作管理」，並補上英文介面翻譯。入口卡片與右側表單標題沿用原文。
+
+移除 Lab 表單特有的 flex 間隔，讓帳號欄位與 LMS 登入頁對齊；1920 × 1080 實測帳號輸入框上緣均為 y=258px，Lab 比原先上移 30px。[淺色截圖](reviews/slim-login-panel/lab-aligned-light.png)／[深色截圖](reviews/slim-login-panel/lab-aligned-dark.png)。
+
+本次最終版本：lint、正式建置、diff check 及登入欄位／版型測試 13／13 通過。

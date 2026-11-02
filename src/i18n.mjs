@@ -39,6 +39,8 @@ const entries=`
 實驗室數位化管理平台|Laboratory digital management platform
 實驗室管理|Laboratory management
 造隆實驗室|COLONG Laboratory
+科隆實驗室|COLONG Laboratory
+實驗室操作管理|Laboratory operations management
 電子委託單|Electronic test requests
 審查需求・安排資源・掌握試驗進度|Review requests · Allocate resources · Track test progress
 試驗執行・設備管理・排程監控|Test execution · Equipment management · Schedule monitoring

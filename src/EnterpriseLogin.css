@@ -63,3 +63,6 @@
 
 /* Credential fields keep their normal border while being edited. */
 #root .enterprise-login .login-credentials input:not([type=checkbox]):is(:focus,:focus-visible){outline:none!important;box-shadow:none!important;border-color:var(--enterprise-border)!important}
+
+/* Match the Lab form spacing to the other login forms. */
+#root .enterprise-login .lab-login-card.unified-login-form{display:block;gap:0}
