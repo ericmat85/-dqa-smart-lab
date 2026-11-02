@@ -14,7 +14,7 @@ import {getRequestDate} from './requestDate.mjs';
 export const LAB_SOURCES=[
   {id:'labWorkItems',label:'實驗室工作清單',key:'dqa_lab_demo_requests_v1',fallback:[]},
   {id:'labAudit',label:'實驗室操作歷程',key:'dqa_lab_demo_audit_v1',fallback:[]},
-  {id:'borrows',label:'設備借用申請',key:'dqa-borrow-requests-v1',fallback:[]},
+  {id:'borrows',label:'設備／物料借用申請',key:'dqa-borrow-requests-v1',fallback:[]},
   {id:'labOperations',label:'實驗室取消／中斷申請',key:'dqa-lab-operations-v1',fallback:[]},
   {id:'schedules',label:'試驗排程',key:'dqa-schedules-demo-v1',fallback:DEMO_SCHEDULES},
   {id:'equipment',label:'設備台帳',key:'dqa-equipment-demo-v1',fallback:DEMO_EQUIPMENT},

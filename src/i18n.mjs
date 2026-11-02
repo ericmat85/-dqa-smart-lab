@@ -43,6 +43,53 @@ const entries=`
 實驗室操作管理|Laboratory operations management
 搜尋與篩選|Search and filters
 通知清單|Notifications list
+物料庫存已更新，請重新開啟編輯。|Material inventory changed. Reopen the editor.
+借用或物料資料無法讀取。|Loan or material data cannot be read.
+物料單位已變更，請重新申請。|The material unit changed. Submit a new request.
+物料借用紀錄或台帳數量已變更，請先確認台帳。|Material loan records or quantities changed. Check the inventory ledger.
+請選擇設備或物料借用。|Select an equipment or material loan.
+搜尋借用單、設備、物料或用途…|Search loan ID, equipment, material or purpose…
+物料歸還|Material return
+核准物料借用|Approve material loan
+退回物料借用|Return material loan request
+借用資料無法讀取，尚未清除案件。|Loan data cannot be read. Cases have not been cleared.
+物料台帳無法讀取，無法釋放借用。|The material ledger cannot be read. Loans cannot be released.
+物料借用紀錄不一致，請先確認台帳。|Material loan records are inconsistent. Check the ledger first.
+物料台帳數量不一致，無法釋放借用。|Material quantities are inconsistent. Loans cannot be released.
+借用類別|Loan category
+借用項目／數量|Loan item / quantity
+借用項目與用途|Loan item and purpose
+Borrowed Item & Purpose|Borrowed Item & Purpose
+填寫設備或物料借用需求與預計歸還日期，送出後會建立借用申請紀錄。|Enter equipment or material loan requirements and an expected return date.
+物料同步自 LMS 台帳；核准時才扣除可用數量，確認歸還後補回。|Materials come from the LMS catalog. Availability is deducted on approval and restored on confirmed return.
+請選擇物料|Select a material
+借用數量|Loan quantity
+本次為借用，需全數歸還。|All borrowed units must be returned.
+單位：|Unit:
+請先選擇物料|Select a material first
+物料借用|Material loan
+物料借用：|Material loan:
+借用物料|Borrowed material
+借出物料／歸還|Material loans / returns
+確認物料歸還|Confirm material return
+歸還確認結果|Return inspection result
+關閉物料歸還|Close material return
+本次確認全數歸還，完成後補回可用數量。|Confirm return of all borrowed units to restore availability.
+物料已確認歸還，可用數量已補回。|Material return confirmed and availability restored.
+預計歸還|Expected return
+借用人|Borrower
+物料已移除，請重新選擇 LMS 物料台帳。|Material was removed. Select another LMS catalog item.
+物料借用數量須為正整數。|Material loan quantity must be a positive integer.
+物料目前不可借用，請確認台帳狀態。|Material is not available for loan. Check its status.
+物料可用數量不足，請調整數量或改選物料。|Insufficient available material. Reduce the quantity or select another item.
+物料台帳數量不一致，請先確認台帳。|Material quantities are inconsistent. Check the inventory ledger.
+請完成物料借用資料，並確認借用期間。|Complete the material loan information and check the loan dates.
+僅未參與申請的一階主管或系統管理員可核准物料借用。|Only an uninvolved first-level supervisor or administrator may approve a material loan.
+物料借用狀態已變更，無法重複確認歸還。|Material loan status changed. The return cannot be confirmed twice.
+僅一階主管或系統管理員可在 LMS 確認物料歸還。|Only a first-level supervisor or administrator may confirm material returns in LMS.
+請填寫物料歸還確認結果。|Enter the material return inspection result.
+此物料尚有借出紀錄，請先完成歸還；借出期間不可直接修改庫存數量或單位。|This material has active loans. Return them before changing inventory quantities or units.
+設備／物料借用申請|Equipment / material loan requests
 下一步：|Next:
 前往送簽|Go to submission
 重設會放棄本次尚未儲存的修改，確定重設？|Reset will discard your unsaved changes. Continue?

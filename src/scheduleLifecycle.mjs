@@ -44,7 +44,7 @@ export function reconcileSchedules(schedules,equipment,now) {
 }
 
 const JOURNAL='dqa-schedule-lifecycle-pending-v1';
-const TRANSACTION_KEYS=[['equipment',EQUIPMENT_KEY],['schedules',SCHEDULE_KEY],['requests','dqa-request-demo-v2'],['reviews','dqa-lms-reviews-v1'],['cancellations','dqa-cancelled-requests-v1'],['labOperations','dqa-lab-operations-v1'],['labRequests','dqa_lab_demo_requests_v1'],['labAudit','dqa_lab_demo_audit_v1'],['borrows','dqa-borrow-requests-v1'],['demoFlowMarker','dqa-completed-flow-provisioned-v1']];
+const TRANSACTION_KEYS=[['materials','dqa-materials-demo-v1'],['equipment',EQUIPMENT_KEY],['schedules',SCHEDULE_KEY],['requests','dqa-request-demo-v2'],['reviews','dqa-lms-reviews-v1'],['cancellations','dqa-cancelled-requests-v1'],['labOperations','dqa-lab-operations-v1'],['labRequests','dqa_lab_demo_requests_v1'],['labAudit','dqa_lab_demo_audit_v1'],['borrows','dqa-borrow-requests-v1'],['demoFlowMarker','dqa-completed-flow-provisioned-v1']];
 export function recoverLifecycleTransaction(storage) {
   const pending=storage.getItem(JOURNAL);
   if(!pending)return false;
