@@ -1,0 +1,35 @@
+/* Scoped to the new/draft editor. A separate navigation row never overlays the form. */
+#root .rq-app.rq-enterprise .rq-editor-page{--editor-side-width:300px;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;height:calc(100dvh - var(--editor-viewport-top,56px) - 12px);min-height:240px;padding-bottom:0}
+#root .rq-app.rq-enterprise .rq-editor-scroll{min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scroll-padding:16px;scrollbar-gutter:stable;padding-right:2px;padding-bottom:8px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-topline{margin-bottom:12px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-pretable-row{margin-bottom:12px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions{display:flex;flex:0 1 auto;width:auto}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions>.rq-btn:last-child{white-space:nowrap;flex-wrap:nowrap}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-columns{grid-template-columns:minmax(0,1fr) var(--editor-side-width);gap:16px;align-items:start}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-sidebar{top:0;gap:12px;align-self:start}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-form-body{overflow:visible;gap:12px}
+#root .rq-app.rq-enterprise .rq-editor-page :is(.rq-entry-card,.rq-editor-sidebar section){padding:16px;border-radius:8px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card-title{padding-bottom:10px;margin-bottom:14px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid{gap:14px 16px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid>label{gap:6px;font-size:13px!important;line-height:1.5}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-label{font-size:13px!important}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid :is(input,select){margin-top:0}
+#root .rq-app.rq-enterprise .rq-editor-page :is(input.rq-input,select.rq-input){height:40px;min-height:40px;padding:8px 10px;border-radius:6px;font-size:13px}
+#root .rq-app.rq-enterprise .rq-editor-page textarea.rq-input{min-height:80px;border-radius:6px;font-size:13px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid-one{margin-top:14px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-field{margin-bottom:14px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-field:last-child{margin-bottom:0}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-check-grid{gap:8px;margin-top:0}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-check-grid>label{min-height:40px;padding:8px 10px;border-radius:6px;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-btn{min-height:40px;padding:8px 12px;border-radius:6px;font-size:13px;line-height:1.4}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-secondary-actions :is(.rq-btn,.rq-section-action){min-height:32px;height:32px;padding:6px 8px;font-size:12px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-form-footer{margin-top:12px;padding:12px 16px}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps{position:static;inset:auto;transform:none;width:100%;max-width:none;box-sizing:border-box;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;min-height:52px;height:auto;margin:0;padding:4px 8px;border-radius:8px;z-index:auto;box-shadow:0 2px 8px #07152512}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps a{min-height:42px;padding:4px;min-width:0}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps .rq-step-label{font-size:13px;line-height:1.4}
+#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-pretable-row{width:calc(100% - var(--editor-side-width) - 16px)}
+@media(min-width:1101px){#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card:first-child .rq-entry-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1599px){#root .rq-app.rq-enterprise .rq-editor-page{--editor-side-width:280px}}
+@media(max-width:1100px){#root .rq-app.rq-enterprise .rq-editor-page{--editor-side-width:280px}#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions{display:flex;flex:0 1 auto;width:auto}}
+@media(max-width:900px){#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-columns{grid-template-columns:minmax(0,1fr)}#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-pretable-row{width:100%}}
+@media(max-width:720px){#root .rq-app.rq-enterprise .rq-editor-page{gap:8px}#root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid{grid-template-columns:minmax(0,1fr)}#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-sidebar{grid-template-columns:minmax(0,1fr)}#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps{min-height:56px;padding:4px;gap:2px}#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps a{min-height:46px;padding:2px}#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps .rq-step-content{flex-direction:column;gap:2px}#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps .rq-step-number{width:22px;height:22px;flex-basis:22px;font-size:11px}#root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps .rq-step-label{font-size:10px}#root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions{width:100%}}
