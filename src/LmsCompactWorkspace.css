@@ -1,0 +1,45 @@
+/* Approved compact treatment: LMS dashboard and request list only. */
+#root .lms-enterprise .dashboard-content>.lms-dashboard-heading{margin-bottom:12px}
+#root .lms-enterprise .live-dashboard .live-metric-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+#root .lms-enterprise .live-dashboard .live-metric-grid>.live-metric{min-height:80px;padding:10px 14px;gap:10px;border-radius:8px;transform:none}
+#root .lms-enterprise .live-dashboard .live-metric-icon{width:32px;height:32px;border-radius:6px;font-size:20px}
+#root .lms-enterprise .live-dashboard .live-metric-copy>span{font-size:13px;line-height:1.4;margin-bottom:2px}
+#root .lms-enterprise .live-dashboard .live-metric-copy strong{font-size:25px;line-height:1.1}
+#root .lms-enterprise .live-dashboard .live-metric-copy small{font-size:11px;line-height:1.4;margin-top:3px;overflow-wrap:anywhere}
+#root .lms-enterprise .live-dashboard .live-metric-arrow{top:10px;right:10px}
+#root .lms-enterprise .live-dashboard :is(.live-dashboard-charts,.live-dashboard-tables){gap:12px;margin-bottom:12px}
+#root .lms-enterprise .live-dashboard .live-panel{padding:16px;border-radius:8px}
+#root .lms-enterprise .live-dashboard .live-panel>header{margin-bottom:12px;gap:10px}
+#root .lms-enterprise .live-dashboard .live-panel>header h2{font-size:16px;line-height:1.5;margin:0}
+#root .lms-enterprise .live-dashboard .live-panel>header>button{min-height:32px;padding:5px 10px;font-size:12px;white-space:nowrap}
+#root .lms-enterprise .live-dashboard .live-dashboard-charts>.live-panel{min-height:264px}
+#root .lms-enterprise .live-dashboard .live-bar-chart{height:208px;padding:24px 0 32px;box-sizing:border-box}
+#root .lms-enterprise .live-dashboard :is(.live-chart-ticks,.live-bars,.live-bar-column){height:152px}
+#root .lms-enterprise .live-dashboard .live-bar-slot{height:152px!important}
+#root .lms-enterprise .live-dashboard .live-composition{min-height:208px;gap:16px}
+#root .lms-enterprise .live-dashboard .live-donut{width:148px;height:148px}
+#root .lms-enterprise .live-dashboard .live-donut>div{width:102px;height:102px}
+#root .lms-enterprise .live-dashboard .live-donut strong{font-size:28px}
+#root .lms-enterprise .live-dashboard .live-legend>button{min-height:26px;padding:4px 6px;gap:7px;font-size:12px;line-height:1.5}
+#root .lms-enterprise .live-dashboard .live-legend>button.is-active>span{font-size:12px;font-weight:700}
+#root .lms-enterprise .live-dashboard .live-legend>button.is-active>strong{font-size:14px}
+#root .lms-enterprise .live-dashboard .live-table-wrap{border-radius:6px}
+#root .lms-enterprise .live-dashboard .live-record-table :is(th,td){height:40px;padding:7px 10px;font-size:12px;line-height:1.5;vertical-align:middle}
+#root .lms-enterprise .live-dashboard .live-attention-strip{gap:12px;margin-bottom:12px}
+#root .lms-enterprise .live-dashboard .live-attention-strip>button{min-height:44px;padding:10px 12px;border-radius:6px}
+#root .lms-enterprise .dashboard-content>.lms-compact-requests{padding:16px;border-radius:8px}
+#root .lms-enterprise .lms-compact-requests>.template-page{border:0;box-shadow:none}
+#root .lms-enterprise .lms-compact-requests>.template-page>.template-heading{align-items:center;gap:12px;margin-bottom:12px;padding-bottom:12px}
+#root .lms-enterprise .lms-compact-requests>.template-page>.template-heading h2{margin:0}
+#root .lms-enterprise .lms-compact-requests .request-review-tabs{margin-bottom:12px;gap:12px}
+#root .lms-enterprise .lms-compact-requests .request-review-tabs>[role=tab]{min-height:40px;padding:8px 10px;font-size:13px}
+#root .lms-enterprise .lms-compact-requests #request-review-panel>.template-toolbar{padding:8px;margin-bottom:12px;border-radius:6px}
+#root .lms-enterprise .lms-compact-requests #request-review-panel .template-input{min-height:40px;height:40px;font-size:13px}
+#root .lms-enterprise .lms-compact-requests #request-review-panel>.template-table-wrap{border-radius:6px}
+#root .lms-enterprise .lms-compact-requests #request-review-panel .template-table :is(th,td){height:40px;padding:4px 10px;line-height:1.5;vertical-align:middle}
+#root .lms-enterprise .lms-compact-requests #request-review-panel .template-table td{font-size:13px}
+#root .lms-enterprise .lms-compact-requests #request-review-panel .template-table .template-btn{min-height:32px;padding:5px 10px!important;font-size:12px}
+#root .lms-enterprise .lms-compact-requests>.template-page>.template-info{padding:10px 12px;margin-top:12px;font-size:12px}
+@media(max-width:1100px){#root .lms-enterprise .live-dashboard .live-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#root .lms-enterprise .live-dashboard :is(.live-dashboard-charts,.live-dashboard-tables){grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){#root .lms-enterprise .live-dashboard .live-metric-grid>.live-metric{padding:10px;gap:8px;min-height:84px;align-items:center}#root .lms-enterprise .live-dashboard .live-metric-copy>span{font-size:12px}#root .lms-enterprise .live-dashboard .live-metric-copy small{font-size:10px}#root .lms-enterprise .live-dashboard .live-metric-icon{width:28px;height:28px}#root .lms-enterprise .live-dashboard .live-panel{padding:12px}#root .lms-enterprise .live-dashboard .live-bar-chart{overflow:auto}#root .lms-enterprise .live-dashboard .live-bars{min-width:480px}#root .lms-enterprise .live-dashboard .live-composition{gap:12px}#root .lms-enterprise .live-dashboard .live-donut{width:128px;height:128px}#root .lms-enterprise .live-dashboard .live-donut>div{width:88px;height:88px}#root .lms-enterprise .live-dashboard .live-legend>button{min-height:32px;font-size:11px}#root .lms-enterprise .dashboard-content>.lms-compact-requests{padding:12px}#root .lms-enterprise .lms-compact-requests .request-review-tabs{gap:4px}#root .lms-enterprise .lms-compact-requests .request-review-tabs>[role=tab]{padding:8px 6px;font-size:12px}}
+@media(max-width:380px){#root .lms-enterprise .live-dashboard .live-metric-grid{grid-template-columns:minmax(0,1fr)}#root .lms-enterprise .live-dashboard .live-composition{flex-direction:column}}
