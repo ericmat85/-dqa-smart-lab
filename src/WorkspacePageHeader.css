@@ -30,8 +30,9 @@
 /* Align section navigation and secondary actions with the form column. */
 #root .rq-enterprise .rq-editor-page{--editor-side-width:280px}
 #root .rq-enterprise .rq-section-nav,#root .rq-enterprise .rq-editor-pretable-row{width:calc(100% - var(--editor-side-width) - 18px)}
-#root .rq-enterprise .rq-section-nav{justify-content:space-between}
-#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{width:24px;margin:0 10px;flex:0 0 24px}
+#root .rq-app.rq-enterprise .rq-section-nav{display:grid;grid-template-columns:repeat(5,minmax(156px,1fr));justify-content:normal}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action){position:relative}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{position:absolute;right:8px;width:24px;margin:0;flex:0 0 24px}
 #root .rq-enterprise .rq-editor-pretable-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 #root .rq-enterprise .rq-editor-pretable-row .rq-editor-hint{padding:0;flex-wrap:wrap}
 #root .rq-enterprise .rq-editor-hint .rq-section-action{font-size:12px;color:var(--enterprise-secondary);text-decoration:none;margin-left:8px}
@@ -41,3 +42,14 @@
 @media(min-width:1600px){#root .rq-enterprise .rq-editor-page{--editor-side-width:300px}}
 @media(max-width:1250px){#root .rq-enterprise .rq-editor-page{--editor-side-width:240px}}
 @media(max-width:720px){#root .rq-enterprise .rq-section-nav,#root .rq-enterprise .rq-editor-pretable-row{width:100%}#root .rq-enterprise .rq-editor-pretable-row .rq-editor-hint{font-size:11px}#root .rq-enterprise .rq-editor-hint .rq-section-action{margin-left:0}}
+
+/* Compact notices and a toolbar aligned to the information column. */
+#root .rq-app.rq-enterprise .rq-feedback{min-height:36px;padding:6px 12px;margin-bottom:12px;font-size:13px;line-height:1.5}
+#root .rq-app.rq-enterprise .rq-feedback>button{min-height:24px;height:24px;width:26px;padding:0;flex:0 0 26px}
+#root .rq-enterprise .rq-editor-hint .rq-section-action{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card);line-height:1.4}
+@media(min-width:721px){
+ #root .rq-enterprise .rq-editor-topline{column-gap:18px}
+ #root .rq-enterprise .rq-editor-top-actions{display:grid;grid-template-columns:max-content max-content minmax(0,1fr);width:var(--editor-side-width);flex:0 0 var(--editor-side-width);gap:10px}
+ #root .rq-enterprise .rq-editor-top-actions>.rq-btn{padding:6px 8px;min-width:0;white-space:nowrap}
+ #root .rq-enterprise .rq-editor-top-actions>.rq-btn:last-child{flex-wrap:wrap;white-space:normal;column-gap:0}
+}
