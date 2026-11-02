@@ -46,3 +46,9 @@
 移除 Lab 表單特有的 flex 間隔，讓帳號欄位與 LMS 登入頁對齊；1920 × 1080 實測帳號輸入框上緣均為 y=258px，Lab 比原先上移 30px。[淺色截圖](reviews/slim-login-panel/lab-aligned-light.png)／[深色截圖](reviews/slim-login-panel/lab-aligned-dark.png)。
 
 本次最終版本：lint、正式建置、diff check 及登入欄位／版型測試 13／13 通過。
+
+## 入口設計品質管理圖示
+
+依使用者新增指示，將入口頁「設計品質管理」卡片的圖形替換為登入頁兩處相同的盾牌勾選圖示；保留原本 SVG 尺寸、灰色未選狀態、紅色互動狀態及背景色。僅修改 `src/App.jsx` 的 validation 圖示路徑，其他入口內容不變。
+
+[入口畫面](reviews/slim-login-panel/portal-validation-shield.png)。實際瀏覽器確認圖形路徑與登入頁兩處一致；lint、建置、diff check 與入口測試 9／9 通過，測試包含卡片顏色與互動。
