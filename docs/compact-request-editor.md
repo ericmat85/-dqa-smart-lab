@@ -50,3 +50,12 @@
 - 最後調整筆電頂部按鈕換行與容器內捲動後，再次 Production Build 並執行編輯器正式包 5／5 通過，以上截圖均來自最後建置。
 - 新案例逐一檢查五階段定位及目前編號、三欄與欄位尺寸、資訊欄寬度、必填錯誤、檢核更新、草稿儲存／重開／再次儲存、建立時間保留與手機送簽按鈕可見。直接比對導覽與捲動區 bounding box，確認沒有相交。
 - 首輪驗證修正了新捲動容器的步驟追蹤邊界及 ResizeObserver 重複通知；目前新增檢查與正式包驗收皆通過。
+
+- 新增及既有瀏覽器回歸 59／59 通過，涵蓋草稿、補件、送簽、主管審查、報告與既有 Demo、鍵盤、真實 Chrome 200% 縮放、深淺色及手機；無失敗、無 ResizeObserver 警告。
+- 最終 lint 與 diff check 通過，未解決的 UI／流程問題：目前未發現；正式版 Demo 環境旗標限制如上。
+
+## 驗收連結
+
+- [Preview：新增委託單](https://dqa-smart-lab-git-codex-compact-request-editor-ericmat85.vercel.app/request/new)
+- [PR #35](https://github.com/ericmat85/-dqa-smart-lab/pull/35)
+- 功能提交：`706aa0b`。Vercel 已回報 Ready；E2E 流程在本機 Production Build 與開發伺服器執行。
