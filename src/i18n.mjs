@@ -1,5 +1,11 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+試驗文件與報告查閱|Test documents and report access
+查看試驗接收、操作與申請紀錄|View test receipt, operations and request records
+接收試驗、掌握執行進度與提交報告|Receive tests, track execution and submit reports
+目前沒有待處理的試驗委託。|There are no test requests to process.
+設計品質管理目前為展示入口，尚未開放登入。|Design quality management is a preview. Sign-in is not available yet.
+
 試驗進度與設備使用概況|Test progress and equipment utilization
 
 試驗規範／試驗手法|Test specification / method
