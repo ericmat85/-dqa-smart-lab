@@ -27,7 +27,7 @@
 #root .enterprise-login .login-options-row{margin:14px 0 22px;gap:8px}
 #root .enterprise-login .login-remember-label{color:var(--enterprise-text)!important;font-size:13px;white-space:nowrap}
 #root .enterprise-login .login-options-row input[type=checkbox]{accent-color:#0866e8;background:var(--enterprise-input)!important}
-#root .enterprise-login .login-help-button{color:#0866e8!important;font-size:13px;background:transparent!important}.enterprise-dark .login-help-button{color:#65b4ff!important}
+#root .enterprise-login .login-help-button{color:#6b7280!important;font-size:13px;background:transparent!important}
 #root .enterprise-login :is(.login-submit,.lab-login-submit,.rq-full){display:flex;align-items:center;justify-content:center;position:relative;background:#0866e8!important;background-image:none!important;border:1px solid #0866e8!important;color:#fff!important;border-radius:6px;width:100%;min-height:46px;height:46px;padding:10px 16px;margin:14px 0 0;font-size:15px;font-weight:600;box-shadow:0 4px 12px #0866e824;cursor:pointer}
 #root .enterprise-login :is(.login-submit,.lab-login-submit,.rq-full):hover{background:#075aca!important;border-color:#075aca!important}#root .enterprise-login button:disabled{opacity:.45;cursor:not-allowed}
 #root .enterprise-login :is(.login-submit,.lab-login-submit,.rq-full)>span{position:absolute;right:18px}
@@ -48,7 +48,7 @@
 #root .enterprise-login .unified-login-form>h1{display:flex;align-items:center;min-height:58px;padding-left:76px;box-sizing:border-box;margin-bottom:30px}
 @media(max-width:720px){#root .enterprise-login .unified-login-form>h1{min-height:44px;padding-left:58px;margin-bottom:22px}}
 #root .enterprise-login.enterprise-dark .login-credentials input:not([type=checkbox]){background:var(--enterprise-input)!important;border-color:var(--enterprise-border)!important;color:var(--enterprise-text)!important}
-#root .enterprise-login.enterprise-dark .login-help-button{color:#65b4ff!important}
+#root .enterprise-login.enterprise-dark .login-help-button{color:#b1b5bd!important}
 #root .enterprise-login .enterprise-story :is(.enterprise-system-name,strong){color:#fff!important}
 
 .enterprise-description>span{display:block}
@@ -60,3 +60,6 @@
  .enterprise-login-body{padding-right:clamp(24px,5vw,96px);box-sizing:border-box;background:linear-gradient(#0a294ab8,#041d36d9),url('/branding/laboratory-login.jpg') right center/cover no-repeat}
  #root .enterprise-login .enterprise-login-panel{align-items:flex-start;padding-top:56px}
 }
+
+/* Credential fields keep their normal border while being edited. */
+#root .enterprise-login .login-credentials input:not([type=checkbox]):is(:focus,:focus-visible){outline:none!important;box-shadow:none!important;border-color:var(--enterprise-border)!important}
