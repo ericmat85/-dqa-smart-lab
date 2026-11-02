@@ -919,6 +919,9 @@ PDF 文件|PDF document
 待審查試驗委託|Test requests awaiting review
 待接收試驗|Tests awaiting receipt
 待簽核|Awaiting approval
+待補件|Awaiting supplements
+執行中|In progress
+已逾期|Overdue
 我的委託與借用|My requests and loans
 所有事項都已處理完成|All items have been handled
 排程儲存失敗，請確認瀏覽器空間與權限後重試。|Could not save the schedule. Check browser storage and permissions.

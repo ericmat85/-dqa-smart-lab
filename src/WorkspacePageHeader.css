@@ -108,3 +108,13 @@
 #root .rq-enterprise .rq-notifications .rq-notice b{font-size:13px;font-weight:600;line-height:1.5}
 #root .rq-enterprise .rq-notifications .rq-notice p{margin:0;font-size:12px;line-height:1.5;color:var(--enterprise-secondary)}
 @media(max-width:900px){#root .rq-enterprise .rq-notifications .rq-notice>div{grid-template-columns:minmax(0,1fr)}}
+
+/* Compact request overview cards with a single arrow affordance. */
+#root .rq-app.rq-enterprise .rq-kpis>button{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;min-height:68px;padding:10px 12px}
+#root .rq-enterprise .rq-kpis>button>.rq-overview-icon{position:static;grid-column:1;grid-row:1/span 2;transform:none;width:30px;height:30px;margin:0}
+#root .rq-enterprise .rq-kpis>button>.rq-overview-icon svg{width:20px;height:20px}
+#root .rq-enterprise .rq-kpis>button>span{grid-column:2;grid-row:1;font-size:12px;line-height:1.35;min-width:0}
+#root .rq-enterprise .rq-kpis>button>strong{grid-column:2;grid-row:2;font-size:22px;line-height:1.1}
+#root .rq-enterprise .rq-kpis>button>.rq-kpi-arrow{grid-column:3;grid-row:1/span 2;display:grid;place-items:center;color:var(--enterprise-secondary);margin:0;line-height:0}
+.rq-kpi-arrow svg{display:block;width:16px;height:16px}
+#root .rq-enterprise .rq-kpis>button:hover .rq-kpi-arrow{color:#0866e8}
