@@ -24,6 +24,7 @@
 
 - 單元測試 195／195 通過，含物料借用的數量、日期、權限、庫存重檢、多筆歸還、重複操作、單位變更、中斷恢復及案件重設。
 - 正式建置跨系統驗收 47／47 通過，含新增三項物料流程測試、既有跨系統深淺色／手機／英文大字體與權限檢查。
+- 完整瀏覽器回歸首輪 161 通過、7 未通過；其中舊登入測試仍預期藍色協助文字與頁首 Logo；依已完成的灰字／側欄設計更新測試後，主題回歸 7／7 通過。既有主管簽核到實驗室接收案例首次中斷，單獨補測 1／1 通過。首輪未通過的七項均已有通過的補測結果。
 - 新增瀏覽器測試確認完整流程：可用 5 組 → 申請 3 組仍為 5 → 核准後 2 → 歸還後 5；手機超量申請被阻止；舊編輯視窗不可覆寫已更新庫存。
 
 ## 實際畫面
@@ -34,4 +35,4 @@
 - [核准後的借出清單與庫存](reviews/material-borrowing/material-borrow-approved.png)
 - [手機深色表單](reviews/material-borrowing/material-borrow-mobile-dark.png)
 
-預覽分支 `codex/slim-login-panel`，不合併 main。
+預覽分支 `codex/slim-login-panel`，不合併 main。Vercel 回報部署 Ready；本環境直接操作線上預覽時遇到 `ERR_TUNNEL_CONNECTION_FAILED`，未完成遠端操作驗證，上述正式包驗收皆使用本機 production build。
