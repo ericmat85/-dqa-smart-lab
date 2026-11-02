@@ -1,3 +1,5 @@
+import {submitMaterialBorrowRequest,decideMaterialBorrowRequest} from './materialBorrowing.mjs';
+export {returnBorrowMaterial} from './materialBorrowing.mjs';
 import {isCalendarDate} from './requestDate.mjs';
 import {accessSystem,canApproveOperationalRequest} from './demoPermissions.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
@@ -23,6 +25,8 @@ function assertAvailable(machine,form,storage,now){
  if(conflict)throw Error(`設備與排程 ${conflict.requestId||conflict.id} 衝突，請改選設備或借用日期。`);
 }
 export function submitBorrowRequest(form,actorId,storage=window.localStorage){
+ if(form.resourceType==='material')return submitMaterialBorrowRequest(form,actorId,storage);
+ if(form.resourceType&&form.resourceType!=='equipment')throw Error('請選擇設備或物料借用。');
  recoverLifecycleTransaction(storage);
  const actor=read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS).find(row=>row.id===actorId);if(!accessSystem(actor,'request',storage))throw Error('請以委託者帳號登入後申請。');
  if(!form.requester?.trim()||!form.department?.trim()||!form.equipment||!form.purpose?.trim()||!isCalendarDate(form.borrowDate)||!isCalendarDate(form.returnDate)||form.returnDate<form.borrowDate||!Number.isInteger(Number(form.quantity))||Number(form.quantity)<1)throw Error('請完成借用資料，並確認數量與借用期間。');
@@ -32,7 +36,7 @@ export function submitBorrowRequest(form,actorId,storage=window.localStorage){
 }
 export function decideBorrowRequest({id,actorId,approve,comment='',signature=''},storage=window.localStorage){
  recoverLifecycleTransaction(storage);
- const rows=read(storage,BORROW_KEY),row=rows.find(item=>item.id===id);if(!row||!['待核准','待確認'].includes(row.status))throw Error('借用申請已處理或已移除，請重新整理。');
+ const rows=read(storage,BORROW_KEY),row=rows.find(item=>item.id===id);if(row?.resourceType==='material')return decideMaterialBorrowRequest({id,actorId,approve,comment,signature},storage);if(!row||!['待核准','待確認'].includes(row.status))throw Error('借用申請已處理或已移除，請重新整理。');
  const accounts=read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS),actor=accounts.find(item=>item.id===actorId);
  const applicantId=row.actorId||accounts.find(item=>item.name===row.requester)?.id;
  if(!canApproveOperationalRequest(actor,applicantId,storage))throw Error('僅未參與申請的一階主管或系統管理員可核准借用。');

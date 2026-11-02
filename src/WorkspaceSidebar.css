@@ -1,0 +1,28 @@
+/* Shared sidebar geometry follows the existing LMS sidebar. */
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.rq-sidebar,.lab-sidebar){padding:20px 10px 14px;gap:5px;color:#e5eef8;overflow-y:auto;align-items:stretch;flex-wrap:nowrap}
+.workspace-sidebar-brand{padding:0 16px 20px;margin-bottom:14px;border-bottom:1px solid #ffffff26;flex-shrink:0}
+.workspace-sidebar-brand .company-brand-logo{width:170px;margin:0;background:transparent!important}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.rq-nav,.lab-sidebar>button){display:flex;align-items:center;gap:10px;min-height:40px;padding:9px 12px;border:0;border-radius:6px;font-size:14px;font-weight:600;color:#e5eef8!important;text-align:left;line-height:1.5;flex-shrink:0}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.rq-nav,.lab-sidebar>button)>svg{width:22px;height:22px;flex:0 0 22px;color:#fff}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.rq-nav,.lab-sidebar>button).active{background:#0866e8!important}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.rq-nav,.lab-sidebar>button).active:hover{background:#075aca!important}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .workspace-sidebar-home{width:100%;justify-content:flex-start;margin-left:0;margin-right:0;margin-top:auto;border:0;border-radius:6px;padding:9px 12px;background:transparent!important}
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .workspace-sidebar-note{margin:16px 0;color:#a5bdd3;font-size:11px;line-height:1.7;border-top:1px solid #ffffff26;padding:12px}
+.workspace-sidebar-note summary{cursor:pointer}.workspace-sidebar-note p{margin:8px 0 0!important;font:inherit!important;color:inherit!important}
+.workspace-header-title{font-size:22px;font-weight:700;color:var(--enterprise-text);margin-right:auto}
+@media(min-width:1001px){
+ #root .rq-app.rq-enterprise{display:grid;grid-template-columns:232px minmax(0,1fr);grid-template-rows:64px minmax(calc(100dvh - 64px),auto)}
+ #root .rq-app.rq-enterprise .rq-topbar{grid-column:2;grid-row:1}
+ #root .rq-app.rq-enterprise .rq-topbar>.company-brand-logo{display:none}
+ #root .rq-app.rq-enterprise .rq-layout{display:contents}
+ #root .rq-app.rq-enterprise .rq-sidebar{grid-column:1;grid-row:1/span 2;display:flex;flex-direction:column;position:sticky;top:0;width:232px;height:100dvh;min-height:0}
+ #root .rq-app.rq-enterprise .rq-main{grid-column:2;grid-row:2;width:100%;margin:0}
+}
+@media(min-width:721px){
+ #root .lab-shell.lab-enterprise{grid-template-columns:232px minmax(0,1fr)}
+ #root .lab-shell.lab-enterprise .lab-global-header{grid-column:2;grid-row:1}
+ #root .lab-shell.lab-enterprise .lab-global-header>.company-brand-logo{display:none}
+ #root .lab-shell.lab-enterprise .lab-sidebar{grid-column:1;grid-row:1/span 2;width:232px;height:100dvh;min-height:0;position:sticky;top:0;display:flex;flex-direction:column}
+}
+@media(max-width:1000px){#root .rq-app.rq-enterprise .workspace-header-title{display:none}#root .rq-app.rq-enterprise .rq-sidebar.rq-menu-open{display:flex;flex-direction:column}#root .rq-app.rq-enterprise .workspace-sidebar-home{margin-top:8px}}
+@media(max-width:720px){#root .lab-shell.lab-enterprise .workspace-header-title{display:none}#root .lab-shell.lab-enterprise .workspace-sidebar-home{margin-top:8px}}

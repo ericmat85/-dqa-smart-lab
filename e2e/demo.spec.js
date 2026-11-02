@@ -57,7 +57,7 @@ test('four portals, direct links, return and browser history stay in the correct
 test('LMS rejects wrong credentials, retains login on reload, switches pages and logs out',async({page})=>{
  await page.goto('/lms/dashboard');await expect(page).toHaveURL(/\/lms\/login$/);
  await page.getByLabel('密碼',{exact:true}).fill('wrong');await page.getByRole('button',{name:'登入系統'}).click();await expect(page.getByRole('alert')).toBeVisible();
- await lmsLogin(page);await page.reload();await expect(page.locator('.welcome-block')).toHaveText('COLONG LMS');
+ await lmsLogin(page);await page.reload();await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'COLONG LMS',exact:true})).toHaveText('COLONG LMS');
  for(const name of ['排程管理','設備管理','物料管理','報表分析'])await page.locator('.sidebar').getByRole('button',{name:new RegExp(name)}).click();
  await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:/登出系統/}).click();await expect(page).toHaveURL(/\/lms\/login$/);
  await page.goto('/lms/dashboard');await expect(page).toHaveURL(/\/lms\/login$/);
@@ -330,7 +330,7 @@ test('request review tabs separate reading from all requests and history filters
  await page.getByRole('button',{name:'全部委託單',exact:false}).click();
  await expect(page.locator('.rq-table')).not.toContainText('READ-CASE');
  await page.getByRole('button',{name:'案件歷程',exact:false}).click();
- await expect(page.getByLabel('篩選欄位')).toBeVisible();
+ await page.locator('.rq-filter-disclosure>summary').click();await expect(page.getByLabel('篩選欄位')).toBeVisible();
  await page.getByLabel('篩選欄位').selectOption('product');
  await page.locator('.rq-filter-row .rq-search').fill('歷程專案');
  await expect(page.locator('.rq-table')).toContainText('HISTORY-CASE');

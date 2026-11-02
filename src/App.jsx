@@ -68,7 +68,7 @@ const portalSystems = [
   {path:'validation',title:PORTAL_TITLES.validation,role:'展示入口・尚未開發',description:'產品驗證規劃的未來工作空間。',action:'查看展示入口'},
 ];
 function PortalIcon({kind='arrow'}) {
- const paths={request:'M8 3H5v18h14V7l-4-4H8m7 0v5h4M8 12h8M8 16h5',lms:'M4 4h16v16H4zM4 10h16M10 4v16M14 4v16M4 14h16',lab:'M9 3h6M10 3v7l-6 9a1.3 1.3 0 001 2h14a1.3 1.3 0 001-2l-6-9V3M7 15h10',validation:'M9 6h11M9 12h11M9 18h11M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',arrow:'M6 18 18 6M6 6h12v12'};
+ const paths={request:'M8 3H5v18h14V7l-4-4H8m7 0v5h4M8 12h8M8 16h5',lms:'M4 4h16v16H4zM4 10h16M10 4v16M14 4v16M4 14h16',lab:'M9 3h6M10 3v7l-6 9a1.3 1.3 0 001 2h14a1.3 1.3 0 001-2l-6-9V3M7 15h10',validation:'M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7l-9-4ZM8 12l3 3 5-6',arrow:'M6 18 18 6M6 6h12v12'};
  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.arrow}/></svg>;
 }
 const portalStories = [

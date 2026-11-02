@@ -1,0 +1,120 @@
+/* Compact header breadcrumb and page title hierarchy shared by all workspaces. */
+#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise,.lms-enterprise) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){height:48px;min-height:48px;padding:0 20px;gap:14px}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>:is(.rq-breadcrumbs,.lab-breadcrumbs,.lms-breadcrumbs){display:flex;flex:1;min-width:0;align-items:center;gap:10px;margin:0;white-space:nowrap;flex-wrap:nowrap;overflow:auto;scrollbar-width:none;font-size:12px;color:var(--enterprise-secondary)}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav button{flex-shrink:0;padding:0;min-height:30px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav strong{color:var(--enterprise-text);font-weight:600}
+#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>.system-header-actions{flex-shrink:0}
+#root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2){display:flex;align-items:center;gap:10px;font-size:22px;line-height:1.4;font-weight:700;color:var(--enterprise-text);margin:0}
+#root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2)::before{content:'';display:block;flex:0 0 22px;width:22px;height:24px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round' d='M14 3H5v18h14V8l-5-5v5h5M8 12h8M8 16h5'/%3E%3C/svg%3E") center/contain no-repeat}
+#root :is(.rq-enterprise .rq-main,.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:18px}
+@media(min-width:1001px){#root .rq-app.rq-enterprise{grid-template-rows:48px minmax(calc(100dvh - 48px),auto)}}
+@media(min-width:721px){#root .lab-shell.lab-enterprise{grid-template-rows:48px minmax(0,1fr)}}
+@media(max-width:720px){#root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise,.lms-enterprise) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){padding:0 10px;gap:6px}#root :is(.rq-topbar,.lab-global-header)>.company-brand-logo{display:none}#root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav{font-size:11px;gap:6px}}
+#root .rq-enterprise .rq-editor-topline{display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+#root .rq-enterprise .rq-editor-topline>.rq-form-header{flex:1;margin:0;padding:0;border:0;background:transparent;min-width:260px}
+#root .rq-enterprise .rq-editor-topline .rq-eyebrow{display:none}
+.rq-editor-top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#root .rq-enterprise .rq-editor-top-actions .rq-btn{min-height:34px;padding:7px 12px;font-size:12px}
+#root .rq-enterprise .rq-section-nav{display:flex;flex-wrap:nowrap;gap:0;overflow-x:auto;padding:0 0 14px;margin-bottom:4px;align-items:center}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action){border:0;border-radius:0;background:transparent!important;padding:0;gap:8px;min-height:34px;flex-shrink:0;color:var(--enterprise-secondary)!important;font-size:13px}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{content:'';width:44px;height:1px;background:var(--enterprise-border);margin:0 14px;flex-shrink:0}
+#root .rq-enterprise .rq-section-nav a:nth-child(5)::after{display:none}
+#root .rq-enterprise .rq-section-nav .rq-step-number{display:grid;place-items:center;width:26px;height:26px;flex:0 0 26px;border:1px solid var(--enterprise-border);border-radius:50%;color:var(--enterprise-secondary);background:var(--enterprise-card);font-weight:600}
+#root .rq-enterprise .rq-section-nav a[aria-current=step]{font-weight:700;color:var(--enterprise-text)!important}
+#root .rq-enterprise .rq-section-nav a[aria-current=step] .rq-step-number{color:#fff;background:#0866e8;border-color:#0866e8}
+#root .rq-enterprise .rq-section-nav .rq-section-action{margin-left:20px;font-size:12px;border:0;background:transparent!important}
+#root .rq-enterprise .rq-form-body>.rq-entry-card{scroll-margin-top:18px}
+@media(max-width:720px){#root .rq-enterprise .rq-editor-topline{gap:12px}#root .rq-enterprise .rq-editor-top-actions{width:100%;gap:8px}#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{width:24px;margin:0 10px}}
+#root .rq-app.rq-enterprise .rq-section-nav a[aria-current=step]{background:transparent!important;color:var(--enterprise-text)!important;border:0;box-shadow:none}
+#root .rq-app.rq-enterprise .rq-section-nav a[aria-current=step]::after{background:#7ca4d8}
+/* Align section navigation and secondary actions with the form column. */
+#root .rq-enterprise .rq-editor-page{--editor-side-width:280px}
+#root .rq-enterprise .rq-section-nav,#root .rq-enterprise .rq-editor-pretable-row{width:calc(100% - var(--editor-side-width) - 18px)}
+#root .rq-app.rq-enterprise .rq-section-nav{display:grid;grid-template-columns:repeat(5,minmax(156px,1fr));justify-content:normal;gap:0}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action){position:relative}
+#root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{position:absolute;right:8px;width:24px;margin:0;flex:0 0 24px}
+#root .rq-enterprise .rq-editor-pretable-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#root .rq-enterprise .rq-editor-pretable-row .rq-editor-hint{padding:0;flex-wrap:wrap}
+#root .rq-enterprise .rq-editor-hint .rq-section-action{font-size:12px;color:var(--enterprise-secondary);text-decoration:none;margin-left:8px}
+#root .rq-enterprise .rq-editor-aux-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#root .rq-enterprise .rq-editor-top-actions{gap:10px}
+#root .rq-enterprise :is(.rq-editor-top-actions,.rq-editor-aux-actions)>button{margin:0!important}
+@media(min-width:1600px){#root .rq-enterprise .rq-editor-page{--editor-side-width:300px}}
+@media(max-width:1250px){#root .rq-enterprise .rq-editor-page{--editor-side-width:240px}}
+@media(max-width:720px){#root .rq-enterprise .rq-section-nav,#root .rq-enterprise .rq-editor-pretable-row{width:100%}#root .rq-enterprise .rq-editor-pretable-row .rq-editor-hint{font-size:11px}#root .rq-enterprise .rq-editor-hint .rq-section-action{margin-left:0}}
+
+/* Compact notices and a toolbar aligned to the information column. */
+#root .rq-app.rq-enterprise .rq-feedback{min-height:36px;padding:6px 12px;margin-bottom:12px;font-size:13px;line-height:1.5}
+#root .rq-app.rq-enterprise .rq-feedback>button{min-height:24px;height:24px;width:26px;padding:0;flex:0 0 26px}
+#root .rq-enterprise .rq-editor-hint .rq-section-action{display:inline-flex;align-items:center;min-height:28px;padding:4px 8px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card);line-height:1.4}
+@media(min-width:721px){
+ #root .rq-enterprise .rq-editor-topline{column-gap:18px}
+ #root .rq-enterprise .rq-editor-top-actions{display:grid;grid-template-columns:max-content max-content minmax(0,1fr);width:var(--editor-side-width);flex:0 0 var(--editor-side-width);gap:10px}
+ #root .rq-enterprise .rq-editor-top-actions>.rq-btn{padding:6px 8px;min-width:0;white-space:nowrap}
+ #root .rq-enterprise .rq-editor-top-actions>.rq-btn:last-child{flex-wrap:wrap;white-space:normal;column-gap:0}
+}
+
+/* Place short connectors at the midpoint of the available gap. */
+#root :is(.rq-app.rq-enterprise .rq-main,.lab-shell.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:8px}
+#root .rq-app.rq-enterprise .rq-section-nav a{gap:0}
+#root .rq-app.rq-enterprise .rq-section-nav a::after{display:none}
+.rq-step-content{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:calc(100% - 40px)}
+.rq-step-label{white-space:normal;line-height:1.4}
+.rq-step-connector{display:flex;justify-content:center;align-items:center;flex:1;min-width:40px}
+.rq-step-connector i{display:block;width:24px;height:1px;background:var(--enterprise-border);flex:0 0 24px}
+.rq-section-nav a[aria-current=step] .rq-step-connector i{background:#7ca4d8}
+.rq-section-nav a:last-child .rq-step-connector{display:none}.rq-section-nav a:last-child .rq-step-content{max-width:100%}
+.rq-editor-secondary-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small){display:inline-flex;align-items:center;justify-content:center;min-height:32px;height:32px;padding:6px 10px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card)!important;color:var(--enterprise-text);font-size:12px;font-weight:500;line-height:1.4;cursor:pointer;transition:background-color .15s,border-color .15s,transform .15s}
+#root .rq-enterprise .rq-editor-secondary-actions button{margin:0!important}
+#root .rq-enterprise .rq-editor-secondary-actions .rq-close{height:32px;min-height:32px;width:32px;padding:0}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):hover{background:color-mix(in srgb,var(--enterprise-card) 88%,#0866e8)!important;border-color:#86abe0;color:var(--enterprise-text);transform:translateY(-1px)}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):active{transform:translateY(0)}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):focus-visible{outline:2px solid #368cff;outline-offset:2px}
+@media(max-width:720px){#root .rq-enterprise .rq-editor-pretable-row{flex-wrap:wrap}.rq-editor-secondary-actions{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small){transition:none;transform:none}}
+
+#root .rq-app.rq-enterprise .rq-section-nav .rq-step-number{display:grid;place-items:center;background:#0866e8;border-color:#0866e8;color:#fff;padding:0;margin:0;line-height:1;text-indent:0;box-sizing:border-box}
+#root .rq-enterprise .rq-entry-number{display:inline-grid;place-items:center;padding:0;line-height:1}
+:is(#root,body) .rq-enterprise .rq-form-header .rq-eyebrow{color:#0866e8!important}
+:is(#root,body) .rq-enterprise.rq-theme-dark .rq-form-header .rq-eyebrow{color:#85bdff!important}
+#root .rq-enterprise .rq-panel-head:has(>.rq-filter-disclosure){display:block}
+.rq-filter-disclosure{width:100%;margin-top:12px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card)}
+.rq-filter-disclosure>summary{padding:10px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--enterprise-text)}
+#root .rq-enterprise .rq-filter-disclosure>.rq-filter-row{padding:12px;margin:0;border-top:1px solid var(--enterprise-border)}
+.rq-filter-disclosure>summary:focus-visible{outline:2px solid #368cff;outline-offset:2px}
+/* Bottom-docked section navigator replaces the in-page connector strip. */
+#root .rq-app.rq-enterprise .rq-floating-steps{position:fixed;top:auto;height:auto;min-height:0;z-index:60;left:calc(50% + 116px);bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(640px,calc(100vw - 280px));max-width:calc(100vw - 24px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:8px;border:1px solid var(--enterprise-border);border-radius:12px;background:var(--enterprise-card)!important;box-shadow:0 6px 24px #07152524;overflow:visible}
+#root .rq-app.rq-enterprise .rq-floating-steps a{display:flex;align-items:center;justify-content:center;min-width:0;padding:4px;min-height:40px;border-radius:6px}
+#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-content{max-width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-label{font-size:11px;white-space:normal}
+#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-number{width:26px;height:26px;display:grid;place-items:center;padding:0;margin:0;line-height:1;border:1px solid var(--enterprise-border);background:var(--enterprise-bg);color:var(--enterprise-secondary)}
+#root .rq-app.rq-enterprise .rq-floating-steps a[aria-current=step] .rq-step-number{background:#0866e8;border-color:#0866e8;color:#fff}
+#root .rq-app.rq-enterprise .rq-floating-steps a:hover{background:var(--soft)!important}
+#root .rq-app.rq-enterprise .rq-floating-steps a:focus-visible{outline:2px solid #368cff;outline-offset:2px}
+#root .rq-enterprise .rq-editor-page{padding-bottom:100px}
+.rq-field-heading{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rq-field-heading>.help-tip{margin:0}
+:is(#root,body) .rq-enterprise .rq-process-note{display:block}
+:is(#root,body) .rq-enterprise .rq-process-note p{display:block;margin:8px 0 0;color:var(--enterprise-secondary);font-size:13px;line-height:1.7}
+@media(max-width:1000px){#root .rq-app.rq-enterprise .rq-floating-steps{left:50%;width:min(640px,calc(100vw - 24px))}}
+@media(max-width:720px){#root .rq-app.rq-enterprise .rq-floating-steps{padding:6px;gap:4px}#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-content{flex-direction:column;gap:4px}#root .rq-app.rq-enterprise .rq-floating-steps .rq-step-label{font-size:10px}#root .rq-app.rq-enterprise .rq-floating-steps a{padding:2px}}
+
+/* Dense notification rows retain their full description. */
+#root .rq-enterprise .rq-notifications .rq-notice{display:grid;grid-template-columns:6px minmax(0,1fr);gap:10px;align-items:center;padding:8px 14px;min-height:44px;border-color:var(--enterprise-border)}
+#root .rq-enterprise .rq-notifications .rq-notice:first-child{border-top:0}
+#root .rq-enterprise .rq-notifications .rq-notice-dot{width:6px;height:6px;margin-top:0;background:#0866e8}
+#root .rq-enterprise .rq-notifications .rq-notice>div{display:grid;grid-template-columns:minmax(200px,240px) minmax(0,1fr);column-gap:16px;row-gap:2px;align-items:center}
+#root .rq-enterprise .rq-notifications .rq-notice b{font-size:13px;font-weight:600;line-height:1.5}
+#root .rq-enterprise .rq-notifications .rq-notice p{margin:0;font-size:12px;line-height:1.5;color:var(--enterprise-secondary)}
+@media(max-width:900px){#root .rq-enterprise .rq-notifications .rq-notice>div{grid-template-columns:minmax(0,1fr)}}
+
+/* Compact request overview cards with a single arrow affordance. */
+#root .rq-app.rq-enterprise .rq-kpis>button{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;min-height:68px;padding:10px 12px}
+#root .rq-enterprise .rq-kpis>button>.rq-overview-icon{position:static;grid-column:1;grid-row:1/span 2;transform:none;width:30px;height:30px;margin:0}
+#root .rq-enterprise .rq-kpis>button>.rq-overview-icon svg{width:20px;height:20px}
+#root .rq-enterprise .rq-kpis>button>span{grid-column:2;grid-row:1;font-size:12px;line-height:1.35;min-width:0}
+#root .rq-enterprise .rq-kpis>button>strong{grid-column:2;grid-row:2;font-size:22px;line-height:1.1}
+#root .rq-enterprise .rq-kpis>button>.rq-kpi-arrow{grid-column:3;grid-row:1/span 2;display:grid;place-items:center;color:var(--enterprise-secondary);margin:0;line-height:0}
+.rq-kpi-arrow svg{display:block;width:16px;height:16px}
+#root .rq-enterprise .rq-kpis>button:hover .rq-kpi-arrow{color:#0866e8}

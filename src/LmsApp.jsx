@@ -1,3 +1,4 @@
+import './WorkspacePageHeader.css';
 import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
 import HelpTip from './HelpTip.jsx';
 import AssistantIcon from './AssistantIcon.jsx';
@@ -571,7 +572,7 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
 
 function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},children}){
- return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button><div className="welcome-block"><strong>COLONG LMS</strong></div>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
+ return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
  {title:'待審查試驗委託',detail:'等待主管審核委託內容與報告',count:notificationCounts.pendingReview,icon:'✓',onClick:()=>onNavigate?.('requests','待審查')},
  {title:'待排程試驗',detail:'等待安排設備與試驗時間',count:notificationCounts.unscheduled,icon:'◷',onClick:()=>onNavigate?.('schedule','未排程')},
  {title:'排程衝突',detail:'設備或時段重疊，需要確認',count:notificationCounts.conflicts,icon:'!',onClick:()=>onNavigate?.('schedule','有衝突')}
@@ -1898,11 +1899,11 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        />
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>COLONG LMS</button><span aria-hidden="true">›</span><strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong></nav></DashboardTopbar>
 
 
 
-        <div className="dashboard-content"><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>COLONG LMS</button><span aria-hidden="true">›</span><strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong></nav>{active==='dashboard'&&<div className="lms-dashboard-heading"><h1>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
+        <div className="dashboard-content">{active==='dashboard'&&<div className="lms-dashboard-heading"><h1>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
 
           {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
             <RequestsPage initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />

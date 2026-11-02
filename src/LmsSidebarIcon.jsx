@@ -1,5 +1,10 @@
 // Consistent outline icons; no platform-dependent Unicode/emoji rendering.
 const paths={
+ new:'M12 4v16 M4 12h16',
+ borrow:'M4 7h16 M16 3l4 4-4 4 M20 17H4 M8 13l-4 4 4 4',
+ history:'M12 8v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+ review:'M5 3h14v18H5z M8 8l2 2 5-5 M8 15h8 M8 18h5',
+ notifications:'M5 17h14l-2-3V9a5 5 0 0 0-10 0v5z M10 21h4',
  dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
  requests:'M9 5H5v16h14V5h-4 M9 3h6v4H9z M8 11h8 M8 15h8',
  schedule:'M4 5h16v16H4z M8 3v4 M16 3v4 M4 10h16 M8 14h2 M14 14h2 M8 17h2',
