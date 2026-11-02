@@ -50,3 +50,7 @@ pg_service.conf
 *.pgpass
 *.raw.sql
 *.dump
+
+# Raw Windows schema exports, regardless of location
+/dqa_public_schema_raw.sql
+**/*_schema_raw.sql
