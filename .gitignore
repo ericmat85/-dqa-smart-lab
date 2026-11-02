@@ -38,3 +38,4 @@ backups/
 # Browser test artifacts
 /test-results/
 /playwright-report/
+/acceptance-results/

@@ -1,0 +1,182 @@
+{
+  "generatedAtTaipei": "2026-11-02T08:11:08.008760+08:00",
+  "baselineCommit": "a0b8a650aab700c578ffb27a46d9c8810f0df6bb",
+  "integratedCommit": "05a572261e96af64434e18fa6df5f116d5a76f9e",
+  "scope": "Listed files only; UI renderers and styles intentionally changed in Phases 1–5.",
+  "files": [
+    {
+      "path": "src/App.jsx",
+      "baselineBlob": "fd132dc49d34f15e00867346d9256eb9bf57a54d",
+      "integratedBlob": "fd132dc49d34f15e00867346d9256eb9bf57a54d",
+      "unchanged": true
+    },
+    {
+      "path": "src/PortalHome.css",
+      "baselineBlob": "02f2d4cf1dc3348fceb43b536c94138e589a2aaf",
+      "integratedBlob": "02f2d4cf1dc3348fceb43b536c94138e589a2aaf",
+      "unchanged": true
+    },
+    {
+      "path": "src/portalLabels.mjs",
+      "baselineBlob": "7ecf54f266b0939a0ceaa70c2f60bf2623245c42",
+      "integratedBlob": "7ecf54f266b0939a0ceaa70c2f60bf2623245c42",
+      "unchanged": true
+    },
+    {
+      "path": "src/CompanyBrandLogo.jsx",
+      "baselineBlob": "f5d01c63b4e0b6cf953e3067a1fcdfce0449a630",
+      "integratedBlob": "f5d01c63b4e0b6cf953e3067a1fcdfce0449a630",
+      "unchanged": true
+    },
+    {
+      "path": "src/CompanyBrandLogo.css",
+      "baselineBlob": "cbfa761d207dc32cfabbd80f30ca401595caafa2",
+      "integratedBlob": "cbfa761d207dc32cfabbd80f30ca401595caafa2",
+      "unchanged": true
+    },
+    {
+      "path": "public/branding/colong-ie-transparent.png",
+      "baselineBlob": "f16526e99b7244aa82e267b496613fb3ab8492eb",
+      "integratedBlob": "f16526e99b7244aa82e267b496613fb3ab8492eb",
+      "unchanged": true
+    },
+    {
+      "path": "src/demoAccounts.mjs",
+      "baselineBlob": "57c0e71a26e88ea241cbdcc1a1abfcd3452b6d82",
+      "integratedBlob": "57c0e71a26e88ea241cbdcc1a1abfcd3452b6d82",
+      "unchanged": true
+    },
+    {
+      "path": "src/demoPermissions.mjs",
+      "baselineBlob": "6f5d2fd2f91db877d76d24bbc809cd336ced1852",
+      "integratedBlob": "6f5d2fd2f91db877d76d24bbc809cd336ced1852",
+      "unchanged": true
+    },
+    {
+      "path": "src/customRoles.mjs",
+      "baselineBlob": "7fdf7bc14ae7c372c9d34f19352d0d9e4e0b06a8",
+      "integratedBlob": "7fdf7bc14ae7c372c9d34f19352d0d9e4e0b06a8",
+      "unchanged": true
+    },
+    {
+      "path": "src/idleSessions.mjs",
+      "baselineBlob": "df9ec5af1d1ca239ddb10c00f0224f9e35e679bb",
+      "integratedBlob": "df9ec5af1d1ca239ddb10c00f0224f9e35e679bb",
+      "unchanged": true
+    },
+    {
+      "path": "src/requestWorkflow.mjs",
+      "baselineBlob": "b09ad3a3ef1c5063f9a1df2f5bfc742ff2a46bce",
+      "integratedBlob": "b09ad3a3ef1c5063f9a1df2f5bfc742ff2a46bce",
+      "unchanged": true
+    },
+    {
+      "path": "src/electronicReview.mjs",
+      "baselineBlob": "ab430ed9b12e24ed7e96a709adeb5971afd6b962",
+      "integratedBlob": "ab430ed9b12e24ed7e96a709adeb5971afd6b962",
+      "unchanged": true
+    },
+    {
+      "path": "src/labReceipts.mjs",
+      "baselineBlob": "39b2a9d5d190322867c7a8ef58ec32416eac6086",
+      "integratedBlob": "39b2a9d5d190322867c7a8ef58ec32416eac6086",
+      "unchanged": true
+    },
+    {
+      "path": "src/labOperations.mjs",
+      "baselineBlob": "abdaefe41da79bf341488790acdcc562f958d103",
+      "integratedBlob": "abdaefe41da79bf341488790acdcc562f958d103",
+      "unchanged": true
+    },
+    {
+      "path": "src/labScheduleBridge.mjs",
+      "baselineBlob": "c5bc3087269a4a932b55727f3a2af9c43c108dfa",
+      "integratedBlob": "c5bc3087269a4a932b55727f3a2af9c43c108dfa",
+      "unchanged": true
+    },
+    {
+      "path": "src/scheduleEquipment.mjs",
+      "baselineBlob": "f28e1888def0fb815306564fd8e558517749e8ec",
+      "integratedBlob": "f28e1888def0fb815306564fd8e558517749e8ec",
+      "unchanged": true
+    },
+    {
+      "path": "src/scheduleResources.mjs",
+      "baselineBlob": "d0302b3eb4b6c54312fb9ab6a2504d1de633ad10",
+      "integratedBlob": "d0302b3eb4b6c54312fb9ab6a2504d1de633ad10",
+      "unchanged": true
+    },
+    {
+      "path": "src/scheduleLifecycle.mjs",
+      "baselineBlob": "3ec1428af4f9fce7a46cb1b41adad8a8d1b99b1c",
+      "integratedBlob": "3ec1428af4f9fce7a46cb1b41adad8a8d1b99b1c",
+      "unchanged": true
+    },
+    {
+      "path": "src/scheduleRequest.mjs",
+      "baselineBlob": "aa69db96926bd7a4f736e0100f440df90d4f9f49",
+      "integratedBlob": "aa69db96926bd7a4f736e0100f440df90d4f9f49",
+      "unchanged": true
+    },
+    {
+      "path": "src/trialControls.mjs",
+      "baselineBlob": "06fb95bef965dcd475f2fb5525374a3493928771",
+      "integratedBlob": "06fb95bef965dcd475f2fb5525374a3493928771",
+      "unchanged": true
+    },
+    {
+      "path": "src/reportWorkflow.mjs",
+      "baselineBlob": "434ca3bb3a46eac03399ec9dd206e0ad0c509368",
+      "integratedBlob": "434ca3bb3a46eac03399ec9dd206e0ad0c509368",
+      "unchanged": true
+    },
+    {
+      "path": "src/reportWorkbook.mjs",
+      "baselineBlob": "c29ac27e6606fc9b0ff615caf4c29824d936272f",
+      "integratedBlob": "c29ac27e6606fc9b0ff615caf4c29824d936272f",
+      "unchanged": true
+    },
+    {
+      "path": "src/reportPdf.mjs",
+      "baselineBlob": "4d2733d8475681b21a744cb7e54080c13b0ca6a7",
+      "integratedBlob": "4d2733d8475681b21a744cb7e54080c13b0ca6a7",
+      "unchanged": true
+    },
+    {
+      "path": "src/generalReportPdf.mjs",
+      "baselineBlob": "f25ed66778a41b1ba7182712a392b505cd134e4d",
+      "integratedBlob": "f25ed66778a41b1ba7182712a392b505cd134e4d",
+      "unchanged": true
+    },
+    {
+      "path": "src/reportStore.mjs",
+      "baselineBlob": "a48de82aabf87c12aa54009a413e1c3196c0ec67",
+      "integratedBlob": "a48de82aabf87c12aa54009a413e1c3196c0ec67",
+      "unchanged": true
+    },
+    {
+      "path": "src/reportArchive.mjs",
+      "baselineBlob": "4e8aefe4937fde065f4ed511ecbf90f94c992a74",
+      "integratedBlob": "4e8aefe4937fde065f4ed511ecbf90f94c992a74",
+      "unchanged": true
+    },
+    {
+      "path": "src/demoReportPreparation.mjs",
+      "baselineBlob": "c14d3c6a49b06067ca1ae620a31cffad5a767dfa",
+      "integratedBlob": "c14d3c6a49b06067ca1ae620a31cffad5a767dfa",
+      "unchanged": true
+    },
+    {
+      "path": "src/signatureHistory.mjs",
+      "baselineBlob": "caca0834c58c0de3e1d8f4c40217f41bf4a4cbc0",
+      "integratedBlob": "caca0834c58c0de3e1d8f4c40217f41bf4a4cbc0",
+      "unchanged": true
+    },
+    {
+      "path": "src/resetCases.mjs",
+      "baselineBlob": "04edeac761c04eae9b30450f8fa76d851f21e724",
+      "integratedBlob": "04edeac761c04eae9b30450f8fa76d851f21e724",
+      "unchanged": true
+    }
+  ]
+}
