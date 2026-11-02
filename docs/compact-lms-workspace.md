@@ -26,7 +26,7 @@ Header、Logo、Sidebar、入口、登入、帳號與權限、其餘 LMS 管理�
 
 ## 範圍與分支
 
-獨立分支 `codex/compact-lms-workspace` 由 `codex/compact-request-editor` 建立，保留已完成而尚未合併的前置 UI。新 PR 以該分支為 base，差異僅含 LMS 本輪改版，依賴 PR #35 及 #33。不合併 main，不手動部署 Production，不改存取權限。
+獨立分支 `codex/compact-lms-workspace` 由 `codex/compact-request-editor` 建立。交付時遠端 PR #33 已合併 main，PR #35 已合併至 `codex/slim-login-panel`；因此新 PR 以包含前置 UI 的 `codex/slim-login-panel` 為 base，差異僅含 LMS 本輪改版，不將電子委託或其他工作混入本輪審查。不合併 main，不手動部署 Production，不改存取權限。
 
 截圖使用隔離的測試帳號與 25 筆示範委託；零排程資料會如實顯示 0 與空圓環，不為設計而製造統計資料。
 
