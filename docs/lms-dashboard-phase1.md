@@ -51,3 +51,26 @@
 - lint、diff check 通過。
 
 操作使用隔離的瀏覽器 Demo 資料，不連接或變更正式案件、資料庫與 AI API；不宣稱正式後端或真實 AI 的驗證已完成。原有 Demo／正式版控制機制未改動。
+
+## 既有流程回歸
+
+相關 E2E 43／43 全數通過（不是宣稱執行整個 E2E 目錄）：
+
+| 項目 | 實際驗證 |
+| --- | --- |
+| 登入與返回入口 | 四入口導航、LMS 錯誤帳密／登入保持／登出；整合驗收的角色與路由守衛 |
+| 審查與退回 | 指定主管及 LMS 二階審查、退回補件及重新送出 |
+| 排程與設備 | 排程儲存、雙設備樣品配置、設備排程分組／篩選、維持原衝突及樣品空間規則 |
+| 甘特圖 | 既有五組尺寸的排程畫面、欄位可見、分組、AI 避讓與圖表操作 |
+| 報告審核 | 報告退回／修訂、兩階主管簽名、封存 PDF；一般性能報告範本上傳及原版面流程 |
+| AI 與偏好 | 助理開關、FAQ 對話／捲動、上下拖動、圓形尺寸；圖表鍵盤／hover、字體／語言／分頁 |
+
+## 尚未解決的既有問題
+
+開發模式的「字體／語言／每頁筆數」回歸會輸出 React `Static children should always be an array` 訊息。本次另建立未修改的 `4a407c7` 原版臨時工作樹，執行相同測試，1／1 通過且同樣重現訊息，確認不是 Dashboard CSS 引入。本輪不修改共用偏好／React 轉換功能；正式建置與 64 項驗收均通過。除此之外，目前未發現新增的 Dashboard 問題。
+
+## 驗收連結
+
+- [Preview：LMS Dashboard](https://dqa-smart-lab-git-codex-lms-dashboard-phase1-ericmat85.vercel.app/lms/dashboard)
+- [PR #38](https://github.com/ericmat85/-dqa-smart-lab/pull/38)，base 為 main
+- 實作 commit：`4e41809`；本次不合併 main，也不推進 Phase 2，等待使用者驗收。
