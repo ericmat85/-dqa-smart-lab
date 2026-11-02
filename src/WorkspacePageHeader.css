@@ -30,7 +30,7 @@
 /* Align section navigation and secondary actions with the form column. */
 #root .rq-enterprise .rq-editor-page{--editor-side-width:280px}
 #root .rq-enterprise .rq-section-nav,#root .rq-enterprise .rq-editor-pretable-row{width:calc(100% - var(--editor-side-width) - 18px)}
-#root .rq-app.rq-enterprise .rq-section-nav{display:grid;grid-template-columns:repeat(5,minmax(156px,1fr));justify-content:normal}
+#root .rq-app.rq-enterprise .rq-section-nav{display:grid;grid-template-columns:repeat(5,minmax(156px,1fr));justify-content:normal;gap:0}
 #root .rq-enterprise .rq-section-nav a:not(.rq-section-action){position:relative}
 #root .rq-enterprise .rq-section-nav a:not(.rq-section-action)::after{position:absolute;right:8px;width:24px;margin:0;flex:0 0 24px}
 #root .rq-enterprise .rq-editor-pretable-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
@@ -53,3 +53,23 @@
  #root .rq-enterprise .rq-editor-top-actions>.rq-btn{padding:6px 8px;min-width:0;white-space:nowrap}
  #root .rq-enterprise .rq-editor-top-actions>.rq-btn:last-child{flex-wrap:wrap;white-space:normal;column-gap:0}
 }
+
+/* Place short connectors at the midpoint of the available gap. */
+#root :is(.rq-app.rq-enterprise .rq-main,.lab-shell.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:8px}
+#root .rq-app.rq-enterprise .rq-section-nav a{gap:0}
+#root .rq-app.rq-enterprise .rq-section-nav a::after{display:none}
+.rq-step-content{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:calc(100% - 40px)}
+.rq-step-label{white-space:normal;line-height:1.4}
+.rq-step-connector{display:flex;justify-content:center;align-items:center;flex:1;min-width:40px}
+.rq-step-connector i{display:block;width:24px;height:1px;background:var(--enterprise-border);flex:0 0 24px}
+.rq-section-nav a[aria-current=step] .rq-step-connector i{background:#7ca4d8}
+.rq-section-nav a:last-child .rq-step-connector{display:none}.rq-section-nav a:last-child .rq-step-content{max-width:100%}
+.rq-editor-secondary-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small){display:inline-flex;align-items:center;justify-content:center;min-height:32px;height:32px;padding:6px 10px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card)!important;color:var(--enterprise-text);font-size:12px;font-weight:500;line-height:1.4;cursor:pointer;transition:background-color .15s,border-color .15s,transform .15s}
+#root .rq-enterprise .rq-editor-secondary-actions button{margin:0!important}
+#root .rq-enterprise .rq-editor-secondary-actions .rq-close{height:32px;min-height:32px;width:32px;padding:0}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):hover{background:color-mix(in srgb,var(--enterprise-card) 88%,#0866e8)!important;border-color:#86abe0;color:var(--enterprise-text);transform:translateY(-1px)}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):active{transform:translateY(0)}
+#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small):focus-visible{outline:2px solid #368cff;outline-offset:2px}
+@media(max-width:720px){#root .rq-enterprise .rq-editor-pretable-row{flex-wrap:wrap}.rq-editor-secondary-actions{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){#root .rq-app.rq-enterprise .rq-editor-secondary-actions :is(.rq-section-action,.rq-btn-small){transition:none;transform:none}}
