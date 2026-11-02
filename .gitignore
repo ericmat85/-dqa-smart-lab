@@ -39,3 +39,14 @@ backups/
 /test-results/
 /playwright-report/
 /acceptance-results/
+
+# Supabase local credentials and unreviewed export evidence
+/supabase/.temp/
+/supabase/private-exports/
+/supabase/raw-dumps/
+.pgpass
+.pgpass.*
+pg_service.conf
+*.pgpass
+*.raw.sql
+*.dump

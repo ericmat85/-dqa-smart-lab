@@ -1,0 +1,26 @@
+-- Supabase 唯讀 catalog 查詢索引（本檔不執行查詢）
+-- 所有查詢均未執行；不是驗證結果，不是可重播 Migration。
+-- Dashboard 每次只貼一個 docs/supabase-catalog/ 檔案，人工核對結果完整性。
+-- 每檔獨立 BEGIN READ ONLY / COMMIT；不共享 snapshot。
+-- 若需要額外權限或結果截斷，停止並記錄，不擴權、不假定成功。
+-- 版本前提：PostgreSQL 14+，16b 另要求 15+；以實際版本人工核對。
+-- supabase-catalog/01-relations.sql
+-- supabase-catalog/02-columns.sql
+-- supabase-catalog/03-constraints.sql
+-- supabase-catalog/04-indexes.sql
+-- supabase-catalog/05-functions.sql
+-- supabase-catalog/06-triggers.sql
+-- supabase-catalog/07-policies.sql
+-- supabase-catalog/08-views.sql
+-- supabase-catalog/09-sequences.sql
+-- supabase-catalog/10-schema-acl.sql
+-- supabase-catalog/11-default-acl.sql
+-- supabase-catalog/12-extensions.sql
+-- supabase-catalog/13-event-triggers.sql
+-- supabase-catalog/14-types-enums-domains.sql
+-- supabase-catalog/15-partition-inheritance.sql
+-- supabase-catalog/16-publications.sql
+-- supabase-catalog/16b-publication-schemas-pg15.sql
+-- supabase-catalog/17-dependencies.sql
+-- supabase-catalog/18-function-execute-acl.sql
+-- supabase-catalog/19-role-and-shared-dependencies.sql
