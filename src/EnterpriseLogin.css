@@ -55,3 +55,8 @@
 .enterprise-system-name{font-weight:700}
 
 #root .enterprise-login .enterprise-preview-note{font-size:13px;line-height:1.7;padding:12px 14px;margin:0 0 20px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--soft);color:var(--enterprise-secondary)}
+/* Keep a small view of the laboratory to the right of the inset login panel. */
+@media(min-width:721px){
+ .enterprise-login-body{padding-right:clamp(24px,5vw,96px);box-sizing:border-box;background:linear-gradient(#0a294ab8,#041d36d9),url('/branding/laboratory-login.jpg') right center/cover no-repeat}
+ #root .enterprise-login .enterprise-login-panel{align-items:flex-start;padding-top:56px}
+}
