@@ -18,7 +18,7 @@ for(const theme of ['light','dark'])test(`page title icons match sidebar icons i
   const count=await navigation.count();
   for(let index=0;index<count;index++){
    const button=navigation.nth(index),label=(await button.innerText()).trim(),expectedPath=await button.locator('svg path').getAttribute('d');await button.click();
-   const heading=page.locator(system==='lms'?'.lms-dashboard-heading h1,.template-heading h2,.account-page-heading h2':system==='request'?'.rq-workspace-heading h1,.rq-editor-page .rq-form-header h2':'.lab-workspace-heading h1').first();
+   const heading=page.locator(system==='lms'?'.lms-dashboard-heading h1,.template-heading h2,.account-page-heading h2':system==='request'?'.rq-workspace-heading h1,.rq-editor-page .rq-form-header h2':'.lab-workspace-heading h1,.lab-catalog-workspace .template-heading h2').first();
    await expect(heading.locator(':scope > svg path'),`${system} ${label}`).toHaveAttribute('d',expectedPath);await expect(heading.locator(':scope > svg')).toHaveAttribute('aria-hidden','true');
    expect(await heading.evaluate(el=>getComputedStyle(el,'::before').content)).toMatch(/^(none|normal)$/);
    if(label==='申請借用'){await page.getByRole('button',{name:'＋申請借用',exact:true}).click();await expect(page.getByRole('dialog').getByRole('heading',{name:'申請借用',exact:true}).locator('svg path')).toHaveAttribute('d',expectedPath);await page.getByRole('button',{name:'關閉借用申請',exact:true}).click();}
