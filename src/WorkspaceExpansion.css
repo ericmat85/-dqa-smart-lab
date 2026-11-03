@@ -1,0 +1,45 @@
+/* Full workspace subpages replace history/chart overlays. */
+html body #root .lms-child-page .dashboard-content>.panel>.template-page:not(.has-request-subpage){display:none}
+html body #root .has-request-subpage>*:not(.workspace-subpage):not(.request-modal-backdrop){display:none}
+html body #root .lms-enterprise .workspace-subpage{position:static;display:block;padding:0;background:transparent}
+html body #root .lms-enterprise .workspace-subpage-panel{position:static;width:100%;max-width:none;max-height:none;padding:0;background:var(--enterprise-card);border:0;border-radius:8px;color:var(--enterprise-text);box-shadow:none;overflow:visible}
+html body #root .lms-enterprise .workspace-subpage-panel>.request-modal-header{padding:0 0 12px;gap:12px}
+html body #root .lms-enterprise .workspace-subpage-panel .request-modal-body{padding:12px 0;max-height:none;overflow:visible}
+html body #root .lms-enterprise .workspace-subpage-panel .gantt-body{max-height:none}
+html body #root .lms-enterprise .workspace-subpage-panel h3{margin:0;font-size:20px}
+html body #root :is(.lms-enterprise,.lab-enterprise) .catalog-search-toolbar svg{flex:none;color:var(--enterprise-secondary)}
+html body #root .lms-enterprise .report-config input[type=checkbox]{accent-color:#0866e8;min-height:16px;width:16px;height:16px;padding:0;flex:none}
+html body #root .lms-enterprise .report-config>.report-preferences{padding:12px}
+html body #root .lms-enterprise .report-config .settings-preferences{gap:12px}
+html body #root .lms-enterprise .report-config .report-columns-title{padding:10px 12px 6px}
+html body #root .lms-enterprise .report-config .management-column-options{gap:8px 16px;padding:6px 12px 12px}
+html body #root .lms-enterprise .report-config .management-column-options label{gap:6px;font-size:12px}
+html body #root .lms-enterprise :is(.catalog-tab-icon,.schedule-view-tabs .catalog-tab-icon){background:transparent!important;box-shadow:none!important}
+html body .session-timeout-dialog button{background:#0866e8;color:#fff;border-radius:6px}
+/* Compact account and role administration. */
+html body #root .lms-enterprise .account-management{padding:16px;border-radius:8px}
+html body #root .lms-enterprise .account-management .account-page-heading{margin-bottom:12px;padding-bottom:0;gap:12px}
+html body #root .lms-enterprise .account-management .help-title-row{flex-wrap:wrap;gap:6px 10px}
+html body #root .lms-enterprise .account-management .account-inline-help{flex-basis:100%;margin:4px 0;font-size:12px;line-height:1.5;color:var(--enterprise-secondary)}
+html body #root .lms-enterprise .account-summary{margin-bottom:12px;gap:12px}
+html body #root .lms-enterprise .account-management :is(.primary-button,.account-row-actions button,.account-cancel-button,.role-primary,.role-secondary){min-height:32px;padding:5px 10px;font-size:12px;line-height:1.5;border-radius:6px}
+html body #root .lms-enterprise .account-management .account-toolbar{gap:8px;margin:12px 0}
+html body #root .lms-enterprise .account-management :is(.account-toolbar input,.account-toolbar select){height:36px;min-height:36px;padding:6px 10px;font-size:12px}
+html body #root .lms-enterprise .account-management .account-table :is(th,td){padding:6px 10px;font-size:12px;line-height:1.4}
+html body #root .lms-enterprise .compact-management-dialog{width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--enterprise-border);border-radius:8px;background:var(--enterprise-card);color:var(--enterprise-text);overflow:auto}
+.compact-management-dialog::backdrop{background:#07152580}.compact-management-dialog>header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--enterprise-border)}.compact-management-dialog>header h3{font-size:18px;margin:0}.compact-management-dialog>header button{width:32px;height:32px;padding:0;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--soft);color:inherit;font-size:22px}
+html body #root .lms-enterprise .compact-management-dialog .account-form{margin:0;padding:16px;border:0;box-shadow:none}
+html body #root .lms-enterprise .compact-management-dialog .account-form-grid{gap:12px 16px}
+html body #root .lms-enterprise .compact-management-dialog .account-form :is(input:not([type=checkbox]):not([type=radio]),select){height:36px;min-height:36px;padding:6px 10px;font-size:12px}
+.account-delete-confirm{padding:16px;font-size:13px;line-height:1.6}
+html body #root .lms-enterprise .role-workspace{padding:0;border:0;max-height:none;width:100%;box-shadow:none}
+html body #root .lms-enterprise .role-workspace>header{padding:12px 0;gap:12px;align-items:center;border:0}
+html body #root .lms-enterprise .role-workspace h2{margin:0;font-size:18px}
+.role-table-wrap{width:100%;overflow:auto}.role-permission-table{width:100%;min-width:700px;border-collapse:collapse;font-size:12px}.role-permission-table th{background:var(--soft);text-align:left}.role-permission-table :is(th,td){padding:7px 10px;border-bottom:1px solid var(--enterprise-border);line-height:1.5}.role-permission-table small{display:block;color:var(--enterprise-secondary)}.role-permission-table td:nth-child(5){max-width:320px}
+html body #root .lms-enterprise .role-workspace .role-editor{padding:12px 0;border-top:1px solid var(--enterprise-border)}
+.role-editor-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}.role-editor-fields label{display:flex;flex-direction:column;gap:6px;font-size:12px}
+html body #root .lms-enterprise .role-workspace .role-editor :is(input:not([type=checkbox]):not([type=radio]),select){height:36px;min-height:36px;padding:6px 10px;font-size:12px}
+html body #root .lms-enterprise .role-workspace fieldset{padding:10px 12px;margin:12px 0}.role-workspace .role-checks{gap:8px 16px}.role-workspace .role-checks input{accent-color:#0866e8}
+@media(max-width:600px){.role-editor-fields{grid-template-columns:1fr}html body #root .lms-enterprise .role-workspace>header{flex-wrap:wrap}.role-workspace .role-checks{grid-template-columns:1fr}}
+html body #root .lms-enterprise a.template-btn{text-decoration:none}
+html body #root .lms-enterprise .account-management .account-avatar{background:var(--soft);color:var(--tab-accent)}

@@ -50,7 +50,7 @@ test('management summary tiles share schedule styling and help artwork is center
 test('lighter actions, export icon, larger brand and list-based settings retain their controls',async({page})=>{
  await expect(page.locator('.lms-dashboard-heading h1')).toHaveCSS('font-size','22px');
  await expect(page.locator('.intelligent-launcher')).toHaveCSS('background-color','rgb(8, 102, 232)');
- await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('button',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
+ await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('link',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
  await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();const exportButton=page.locator('.management-export-menu>summary');await expect(exportButton).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(exportButton.locator('.report-export-icon')).toBeVisible();
  await page.locator('.sidebar').getByRole('button',{name:'系統設定',exact:true}).click();const settings=page.locator('.settings-management');await expect(settings.locator('.management-summary,.lab-system-rules')).toHaveCount(0);await expect(settings.locator('.settings-health-list>div')).toHaveCount(4);await expect(settings.getByRole('button',{name:'重新檢查',exact:true})).toHaveCSS('background-color','rgb(8, 102, 232)');await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByRole('status')).toContainText('重新讀取本機資料');
 });

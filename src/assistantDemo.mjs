@@ -16,14 +16,23 @@ export const ASSISTANT_DEMOS=[
  {id:'stock',category:'物料',question:'目前有哪些物料低於安全庫存？',keywords:['庫存','缺料','補貨'],answer:'stock'},
  {id:'signature',category:'簽核',question:'電子簽名可以上傳或使用預設簽名嗎？',keywords:['簽名','上傳','預設簽名'],answer:'簽名區支援手寫與上傳簽名檔，也可儲存並使用帳號的預設簽名。已提交的簽名可在對應委託資訊與簽名歷程中查看。'},
  {id:'return',category:'簽核',question:'主管退件時需要簽名嗎？',keywords:['退件','退回','補件'],answer:'退回補正時需要填寫原因，可不簽名；核准則需要簽名。重新送出後依流程重新審查，既有簽名與退件歷程會保留。'},
- {id:'report',category:'報表',question:'如何匯出試驗排程報表？',keywords:['報表','匯出','csv'],answer:'前往報表分析，選擇試驗排程、設備概況、物料庫存或委託審查。設定搜尋、狀態與日期條件後按「匯出 CSV」，會匯出全部符合條件的資料。'},
- {id:'role',category:'權限',question:'如何新增帳號並設定角色權限？',keywords:['帳號','權限','角色'],answer:'具有帳號管理權限的人員可在帳號管理新增或編輯帳號。使用右上角「權限設定」建立角色、選擇功能頁面與審查階級，再將角色指派給帳號。'},
+ {id:'report',category:'報表',question:'如何匯出試驗排程報表？',keywords:['報表','匯出','csv'],answer:'前往報表分析，選擇試驗排程、設備概況、物料庫存或委託審查。設定搜尋、狀態與日期條件後按「匯出報表」選擇 PDF 或 Excel，會匯出全部符合條件的資料。'},
+ {id:'role',category:'權限',question:'如何新增帳號並設定角色權限？',keywords:['帳號','權限','角色'],answer:'具有帳號管理權限的人員可在帳號管理新增或編輯帳號。切換「角色與權限」頁籤，建立新角色或編輯內建角色的功能頁面與審查階級，再將角色指派給帳號。'},
  {id:'sync',category:'系統',question:'資料會自動同步嗎？重新整理會不會不見？',keywords:['同步','儲存','重新整理','資料'],answer:'目前 Demo 使用同一網站、同一瀏覽器的本機儲存，管理頁面的變更會同步到儀錶板。重新整理通常會保留已儲存資料；清除網站資料、使用不同瀏覽器或不同裝置不會共用這些資料。'},
 ];
-export function assistantReply(question,snapshot,metrics){
+export function assistantReply(question,snapshot,metrics,system='lms'){
  const normalized=question.trim().toLowerCase().replace(/\s/g,'');
  const item=ASSISTANT_DEMOS.find(item=>item.question.toLowerCase().replace(/\s/g,'')===normalized)||ASSISTANT_DEMOS.find(item=>item.keywords.some(word=>normalized.includes(word)));
  if(!item)return '這是 Demo 示範助理，目前提供 20 組實驗室常見問答。請展開「常見問題」選擇題目，或詢問排程、設備、物料、簽名、報表與權限相關問題。';
+ if(system==='lab'){
+  const rows=snapshot.labWorkItems||[],count=status=>rows.filter(row=>row.status===status).length;
+  if(item.answer==='overview')return `依實驗室試驗委託資料：待確認 ${count('待確認')} 筆、已排程 ${count('已排程')} 筆、試驗中 ${count('試驗中')} 筆、已完成 ${count('已完成')} 筆。`;
+  if(item.answer==='pending')return `實驗室目前待確認 ${count('待確認')} 筆、已排程 ${count('已排程')} 筆。尚未排程的案件由實驗室管理系統安排。`;
+  if(item.answer==='running')return `實驗室目前有 ${count('試驗中')} 筆試驗正在進行，另有 ${count('已排程')} 筆已接收、等待開始。`;
+  if(['schedule','automatic','conflict','stop'].includes(item.id))return '排程安排、衝突與中止請交由實驗室管理系統的授權人員處理；實驗室可在試驗委託確認接收，或依現有流程提出取消／中斷申請。';
+  if(item.id==='breakdown')return '設備狀態頁僅供查閱，無法修改屬性或狀態。請先依現場規範處置試驗，再通知授權管理人員處理設備。';
+  if(item.id==='report')return '實驗室完成試驗後，可在試驗委託提交報告；資料庫提供授權報告與範本查閱。統計報表的 PDF／Excel 匯出請使用實驗室管理系統的報表分析。';
+ }
  const counts=metrics.counts;
  if(item.answer==='overview')return `依目前資料：待排程 ${counts['未排程']||0} 筆、已排程 ${counts['已排程']||0} 筆、試驗中 ${counts['試驗中']||0} 筆、已完成 ${counts['已完成']||0} 筆；設備共 ${snapshot.equipment.length} 台。`;
  if(item.answer==='pending')return `目前有 ${counts['未排程']||0} 筆待排程，另有 ${counts['有衝突']||0} 筆排程衝突待確認。可前往排程管理查看明細。`;

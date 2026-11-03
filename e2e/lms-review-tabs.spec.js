@@ -46,16 +46,16 @@ test('LMS tabs use enterprise blue selection with transparent hover in either th
  await page.setViewportSize({width:1366,height:768});
  await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-lms-account-id','U001');},INITIAL_ACCOUNTS);
  await page.goto('/lms/dashboard');
- async function checkTabs(tablist,dark){
+ async function checkTabs(tablist,dark,owner=page){
   const selected=tablist.locator('[role=tab][aria-selected=true]');
   const selectedId=await selected.evaluate(el=>el.id||el.textContent);
   for(const tab of (await tablist.getByRole('tab').all()).slice(0,2)){
-   await page.mouse.move(600,30);const initialColor=await tab.evaluate(el=>getComputedStyle(el).color);
+   await owner.mouse.move(600,30);const initialColor=await tab.evaluate(el=>getComputedStyle(el).color);
    await tab.hover();await expect(tab).toHaveCSS('color',dark?'rgb(133, 189, 255)':'rgb(8, 102, 232)');
    await expect(tab).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
    await expect(tab).toHaveCSS('box-shadow','none');await expect(tab).toHaveCSS('border-top-width','0px');
    await expect.poll(()=>selected.evaluate(el=>el.id||el.textContent)).toBe(selectedId);
-   await page.mouse.move(600,30);await expect(tab).toHaveCSS('color',initialColor);
+   await owner.mouse.move(600,30);await expect(tab).toHaveCSS('color',initialColor);
   }
  }
  for(const dark of [false,true]){
@@ -65,8 +65,7 @@ test('LMS tabs use enterprise blue selection with transparent hover in either th
    await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'實驗室管理系統',exact:true})).toHaveText('實驗室管理系統');
    await checkTabs(page.getByRole('tablist').first(),dark);
    if(name==='排程管理'){
-    await page.getByRole('button',{name:'排程管理圖表',exact:true}).click();await checkTabs(page.getByRole('tablist',{name:'甘特圖類型'}),dark);
-    await page.getByRole('button',{name:'關閉排程管理圖表',exact:true}).click();
+    const popup=page.waitForEvent('popup');await page.getByRole('link',{name:'排程管理圖表',exact:true}).click();const chart=await popup;await checkTabs(chart.getByRole('tablist',{name:'甘特圖類型'}),dark,chart);await chart.close();
    }
    if(name==='設備管理'||name==='物料管理'){
     const kind=name==='設備管理'?'設備':'物料';

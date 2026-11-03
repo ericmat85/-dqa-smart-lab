@@ -1,3 +1,4 @@
+import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import HelpTip from './HelpTip.jsx';
 import {PaginatedTable,PaginatedList} from './Pagination.jsx';
 import ScheduleTimeline from './ScheduleTimeline.jsx';
@@ -12,7 +13,7 @@ function ScheduleTable({rows,onRequest,onEdit,resetKey}) {
   return <div className="template-table-wrap schedule-table-region" role="region" aria-label="排程表格"><PaginatedTable resetKey={resetKey} className="template-table schedule-table"><thead><tr>{['委託編號','產品代碼','試驗項目','設備','執行人','樣品編號','試驗日程','狀態','操作'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>{rows.map(row=><tr key={row.id}><td><button type="button" className="request-id-link" onClick={()=>onRequest(row)}>{row.requestId||'未關聯委託'}</button></td><td>{row.productCode||'—'}</td><td>{row.title}</td><td>{row.eq||'—'}{row.equipmentCount>1&&<small>共 {row.equipmentCount} 台</small>}{Boolean(row.preparationMinutes||row.cleanupMinutes)&&<small>準備 {row.preparationMinutes||0}／清理 {row.cleanupMinutes||0} 分鐘</small>}</td><td>{row.owner||'尚未指派'}</td><td>{row.sampleCode||`SMP-${String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')}`}</td><td><ScheduleTimeline row={row}/></td><td><span className={`template-status status-${row.status}`}>{row.status==='未排程'?'待排程':row.status==='有衝突'?'排程衝突':row.status}</span>{row.status==='未排程'&&(row.receiptReturn||row.labCancellationReturn)&&<small style={{display:'block',fontSize:10,marginTop:6,color:'#9a7790'}} title={(row.receiptReturn||row.labCancellationReturn).reason}>{row.labCancellationReturn?'取消原安排退回':'實驗室未接收退回'}</small>}</td><td>{["已完成","已結案"].includes(row.status)?<span className="rq-muted">試驗已結束</span>:<button type="button" className="template-btn secondary schedule-edit-btn" disabled={Boolean(row.reportInfo?.stage)||['取消','待核准','已結案'].includes(row.status)} onClick={()=>onEdit(row)}>編輯排程</button>}</td></tr>)}</tbody></PaginatedTable>{!rows.length&&<div className="schedule-view-empty">目前沒有符合條件的排程</div>}</div>;
 }
 const colors=['#7c69cf','#4093b4','#d08c4b','#56a18c','#c57191','#6682bf'];
-export default function ScheduleViews({rows,accounts,equipment=[],now,status,search,onSearch,onRequest,onEdit}) {
+export default function ScheduleViews({rows,accounts,equipment=[],now,status,search,onSearch,onClear,onRequest,onEdit}) {
   const [view,setView]=useState('all');
   const [collapsed,setCollapsed]=useState({});
   const visible=filterScheduleRows(rows,status,search);
@@ -27,7 +28,7 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
   };
   return <section className="schedule-views" aria-label="排程檢視">
     <div className="schedule-view-top"><div className="schedule-view-tabs" role="tablist" aria-label="排程檢視方式">{tabs.map(([key,label,count],index)=><button type="button" key={key} role="tab" id={`schedule-view-tab-${key}`} aria-selected={view===key} aria-controls={`schedule-view-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>chooseTab(event,index)}>{key==='all'?'▤':key==='people'?'◉':'▦'}<strong>{label}</strong><span>{count}</span></button>)}</div></div>
-    <div className="template-toolbar schedule-search-toolbar"><label className="schedule-search-wrap"><span aria-hidden="true">⌕</span><input type="search" value={search} onChange={event=>onSearch(event.target.value)} placeholder="搜尋委託編號、產品代碼、樣品編號、試驗項目、設備或執行人…" aria-label="搜尋排程"/></label></div>
+    <CatalogSearchToolbar kind="排程" value={search} onChange={onSearch} onClear={onClear||(()=>onSearch(''))}/>
     <div role="tabpanel" id={`schedule-view-panel-${view}`} aria-labelledby={`schedule-view-tab-${view}`} tabIndex={0}>
       {view==='all'?<ScheduleTable resetKey={`${status}:${search}`} rows={visible} onRequest={onRequest} onEdit={onEdit}/>:view==='equipment'?<EquipmentScheduleBoard groups={deviceGroups} now={now} status={status} search={search} onRequest={onRequest} onEdit={onEdit}/>:<div className="schedule-people-board"><PaginatedList items={groups} resetKey={`${status}:${search}`}>{(pageGroups,offset)=>pageGroups.map((group,pageIndex)=>{const index=offset+pageIndex;
         const matchingName=search.trim()&&group.name.toLowerCase().includes(search.trim().toLowerCase());

@@ -5,13 +5,13 @@ const LEVELS = new Map([[ROLE.LEVEL1,1],[ROLE.LEVEL2,2],[ROLE.LEVEL3,3]]);
 export function accessSystem(account, system, storage) {
  if (!account?.id || account.status !== '啟用中') return false;
  const custom=customRole(account,storage);
- if(custom)return system==='lms';
+ if(custom)return custom.builtin?custom.systems.includes(system):system==='lms';
  if (system === 'request') return [ROLE.REQUESTER,ROLE.REQUEST_MANAGER].includes(account.role);
  if (system === 'lab') return [ROLE.LAB,ROLE.LAB_ASSISTANT,ROLE.LEVEL1,ROLE.LEVEL2,ROLE.LEVEL3].includes(account.role);
  if (system === 'lms') return [ROLE.LEVEL1,ROLE.LEVEL2,ROLE.LEVEL3,ROLE.ADMIN].includes(account.role);
  return false;
 }
-export function canManageAccounts(account) { return account?.status === '啟用中' && ([ROLE.ADMIN,ROLE.LEVEL2].includes(account.role) || customRole(account)?.manageAccounts===true); }
+export function canManageAccounts(account,storage) {if(account?.status!=='啟用中')return false;const role=customRole(account,storage);return role?role.manageAccounts===true:[ROLE.ADMIN,ROLE.LEVEL2].includes(account.role);}
 export function canApproveOperationalRequest(account,applicantId,storage){
  if(!account?.id||account.status!=='啟用中'||account.id===applicantId)return false;
  return account.role===ROLE.ADMIN||canReview(account,{status:'待審查',approval:0,participantIds:[applicantId]},storage);

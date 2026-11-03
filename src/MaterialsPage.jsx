@@ -15,7 +15,7 @@ import './MaterialsPage.css';
 export default function MaterialsPage({currentUser}) {
   const snapshot=useLabSnapshot(),rows=snapshot.materials;
   const [search,setSearch]=useState('');
-  const [status,setStatus]=useState('全部');
+  const [status,setStatus]=useState('可用');
   const [selectedId,setSelectedId]=useState(null);
   const [form,setForm]=useState(null);
   const [statusForm,setStatusForm]=useState(null);

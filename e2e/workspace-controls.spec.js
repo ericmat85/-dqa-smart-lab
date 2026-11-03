@@ -41,7 +41,7 @@ for(const width of [1920,1366,390])for(const theme of ['light','dark'])test(`sum
   if(width===1366&&['試驗委託','排程管理','設備管理','物料管理'].includes(label))await page.screenshot({path:test.info().outputPath(`${label}-${theme}.png`)});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
- await page.goto('/lab/dashboard');for(const card of await page.locator('.lab-dashboard-stats>.lab-stat-card').all()){expect((await card.boundingBox()).height).toBe(68);await expect(card.locator('svg')).toHaveCSS('width','20px');await expect(card.locator('.lab-stat-icon')).toHaveCSS('color',theme==='dark'?'rgb(133, 189, 255)':'rgb(8, 102, 232)');}if(width===1366)await page.screenshot({path:test.info().outputPath(`lab-summary-${theme}.png`)});
+ await page.goto('/lab/dashboard');for(const card of await page.locator('.lab-dashboard-stats>.lab-stat-card').all()){expect((await card.boundingBox()).height).toBe(68);await expect(card.locator('.lab-stat-icon svg')).toHaveCSS('width','20px');await expect(card.locator('.lab-stat-icon')).toHaveCSS('color',theme==='dark'?'rgb(133, 189, 255)':'rgb(8, 102, 232)');}if(width===1366)await page.screenshot({path:test.info().outputPath(`lab-summary-${theme}.png`)});
  for(const system of ['request','lab']){await page.goto(`/${system}/dashboard`);if(theme==='light')await expect(page.locator('.theme-toggle [data-system-icon=sun]')).toHaveCSS('color','rgb(217, 145, 0)');}
  await page.goto('/');if(theme==='light'&&await page.locator('[data-theme-symbol=sun]').count())await expect(page.locator('[data-theme-symbol=sun]')).toHaveCSS('color','rgb(217, 145, 0)');expect(await page.pageErrors()).toEqual([]);
 });

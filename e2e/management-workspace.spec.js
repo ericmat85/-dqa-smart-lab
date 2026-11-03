@@ -31,7 +31,7 @@ test('report export downloads valid complete Excel and Chinese PDF with column s
 test('accounts and roles share a workspace, assign custom permissions and preserve them after reload',async({page})=>{
  await nav(page,'帳號管理');await expect(page.getByRole('heading',{name:'帳號與權限管理'})).toBeVisible();
  await page.getByRole('tab',{name:/角色與權限/}).click();await expect(page.locator('dialog.role-dialog')).toHaveCount(0);
- const role=page.locator('.role-workspace form');await role.getByLabel('角色名稱',{exact:true}).fill('排程協作專員');await role.getByLabel('排程管理',{exact:true}).check();await role.getByRole('button',{name:'儲存角色權限'}).click();await expect(page.getByRole('status')).toContainText('角色權限已儲存');
+ await page.getByRole('button',{name:'＋ 建立新角色',exact:true}).click();const role=page.locator('.role-workspace form');await role.getByLabel('角色名稱',{exact:true}).fill('排程協作專員');await role.getByLabel('排程管理',{exact:true}).check();await role.getByRole('button',{name:'儲存角色權限'}).click();await expect(page.getByRole('status')).toContainText('角色權限已儲存');
  await page.getByRole('tab',{name:/帳號清單/}).click();await page.locator('.account-table tbody tr').filter({hasText:'U003'}).getByRole('button',{name:'編輯',exact:true}).click();
  const form=page.locator('.account-form');await form.getByLabel('角色',{exact:true}).selectOption({label:'排程協作專員'});await form.getByRole('button',{name:'儲存修改'}).click();
  await page.getByLabel('依角色篩選').selectOption({label:'排程協作專員'});await expect(page.locator('.account-table tbody tr')).toHaveCount(1);await expect(page.locator('.account-table')).toContainText('2 個功能頁面');

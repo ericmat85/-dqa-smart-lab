@@ -1,3 +1,11 @@
+import {canAccessLabPage} from './customRoles.mjs';
+import './LabWorkspaceExpansion.css';
+import MaterialsPage from './MaterialsPage.jsx';
+import EquipmentPage from './EquipmentPage.jsx';
+import IntelligentAssistant from './IntelligentAssistant.jsx';
+import useLabView from './useLabView.js';
+import WorkspaceDiagonalArrow from './WorkspaceDiagonalArrow.jsx';
+import {labRequestOverdue} from './labRequestFilters.mjs';
 import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
 import useSidebarMobile from './useSidebarMobile.js';
 import './LabDashboardCompactV2.css';
@@ -31,7 +39,7 @@ import ScheduleTimeline from './ScheduleTimeline.jsx';
 import useScheduleLifecycle from './useScheduleLifecycle.js';
 import {PaginatedTable} from './Pagination.jsx';
 import RequestInfoModal from './RequestInfoModal.jsx';
-import useLabSnapshot,{refreshLabSnapshot} from './useLabSnapshot.js';
+import {refreshLabSnapshot} from './useLabSnapshot.js';
 import {mergeLabSchedules,labRequestInformation} from './labScheduleBridge.mjs';
 import SignatureHistory from './SignatureHistory.jsx';
 import { auditSignatures } from './signatureHistory.mjs';
@@ -65,7 +73,7 @@ const now = () => new Date().toLocaleString("zh-TW", { hour12: false });
 export default function LabApp({ path, navigate }) {
   const lifecycleError=useScheduleLifecycle();
   useReportSnapshot();
-  const sharedSnapshot=useLabSnapshot();
+  const {snapshot:sharedSnapshot,metrics:labMetrics,now:labNow}=useLabView();
   const [username, setUsername] = useState(() => { try { const id=window.sessionStorage.getItem("dqa-lab-account-id"), a=readDemoAccounts(); const selected=a.find(x=>x.id===id&&accessSystem(x,'lab'))||a.find(x=>x.role==='實驗室工程師'&&accessSystem(x,'lab'))||a.find(x=>accessSystem(x,'lab')); return selected?.email || selected?.name || ""; } catch { return ""; } });
   const [password, setPassword] = useState("demo1234");
   const [loginError, setLoginError] = useState("");
@@ -73,7 +81,8 @@ export default function LabApp({ path, navigate }) {
   const [account, setAccount] = useState(() => {
     try { const id=window.sessionStorage.getItem("dqa-lab-account-id"); const accounts=readDemoAccounts(); const found=Array.isArray(accounts) ? accounts.find(a=>a.id===id) : null; return accessSystem(found,"lab") ? found : null; } catch { return null; }
   });
-  const loggedIn=Boolean(account);
+  const loggedIn=Boolean(account&&sharedSnapshot.accounts.some(row=>row.id===account.id&&accessSystem(row,'lab')));
+  const [,refreshRoleAccess]=useState(0);useEffect(()=>{const refresh=()=>refreshRoleAccess(v=>v+1);window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
   const {dark,toggleTheme}=useSystemTheme();
 
   useEffect(() => {
@@ -109,7 +118,8 @@ export default function LabApp({ path, navigate }) {
   const [tab, setTab] = useState("requests");
   const [menuOpen,setMenuOpen]=useState(false);
   const [sidebarCollapsed,setSidebarCollapsed]=useState(false);const sidebarMobile=useSidebarMobile(720);
-  const chooseTab=next=>{setTab(next);setMenuOpen(false);};
+  const [requestFilter,setRequestFilter]=useState('all');
+  const chooseTab=next=>{setTab(next);setMenuOpen(false);if(next==='requests')setRequestFilter('all');};
   const [notice, setNotice] = useState("");
   const [reportFile, setReportFile] = useState(null);
   const [preparingReport,setPreparingReport]=useState(false);
@@ -241,29 +251,30 @@ export default function LabApp({ path, navigate }) {
   return (
     <div className={`lab-shell lab-enterprise ${sidebarCollapsed?'lab-sidebar-collapsed':''} ${dark ? "lab-theme-dark" : "lab-theme-light"}`}>
       <header className="lab-global-header"><WorkspaceMenuToggle className="lab-mobile-menu" label="切換功能選單" controls="lab-navigation" expanded={sidebarMobile?menuOpen:!sidebarCollapsed} onClick={()=>sidebarMobile?setMenuOpen(v=>!v):setSidebarCollapsed(v=>!v)}/>
-        <CompanyBrandLogo dark={dark}/><nav className="lab-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={navigateHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>chooseTab('requests')}>COLONG 實驗室</button><span aria-hidden="true">›</span><strong aria-current="page">{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</strong></nav>
+        <CompanyBrandLogo dark={dark}/><nav className="lab-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={navigateHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>chooseTab('requests')}>COLONG 實驗室</button><span aria-hidden="true">›</span><strong aria-current="page">{tab==='materials'?'物料管理':tab==='equipment'?'設備狀態':tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託'}</strong></nav>
         <SystemHeaderActions compactTheme dark={dark} onToggle={toggleTheme} account={sharedSnapshot.accounts.find(row=>row.id===account.id)||account} onLogout={logout} notifications={[{title:'待接收試驗',detail:'等待實驗室確認接收',count:requests.filter(row=>row.status==='待確認').length,icon:'✓',onClick:()=>chooseTab('requests')}]}/>
       </header>
       <aside id="lab-navigation" className={`lab-sidebar ${menuOpen?'lab-menu-open':''}`} onKeyDown={event=>{if(event.key==='Escape'&&menuOpen){setMenuOpen(false);document.querySelector('.lab-mobile-menu')?.focus();}}}>
         <WorkspaceSidebarBrand/>
-        <button className={tab === "requests" ? "active" : ""} aria-current={tab === 'requests'?'page':undefined} onClick={() => chooseTab("requests")}><LmsSidebarIcon name="requests"/>試驗委託與接收</button>
-        <button className={tab === "audit" ? "active" : ""} aria-current={tab === 'audit'?'page':undefined} onClick={() => chooseTab("audit")}><LmsSidebarIcon name="history"/>操作歷程</button>
-        <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>chooseTab("archive")}><LmsSidebarIcon name="archive"/>資料庫</button>}</><details className="workspace-sidebar-note"><summary>Demo 使用說明</summary><p>展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</p></details>
+        {canAccessLabPage(account,'requests')&&<button className={tab === "requests" ? "active" : ""} aria-current={tab === 'requests'?'page':undefined} onClick={() => chooseTab("requests")}><LmsSidebarIcon name="requests"/>試驗委託</button>}
+        {canAccessLabPage(account,'equipment')&&<button className={tab==='equipment'?'active':''} onClick={()=>chooseTab('equipment')}><LmsSidebarIcon name="equipment"/>設備狀態</button>}{canAccessLabPage(account,'materials')&&<button className={tab==='materials'?'active':''} onClick={()=>chooseTab('materials')}><LmsSidebarIcon name="maintenance"/>物料管理</button>}
+        {canAccessLabPage(account,'audit')&&<button className={tab === "audit" ? "active" : ""} aria-current={tab === 'audit'?'page':undefined} onClick={() => chooseTab("audit")}><LmsSidebarIcon name="history"/>操作歷程</button>}
+        <>{canAccessLabPage(account,'archive')&&canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={!canAccessLabPage(account,tab)?<div role="alert" className="lab-notice">此角色沒有此頁面的使用權限。</div>:tab==='materials'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><MaterialsPage currentUser={account}/></div>:tab==='equipment'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><EquipmentPage currentUser={account} readOnly/></div>:tab === "archive" ? "active" : ""} onClick={()=>chooseTab("archive")}><LmsSidebarIcon name="archive"/>資料庫</button>}</><details className="workspace-sidebar-note"><summary>Demo 使用說明</summary><p>展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</p></details>
         <button className="lab-back workspace-sidebar-home" onClick={navigateHome}><LmsSidebarIcon name="dashboard"/>回到首頁</button>
       </aside>
-      <main className="lab-main"><div className="lab-workspace-heading"><h1><LmsSidebarIcon name={tab==='audit'?'history':tab==='archive'?'archive':'requests'}/>{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</h1><p>{tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
+      <main className="lab-main"><div className="lab-workspace-heading"><h1><LmsSidebarIcon name={tab==='materials'?'maintenance':tab==='equipment'?'equipment':tab==='audit'?'history':tab==='archive'?'archive':'requests'}/>{tab==='materials'?'物料管理':tab==='equipment'?'設備狀態':tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託'}</h1><p>{tab==='materials'?'庫存、借出與物料資訊管理':tab==='equipment'?'設備資訊與狀態查閱（唯讀）':tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
         {lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{notice && <div className="lab-notice" role="status">{notice}</div>}
-        {tab === "archive" ? <ReportArchive actor={account} system="lab" showHeading={false}/> : tab === "requests" ? <>
-          <div className="lab-stats lab-stats-with-scheduled lab-dashboard-stats">{[['待確認','clock','pending'],['已排程','flow','scheduled'],['試驗中','lab','running'],['已完成','shield','completed']].map(([status,icon,tone])=><div className="lab-stat-card" key={status}><span className={`lab-stat-icon lab-stat-${tone}`}><LoginSystemIcon kind={icon}/></span><div><span>{status}</span><strong>{requests.filter(item=>item.status===status).length}</strong></div></div>)}</div>
+        {tab==='materials'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><MaterialsPage currentUser={account}/></div>:tab==='equipment'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><EquipmentPage currentUser={account} readOnly/></div>:tab === "archive" ? <ReportArchive actor={account} system="lab" showHeading={false}/> : tab === "requests" ? <>
+          <div className="lab-stats lab-stats-with-scheduled lab-dashboard-stats">{[['待確認','clock','pending'],['已排程','flow','scheduled'],['試驗中','lab','running'],['已完成','shield','completed'],['已逾期','clock','overdue']].map(([status,icon,tone])=>{const match=item=>status==='已逾期'?labRequestOverdue(item,sharedSnapshot.schedules,labNow):item.status===status;return <button type="button" className="lab-stat-card" key={status} aria-pressed={requestFilter===status} aria-describedby={`lab-kpi-${tone}`} onClick={()=>setRequestFilter(current=>current===status?'all':status)}><span className={`lab-stat-icon lab-stat-${tone}`}><LoginSystemIcon kind={icon}/></span><div><span>{status}</span><strong>{requests.filter(match).length}</strong></div><span className="lab-kpi-arrow" aria-hidden="true"><WorkspaceDiagonalArrow/></span><small id={`lab-kpi-${tone}`} className="lab-kpi-hint">查看{status}的試驗委託；再次點擊顯示全部。</small></button>;})}</div>
           <section className="lab-panel lab-dashboard-overview"><div className="lab-panel-heading"><div><div className="help-title-row"><h2>試驗委託清單</h2><HelpTip>確認接收、試驗執行與主管審核申請</HelpTip></div></div><button type="button" className="lab-primary" onClick={addReportExample}>Demo試驗加速器</button></div>
-            <div className="lab-table-wrap"><PaginatedTable><thead><tr><th>委託編號</th><th>專案／試驗</th><th>設備</th><th>樣品編號</th><th>試驗日程</th><th>狀態</th><th>操作</th></tr></thead><tbody>{requests.filter(item=>item.status!=="已結案").map(item => <tr key={item.id}>
-              <td><button type="button" className="lab-request-link" onClick={() => setDetail(item)}>{item.id}</button></td><td>{item.project}<small>{item.test}</small><small className="lab-trial-hours">{item.hours} h</small></td><td>{item.equipment}</td><td>{sampleNumbers(item)}</td><td><ScheduleTimeline row={sharedSnapshot.schedules.find(row=>row.id===item.scheduleId||row.requestId===item.id)||{time:item.scheduledStart,end:item.scheduledEnd,status:item.status==='取消'?'取消':'已排程'}}/></td><td><span data-status={item.status} className={`lab-status ${item.status === "試驗中" ? "running" : ""}`}>{item.status}</span>{item.reportInfo?.stage!=='returned'&&passedDemoReview(item.reportInfo?.check)&&<small className="report-demo-review-badge">{DEMO_REVIEW_PASSED}</small>}{item.lastOperationStatus==='已退回'&&<small>申請已退回，請查看操作歷程</small>}</td>
+            <div className="lab-table-wrap"><PaginatedTable><thead><tr><th>委託編號</th><th>專案／試驗</th><th>設備</th><th>樣品編號</th><th>試驗日程</th><th>狀態</th><th>操作</th></tr></thead><tbody>{requests.filter(item=>item.status!=="已結案"&&(requestFilter==='all'||(requestFilter==='已逾期'?labRequestOverdue(item,sharedSnapshot.schedules,labNow):item.status===requestFilter))).map(item => <tr key={item.id}>
+              <td><button type="button" className="lab-request-link" onClick={() => setDetail(item)}>{item.id}</button></td><td>{item.project}<small>{item.test}<small className="lab-trial-hours"> · {item.hours} h</small></small></td><td>{item.equipment}</td><td>{sampleNumbers(item)}</td><td><ScheduleTimeline row={sharedSnapshot.schedules.find(row=>row.id===item.scheduleId||row.requestId===item.id)||{time:item.scheduledStart,end:item.scheduledEnd,status:item.status==='取消'?'取消':'已排程'}}/></td><td><span data-status={item.status} className={`lab-status ${item.status === "試驗中" ? "running" : ""}`}>{item.status}</span>{item.reportInfo?.stage!=='returned'&&passedDemoReview(item.reportInfo?.check)&&<small className="report-demo-review-badge">{DEMO_REVIEW_PASSED}</small>}{item.lastOperationStatus==='已退回'&&<small>申請已退回，請查看操作歷程</small>}</td>
               <td><div className="lab-actions">{item.status==='已排程'&&!item.pendingOperationId&&<span className="lab-review-indicator">已接收，等待開始</span>}{item.pendingOperationId?<span className="lab-review-indicator">待一階主管審核</span>:null}{!item.pendingOperationId&&item.status === "待確認" && <><button onClick={() => openAction(item,"confirm")}>確認接收</button><button className="lab-danger" onClick={() => openAction(item,"cancel")}>申請取消</button></>}{['試驗中','暫停中'].includes(item.status)&&<button type="button" onClick={()=>{setEquipmentRequest(item.id);setEquipmentChoice(null);}}>設備狀態</button>}{item.status === "已完成" && <button type="button" onClick={() => openAction(item,"submitReport")}>提交報告</button>}</div></td>
-            </tr>)}</tbody></PaginatedTable></div>{!requests.some(item=>item.status!=='已結案')&&<div className="lab-empty" role="status">目前沒有待處理的試驗委託。</div>}
+            </tr>)}</tbody></PaginatedTable></div>{!requests.some(item=>item.status!=='已結案'&&(requestFilter==='all'||(requestFilter==='已逾期'?labRequestOverdue(item,sharedSnapshot.schedules,labNow):item.status===requestFilter)))&&<div className="lab-empty" role="status">目前篩選條件下沒有試驗委託。</div>}
           </section>
         </> : <section className="lab-panel"><div className="lab-panel-heading"><div><div className="help-title-row"><h2>本機操作歷程</h2><HelpTip>示範用追加紀錄，尚未具備正式後端不可竄改稽核機制</HelpTip></div></div></div><div className="lab-table-wrap"><PaginatedTable><thead><tr><th>時間</th><th>委託編號</th><th>操作</th><th>操作者</th><th>原因</th><th>簽名</th></tr></thead><tbody>{audit.length ? audit.map(event => <tr key={event.id}><td>{event.time}</td><td><button type="button" className="lab-request-link" onClick={()=>setDetail(requests.find(row=>row.id===event.requestId)||{id:event.requestId})}>{event.requestId}</button></td><td>{event.action}</td><td>{event.actor}</td><td>{event.reason}</td><td>{event.signature ? <SignatureHistory records={auditSignatures([event], event.requestId)} /> : "舊紀錄未提供簽名"}</td></tr>) : <tr><td colSpan="6">尚無操作紀錄</td></tr>}</tbody></PaginatedTable></div></section>}
-      </main>
+      <div className={`lab-shared-tools lms-enterprise ${dark?'theme-dark':'theme-light'}`}><IntelligentAssistant system="lab" snapshot={{...sharedSnapshot,labWorkItems:requests}} metrics={labMetrics}/></div></main>
       <ClearCasesButton />
       {equipmentRequest&&(()=>{const schedule=sharedSnapshot.schedules.find(r=>r.requestId===equipmentRequest);const machines=sharedSnapshot.equipment.filter(m=>schedule&&usesEquipment(schedule,m));return equipmentChoice?<EquipmentInfoModal equipment={machines.find(m=>m.id===equipmentChoice)||{id:equipmentChoice,name:'設備已移除'}} onClose={()=>{setEquipmentChoice(null);setEquipmentRequest(null);}}/>:<div className="lab-modal-backdrop"><section className="lab-modal" role="dialog" aria-label="試驗設備狀態"><h2>設備狀態｜{equipmentRequest}</h2>{machines.map(m=><p key={m.id}><button type="button" onClick={()=>setEquipmentChoice(m.id)}>{m.id} · {m.name} · {m.status}</button></p>)}{!machines.length&&<p>目前無對應設備。</p>}<button type="button" onClick={()=>setEquipmentRequest(null)}>關閉</button></section></div>;})()}
       {detail && <RequestInfoModal account={account} request={labRequestInformation(detail,sharedSnapshot)} onClose={()=>setDetail(null)}/>}
