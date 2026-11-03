@@ -68,3 +68,13 @@ export async function returnReportWorkflow({requestId,actorId,comment,expectedRe
  const next={...report,revision:crypto.randomUUID(),stage:'returned',returnReason:reason,priorApprovals:[...(report.priorApprovals||[]),{level,actorId,actor:account.name,at,decision:'退回'}],history:[...report.history,{id:crypto.randomUUID(),at,actor:account.name,actorId,level,action:`第${level}階主管退回報告：${reason}`} ]};
  ensureEpoch(storage,epoch);await repository.save(next,report.revision,epoch);ensureEpoch(storage,epoch);projectReportState(next,storage);return reportMetadata(next);
 }
+
+// Requester-manager readback return: resubmit through the existing report review chain.
+export async function returnViewedReport({requestId,actorId,comment,expectedRevision},storage=window.localStorage,repository=repo){
+ const epoch=caseResetVersion(storage),report=await repository.get(requestId),source=request(storage,requestId),account=actor(storage,actorId);
+ if(!report||report.revision!==expectedRevision)throw Error('報告已更新，請重新開啟。');
+ if(!canConfirmReport(account,report,source))throw Error('僅指定委託者主管可退回待查閱報告。');
+ const reason=String(comment||'').trim();if(!reason)throw Error('退回原因必填。');
+ const at=new Date().toISOString(),next={...report,revision:crypto.randomUUID(),stage:'returned',returnReason:reason,history:[...report.history,{id:crypto.randomUUID(),at,actor:account.name,actorId:account.id,action:`委託者主管查閱退回：${reason}`} ]};
+ ensureEpoch(storage,epoch);await repository.save(next,report.revision,epoch);ensureEpoch(storage,epoch);projectReportState(next,storage);return reportMetadata(next);
+}
