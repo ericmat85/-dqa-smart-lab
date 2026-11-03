@@ -11,7 +11,7 @@ const details={
 };
 export function LoginSystemIcon({kind='lab',...props}){
  const paths={'lms-entry':'M4 4h16v16H4zM4 10h16M10 4v16M14 4v16M4 14h16',lab:'M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10M10 18h.01M13 12h.01',document:'M14 3H5v18h14V8l-5-5v5h5M8 12h8M8 16h5',shield:'M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7l-9-4ZM8 12l3 3 5-6',chart:'M4 20h16M7 16v-5M12 16V5M17 16V8',clock:'M12 8v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',folder:'M3 7h7l2 2h9v11H3V5h7l2 2',flow:'M12 3v5M5 14v-4h14v4M3 14h4v6H3zM10 14h4v6h-4zM17 14h4v6h-4zM10 3h4v4h-4z',sun:'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',moon:'M20 15.5A9 9 0 0 1 8.5 4 9 9 0 1 0 20 15.5',help:'M12 10.5v6.8M12 7.5h.01M21.5 12a9.5 9.5 0 1 1-19 0 9.5 9.5 0 0 1 19 0'};
- return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={kind==='lms-entry'?'1.5':'1.6'} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.document}/></svg>;
+ return <svg {...props} data-system-icon={kind} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={kind==='lms-entry'?'1.5':'1.6'} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.document}/></svg>;
 }
 export default function EnterpriseLoginLayout({system,dark,onToggle,children}){
  const [help,setHelp]=useState(false);const info=details[system]||details.lms;

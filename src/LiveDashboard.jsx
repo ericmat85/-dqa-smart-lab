@@ -1,3 +1,5 @@
+import LmsSidebarIcon from './LmsSidebarIcon.jsx';
+import {LoginSystemIcon} from './EnterpriseLoginLayout.jsx';
 import './LmsDashboardPhase1.css';
 import ScheduleStatusChart from './ScheduleStatusChart.jsx';
 import DashboardMetricIcon from './DashboardMetricIcon.jsx';
@@ -25,9 +27,10 @@ export default function LiveDashboard({onNavigate,currentUser}) {
   return <div className="live-lab-page live-dashboard">
     <div className="live-metric-grid">
       <MetricCard label="待排程試驗" value={metrics.counts['未排程']} detail={`另有 ${metrics.counts['有衝突']} 筆排程衝突`} icon={<DashboardMetricIcon kind="pending"/>} onClick={()=>onNavigate('schedule','未排程')}/>
+      <MetricCard label="排程衝突" value={metrics.counts['有衝突']} detail="查看既有排程衝突清單" icon={<LoginSystemIcon kind="flow"/>} onClick={()=>onNavigate('schedule','有衝突')}/>
       <MetricCard label="試驗中" value={metrics.counts['試驗中']} detail={`${metrics.counts['已排程']} 筆已預約、尚未開始`} icon={<DashboardMetricIcon kind="running"/>} color="teal" onClick={()=>onNavigate('schedule','試驗中')}/>
       <MetricCard label="本週完成" value={metrics.completedThisWeek} detail={`${metrics.week.from} — ${metrics.week.to}`} icon={<DashboardMetricIcon kind="completed"/>} color="orange" onClick={()=>onNavigate('schedule','已完成')}/>
-      <MetricCard label="設備稼動率" value={`${activity.rate}%`} detail={`${activity.from} — ${activity.to} · 排程估算`} icon="▦" color="slate" onClick={()=>onNavigate('settings','activity')}/>
+      <MetricCard label="設備稼動率" value={`${activity.rate}%`} detail={`${activity.from} — ${activity.to} · 排程估算`} icon={<LmsSidebarIcon name="equipment"/>} color="slate" onClick={()=>onNavigate('settings','activity')}/>
     </div>
     <div className="live-dashboard-charts">
       <section className="live-panel"><header><div><div className="help-title-row"><h2>設備排程占用率</h2><HelpTip>本週 · 依設備分類 · {metrics.week.from} — {metrics.week.to}</HelpTip></div></div></header><div className="live-bar-chart"><div className="live-chart-ticks"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div><div className="live-bars">{metrics.categories.map(item=><button type="button" className="live-bar-column" key={item.category} onClick={()=>setCategory(item.category)} aria-label={`${item.category}，本週排程占用率 ${item.rate.toFixed(1)}%，${item.count} 台設備`}><span className="live-bar-value">{item.rate.toFixed(1)}%</span><span className="live-bar-slot"><span style={{height:`${item.rate}%`}}/></span><span className="live-bar-label">{item.category}</span><span className="live-bar-tooltip">{item.count} 台 · {(item.occupiedMs/3600000).toFixed(1)}／{(item.calendarMs/3600000).toFixed(0)} 小時<br/>點擊查看設備</span></button>)}{!metrics.categories.length&&<div className="live-empty">尚無設備資料</div>}</div></div></section>

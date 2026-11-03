@@ -5,7 +5,7 @@ import './IntelligentAssistant.css';
 import AssistantIcon from './AssistantIcon.jsx';
 
 function viewport(){const view=window.visualViewport;return {width:view?.width||window.innerWidth,height:view?.height||window.innerHeight,top:view?.offsetTop||0,right:Math.max(0,window.innerWidth-((view?.offsetLeft||0)+(view?.width||window.innerWidth)))};}
-export default function IntelligentAssistant({snapshot,metrics}){
+export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
  const [open,setOpen]=useState(false),[question,setQuestion]=useState(''),[turns,setTurns]=useState([]),[files,setFiles]=useState([]);const input=useRef(null),fileInput=useRef(null),timers=useRef(new Set()),body=useRef(null),examples=useRef(null),focusNewTurn=useRef(false);
  const [view,setView]=useState(viewport);
  const [launcherTop,setLauncherTop]=useState(()=>{const area=viewport();return area.top+Math.max(8,area.height-64);});
@@ -48,7 +48,7 @@ export default function IntelligentAssistant({snapshot,metrics}){
  }
  function ask(text=question,{focusTurn=false}={}){
   if(!text.trim()&&!files.length)return;
-  const reply=text.trim()?assistantReply(text,snapshot,metrics):'已附加檔案資訊。本 Demo 不會解析檔案內容，請選擇常見問題進行展示。';
+  const reply=text.trim()?assistantReply(text,snapshot,metrics,system):'已附加檔案資訊。本 Demo 不會解析檔案內容，請選擇常見問題進行展示。';
   const characters=typeof Intl.Segmenter==='function'
    ? Array.from(new Intl.Segmenter('zh-TW',{granularity:'grapheme'}).segment(reply),part=>part.segment)
    : Array.from(reply);

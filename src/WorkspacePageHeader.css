@@ -5,7 +5,7 @@
 #root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav strong{color:var(--enterprise-text);font-weight:600}
 #root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>.system-header-actions{flex-shrink:0}
 #root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2){display:flex;align-items:center;gap:10px;font-size:22px;line-height:1.4;font-weight:700;color:var(--enterprise-text);margin:0}
-#root :is(.rq-enterprise .rq-workspace-heading h1,.lab-enterprise .lab-workspace-heading h1,.lms-enterprise .lms-dashboard-heading h1,.rq-enterprise .rq-editor-page .rq-form-header h2,.lms-enterprise .template-heading h2,.lms-enterprise .account-page-heading h2)::before{content:'';display:block;flex:0 0 22px;width:22px;height:24px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round' d='M14 3H5v18h14V8l-5-5v5h5M8 12h8M8 16h5'/%3E%3C/svg%3E") center/contain no-repeat}
+
 #root :is(.rq-enterprise .rq-main,.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:18px}
 @media(min-width:1001px){#root .rq-app.rq-enterprise{grid-template-rows:48px minmax(calc(100dvh - 48px),auto)}}
 @media(min-width:721px){#root .lab-shell.lab-enterprise{grid-template-rows:48px minmax(0,1fr)}}
@@ -118,3 +118,7 @@
 #root .rq-enterprise .rq-kpis>button>.rq-kpi-arrow{grid-column:3;grid-row:1/span 2;display:grid;place-items:center;color:var(--enterprise-secondary);margin:0;line-height:0}
 .rq-kpi-arrow svg{display:block;width:16px;height:16px}
 #root .rq-enterprise .rq-kpis>button:hover .rq-kpi-arrow{color:#0866e8}
+
+/* Page titles reuse the exact sidebar SVG, inheriting the title theme color. */
+#root :is(.rq-enterprise,.lab-enterprise,.lms-enterprise) :is(h1,h2):has(>.lms-sidebar-icon){display:flex;align-items:center;gap:10px}
+#root :is(.rq-enterprise,.lab-enterprise,.lms-enterprise) :is(h1,h2)>.lms-sidebar-icon{width:22px;height:24px;flex:0 0 22px;color:currentColor}

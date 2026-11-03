@@ -13,5 +13,22 @@ export function saveCustomRole(roles,draft,storage=globalThis.window?.localStora
  const next=roles.some(row=>row.id===role.id)?roles.map(row=>row.id===role.id?role:row):[...roles,role];
  storage.setItem(ROLE_KEY,JSON.stringify(next));return next;
 }
-export function customRole(account,storage){return readCustomRoles(storage).find(role=>role.name===account?.role);}
+export function customRole(account,storage=globalThis.window?.localStorage){const custom=readCustomRoles(storage).find(role=>role.name===account?.role);if(custom)return custom;try{const saved=JSON.parse(storage?.getItem(BUILTIN_ROLE_KEY)||'[]');if(Array.isArray(saved)&&saved.some(row=>row.name===account?.role))return readBuiltinRoles(storage).find(role=>role.name===account.role);}catch{/* Ignore invalid overrides. */}return undefined;}
 export function canAccessLmsPage(account,page){if(account?.status!=='啟用中')return false;const role=customRole(account);return role?page==='accounts'?role.manageAccounts:role.pages.includes(page):true;}
+
+export const BUILTIN_ROLE_KEY='dqa-builtin-role-overrides-v1';
+const builtinSystems=name=>['實驗室工程師','實驗室副工程師'].includes(name)?['lab']:['委託者','委託者主管'].includes(name)?['request']:['一階主管','二階主管','三階主管'].includes(name)?['lms','lab']:name==='系統管理員'?['lms']:[];
+export function readBuiltinRoles(storage=globalThis.window?.localStorage){
+ let saved=[];try{saved=JSON.parse(storage?.getItem(BUILTIN_ROLE_KEY)||'[]');}catch{/* Keep original defaults. */}
+ return BUILTIN_ROLES.map(name=>{const original={id:`builtin:${name}`,name,builtin:true,level:({'一階主管':1,'二階主管':2,'三階主管':3})[name]||0,pages:ROLE_PAGES.map(([id])=>id),systems:builtinSystems(name),manageAccounts:['系統管理員','二階主管'].includes(name)};const override=Array.isArray(saved)&&saved.find(row=>row.name===name&&[0,1,2,3].includes(row.level)&&Array.isArray(row.pages)&&Array.isArray(row.systems));return override?{...original,...override,id:original.id,name,builtin:true}:original;});
+}
+export function saveBuiltinRole(draft,storage=globalThis.window?.localStorage){
+ if(!BUILTIN_ROLES.includes(draft.name)||![0,1,2,3].includes(draft.level))throw Error('請選擇有效內建角色與權限等級。');
+ const pages=[...new Set(draft.pages)].filter(page=>ROLE_PAGES.some(([id])=>id===page));if(!pages.includes('dashboard'))pages.unshift('dashboard');
+ if(draft.level>0&&!pages.includes('requests'))throw Error('審查角色必須開啟「試驗委託與審查」。');
+ const systems=[...new Set(draft.systems||[])].filter(id=>['lms','lab','request'].includes(id));
+ const role={id:`builtin:${draft.name}`,name:draft.name,builtin:true,level:draft.level,pages,systems,manageAccounts:Boolean(draft.manageAccounts)};
+ const next=readBuiltinRoles(storage).map(row=>row.name===role.name?role:row);storage.setItem(BUILTIN_ROLE_KEY,JSON.stringify(next));return next;
+}
+
+export function canAccessLabPage(account,page,storage){if(account?.status!=='啟用中')return false;const role=customRole(account,storage);return !role||role.pages.includes(({materials:'maintenance',audit:'requests'})[page]||page);}

@@ -1,0 +1,16 @@
+/* Restrained status accents; card selection continues to use enterprise blue. */
+html body #root .lms-enterprise .workspace-summary-icon[data-inventory-tone]{background:var(--inventory-icon-bg,var(--soft));color:var(--inventory-icon-fg,var(--tab-accent))}
+html body #root .lms-enterprise [data-inventory-tone=active]{--inventory-icon-bg:#e9f2ff;--inventory-icon-fg:#0866e8}
+html body #root .lms-enterprise [data-inventory-tone=available]{--inventory-icon-bg:#e7f5ef;--inventory-icon-fg:#157650}
+html body #root .lms-enterprise [data-inventory-tone=maintenance]{--inventory-icon-bg:#fff3df;--inventory-icon-fg:#916000}
+html body #root .lms-enterprise [data-inventory-tone=calibration]{--inventory-icon-bg:#f0ecfb;--inventory-icon-fg:#6951a2}
+html body #root .lms-enterprise [data-inventory-tone=loan]{--inventory-icon-bg:#ecedfb;--inventory-icon-fg:#565ba4}
+html body #root .lms-enterprise [data-inventory-tone=warning]{--inventory-icon-bg:#fcebec;--inventory-icon-fg:#ab3948}
+html body #root .lms-enterprise [data-inventory-tone=neutral]{--inventory-icon-bg:#edf1f6;--inventory-icon-fg:#53677f}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=active]{--inventory-icon-bg:#163a61;--inventory-icon-fg:#85bdff}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=available]{--inventory-icon-bg:#153d34;--inventory-icon-fg:#8bd8b4}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=maintenance]{--inventory-icon-bg:#40351e;--inventory-icon-fg:#efca7b}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=calibration]{--inventory-icon-bg:#302c4c;--inventory-icon-fg:#c0b1ee}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=loan]{--inventory-icon-bg:#292f50;--inventory-icon-fg:#b1bcf2}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=warning]{--inventory-icon-bg:#452a35;--inventory-icon-fg:#f1a9b4}
+html body #root .lms-enterprise.theme-dark [data-inventory-tone=neutral]{--inventory-icon-bg:#23374b;--inventory-icon-fg:#b1c2d4}

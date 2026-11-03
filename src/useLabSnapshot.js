@@ -1,8 +1,9 @@
+import {ROLE_KEY,BUILTIN_ROLE_KEY} from './customRoles.mjs';
 import {useSyncExternalStore} from 'react';
 import {LAB_SOURCES,readLabSnapshot} from './labData.mjs';
 
-const keys=[...LAB_SOURCES.map(source=>source.key),'dqa-cancelled-requests-v1'];
-const events=['storage','focus','dqa:request-updated','dqa:review-updated','dqa:schedules-updated','dqa:equipment-updated'];
+const keys=[...LAB_SOURCES.map(source=>source.key),'dqa-cancelled-requests-v1',ROLE_KEY,BUILTIN_ROLE_KEY];
+const events=['storage','focus','dqa:request-updated','dqa:review-updated','dqa:schedules-updated','dqa:equipment-updated','dqa:roles-updated'];
 let cached=null,signature='',timer;
 const listeners=new Set();
 const serverStorage={getItem:()=>null};

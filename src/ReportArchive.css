@@ -12,3 +12,13 @@
 .archive-page [role=tabpanel]:focus-visible{outline:2px solid var(--tab-accent);outline-offset:3px}
 .archive-empty{padding:32px 16px;text-align:center;border:1px solid var(--border,#dce5f1);border-radius:10px;color:var(--muted,#71829a);font-size:13px}
 .archive-template-download{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid var(--border,#dce5f1);border-radius:7px;color:var(--tab-accent);text-decoration:none}
+
+/* Shared database rhythm: one padding layer and tabs directly below the heading. */
+html body #root .archive-page[data-system]{padding:16px}
+html body #root .archive-page[data-system]>.template-page{padding:0;margin:0}
+html body #root .archive-page[data-system] .template-heading{margin:0 0 12px;padding:0;min-height:0}
+html body #root .archive-page[data-system] .archive-tabs{margin:0 0 12px;padding-top:0;min-height:40px}
+html body #root .archive-page[data-system] .archive-tabs button{margin:0;padding:10px 4px;min-height:40px}
+html body #root .archive-page[data-system] .archive-toolbar{margin:0 0 12px;padding:0}
+html body #root .archive-page[data-system] .archive-toolbar input{margin:6px 0 0;min-height:36px}
+@media(max-width:600px){html body #root .archive-page[data-system]{padding:12px}}

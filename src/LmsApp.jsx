@@ -1,3 +1,14 @@
+import './AccountRolePolish.css';
+import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
+import ScheduleGanttBoard from './ScheduleGanttBoard.jsx';
+import {shiftGanttDate} from './scheduleGantt.mjs';
+import CompactDialog from './CompactDialog.jsx';
+import {deleteDemoAccount} from './accountManagement.mjs';
+import './WorkspaceExpansion.css';
+import ScheduleSummaryIcon from './ScheduleSummaryIcon.jsx';
+import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
+import useSidebarMobile from './useSidebarMobile.js';
+import WorkspaceSidebarBrand from './WorkspaceSidebarBrand.jsx';
 import './WorkspacePageHeader.css';
 import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
 import HelpTip from './HelpTip.jsx';
@@ -16,7 +27,6 @@ import {canControlTrial,isActiveTrial,trialPauseAvailability} from './trialPermi
 import {setTrialPaused} from './trialControls.mjs';
 import ReportArchive from './ReportArchive.jsx';
 import {canOpenReportArchive} from './reportArchive.mjs';
-import {usesEquipment} from './scheduleResources.mjs';
 import useSystemTheme from './useSystemTheme.js';
 import SystemHeaderActions from './SystemHeaderActions.jsx';
 import useReportSnapshot from './useReportSnapshot.js';
@@ -140,7 +150,7 @@ function ThemeToggle({ dark, onToggle }) {
 
     >
 
-      <span>{dark ? "☾" : "☀"}</span>
+      <span data-theme-symbol={dark?"moon":"sun"}>{dark ? "☾" : "☀"}</span>
 
       <span>{dark ? "深色模式" : "淺色模式"}</span>
 
@@ -501,9 +511,9 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
 
 
-      <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
+      <aside id="lms-navigation" className={`sidebar ${open ? "sidebar-open" : ""}`}>
 
-        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><CompanyBrandLogo dark whiteText/></div>
+        <WorkspaceSidebarBrand className="sidebar-brand live-sidebar-brand colong-sidebar-brand"/>
 
 
 
@@ -572,17 +582,18 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
 
 
-function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},children}){
- return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
+function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},sidebarExpanded,children}){
+ return <header className="dashboard-topbar"><WorkspaceMenuToggle className="menu-button" label="切換側邊欄" controls="lms-navigation" expanded={sidebarExpanded} onClick={onMenu}/>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
  {title:'待審查試驗委託',detail:'等待主管審核委託內容與報告',count:notificationCounts.pendingReview,icon:'✓',onClick:()=>onNavigate?.('requests','待審查')},
  {title:'待排程試驗',detail:'等待安排設備與試驗時間',count:notificationCounts.unscheduled,icon:'◷',onClick:()=>onNavigate?.('schedule','未排程')},
  {title:'排程衝突',detail:'設備或時段重疊，需要確認',count:notificationCounts.conflicts,icon:'!',onClick:()=>onNavigate?.('schedule','有衝突')}
  ]}/></header>;
 }
 
-function AccountManagement({ accounts, setAccounts }) {
+function AccountManagement({ accounts, setAccounts,currentUser }) {
   const [roles,setRoles]=useState(()=>readCustomRoles());
   const [roleSettingsOpen,setRoleSettingsOpen]=useState(false);
+  const [deleteTarget,setDeleteTarget]=useState(null),[deleteError,setDeleteError]=useState('');
 
   const [showForm, setShowForm] = useState(false);
 
@@ -965,7 +976,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
         <div>
 
-          <div className="help-title-row"><h2>帳號與權限管理</h2><HelpTip>集中管理使用者、角色與功能權限，從帳號指派到簽核層級一次完成。</HelpTip></div>
+          <div className="help-title-row"><h2><LmsSidebarIcon name="accounts"/>帳號與權限管理</h2><p className="account-inline-help">集中管理使用者、角色與功能權限，從帳號指派到簽核層級一次完成。</p></div>
 
         </div>
 
@@ -992,7 +1003,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
 <div className="account-summary">
 
-        <div className="account-summary-card">
+        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
 
           <span>帳號總數</span>
 
@@ -1000,7 +1011,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
         </div>
 
-        <div className="account-summary-card">
+        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
 
           <span>啟用中</span>
 
@@ -1008,7 +1019,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
         </div>
 
-        <div className="account-summary-card">
+        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
 
           <span>停用帳號</span>
 
@@ -1053,9 +1064,9 @@ function AccountManagement({ accounts, setAccounts }) {
 
       {showForm && (
 
-        <form className="account-form" onSubmit={handleSubmit}>
+        <CompactDialog title={editingId?"編輯帳號":"新增帳號"} onClose={resetForm}><form className="account-form" onSubmit={handleSubmit}>
 
-          <h3>{editingId ? "編輯帳號" : "新增帳號"}</h3>
+
 
 
 
@@ -1238,13 +1249,13 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
-          <HelpTip>
+          <p className="account-inline-help">
 
             登入帳號以電子郵件為準。密碼欄位目前僅供表單驗證展示；
 
             正式環境必須由後端安全處理，不可儲存明文密碼。
 
-          </HelpTip>
+          </p>
 
 
 
@@ -1286,33 +1297,13 @@ function AccountManagement({ accounts, setAccounts }) {
 
           </div>
 
-        </form>
+        </form></CompactDialog>
 
       )}
 
 
 
-      <div className="account-toolbar"><select aria-label="依角色篩選" value={roleFilter} onChange={event=>setRoleFilter(event.target.value)}><option value="">全部角色</option>{[...BUILTIN_ROLES,...roles.map(role=>role.name)].map(name=><option key={name}>{name}</option>)}</select>
-
-        <input
-
-          className="account-search"
-
-          type="search"
-
-          placeholder="搜尋姓名、電子郵件或部門..."
-
-          value={search}
-
-          onChange={(event) => setSearch(event.target.value)}
-
-          aria-label="搜尋帳號"
-
-        />
-
-
-
-        <select
+      <CatalogSearchToolbar kind="帳號" label="搜尋帳號" placeholder="搜尋姓名、電子郵件或部門..." value={search} onChange={setSearch} onClear={()=>{setSearch('');setRoleFilter('');setFilter('全部');}} className="account-toolbar"><select aria-label="依角色篩選" value={roleFilter} onChange={event=>setRoleFilter(event.target.value)}><option value="">全部角色</option>{[...BUILTIN_ROLES,...roles.map(role=>role.name)].map(name=><option key={name}>{name}</option>)}</select><select
 
           className="account-role-filter"
 
@@ -1330,9 +1321,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
           <option value="已停用">已停用</option>
 
-        </select>
-
-      </div>
+        </select></CatalogSearchToolbar>
 
 
 
@@ -1476,7 +1465,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
                         : "啟用"}
 
-                    </button>
+                    </button><button type="button" disabled={account.id===currentUser?.id} onClick={()=>{setDeleteTarget(account);setDeleteError('');}}>刪除</button>
 
                   </div>
 
@@ -1510,16 +1499,16 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
-      <HelpTip>
+      <p className="account-inline-help">
 
         Demo 帳號、角色與權限供流程展示，保存於目前瀏覽器；
 
         正式帳號驗證與權限控管需由後端服務執行。
 
-      </HelpTip>
+      </p>
 
       </div>
-    </section>
+    {deleteTarget&&<CompactDialog title="刪除帳號" onClose={()=>setDeleteTarget(null)}><div className="account-delete-confirm"><p>確認刪除 {deleteTarget.name}（{deleteTarget.email}）？此帳號將無法登入，既有操作歷史仍保留。</p>{deleteError&&<p role="alert">{deleteError}</p>}<div className="account-form-actions"><button type="button" className="account-cancel-button" onClick={()=>setDeleteTarget(null)}>取消</button><button type="button" className="primary-button" onClick={()=>{try{const next=deleteDemoAccount(readDemoAccounts(),deleteTarget.id,currentUser?.id);setAccounts(next);setNotice(`帳號 ${deleteTarget.name} 已刪除。`);setDeleteTarget(null);}catch(error){setDeleteError(error.message);}}}>確認刪除</button></div></div></CompactDialog>}</section>
 
   );
 
@@ -1527,7 +1516,7 @@ function AccountManagement({ accounts, setAccounts }) {
 
 
 
-function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser }) {
+function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPage=null,onExit }) {
  const requestResetEpoch=useRef(caseResetVersion());
  const reportRows=useReportSnapshot();
  const approvalSnapshot=useLabSnapshot();
@@ -1577,7 +1566,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser }) {
    }, 100);
    return () => window.clearInterval(timer);
  }, [pendingReviewResult]);
- const [showHistory,setShowHistory] = useState(false);
+ const [showHistory,setShowHistory] = useState(subPage==='history');
  const [historyFilter,setHistoryFilter] = useState("完成");
  const approvalRows=requestApprovalRows(requests,approvalSnapshot.labOperations,approvalSnapshot.schedules,approvalSnapshot.borrows,reportRows);
  const pendingCount=approvalRows.filter(row=>row.status==='待審查').length;
@@ -1682,17 +1671,17 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser }) {
  if(!canReview(currentUser,{...current,participantIds:current.applicant===currentUser?.name?[currentUser.id]:[],approvals:current.approvalRecords||[]})){setNotice("此帳號無權審核本案件，或已參與本案件的審查。");return;} if(!returnIt&&!reviewSignature){setNotice("請先完成電子簽名。");return;} if(returnIt&&!comment.trim()){setNotice("退回原因必填。");return;}  const level=current.approval+1; const action=returnIt?`第${level}階主管退回：${comment||"請補充資料"}`:`第${level}階主管核准`; update(current.id,r=>({...r,status:returnIt?"退回":level>=2?"完成":"待審查",approval:returnIt?0:level,approvalRecords:[...(r.approvalRecords||[]),{stage:level,actorId:currentUser.id,action:returnIt?"退回":"核准",at:new Date().toISOString()}],signatureRecords:[...getSignatureHistory(r),{stage:level,actor:currentUser.name,comment:comment.trim(),actorId:currentUser.id,signature:reviewSignature,at:new Date().toISOString(),decision:returnIt?"退回":"核准"}],history:[...r.history,`${stamp()} ${action}`]})); setNotice(returnIt?"已退回申請人補件；重新送出後將由第一階主管重新審查。":level>=2?"兩階主管皆已核准，委託狀態更新為完成。":"第一階主管已核准，等待第二階主管審查。"); setComment(""); setReviewSignature("");setReviewMode("draw"); if(returnIt||level>=2)setSelected(null); else setSelected(current.id); }
  const visible=approvalRows.filter(r=>(requestStatusFilter==='all'||r.status===requestStatusFilter)&&`${r.id} ${r.productCode||''} ${r.title} ${r.department} ${r.applicant}`.toLowerCase().includes(search.toLowerCase()));
  const historical=requests.filter(r=>["完成","取消","退回","已結案"].includes(r.status)&&r.status===historyFilter&&`${r.id} ${r.productCode||""} ${r.title} ${r.department} ${r.applicant}`.toLowerCase().includes(search.toLowerCase()));
- return <section className="panel generic-page lms-compact-requests"><div className="template-page"><div className="template-heading"><div><div className="help-title-row"><h2>試驗委託管理</h2><HelpTip>本頁顯示待審查、待核准與報告待審核委託；已完成、取消及退回案件請至歷史委託查詢。</HelpTip></div></div><button className="template-btn secondary request-history-button" onClick={()=>setShowHistory(true)}>歷史委託</button></div>
+ return <section className="panel generic-page lms-compact-requests"><div className={subPage?"template-page has-request-subpage":"template-page"}><div className="template-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="requests"/>試驗委託管理</h2><HelpTip>本頁顯示待審查、待核准與報告待審核委託；已完成、取消及退回案件請至歷史委託查詢。</HelpTip></div></div><a className="template-btn secondary request-history-button" href="/lms/requests/history" target="_blank" rel="opener">歷史委託</a></div>
  <div className="schedule-view-tabs request-review-tabs" role="tablist" aria-label="委託審查分類">{reviewTabs.map(([key,label,count],index)=><button type="button" role="tab" key={key} id={`request-review-tab-${index}`} aria-selected={requestStatusFilter===key} aria-controls="request-review-panel" tabIndex={requestStatusFilter===key?0:-1} onClick={()=>setRequestStatusFilter(key)} onKeyDown={event=>reviewTabKeyDown(event,index)}><strong>{label}</strong><span>{count}</span></button>)}</div>
  {approvalOperationId&&<LabOperationApproval operationId={approvalOperationId} currentUser={currentUser} onClose={()=>setApprovalOperationId(null)}/>}
  {approvalInfo&&<RequestInfoModal account={currentUser} request={approvalInfo} onClose={()=>setApprovalInfo(null)}/>}
  {storageError && <div className="template-notice" role="alert">{storageError}<button type="button" onClick={() => setStorageError(writeStoredRequests(requests) ? "" : storageError)}>重試儲存</button></div>}
  {notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}
  <section id="request-review-panel" role="tabpanel" aria-labelledby={`request-review-tab-${activeReviewTab}`} tabIndex={0}>
- <div className="template-toolbar"><input className="template-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜尋委託編號、產品代碼、試驗項目、部門…"/></div>
+ <CatalogSearchToolbar kind="委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>setSearch('')}/>
  <div className="template-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}:${requestStatusFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","優先順序","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(r=><tr key={r.operationId||r.id}><td><button type="button" className="request-id-link" onClick={()=>{if(r.reportId){setApprovalInfo(requestInformation(r,approvalSnapshot));return;}if(r.operationId?.startsWith('borrow:')){setApprovalOperationId(r.operationId);return;}if(r.operationId){setApprovalInfo({...requestInformation(r,approvalSnapshot),status:'待核准'});return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode("view");setComment("");setAiReview(null)}} title={`查看 ${r.id} 委託單細節`}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.priority}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{if(r.operationId){setApprovalOperationId(r.operationId);return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode(r.status==="待審查"?"review":"view");setComment("");setAiReview(null);}}>{r.reportId?'審核':r.operationId?'核准':r.status==="待審查"?"審查":r.status==="退回"?"補件":"查看"}</button></td></tr>)}</tbody></PaginatedTable>{!visible.length&&<div className="template-empty">沒有符合條件的委託</div>}</div></section>
  <div className="template-info">顯示委託審查、申請核准與二／三階報告審核；已結案報告可在案件歷程查閱。</div>
- {showHistory&&<div className="request-modal-backdrop history-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setShowHistory(false)}}><section className="request-modal history-modal" role="dialog" aria-modal="true" aria-labelledby="history-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="history-modal-title">歷史委託</h3><HelpTip>查詢已完成、取消及退回的委託單；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史委託" onClick={()=>setShowHistory(false)}>×</button></div><div className="request-modal-body"><div className="template-toolbar history-toolbar"><input className="template-input" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜尋委託編號、產品代碼、試驗項目、部門…"/><select className="template-select" value={historyFilter} onChange={e=>setHistoryFilter(e.target.value)}>{["完成","取消","退回"].map(x=><option key={x} value={x}>{x}</option>)}</select><span className="request-count">共 {historical.length} 筆</span></div><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historical.map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);setShowHistory(false)}}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);setShowHistory(false)}}>查看</button></td></tr>)}</tbody></PaginatedTable>{!historical.length&&<div className="template-empty">此分類目前沒有歷史委託</div>}</div></div></section></div>}
+ {showHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal" role="region" aria-labelledby="history-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="history-modal-title">歷史委託</h3><HelpTip>查詢已完成、取消及退回的委託單；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史委託" onClick={()=>subPage?onExit():setShowHistory(false)}>×</button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>{setSearch('');setHistoryFilter('完成');}} className="history-toolbar"><select className="template-select" value={historyFilter} onChange={e=>setHistoryFilter(e.target.value)}>{["完成","取消","退回"].map(x=><option key={x} value={x}>{x}</option>)}</select><span className="request-count">共 {historical.length} 筆</span></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historical.map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>查看</button></td></tr>)}</tbody></PaginatedTable>{!historical.length&&<div className="template-empty">此分類目前沒有歷史委託</div>}</div></div></section></div>}
  {current&&<div className="request-modal-backdrop" role="presentation" onMouseDown={e=>{if(!selectedFromHistory&&e.target===e.currentTarget)setSelected(null)}}><section className="request-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="request-modal-title">{current.id}｜{current.title}</h3><HelpTip>委託詳細資料與簽核歷程</HelpTip></div></div><div className="request-modal-header-actions">{current.status === "待審查" && <button type="button" className="template-btn secondary" onClick={fillDemoReview}>DEMO 填寫</button>}{modalMode==="review"&&<button type="button" className="template-btn ai-review-button" disabled={aiReviewing} onClick={()=>runAIReview(current)}><AssistantIcon/><span>{aiReviewing?"檢查中…":"AI 審查"}</span></button>}{selectedFromHistory?<button type="button" className="template-btn secondary" onClick={()=>{setSelected(null);setSelectedFromHistory(false);setAiReview(null);setShowHistory(true);}}>回上一頁</button>:<button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉視窗" onClick={()=>{setSelected(null);setAiReview(null);}}>×</button>}</div></div><div className="request-modal-body"><ReportCasePanel request={approvalSnapshot.electronic.find(row=>row.id===current.id)||current} account={currentUser}/>{notice && <div className="template-info" role="status">{notice}</div>}{modalMode === "review" && aiReviewing && <section className="ai-review-results" aria-live="polite"><h4>檢查委託資料</h4><p>正在依現有規則檢查欄位，請稍候。</p><div role="progressbar" aria-label="審查進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={aiProgress} style={{height:10,background:"#e6ecf5",borderRadius:10,overflow:"hidden"}}><div style={{height:"100%",width:`${aiProgress}%`,background:"#4857d5",transition:"width 100ms linear"}} /></div><p>{aiProgress}%</p>{["產品代碼", "產品類型", "需求日期", "測試數量", "試驗規範／試驗手法", "判定基準"].map((label,index)=><p key={label} style={{margin:"6px 0",color:aiProgress >= Math.ceil((index+1)*100/6) ? "#25835d" : "#8794aa"}}>{aiProgress >= Math.ceil((index+1)*100/6) ? "✓ 已檢查" : "○ 等待檢查"}　{label}</p>)}</section>}{modalMode==="review"&&aiReview&&aiReview.id===current.id&&<section className="ai-review-results" aria-live="polite"><div className="ai-review-results-heading"><div><span className="ai-review-eyebrow">DQA SMART REVIEW · {aiReview.mode}</span><h4>AI 審查結果</h4><p>{aiReview.summary}</p></div><button type="button" className="ai-review-dismiss" onClick={()=>setAiReview(null)} aria-label="關閉 AI 審查結果">×</button></div><div className="ai-review-metrics"><span>檢查欄位 <strong>{aiReview.checkedFields}</strong></span><span>待確認項目 <strong>{aiReview.findings.length}</strong></span><span>檢查時間 <strong>{aiReview.createdAt}</strong></span></div>{aiReview.findings.length===0?<div className="ai-review-empty"><strong>未發現明顯缺漏</strong><HelpTip>這只代表目前規則檢查未發現明顯問題，不代表試驗規格已獲正式認可。</HelpTip></div>:<div className="ai-review-finding-list">{aiReview.findings.map((finding,index)=><article className={`ai-review-finding ${finding.level}`} key={`${finding.title}-${index}`}><span className="ai-review-finding-icon">{finding.level==="error"?"!":"△"}</span><div><strong>{finding.title}</strong><p>{finding.detail}</p></div><span className="ai-review-level">{finding.level==="error"?"需補正":"待確認"}</span></article>)}</div>}<p className="ai-review-disclaimer">提示：目前為前端 Demo 規則檢查，尚未連接真正的 AI API 或讀取外部規格文件。結果僅供參考，不會自動核准或退回委託。</p></section>}<div className="request-form-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{current.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{current.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{current.customerName||"—"}</strong></div><div><label>客戶品番</label><strong>{current.customerPartNo||"—"}</strong></div><div><label>需求日期</label><strong>{current.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{current.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{(current.intentions||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{(current.sampleSource||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{current.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{current.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{current.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{current.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{current.specification||current.title}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{current.judgment||"依核准之試驗規格判定。"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{current.remarks||"—"}</div></div>{current.source === "electronic-request" && <div className="template-info">此電子委託的簽名與審查結果會同步回委託系統；雙階核准後進入待排程。</div>}<div className="detail-grid"><div><span>委託部門</span><strong>{current.department}</strong></div><div><span>申請人</span><strong>{current.applicant}</strong></div><div><span>目前狀態</span><strong><span className={`template-status status-${current.status}`}>{current.status}</span></strong></div><div><span>審查進度</span><strong>{current.approval}/2 階核准</strong></div></div><h4>雙階主管審查</h4><div className="approval-steps"><div className={current.approval>=1?"approved":""}><b>1</b><span>第一階主管</span><small>{current.approval>=1?"已核准":current.status==="退回"?"已退回":"待審查"}</small></div><div className={current.approval>=2?"approved":""}><b>2</b><span>第二階主管</span><small>{current.approval>=2?"已核准":"待第一階完成"}</small></div></div><SignatureHistory request={current} /><h4>完整操作歷程</h4><PaginatedList items={current.history} resetKey={current.id}>{page=><ul className="history-list">{page.map((h,i)=><li key={i}>{h}</li>)}</ul>}</PaginatedList>{current.status === "待審查" && <section className="request-form-preview"><h4>電子簽名與審核</h4><ApprovalSignature key={`${current.id}-${current.approval}-${reviewInputVersion}`} accountId={currentUser?.id} mode={reviewMode} onModeChange={setReviewMode} value={reviewSignature} onChange={setReviewSignature} onError={setNotice} /><label className="comment-label">審查意見（退回時請填寫）<textarea className="template-input" value={comment} onChange={e=>setComment(e.target.value)} placeholder="例如：請補充測試條件、樣品數量或規格依據" rows={3}/></label><div className="template-form-actions"><button type="button" className="template-btn" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(false)}>核准第 {current.approval+1} 階</button><button type="button" className="template-btn danger" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(true)}>退回委託</button></div></section>}</div></section></div>}
  </div></section>;
 }
@@ -1700,7 +1689,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser }) {
 function readSavedSchedules(fallback){
  try{const data=JSON.parse(window.localStorage.getItem(SCHEDULE_KEY)||'null');return Array.isArray(data)&&data.every(row=>row?.id&&row?.requestId)?data:fallback;}catch{return fallback;}
 }
-function SchedulePage({ currentUser, accounts = [], initialFilter = null, onScheduleCountsChange = () => {} }){
+function SchedulePage({ currentUser, accounts = [], initialFilter = null, onScheduleCountsChange = () => {},subPage=null,onExit }){
  const [scheduleFilter,setScheduleFilter]=useState(initialFilter || "未排程");
  const [scheduleSearch,setScheduleSearch]=useState("");
  const [notice,setNotice]=useState("");
@@ -1720,10 +1709,10 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    window.addEventListener('focus',refresh);window.addEventListener('storage',storage);window.addEventListener('dqa:equipment-updated',refresh);
    return()=>{window.removeEventListener('focus',refresh);window.removeEventListener('storage',storage);window.removeEventListener('dqa:equipment-updated',refresh);};
  },[]);
- const [showScheduleHistory,setShowScheduleHistory]=useState(false);
- const [showGantt,setShowGantt]=useState(false);
+ const [showScheduleHistory,setShowScheduleHistory]=useState(subPage==='history');
+ const [showGantt,setShowGantt]=useState(subPage==='chart');
  const [ganttTab,setGanttTab]=useState("equipment");
- const [ganttStartDate,setGanttStartDate]=useState("2026-10-25");
+ const [ganttStartDate,setGanttStartDate]=useState(()=>getRequestDate());
  const [ganttDays,setGanttDays]=useState(14);
  const [historyScheduleFilter,setHistoryScheduleFilter]=useState("全部");
  const [editing,setEditing]=useState(null);
@@ -1808,7 +1797,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
      const proposal=validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows,today:getRequestDate()});
      const updated=rows.map(row=>row.id===editing.id?proposal:row);
      try{window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
-     setScheduleRows(updated);setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
+     setScheduleRows(updated);window.dispatchEvent(new Event('dqa:schedules-updated'));setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
      setEditing(null);setEditForm(null);
    }catch(error){setScheduleMessage(error.message||'無法儲存排程，請重試。');}
  }
@@ -1821,15 +1810,16 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const activityPreferences=useManagementPreferences();
  const activity=equipmentActivity(displayScheduleRows,equipmentCatalog,activityPreferences,scheduleNow);
 
- return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><div className="help-title-row"><h2>試驗排程管理</h2><HelpTip>按「編輯排程」查看委託內容並安排設備；日程結束後自動完成並釋放設備。</HelpTip></div></div><div className="schedule-heading-actions"><button type="button" className="template-btn schedule-chart-button" onClick={()=>setShowGantt(true)}><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></button><button type="button" className="template-btn secondary schedule-history-button" onClick={()=>setShowScheduleHistory(true)}>歷史排程</button></div></div><div className="schedule-kpis schedule-kpis-timed summary-tiles"><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi equipment-activity-kpi" title={`台灣時間 ${activity.from} 至 ${activity.to}；依排程時數估算，重疊時段去除重複。`}><span>設備稼動率（{activity.days} 天）<small>{activity.from} — {activity.to}</small></span><strong>{activity.rate}%</strong></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<ScheduleViews rows={activeScheduleRows} accounts={accounts} equipment={equipmentCatalog} now={scheduleNow} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備稼動率依區間內試驗排程時數／設備日曆總時數估算，並非實測開機時數；規則僅供流程驗證，尚未接正式資料庫。</div></div>
- {showGantt&&<div className="request-modal-backdrop gantt-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setShowGantt(false)}}><section className="request-modal gantt-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-gantt-title"><header className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-gantt-title">排程管理圖表</h3><HelpTip>分頁檢視設備或人力排程；可瀏覽過去與未來日期</HelpTip></div></div><button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉排程管理圖表" onClick={()=>setShowGantt(false)}>×</button></header><div className="request-modal-body"><div className="gantt-tabs" role="tablist" aria-label="甘特圖類型"><button type="button" role="tab" aria-selected={ganttTab==="equipment"} className={ganttTab==="equipment"?"active":""} onClick={()=>setGanttTab("equipment")}>設備排程甘特圖</button><button type="button" role="tab" aria-selected={ganttTab==="people"} className={ganttTab==="people"?"active":""} onClick={()=>setGanttTab("people")}>人力排程甘特圖</button></div><div className="gantt-controls"><button type="button" className="template-btn secondary" onClick={()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()-ganttDays);setGanttStartDate(d.toISOString().slice(0,10))}}>← 前一段</button><label>起始日期 <input type="date" value={ganttStartDate} onChange={e=>e.target.value&&setGanttStartDate(e.target.value)}/></label><label>顯示天數 <select value={ganttDays} onChange={e=>setGanttDays(Number(e.target.value))}><option value={7}>7 天</option><option value={14}>14 天</option><option value={30}>30 天</option><option value={60}>60 天</option><option value={90}>90 天</option></select></label><button type="button" className="template-btn secondary" onClick={()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+ganttDays);setGanttStartDate(d.toISOString().slice(0,10))}}>下一段 →</button><button type="button" className="template-btn secondary" onClick={()=>setGanttStartDate(new Date().toISOString().slice(0,10))}>回到今天</button></div><div className="gantt-summary"><span><i className={`gantt-legend ${ganttTab}`}/>{ganttTab==="equipment"?"設備占用時段":"工程師工作時段"}</span><span><i className="gantt-legend conflict"/>衝突／待確認</span><small>{ganttStartDate} 至 {(()=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+ganttDays-1);return d.toISOString().slice(0,10)})()}（Demo）</small></div><div className="gantt-scroll"><div className="gantt-board"><div className="gantt-axis" style={{gridTemplateColumns:`190px repeat(${ganttDays}, minmax(${ganttDays>30?36:58}px,1fr))`}}><div className="gantt-lane-label">{ganttTab==="equipment"?"設備":"工程師"}</div>{Array.from({length:ganttDays},(_,i)=>{const d=new Date(ganttStartDate+"T00:00:00");d.setDate(d.getDate()+i);return <div className="gantt-day" key={i}>{`${d.getMonth()+1}/${d.getDate()}`}<small>{["日","一","二","三","四","五","六"][d.getDay()]}</small></div>})}</div>{(()=>{const kind=ganttTab;const lanes=kind==="equipment"?equipmentCatalog.filter(machine=>activeScheduleRows.some(row=>usesEquipment(row,machine))).map(machine=>machine.name):[...new Set(activeScheduleRows.map(row=>row.owner).filter(Boolean))];const base=new Date(ganttStartDate+"T00:00:00");const range=ganttDays*24*60*60*1000;return <div className="gantt-group">{lanes.length===0?<div className="gantt-empty">目前沒有可顯示的{kind==="equipment"?"設備":"人力"}排程。</div>:lanes.map(lane=>{const tasks=activeScheduleRows.filter(r=>(kind==="equipment"?usesEquipment(r,equipmentCatalog.find(machine=>machine.name===lane)):r.owner===lane)&&r.time&&r.end);return <div className="gantt-row" key={lane} style={{gridTemplateColumns:`190px minmax(0,1fr)`}}><div className="gantt-lane-label" title={lane}>{lane}</div><div className="gantt-track" style={{backgroundSize:`${100/ganttDays}% 100%`,backgroundImage:`repeating-linear-gradient(to right,transparent 0,transparent calc(${100/ganttDays}% - 1px),#e8edf4 calc(${100/ganttDays}% - 1px),#e8edf4 ${100/ganttDays}%)`}}>{tasks.map(r=>{const start=new Date(r.time),end=new Date(r.end);const left=Math.max(0,Math.min(100,((start-base)/range)*100));const right=Math.max(left+Math.min(1,100/ganttDays),Math.min(100,((end-base)/range)*100));if(end<base||start>=new Date(base.getTime()+range))return null;return <button type="button" key={r.id} className={`gantt-task ${kind} ${r.status==="有衝突"?"is-conflict":""}`} style={{left:`${left}%`,width:`${Math.max(0.5,right-left)}%`}} title={`${r.id}｜${r.title}｜${r.time}–${r.end}`} onClick={()=>{setShowGantt(false);openEditor(r)}}>{r.title}</button>})}</div></div>})}</div>})()}</div></div><div className="gantt-footnote"><strong>排程判讀提醒</strong><HelpTip>可透過起始日期與日期跨度瀏覽任意過去或未來區間；左右切換不受目前 Demo 日期限制。甘特圖依現有排程資料繪製，點擊任務可開啟既有排程編輯。尚未接上正式資料庫的排程衝突計算與最佳化引擎。</HelpTip></div></div></section></div>}
- {showScheduleHistory&&<div className="request-modal-backdrop history-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setShowScheduleHistory(false)}}><section className="request-modal history-modal schedule-history-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-history-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-history-title">歷史排程</h3><HelpTip>依排程管理狀態查詢排程紀錄；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史排程" onClick={()=>setShowScheduleHistory(false)}>×</button></div><div className="request-modal-body"><div className="template-toolbar history-toolbar"><input className="template-input" value={scheduleSearch} onChange={e=>setScheduleSearch(e.target.value)} placeholder="搜尋委託編號、產品代碼、試驗項目或設備…"/><select className="template-select" value={historyScheduleFilter} onChange={e=>setHistoryScheduleFilter(e.target.value)}>{[{value:"全部",label:"全部"},{value:"已排程",label:"已排程"},{value:"試驗中",label:"試驗中"},{value:"已完成",label:"已完成"},{value:"取消",label:"已取消"},{value:"未排程",label:"待排程"},{value:"有衝突",label:"排程衝突"}].map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></div><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${scheduleSearch}:${historyScheduleFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","樣品編號","試驗項目","設備","執行人","試驗日程","狀態"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={() => openRequestInfo(r)}>{r.requestId || "未關聯委託"}</button></td><td>{r.productCode||"—"}</td><td>{r.sampleCode||"—"}</td><td>{r.title}</td><td>{r.eq}</td><td>{r.owner}</td><td><ScheduleTimeline row={r}/></td><td><span className={`template-status status-${r.status}`}>{r.status==="未排程"?"待排程":r.status==="有衝突"?"排程衝突":r.status}</span></td></tr>)}</tbody></PaginatedTable>{!historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).length&&<div className="template-empty">此分類目前沒有歷史排程</div>}</div></div></section></div>}
+ return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="schedule"/>試驗排程管理</h2><HelpTip>按「編輯排程」查看委託內容並安排設備；日程結束後自動完成並釋放設備。</HelpTip></div></div><div className="schedule-heading-actions"><a className="template-btn schedule-chart-button" href="/lms/schedule/chart" target="_blank" rel="opener"><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></a><a className="template-btn secondary schedule-history-button" href="/lms/schedule/history" target="_blank" rel="opener">歷史排程</a></div></div><div className="schedule-kpis schedule-kpis-timed summary-tiles"><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><ScheduleSummaryIcon kind="pending"/><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><ScheduleSummaryIcon kind="conflict"/><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><ScheduleSummaryIcon kind="scheduled"/><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><ScheduleSummaryIcon kind="running"/><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi equipment-activity-kpi" tabIndex={0} aria-describedby="schedule-activity-period" title={`台灣時間 ${activity.from} 至 ${activity.to}；依排程時數估算，重疊時段去除重複。`}><ScheduleSummaryIcon kind="activity"/><span>設備稼動率</span><strong>{activity.rate}%</strong><small className="schedule-activity-period" id="schedule-activity-period">統計 {activity.days} 天 · {activity.from} — {activity.to}</small></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<ScheduleViews rows={activeScheduleRows} accounts={accounts} equipment={equipmentCatalog} now={scheduleNow} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onClear={()=>{setScheduleSearch('');setScheduleFilter('全部');}} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備稼動率依區間內試驗排程時數／設備日曆總時數估算，並非實測開機時數；規則僅供流程驗證，尚未接正式資料庫。</div></div>
+ {showGantt&&<div className="workspace-subpage"><section className="workspace-subpage-panel gantt-modal" role="region" aria-labelledby="schedule-gantt-title"><header className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-gantt-title">排程管理圖表</h3><HelpTip>分頁檢視設備或人力排程；可瀏覽過去與未來日期</HelpTip></div></div><button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉排程管理圖表" onClick={()=>subPage?onExit():setShowGantt(false)}>×</button></header><div className="request-modal-body"><div className="gantt-tabs" role="tablist" aria-label="甘特圖類型"><button type="button" role="tab" aria-selected={ganttTab==="equipment"} className={ganttTab==="equipment"?"active":""} onClick={()=>setGanttTab("equipment")}>設備排程甘特圖</button><button type="button" role="tab" aria-selected={ganttTab==="people"} className={ganttTab==="people"?"active":""} onClick={()=>setGanttTab("people")}>人力排程甘特圖</button></div><div className="gantt-controls"><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,-ganttDays))}}>← 前一段</button><label>起始日期 <input type="date" value={ganttStartDate} onChange={e=>e.target.value&&setGanttStartDate(e.target.value)}/></label><label>顯示天數 <select value={ganttDays} onChange={e=>setGanttDays(Number(e.target.value))}><option value={7}>7 天</option><option value={14}>14 天</option><option value={30}>30 天</option><option value={60}>60 天</option><option value={90}>90 天</option></select></label><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,ganttDays))}}>下一段 →</button><button type="button" className="template-btn secondary" onClick={()=>setGanttStartDate(getRequestDate())}>回到今天</button></div><div className="gantt-summary"><span><i className={`gantt-legend ${ganttTab}`}/>{ganttTab==="equipment"?"設備占用時段":"工程師工作時段"}</span><span><i className="gantt-legend conflict"/>衝突／待確認</span><small>{ganttStartDate} 至 {shiftGanttDate(ganttStartDate,ganttDays-1)}（Demo）</small></div><ScheduleGanttBoard rows={displayScheduleRows} equipment={equipmentCatalog} accounts={accounts} kind={ganttTab} date={ganttStartDate} days={ganttDays} now={scheduleNow} onEdit={row=>{if(!subPage)setShowGantt(false);openEditor(row);}}/><div className="gantt-footnote"><strong>排程判讀提醒</strong><HelpTip>可透過起始日期與日期跨度瀏覽任意過去或未來區間；左右切換不受目前 Demo 日期限制。設備與人力共用已儲存排程，包含已完成紀錄；未排程、取消與待核准項目不繪製。暫停順延與台灣日期依排程時間同步。甘特圖依現有排程資料繪製，點擊任務可開啟既有排程編輯。尚未接上正式資料庫的排程衝突計算與最佳化引擎。</HelpTip></div></div></section></div>}
+ {showScheduleHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal schedule-history-modal" role="region" aria-labelledby="schedule-history-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-history-title">歷史排程</h3><HelpTip>依排程管理狀態查詢排程紀錄；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史排程" onClick={()=>subPage?onExit():setShowScheduleHistory(false)}>×</button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史排程" placeholder="搜尋委託編號、產品代碼、試驗項目或設備…" value={scheduleSearch} onChange={setScheduleSearch} onClear={()=>{setScheduleSearch('');setHistoryScheduleFilter('全部');}} className="history-toolbar"><select className="template-select" value={historyScheduleFilter} onChange={e=>setHistoryScheduleFilter(e.target.value)}>{[{value:"全部",label:"全部"},{value:"已排程",label:"已排程"},{value:"試驗中",label:"試驗中"},{value:"已完成",label:"已完成"},{value:"取消",label:"已取消"},{value:"未排程",label:"待排程"},{value:"有衝突",label:"排程衝突"}].map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${scheduleSearch}:${historyScheduleFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","樣品編號","試驗項目","設備","執行人","試驗日程","狀態"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={() => openRequestInfo(r)}>{r.requestId || "未關聯委託"}</button></td><td>{r.productCode||"—"}</td><td>{r.sampleCode||"—"}</td><td>{r.title}</td><td>{r.eq}</td><td>{r.owner}</td><td><ScheduleTimeline row={r}/></td><td><span className={`template-status status-${r.status}`}>{r.status==="未排程"?"待排程":r.status==="有衝突"?"排程衝突":r.status}</span></td></tr>)}</tbody></PaginatedTable>{!historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).length&&<div className="template-empty">此分類目前沒有歷史排程</div>}</div></div></section></div>}
  {editing&&editForm&&<div className="request-modal-backdrop schedule-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget){setEditing(null);setEditForm(null);}}}><section className="request-modal schedule-edit-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-edit-title"><header className="request-modal-header"><div><h3 id="schedule-edit-title">編輯試驗排程｜{editing.requestId}</h3><ScheduleEditStatus row={editing} now={scheduleNow}/></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉" onClick={()=>{setEditing(null);setEditForm(null);}}>×</button></header><div className="request-modal-body schedule-edit-body"><details className="schedule-request-details"><summary>試驗資訊<small>{editing.requestId} · 點擊展開／收合</small></summary><div className="request-form-preview schedule-request-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{editing.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{editing.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{editing.customer||"—"}</strong></div><div><label>客戶品番</label><strong>{editing.customerPart||"—"}</strong></div><div><label>需求日期</label><strong>{editing.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{editing.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{String(editing.intent||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{String(editing.sampleSource||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{editing.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{editing.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{editing.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{editing.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{editing.testSpec||editing.title||"—"}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{editing.judgment||"—"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{editing.remarks||"—"}</div></div></details><ScheduleArrangement editing={editing} form={editForm} onChange={setEditForm} equipment={equipmentCatalog} accounts={accounts} onRecommend={autoScheduleCurrent} message={scheduleMessage} onRefresh={refreshEquipment} /><div className="template-form-actions schedule-edit-actions">{<button type="button" className="template-btn secondary" disabled={!trialPauseAvailability(currentUser,editing,scheduleNow).enabled} onClick={()=>{const paused=!editing.pauseStartedAt;if(!window.confirm(paused?'確定暫停試驗？設備將暫停占用，預估結束時間隨暫停時間往後順延。':'確定恢復試驗？暫停期間會計入預估結束時間。'))return;try{setTrialPaused({scheduleId:editing.id,actorId:currentUser?.id,paused});for(const name of ['dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));setEditing(null);setEditForm(null);setNotice(paused?'試驗與設備已暫停。':'試驗與設備已恢復，預估結束時間已順延。');}catch(error){setScheduleMessage(error.message);}}}>{editing.pauseStartedAt?'恢復試驗':'暫停試驗'}</button>}<button type="button" className="template-btn danger" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={()=>{setStopError('');setShowStopDialog(true);}}>中止排程</button><button className="template-btn schedule-save-button" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={saveSchedule}>儲存排程</button></div></div></section></div>}
  {showStopDialog && editing && <StopScheduleDialog requestId={editing.requestId} onClose={()=>setShowStopDialog(false)} onConfirm={confirmStopSchedule} error={stopError} />}
  {requestInfo && <RequestInfoModal account={currentUser} request={requestInfo} onClose={() => setRequestInfo(null)} />}</section>;
 }
 
 function DashboardPage({
+  path,appNavigate,
 
   dark,
 
@@ -1847,10 +1837,14 @@ function DashboardPage({
 }) {
 
   const lifecycleError=useScheduleLifecycle();
-  const [active, setActive] = useState("dashboard");
+  const routePage=path.split('/')[2]||'dashboard';
+  const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
+  const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
+  const [active, setActive] = useState(routePage);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [notificationFilter, setNotificationFilter] = useState(null);
+  const sidebarMobile=useSidebarMobile(900);
+  const [notificationFilter, setNotificationFilter] = useState(()=>new URLSearchParams(window.location.search).get('filter'));
 
   // 全 Dashboard 共用 AI 排程助理，切換側邊頁面時仍保持可用。
   function navigate(id, filter = null) {
@@ -1858,6 +1852,7 @@ function DashboardPage({
     setActive(id);
     setNotificationFilter(filter);
     setSidebarOpen(false);
+    appNavigate(`/lms/${id}${filter?'?filter='+encodeURIComponent(filter):''}`);
   }
 
   const {snapshot: liveSnapshot, metrics: liveMetrics}=useLabView();
@@ -1869,7 +1864,7 @@ function DashboardPage({
 
   return (
 
-    <div className={`dashboard-shell lms-enterprise ${dark ? "theme-dark" : "theme-light"} ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${active === "schedule" ? "is-schedule-page" : ""}`}>
+    <div className={`dashboard-shell lms-enterprise ${dark ? "theme-dark" : "theme-light"} ${sidebarCollapsed ? "sidebar-collapsed" : ""} ${active === "schedule" ? "is-schedule-page" : ""} ${subPage?"lms-child-page":""}`}>
 
       <Sidebar
 
@@ -1894,29 +1889,30 @@ function DashboardPage({
 
           onToggle={onToggle}
 
-          onMenu={() => { if (window.matchMedia("(max-width: 900px)").matches) setSidebarOpen(!sidebarOpen); else setSidebarCollapsed(value => !value); }}
+          sidebarExpanded={sidebarMobile?sidebarOpen:!sidebarCollapsed}
+          onMenu={() => { if (sidebarMobile) setSidebarOpen(value=>!value); else setSidebarCollapsed(value => !value); }}
 
           onLogout={onLogout}
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>COLONG LMS</button><span aria-hidden="true">›</span><strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong></nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
-        <div className="dashboard-content">{active==='dashboard'&&<div className="lms-dashboard-heading"><h1>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
+        <div className="dashboard-content">{active==='dashboard'&&<div className="lms-dashboard-heading"><h1><LmsSidebarIcon name="dashboard"/>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
 
           {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
-            <RequestsPage initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />
+            <RequestsPage onExit={()=>navigate('requests')} subPage={subPage} initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />
           ) : active === "schedule" ? (
-            <SchedulePage currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
+            <SchedulePage onExit={()=>navigate('schedule')} subPage={subPage} currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
           ) : active === "equipment" ? (
             <EquipmentPage currentUser={currentUser} />
           ) : active === "maintenance" ? (
             <MaterialsPage currentUser={currentUser} />
           ) : active === "accounts" ? (
 
-            canManageAccounts(currentUser) ? <AccountManagement
+            canManageAccounts(currentUser) ? <AccountManagement currentUser={currentUser}
 
               accounts={accounts}
 
@@ -1952,6 +1948,7 @@ export default function App({ path, navigate }) {
 
   const {dark,toggleTheme}=useSystemTheme();
 
+
   const [accounts, setAccounts] = useState(() => {
     const saved = readDemoAccounts();
     const stored = !window.localStorage.getItem("dqa-report-level3-migration-v1")&&!saved.some(row=>row.role==="三階主管")?[...saved,{id:"DEMO-LEVEL3",name:"示範三階主管",email:"level3@example.com",role:"三階主管",department:"DQA 實驗室",status:"啟用中",lastLogin:"尚未登入"}]:saved;
@@ -1959,13 +1956,15 @@ export default function App({ path, navigate }) {
   });
   useEffect(() => { window.localStorage.setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); window.localStorage.setItem("dqa-admin-huang-migration-v1", "1"); window.localStorage.setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
 
+  const [,refreshRoles]=useState(0);useEffect(()=>{const refresh=event=>{if(event.type==='storage'&&event.key==='dqa-shared-demo-accounts-v1')setAccounts(readDemoAccounts());refreshRoles(value=>value+1);};window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
   const [currentUserId, setCurrentUserId] = useState(() => {
     try { return window.sessionStorage.getItem('dqa-lms-account-id') || ''; } catch { return ''; }
   });
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
-    if (path !== '/lms/login' && path !== '/lms/dashboard') navigate('/lms/login', true);
-    else if (path === '/lms/dashboard' && !currentUser) navigate('/lms/login', true);
+    const valid=[...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
+    if (path !== '/lms/login' && !valid.includes(path)) navigate('/lms/login', true);
+    else if (valid.includes(path) && !currentUser) navigate('/lms/login', true);
     else if(path==='/lms/login'&&currentUser)navigate('/lms/dashboard',true);
   }, [path, currentUser, navigate]);
 
@@ -2123,11 +2122,11 @@ export default function App({ path, navigate }) {
 
 
 
-  if (currentUser && path === "/lms/dashboard") {
+  if (currentUser && path.startsWith("/lms/") && path!=="/lms/login") {
 
     return (
 
-      <DashboardPage
+      <DashboardPage key={path} path={path} appNavigate={navigate}
 
         dark={dark}
 

@@ -21,7 +21,7 @@ test('report export downloads valid complete Excel and Chinese PDF with column s
  await page.locator('.management-export-menu>summary').click();await expect(page.locator('.management-export-menu>summary')).toHaveCSS('background-color','rgb(8, 102, 232)');
  let waiting=page.waitForEvent('download');await page.getByRole('button',{name:/Excel 活頁簿/}).click();let download=await waiting;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
  const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(await readFile(await download.path()));expect(book.worksheets[0].rowCount).toBe(26);expect(book.worksheets[1].name).toBe('匯出摘要');
- await page.locator('.management-export-menu>summary').click();waiting=page.waitForEvent('download');await page.getByRole('button',{name:/PDF 文件/}).click();download=await waiting;expect(download.suggestedFilename()).toMatch(/\.pdf$/);const pdf=await PDFDocument.load(await readFile(await download.path()));expect(pdf.getPageCount()).toBeGreaterThan(0);expect(pdf.getTitle()).toBe('試驗排程');
+ await page.locator('.management-export-menu>summary').click();waiting=page.waitForEvent('download');await page.getByRole('button',{name:/PDF 文件/}).click();download=await waiting;expect(download.suggestedFilename()).toMatch(/\.pdf$/);const pdf=await PDFDocument.load(await readFile(await download.path()));expect(pdf.getPageCount()).toBeGreaterThan(0);expect(pdf.getTitle()).toBe('試驗執行統計');
  await page.getByRole('searchbox',{name:'搜尋報表'}).fill('REQ-EXPORT-24');await expect(page.locator('.lab-report-scope')).toContainText('顯示 1／25 筆');
  await page.locator('.management-fold>summary').click();await page.locator('.management-column-options').getByLabel('設備',{exact:true}).uncheck();
  await expect(page.locator('.live-record-table thead')).not.toContainText('設備');
@@ -31,7 +31,7 @@ test('report export downloads valid complete Excel and Chinese PDF with column s
 test('accounts and roles share a workspace, assign custom permissions and preserve them after reload',async({page})=>{
  await nav(page,'帳號管理');await expect(page.getByRole('heading',{name:'帳號與權限管理'})).toBeVisible();
  await page.getByRole('tab',{name:/角色與權限/}).click();await expect(page.locator('dialog.role-dialog')).toHaveCount(0);
- const role=page.locator('.role-workspace form');await role.getByLabel('角色名稱',{exact:true}).fill('排程協作專員');await role.getByLabel('排程管理',{exact:true}).check();await role.getByRole('button',{name:'儲存角色權限'}).click();await expect(page.getByRole('status')).toContainText('角色權限已儲存');
+ await page.getByRole('button',{name:'＋ 建立新角色',exact:true}).click();const role=page.locator('.role-workspace form');await role.getByLabel('角色名稱',{exact:true}).fill('排程協作專員');await role.getByLabel('排程管理',{exact:true}).check();await role.getByRole('button',{name:'儲存角色權限'}).click();await expect(page.getByRole('status')).toContainText('角色權限已儲存');
  await page.getByRole('tab',{name:/帳號清單/}).click();await page.locator('.account-table tbody tr').filter({hasText:'U003'}).getByRole('button',{name:'編輯',exact:true}).click();
  const form=page.locator('.account-form');await form.getByLabel('角色',{exact:true}).selectOption({label:'排程協作專員'});await form.getByRole('button',{name:'儲存修改'}).click();
  await page.getByLabel('依角色篩選').selectOption({label:'排程協作專員'});await expect(page.locator('.account-table tbody tr')).toHaveCount(1);await expect(page.locator('.account-table')).toContainText('2 個功能頁面');
@@ -46,7 +46,7 @@ test('report export settings persist preferences while system settings retain ap
  await nav(page,'系統設定');await page.getByRole('button',{name:'切換深色或淺色模式'}).click();await expect(page.locator('.dashboard-shell')).toHaveClass(/theme-dark/);
  await settings.locator('.management-fold').filter({has:page.locator('summary').filter({hasText:'資料來源健檢'})}).locator('summary').first().click();await expect(settings.getByRole('columnheader',{name:'資料來源',exact:true})).toBeVisible();
  await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByText(/重新讀取本機資料/)).toBeVisible();
- await settings.locator('.settings-home-footer').getByRole('button',{name:'回到首頁'}).click();await expect(page).toHaveURL(/\/$/);expect(await page.evaluate(()=>sessionStorage.getItem('dqa-lms-account-id'))).toBe('U001');
+ await expect(settings.locator('.settings-home-footer')).toHaveCount(0);await page.locator('.sidebar').getByRole('button',{name:'回到首頁',exact:true}).click();await expect(page).toHaveURL(/\/$/);expect(await page.evaluate(()=>sessionStorage.getItem('dqa-lms-account-id'))).toBe('U001');
  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'回到首頁',exact:true}).click();await expect(page).toHaveURL(/\/$/);
  expect(await page.pageErrors()).toEqual([]);
 });

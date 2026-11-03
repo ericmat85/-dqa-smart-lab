@@ -1,0 +1,18 @@
+/* Phase 1 only: the existing Lab landing workspace, not its operation dialogs. */
+#root .lab-shell.lab-enterprise .lab-main:has(>.lab-dashboard-stats)>.lab-workspace-heading{margin-bottom:12px}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats{gap:12px;margin-bottom:12px}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats>.lab-stat-card{min-height:96px;padding:16px;gap:12px}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-icon{width:32px;height:32px;flex-basis:32px;border-radius:6px}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-card>div>span{font-size:13px;line-height:1.5}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-card strong{font-size:26px;margin-top:4px}
+#root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-running{background:var(--soft);color:var(--tab-accent)}
+#root .lab-shell.lab-enterprise .lab-dashboard-overview{margin-bottom:12px}
+#root .lab-shell.lab-enterprise .lab-dashboard-overview>.lab-panel-heading{padding:12px 16px}
+#root .lab-shell.lab-enterprise .lab-dashboard-overview td{height:44px;padding:6px 12px}
+#root .lab-shell.lab-enterprise .lab-dashboard-overview td small{margin-top:2px}
+#root .lab-shell.lab-enterprise .lab-dashboard-overview .lab-status[data-status=試驗中]{background:var(--soft);color:var(--tab-accent)}
+/* Reuse the original Demo control, outside the working table's hit area. */
+#root .lab-shell.lab-enterprise:has(.lab-dashboard-stats){position:relative}
+#root .lab-shell.lab-enterprise:has(.lab-dashboard-stats)>.clear-cases-control{position:absolute;top:64px;right:24px;bottom:auto;flex-direction:column-reverse}
+@media(max-width:720px){#root .lab-shell.lab-enterprise .lab-dashboard-stats>.lab-stat-card{padding:14px;min-height:96px}#root .lab-shell.lab-enterprise:has(.lab-dashboard-stats)>.clear-cases-control{right:12px}}
+@media(max-width:720px){#root .lab-shell.lab-enterprise:has(.lab-dashboard-stats):has(.lab-menu-open)>.clear-cases-control{visibility:hidden}}

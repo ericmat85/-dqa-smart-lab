@@ -16,7 +16,7 @@ for(const system of Object.keys(keys)){
  test(`${system} logs out at 30 minutes, shows a modal and allows a fresh login`,async({page})=>{
   await login(page,system);await page.clock.fastForward(29*60*1000+59000);await expect(page.getByRole('dialog',{name:'已自動登出'})).toHaveCount(0);
   await page.clock.fastForward(1000);const modal=page.getByRole('dialog',{name:'已自動登出'});await expect(modal).toBeVisible();await expect(modal).toContainText('超過 30 分鐘未操作');await expect(page).toHaveURL(new RegExp(`/${system}/login$`));expect(await page.evaluate(key=>sessionStorage.getItem(key),keys[system])).toBeNull();
-  await modal.getByRole('button',{name:'確認，重新登入'}).click();await expect(modal).toHaveCount(0);await page.getByRole('button',{name:'登入系統',exact:false}).click();await expect(page).toHaveURL(new RegExp(`/${system}/dashboard$`));expect(await page.pageErrors()).toEqual([]);
+  await expect(modal.getByRole('button',{name:'確認，重新登入'})).toHaveCSS('background-color','rgb(8, 102, 232)');await modal.getByRole('button',{name:'確認，重新登入'}).click();await expect(modal).toHaveCount(0);await page.getByRole('button',{name:'登入系統',exact:false}).click();await expect(page).toHaveURL(new RegExp(`/${system}/dashboard$`));expect(await page.pageErrors()).toEqual([]);
  });
 }
 test('user interaction renews the idle deadline while reload does not',async({page})=>{

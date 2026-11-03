@@ -66,3 +66,6 @@
 
 /* Match the Lab form spacing to the other login forms. */
 #root .enterprise-login .lab-login-card.unified-login-form{display:block;gap:0}
+
+/* A warm sun in every workspace, entry page and login. */
+html body #root :is(svg[data-system-icon="sun"],[data-theme-symbol="sun"]){color:#d99100!important}

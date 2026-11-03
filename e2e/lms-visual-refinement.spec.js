@@ -6,7 +6,7 @@ test.beforeEach(async({page})=>{
  await page.goto('/lms/dashboard');
 });
 test('compact help follows the request title and dashboard uses three distinct vector icons',async({page})=>{
- await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'COLONG LMS',exact:true})).toHaveText('COLONG LMS');
+ await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'實驗室管理系統',exact:true})).toHaveText('實驗室管理系統');
  const icons=page.locator('.live-metric-icon .dashboard-metric-symbol');await expect(icons).toHaveCount(3);
  expect(new Set(await icons.evaluateAll(nodes=>nodes.map(node=>node.innerHTML))).size).toBe(3);
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();
@@ -50,7 +50,7 @@ test('management summary tiles share schedule styling and help artwork is center
 test('lighter actions, export icon, larger brand and list-based settings retain their controls',async({page})=>{
  await expect(page.locator('.lms-dashboard-heading h1')).toHaveCSS('font-size','22px');
  await expect(page.locator('.intelligent-launcher')).toHaveCSS('background-color','rgb(8, 102, 232)');
- await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('button',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
+ await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();await expect(page.getByRole('link',{name:'歷史委託',exact:true})).toHaveCSS('background-color','rgb(255, 255, 255)');
  await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();const exportButton=page.locator('.management-export-menu>summary');await expect(exportButton).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(exportButton.locator('.report-export-icon')).toBeVisible();
  await page.locator('.sidebar').getByRole('button',{name:'系統設定',exact:true}).click();const settings=page.locator('.settings-management');await expect(settings.locator('.management-summary,.lab-system-rules')).toHaveCount(0);await expect(settings.locator('.settings-health-list>div')).toHaveCount(4);await expect(settings.getByRole('button',{name:'重新檢查',exact:true})).toHaveCSS('background-color','rgb(8, 102, 232)');await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByRole('status')).toContainText('重新讀取本機資料');
 });
@@ -63,7 +63,7 @@ test('dashboard cards retain neutral surfaces and report filters keep their bord
   await page.locator('.sidebar').getByRole('button',{name:'儀錶板',exact:true}).click();
   for(let i=0;i<4;i++)await expect(page.locator('.live-metric-grid>.live-metric').nth(i)).toHaveCSS('background-color',(night?dark:light)[i]);
   await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();
-  const controls=page.locator('.lab-report-controls');await expect(controls).toHaveCSS('border-top-style','solid');
+  const controls=page.locator('.lab-report-controls');await expect(controls).toHaveCSS('border-top-width','0px');
   for(const control of await controls.locator('input,select').all()){await expect(control).toHaveCSS('border-top-style','solid');await expect(control).toHaveCSS('border-top-width','1px');expect(await control.evaluate(el=>getComputedStyle(el).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)');}
  }
 });

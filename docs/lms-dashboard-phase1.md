@@ -74,3 +74,11 @@
 - [Preview：LMS Dashboard](https://dqa-smart-lab-git-codex-lms-dashboard-phase1-ericmat85.vercel.app/lms/dashboard)
 - [PR #38](https://github.com/ericmat85/-dqa-smart-lab/pull/38)，base 為 main
 - 實作 commit：`4e41809`；本次不合併 main，也不推進 Phase 2，等待使用者驗收。
+
+## PR #39 衝突整合（2026-11-03）
+
+合入 main 的 Phase 1 圖表密度與 AI 按鈕預留區域，同時保留後續 UI 分支的五個統計方塊（含排程衝突）、68–80px 緊湊高度、對應圖示、藍色風格與歷史委託新分頁。前述 Phase 1 截圖與四方塊尺寸為歷史紀錄，現行驗收以五方塊為準。
+
+`compact-lms-workspace` 改以 searchbox 語意定位目前 36px 搜尋欄；兩套儀錶板測試同步現行方塊尺寸，保留圖表、AI 助理避讓、列表、資料不變及導覽的功能檢查。
+
+整合驗證：Lint、Production Build、45 個單元測試檔與12項 Production 瀏覽器回歸通過，涵蓋1920／1600／1366／390及深淺色。首次回歸的舊搜尋欄 class 定位失敗已改為 searchbox，完整重跑通過。Build 仍有既有大型 bundle 提示。

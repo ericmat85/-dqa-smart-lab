@@ -1,5 +1,5 @@
 export const MATERIAL_KEY='dqa-materials-demo-v1';
-export const MATERIAL_STATUSES=['可用','使用中','借出','維護中','校驗中','缺料','停用'];
+export const MATERIAL_STATUSES=['可用','使用中','借出','校驗中','缺料','停用'];
 const definitions=[
   ['耐熱膠帶','物料耗材','TAPE-25','25 mm × 33 m；耐熱固定用途',24,18,'卷','耗材櫃 A・01',5],
   ['無塵擦拭布','物料耗材','WIPE-100','100 張／包；儀器外觀清潔',30,12,'包','耗材櫃 A・02',8],
@@ -25,7 +25,7 @@ const definitions=[
 export const DEMO_MATERIALS=definitions.map((row,index)=>{
   const [name,category,model,specification,quantity,available,unit,location,minStock]=row;
   const id=`MAT-${String(index+1).padStart(3,'0')}`;
-  const status=({5:'借出',7:'校驗中',8:'維護中',13:'使用中',14:'停用',16:'借出',17:'使用中',19:'缺料'})[index] || '可用';
+  const status=({5:'借出',7:'校驗中',8:'停用',13:'使用中',14:'停用',16:'借出',17:'使用中',19:'缺料'})[index] || '可用';
   return {id,name,category,model,specification,quantity,available,unit,location,minStock,status,
     owner:['陳工程師','林工程師','王工程師','黃小明'][index%4],manufacturer:'DQA 示範供應商（虛構）',
     serial:`DEMO-MAT-2026-${String(index+1).padStart(3,'0')}`,purchasedAt:'2026-09-01',

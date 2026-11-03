@@ -1,3 +1,6 @@
+import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
+import InventorySummaryIcon from './InventorySummaryIcon.jsx';
+import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import HelpTip from './HelpTip.jsx';
 import {returnBorrowEquipment} from './borrowApprovals.mjs';
 import {PaginatedTable} from './Pagination.jsx';
@@ -18,11 +21,10 @@ function readEquipment() {
   } catch { return DEMO_EQUIPMENT; }
 }
 
-export default function EquipmentPage({ currentUser }) {
+export default function EquipmentPage({ currentUser, readOnly=false }) {
   const [equipment,setEquipment] = useState(readEquipment);
-  const [status,setStatus] = useState('全部');
+  const [status,setStatus] = useState(readOnly?'全部':'使用中');
   const [search,setSearch] = useState('');
-  const [category,setCategory] = useState('全部');
   const [selectedId,setSelectedId] = useState(null);
   const [form,setForm] = useState(null);
   const [formError,setFormError] = useState('');
@@ -30,9 +32,9 @@ export default function EquipmentPage({ currentUser }) {
   const [statusError,setStatusError] = useState('');
   const [notice,setNotice] = useState('');
   const statusEquipment=equipment.find(row=>row.id===statusForm?.id);
-  const openStatusChange=(row)=>{setSelectedId(null);setForm(null);setStatusError('');setStatusForm({id:row?.id || '',expectedBorrowId:row?.activeBorrowId,status:row?.status==='維護中' || row?.status==='校驗中' || row?.status==='借用' ? '待機中' : '維護中',reason:''});};
+  const openStatusChange=(row)=>{if(readOnly)return;setSelectedId(null);setForm(null);setStatusError('');setStatusForm({id:row?.id || '',expectedBorrowId:row?.activeBorrowId,status:row?.status==='維護中' || row?.status==='校驗中' || row?.status==='借用' ? '待機中' : '維護中',reason:''});};
   const submitStatusChange=event=>{
-    event.preventDefault();
+    event.preventDefault();if(readOnly)return;
     try {
       const raw=window.localStorage.getItem(KEY);
       const current=raw ? JSON.parse(raw) : equipment;
@@ -48,7 +50,7 @@ export default function EquipmentPage({ currentUser }) {
       setStatusForm(null);
     } catch(error) {setStatusError(error.message || '狀態變更失敗，請重試。');}
   };
-  const storage=useDemoPersistence(KEY,equipment);
+  const storage=useDemoPersistence(KEY,equipment,!readOnly);
   useEffect(()=>{
     const refresh=()=>setEquipment(readEquipment());
     const storage=event=>{if(event.key===KEY||event.key===null)refresh();};
@@ -57,17 +59,16 @@ export default function EquipmentPage({ currentUser }) {
   },[]);
 
   const selected=equipment.find(row=>row.id===selectedId);
-  const categories=[...new Set(equipment.map(row=>row.category||'未分類'))];
-  const visible=equipment.filter(row => (status==='全部' || row.status===status) && (category==='全部' || (row.category||'未分類')===category) && [row.id,row.name,row.category,row.model,row.serial,row.location,row.owner].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
+  const visible=equipment.filter(row => (status==='全部' || row.status===status) && [row.id,row.name,row.category,row.model,row.serial,row.location,row.owner,row.status].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
   useEffect(() => {
     if (!selectedId && !form && !statusForm) return;
     const escape=event=>{if(event.key==='Escape'){setSelectedId(null);setForm(null);setStatusForm(null);}};
     document.addEventListener('keydown',escape);
     return ()=>document.removeEventListener('keydown',escape);
   },[selectedId,form,statusForm]);
-  const openEditor = row => {setFormError('');setSelectedId(null);setForm(row ? {...row} : {id:'',name:'',category:'溫度試驗',model:'',serial:'',location:'',owner:'',status:'待機中',specification:'',capacity:1,dailyHours:24,utilization:0,records:[]});};
+  const openEditor = row => {if(readOnly)return;setFormError('');setSelectedId(null);setForm(row ? {...row} : {id:'',name:'',category:'溫度試驗',model:'',serial:'',location:'',owner:'',status:'待機中',specification:'',capacity:1,dailyHours:24,utilization:0,records:[]});};
   const save=event=>{
-    event.preventDefault();
+    event.preventDefault();if(readOnly)return;
     if (![form.id,form.name,form.location,form.owner].every(value=>String(value||'').trim())) {setFormError('請填寫設備編號、名稱、位置及負責人。');return;}
     const id=form.id.trim();
     let latest;
@@ -84,15 +85,15 @@ export default function EquipmentPage({ currentUser }) {
     setEquipment(updated);
     setForm(null);setSelectedId(id);
   };
-  const renderTable=items=>(<div className="template-table-wrap"><PaginatedTable resetKey={`${search}:${category}:${status}`} className="template-table"><thead><tr>{['設備編號','設備名稱／型號','分類','位置','負責人','狀態','下次校驗','操作'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>{items.map(row=><tr key={row.id}><td><button type="button" className="request-id-link" onClick={()=>setSelectedId(row.id)}>{row.id}</button></td><td><strong>{row.name}</strong><small className="equipment-model">{row.model}</small></td><td>{row.category}</td><td>{row.location}</td><td>{row.owner}</td><td><span className={`equipment-status equipment-status-${statuses.indexOf(row.status)}`}>{row.status}</span></td><td>{row.nextCalibration || '—'}</td><td><button type="button" className="template-btn secondary" onClick={()=>setSelectedId(row.id)}>設備資訊</button></td></tr>)}</tbody></PaginatedTable>{!items.length && <div className="template-empty">沒有符合條件的設備</div>}</div>);
+  const renderTable=items=>(<div className="template-table-wrap"><PaginatedTable resetKey={`${search}:${status}`} className="template-table"><thead><tr>{['設備編號','設備名稱／型號','分類','位置','負責人','狀態','下次校驗','操作'].map(label=><th key={label}>{label}</th>)}</tr></thead><tbody>{items.map(row=><tr key={row.id}><td><button type="button" className="request-id-link" onClick={()=>setSelectedId(row.id)}>{row.id}</button></td><td><strong>{row.name}</strong><small className="equipment-model">{row.model}</small></td><td>{row.category}</td><td>{row.location}</td><td>{row.owner}</td><td><span className={`equipment-status equipment-status-${statuses.indexOf(row.status)}`}>{row.status}</span></td><td>{row.nextCalibration || '—'}</td><td><button type="button" className="template-btn secondary" onClick={()=>setSelectedId(row.id)}>設備資訊</button></td></tr>)}</tbody></PaginatedTable>{!items.length && <div className="template-empty">沒有符合條件的設備</div>}</div>);
   return <section className="panel generic-page equipment-page"><div className="template-page">
-    <header className="template-heading"><div><div className="help-title-row"><h2>設備管理</h2><HelpTip>設備台帳、規格與校驗保養資訊</HelpTip></div></div><div className="equipment-header-actions"><button type="button" className="template-btn" onClick={()=>openEditor(null)}>＋ 新增設備</button><button type="button" className="template-btn secondary" onClick={openStatusChange}>＋ 狀態變更</button></div></header>
+    <header className="template-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="equipment"/>{readOnly?'設備狀態':'設備管理'}</h2><HelpTip>設備台帳、規格與校驗保養資訊</HelpTip></div></div>{!readOnly&&<div className="equipment-header-actions"><button type="button" className="template-btn" onClick={()=>openEditor(null)}>＋ 新增設備</button><button type="button" className="template-btn secondary" onClick={openStatusChange}>＋ 狀態變更</button></div>}</header>
     {notice && <div role="status" className="template-notice">{notice}</div>}
     {storage.error && <div role="alert" className="template-notice">{storage.error}<button type="button" onClick={storage.retry}>重試儲存</button></div>}
-    <div className="equipment-counts summary-tiles">{['全部',...statuses].map(value=><button type="button" key={value} className={`summary-tile ${status===value?'active':''}`} aria-pressed={status===value} onClick={()=>setStatus(value)}><span>{value==='全部'?'設備總數':value}</span><strong>{value==='全部'?equipment.length:equipment.filter(row=>row.status===value).length}</strong></button>)}</div>
-    <CategoryViews filterKey={`${search}:${category}:${status}`} rows={equipment} visibleRows={visible} renderTable={renderTable} kind="設備" toolbar={<div className="template-toolbar"><input className="template-input" type="search" aria-label="搜尋設備" placeholder="搜尋設備編號、名稱、型號、序號、位置或負責人…" value={search} onChange={event=>setSearch(event.target.value)}/><select className="template-select" aria-label="設備分類" value={category} onChange={event=>setCategory(event.target.value)}><option value="全部">全部分類</option>{categories.map(value=><option key={value}>{value}</option>)}</select><select className="template-select" aria-label="設備狀態" value={status} onChange={event=>setStatus(event.target.value)}><option>全部</option>{statuses.map(value=><option key={value}>{value}</option>)}</select></div>}/>
+    <div className="equipment-counts summary-tiles">{statuses.map(value=><button type="button" key={value} className={`summary-tile ${status===value?'active':''}`} aria-pressed={status===value} onClick={()=>setStatus(current=>current===value?'全部':value)}><InventorySummaryIcon kind="equipment" status={value}/><span>{value}</span><strong>{equipment.filter(row=>row.status===value).length}</strong></button>)}</div>
+    <CategoryViews filterKey={`${search}:${status}`} rows={equipment} visibleRows={visible} renderTable={renderTable} kind="設備" toolbar={<CatalogSearchToolbar kind="設備" value={search} onChange={setSearch} onClear={()=>{setSearch('');setStatus('全部');}}/>}/>
   </div>
-  {selected && <EquipmentInfoModal key={selected.id} equipment={selected} onClose={()=>setSelectedId(null)} onEdit={()=>openEditor({...selected,editingId:selected.id})} onStatusChange={()=>openStatusChange(selected)} />}
+  {selected && <EquipmentInfoModal key={selected.id} equipment={selected} onClose={()=>setSelectedId(null)} onEdit={readOnly?undefined:()=>openEditor({...selected,editingId:selected.id})} onStatusChange={readOnly?undefined:()=>openStatusChange(selected)} />}
   {form && <div className="request-modal-backdrop"><section className="request-modal equipment-modal" role="dialog" aria-modal="true" aria-labelledby="equipment-edit-title"><header className="request-modal-header"><h3 id="equipment-edit-title">{form.editingId?'編輯設備資料':'新增設備'}</h3><button type="button" className="request-modal-close" aria-label="關閉編輯" onClick={()=>setForm(null)}>×</button></header><form className="request-modal-body" onSubmit={save}><div className="equipment-form-grid">{[['設備編號','id'],['設備名稱','name'],['型號','model'],['設備序號','serial'],['位置','location'],['負責人','owner'],['製造商','manufacturer']].map(([label,key])=><label key={key}><span>{label}{['id','name','location','owner'].includes(key)&&<span className="required-mark" aria-hidden="true"> *</span>}</span><input className="template-input" value={form[key] || ''} required={['id','name','location','owner'].includes(key)} readOnly={key==='id' && Boolean(form.editingId)} onChange={event=>setForm({...form,[key]:event.target.value})}/></label>)}<label>分類<input className="template-input" value={form.category} onChange={event=>setForm({...form,category:event.target.value})}/></label><label>狀態<input className="template-input" readOnly value={form.editingId ? form.status : "待機中"}/><small>請使用「狀態變更」調整設備狀態；新設備預設待機中。</small></label>{[['最大樣品數','capacity',1,999],['每日可用時數','dailyHours',0.5,24]].map(([label,key,min,max])=><label key={key}>{label}<input type="number" className="template-input" value={form[key]} min={min} max={max} step={key==='dailyHours'?0.5:1} required onChange={event=>setForm({...form,[key]:event.target.value})}/></label>)}<label>可用空間 L（選填）<input type="number" min="0.01" step="any" className="template-input" value={form.usableVolumeLitres??''} onChange={event=>setForm({...form,usableVolumeLitres:event.target.value})}/><small>Demo 容積限制，無法取代實際樣品尺寸與治具間距確認。</small></label>{[['下次校驗','nextCalibration'],['下次保養','nextMaintenance']].map(([label,key])=><label key={key}>{label}<input type="date" className="template-input" value={form[key] || ''} onChange={event=>setForm({...form,[key]:event.target.value})}/></label>)}</div>{[['技術規格','specification'],['保養檢查重點','maintenancePlan'],['操作注意事項／備註','notes']].map(([label,key])=><label className="equipment-text-field" key={key}>{label}<textarea rows={3} className="template-input" value={form[key] || ''} onChange={event=>setForm({...form,[key]:event.target.value})}/></label>)}{formError && <p role="alert">{formError}</p>}<div className="template-form-actions"><button type="button" className="template-btn secondary" onClick={()=>setForm(null)}>取消</button><button type="submit" className="template-btn">儲存設備資料</button></div></form></section></div>}
   {statusForm && <div className="request-modal-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setStatusForm(null);}}><section className="request-modal equipment-status-modal" role="dialog" aria-modal="true" aria-labelledby="equipment-status-title">
     <header className="request-modal-header"><div><div className="help-title-row"><h3 id="equipment-status-title">設備狀態變更</h3><HelpTip>開始維護／校驗，完成後恢復待機</HelpTip></div></div><button type="button" className="request-modal-close" aria-label="關閉狀態變更" onClick={()=>setStatusForm(null)}>×</button></header>
