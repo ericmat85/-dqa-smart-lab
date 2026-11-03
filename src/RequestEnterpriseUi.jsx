@@ -4,7 +4,7 @@ export function RequestBreadcrumbs({title,onHome,onOverview}){
  return <nav className="rq-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={onOverview}>電子委託系統</button><span aria-hidden="true">›</span><strong aria-current="page">{title}</strong></nav>;
 }
 export function RequestSummary({rows,collection,onFilter}){
- const cards=[['all','全部委託','document'],['draft','草稿','document'],['approval','待主管簽核','clock'],['executing','執行中','lab'],['completed','已完成','shield'],['returned','退回待補件','folder']];
+ const cards=[['all','全部委託','document'],['draft','草稿','document'],['approval','待簽核','clock'],['executing','執行中','lab'],['completed','已完成','shield'],['returned','待補件','folder']];
  return <div className="rq-request-summary" aria-label="委託狀態摘要">{cards.map(([key,label,icon])=><button key={key} type="button" aria-pressed={collection===key} onClick={()=>onFilter(collection===key?'all':key)}><span className={`rq-summary-icon rq-summary-${key}`}><LoginSystemIcon kind={icon}/></span><span className="rq-summary-copy"><span>{label}</span><strong>{rows.filter(row=>key==='completed'?row.status==='已完成':requestMatchesCollection(row,key)).length}</strong></span></button>)}</div>;
 }
 export function RequestEditorSidebar({form,signature,source,dirty,active}){
