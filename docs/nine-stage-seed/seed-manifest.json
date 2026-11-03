@@ -1,0 +1,214 @@
+{
+  "counts": [
+    {
+      "stage": 1,
+      "label": "待簽核",
+      "count": 2
+    },
+    {
+      "stage": 2,
+      "label": "待審查",
+      "count": 2
+    },
+    {
+      "stage": 3,
+      "label": "待排程",
+      "count": 2
+    },
+    {
+      "stage": 4,
+      "label": "待確認",
+      "count": 2
+    },
+    {
+      "stage": 5,
+      "label": "試驗中",
+      "count": 2
+    },
+    {
+      "stage": 6,
+      "label": "已完成",
+      "count": 2
+    },
+    {
+      "stage": 7,
+      "label": "待審核",
+      "count": 2
+    },
+    {
+      "stage": 8,
+      "label": "待查閱",
+      "count": 2
+    },
+    {
+      "stage": 9,
+      "label": "已結案",
+      "count": 2
+    }
+  ],
+  "requests": [
+    {
+      "id": "DEMO-001",
+      "group": "A",
+      "initialStage": 1,
+      "status": "待主管簽核",
+      "sample": "SMP-DEMO-001",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 1"
+    },
+    {
+      "id": "DEMO-002",
+      "group": "B",
+      "initialStage": 1,
+      "status": "待主管簽核",
+      "sample": "SMP-DEMO-002",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 2"
+    },
+    {
+      "id": "DEMO-003",
+      "group": "A",
+      "initialStage": 2,
+      "status": "已核准",
+      "sample": "SMP-DEMO-003",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 1"
+    },
+    {
+      "id": "DEMO-004",
+      "group": "B",
+      "initialStage": 2,
+      "status": "已核准",
+      "sample": "SMP-DEMO-004",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 2"
+    },
+    {
+      "id": "DEMO-005",
+      "group": "A",
+      "initialStage": 3,
+      "status": "待排程",
+      "sample": "SMP-DEMO-005",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 3"
+    },
+    {
+      "id": "DEMO-006",
+      "group": "B",
+      "initialStage": 3,
+      "status": "待排程",
+      "sample": "SMP-DEMO-006",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 4"
+    },
+    {
+      "id": "DEMO-007",
+      "group": "A",
+      "initialStage": 4,
+      "status": "待排程",
+      "sample": "SMP-DEMO-007",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 3"
+    },
+    {
+      "id": "DEMO-008",
+      "group": "B",
+      "initialStage": 4,
+      "status": "待排程",
+      "sample": "SMP-DEMO-008",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 4"
+    },
+    {
+      "id": "DEMO-009",
+      "group": "A",
+      "initialStage": 5,
+      "status": "執行中",
+      "sample": "SMP-DEMO-009",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 1"
+    },
+    {
+      "id": "DEMO-010",
+      "group": "B",
+      "initialStage": 5,
+      "status": "執行中",
+      "sample": "SMP-DEMO-010",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 2"
+    },
+    {
+      "id": "DEMO-011",
+      "group": "A",
+      "initialStage": 6,
+      "status": "已完成",
+      "sample": "SMP-DEMO-011",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 5"
+    },
+    {
+      "id": "DEMO-012",
+      "group": "B",
+      "initialStage": 6,
+      "status": "已完成",
+      "sample": "SMP-DEMO-012",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 6"
+    },
+    {
+      "id": "DEMO-013",
+      "group": "A",
+      "initialStage": 7,
+      "status": "待審核",
+      "sample": "SMP-DEMO-013",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 5"
+    },
+    {
+      "id": "DEMO-014",
+      "group": "B",
+      "initialStage": 7,
+      "status": "待審核",
+      "sample": "SMP-DEMO-014",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 6"
+    },
+    {
+      "id": "DEMO-015",
+      "group": "A",
+      "initialStage": 8,
+      "status": "待查閱",
+      "sample": "SMP-DEMO-015",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 5"
+    },
+    {
+      "id": "DEMO-016",
+      "group": "B",
+      "initialStage": 8,
+      "status": "待查閱",
+      "sample": "SMP-DEMO-016",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 6"
+    },
+    {
+      "id": "DEMO-017",
+      "group": "A",
+      "initialStage": 9,
+      "status": "已結案",
+      "sample": "SMP-DEMO-017",
+      "operator": "模擬執行人A",
+      "equipment": "模擬環境試驗箱 5"
+    },
+    {
+      "id": "DEMO-018",
+      "group": "B",
+      "initialStage": 9,
+      "status": "已結案",
+      "sample": "SMP-DEMO-018",
+      "operator": "模擬執行人B",
+      "equipment": "模擬環境試驗箱 6"
+    }
+  ],
+  "storageBytes": 1836788
+}
