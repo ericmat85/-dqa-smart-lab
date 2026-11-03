@@ -251,7 +251,7 @@ export default function LabApp({ path, navigate }) {
         <>{canOpenReportArchive(sharedSnapshot.accounts.find(row=>row.id===account?.id),'lab')&&<button className={tab === "archive" ? "active" : ""} onClick={()=>chooseTab("archive")}><LmsSidebarIcon name="archive"/>資料庫</button>}</><details className="workspace-sidebar-note"><summary>Demo 使用說明</summary><p>展示環境 · LMS 已排程委託會同步至待確認清單。實驗室接收與操作歷程儲存於此瀏覽器，取消原安排需先進入 LMS 待核准；中斷申請由 LMS 一階主管審核。</p></details>
         <button className="lab-back workspace-sidebar-home" onClick={navigateHome}><LmsSidebarIcon name="dashboard"/>回到首頁</button>
       </aside>
-      <main className="lab-main"><div className="lab-workspace-heading"><h1>{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</h1><p>{tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
+      <main className="lab-main"><div className="lab-workspace-heading"><h1><LmsSidebarIcon name={tab==='audit'?'history':tab==='archive'?'archive':'requests'}/>{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</h1><p>{tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>
         {lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{notice && <div className="lab-notice" role="status">{notice}</div>}
         {tab === "archive" ? <ReportArchive actor={account} system="lab" showHeading={false}/> : tab === "requests" ? <>

@@ -9,3 +9,20 @@ for(const width of [1920,1600,1366])for(const theme of ['light','dark'])test(`wo
  expect(Math.abs(geometry.request.title-geometry.lms.title)).toBeLessThanOrEqual(1);for(const key of ['logoX','logoY','navY','navHeight'])expect(Math.abs(geometry.request[key]-geometry.lms[key]),key).toBeLessThanOrEqual(1);
 });
 test('mobile menus retain navigation in all three systems',async({page})=>{await page.setViewportSize({width:390,height:844});await seed(page,'dark');for(const [system,header,side]of systems){await page.goto(`/${system}/dashboard`);const menu=page.locator(`${header} .workspace-menu-toggle`);await expect(menu).toHaveAttribute('aria-expanded','false');await menu.click();await expect(menu).toHaveAttribute('aria-expanded','true');await expect(page.locator(side)).toBeVisible();await page.locator(side).getByRole('button',{name:system==='request'?'通知中心':system==='lms'?'設備管理':'操作歷程',exact:true}).click();await expect(menu).toHaveAttribute('aria-expanded','false');if(system==='lms')await expect.poll(async()=>{const box=await page.locator(side).boundingBox();return box.x+box.width;}).toBeLessThanOrEqual(0);else await expect(page.locator(side)).not.toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}});
+
+for(const theme of ['light','dark'])test(`page title icons match sidebar icons in all systems ${theme}`,async({page})=>{
+ await page.setViewportSize({width:1366,height:768});await seed(page,theme);
+ for(const [system]of systems){
+  await page.goto(`/${system}/dashboard`);await page.screenshot({path:test.info().outputPath(`${system}-title-${theme}.png`)});
+  const navigation=page.locator(system==='lms'?'.sidebar-nav .nav-item':system==='request'?'.rq-sidebar>.rq-nav:not(.workspace-sidebar-home)':'.lab-sidebar>button:not(.workspace-sidebar-home)');
+  const count=await navigation.count();
+  for(let index=0;index<count;index++){
+   const button=navigation.nth(index),label=(await button.innerText()).trim(),expectedPath=await button.locator('svg path').getAttribute('d');await button.click();
+   const heading=page.locator(system==='lms'?'.lms-dashboard-heading h1,.template-heading h2,.account-page-heading h2':system==='request'?'.rq-workspace-heading h1,.rq-editor-page .rq-form-header h2':'.lab-workspace-heading h1').first();
+   await expect(heading.locator(':scope > svg path'),`${system} ${label}`).toHaveAttribute('d',expectedPath);await expect(heading.locator(':scope > svg')).toHaveAttribute('aria-hidden','true');
+   expect(await heading.evaluate(el=>getComputedStyle(el,'::before').content)).toMatch(/^(none|normal)$/);
+   if(label==='申請借用'){await page.getByRole('button',{name:'＋申請借用',exact:true}).click();await expect(page.getByRole('dialog').getByRole('heading',{name:'申請借用',exact:true}).locator('svg path')).toHaveAttribute('d',expectedPath);await page.getByRole('button',{name:'關閉借用申請',exact:true}).click();}
+  }
+  expect(await page.pageErrors()).toEqual([]);
+ }
+});

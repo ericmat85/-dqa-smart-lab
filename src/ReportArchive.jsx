@@ -1,3 +1,4 @@
+import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import HelpTip from './HelpTip.jsx';
 import {displayTaipei} from './requestWorkspace.mjs';
 import RequestInfoModal from './RequestInfoModal.jsx';
@@ -35,7 +36,7 @@ export default function ReportArchive({actor,system,showHeading=true}){
  }
  if(!allowed)return <section className={pageClass} data-system={system}><p role="alert">此帳號沒有資料庫權限。</p></section>;
  return <section className={pageClass} data-system={system} style={{'--tab-accent':'inherit','--tab-tint':'inherit'}}><div className="template-page">
-  {showHeading&&<header className="template-heading"><div><div className="help-title-row"><h2>資料庫</h2><HelpTip>依類別查閱試驗報告、試驗規範、試驗手冊與報告範本。試驗報告僅顯示主管確認查閱並完成 PDF 封存的案件；清除瀏覽器資料會移除本機封存檔案。</HelpTip></div></div></header>}
+  {showHeading&&<header className="template-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="archive"/>資料庫</h2><HelpTip>依類別查閱試驗報告、試驗規範、試驗手冊與報告範本。試驗報告僅顯示主管確認查閱並完成 PDF 封存的案件；清除瀏覽器資料會移除本機封存檔案。</HelpTip></div></div></header>}
   <div className="archive-tabs" role="tablist" aria-label="資料庫分類">{tabs.map(([key,label],index)=><button type="button" key={key} id={`${tabId}-tab-${key}`} role="tab" aria-selected={tab===key} aria-controls={`${tabId}-panel`} tabIndex={tab===key?0:-1} onClick={()=>chooseTab(key)} onKeyDown={event=>tabKeyDown(event,index)}>{label}</button>)}</div>
   <section role="tabpanel" id={`${tabId}-panel`} aria-labelledby={`${tabId}-tab-${tab}`} tabIndex={0}>
    <div className={lms?"template-toolbar archive-toolbar":"archive-toolbar"}><label><span className="archive-search-caption">{tab==='reports'?'搜尋已結案報告':`搜尋${activeLabel}`}</span><input type="search" className={lms?"template-input":undefined} value={search} onChange={event=>setSearch(event.target.value)} placeholder={tab==='reports'?'搜尋委託編號、產品代碼、報告類型或查閱主管…':`搜尋${activeLabel}名稱…`}/></label></div>
