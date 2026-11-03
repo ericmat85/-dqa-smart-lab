@@ -33,3 +33,13 @@ test('invalid material changes cannot create misleading records',()=>{
   const params={id:'MAT-1',status:'借出',reason:'借用',actor:'管理員',actorId:'user'};
   for(const change of [{id:'missing'},{status:'可用'},{status:'invalid'},{reason:' '},{actorId:''}])assert.throws(()=>changeMaterialStatus(rows,{...params,...change}));
 });
+
+test('maintenance is not a material action; legacy entries can transition without losing history or stock',()=>{
+  assert.ok(!MATERIAL_STATUSES.includes('維護中'));
+  assert.ok(DEMO_MATERIALS.every(row=>MATERIAL_STATUSES.includes(row.status)));
+  const params={id:'MAT-OLD',reason:'盤點確認停用',actor:'管理員',actorId:'manager'};
+  const rows=[{id:'MAT-OLD',status:'維護中',quantity:5,available:0,records:[{id:'OLD',type:'狀態變更',result:'可用 → 維護中'}]}];
+  assert.throws(()=>changeMaterialStatus(rows,{...params,status:'維護中'}),/有效的物料狀態/);
+  const next=changeMaterialStatus(rows,{...params,status:'停用'});
+  assert.equal(next[0].status,'停用');assert.equal(next[0].quantity,5);assert.equal(next[0].available,0);assert.equal(next[0].records[1].id,'OLD');assert.equal(rows[0].status,'維護中');assert.equal(rows[0].records.length,1);
+});
