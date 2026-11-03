@@ -35,3 +35,34 @@ html body #root .dashboard-shell.lms-enterprise .live-dashboard .workspace-short
 
 @media(min-width:1001px){html body #root .rq-app.rq-enterprise{grid-template-rows:48px minmax(calc(100dvh - 48px),auto)}}
 @media(min-width:721px){html body #root .lab-shell.lab-enterprise{grid-template-rows:48px minmax(calc(100dvh - 48px),auto)}}
+
+/* Refinement: one compact summary language, with a single visible panel frame. */
+html body #root .lms-enterprise .live-dashboard .live-metric-icon svg,
+html body #root .lab-shell.lab-enterprise .lab-stat-icon svg{width:20px;height:20px;flex:none}
+html body #root .lms-enterprise .dashboard-content>.panel>.template-page{padding:0;border:0;box-shadow:none;background:transparent}
+html body #root .lms-enterprise .dashboard-content :is(.template-page>.schedule-views,.template-page>.catalog-category-views){padding:0;border:0;box-shadow:none;background:transparent}
+html body #root .lms-enterprise .dashboard-content :is(.template-toolbar,.schedule-search-wrap,.lab-report-controls,.account-toolbar){border:0;box-shadow:none;background:transparent;padding:0}
+html body #root .lms-enterprise .dashboard-content .schedule-search-wrap input{height:40px;min-height:40px;padding:8px 12px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-input);color:var(--enterprise-text)}
+html body #root .lms-enterprise .dashboard-content :is(.template-table-wrap,.live-table-wrap,.account-management .table-wrap){border:0;box-shadow:none}
+html body #root :is(.lms-enterprise,.lab-enterprise) :is(.summary-tiles,.account-summary,.lab-dashboard-stats){gap:12px;margin-bottom:18px}
+html body #root .lms-enterprise :is(.summary-tiles>.summary-tile,.summary-tiles>.equipment-activity-kpi,.account-summary-card),
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats>.lab-stat-card{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-content:normal;column-gap:10px;row-gap:2px;min-height:68px;padding:10px 12px;border:1px solid var(--enterprise-border);border-radius:8px;background:var(--enterprise-card);color:var(--enterprise-text);box-shadow:0 2px 6px #132d4b06;text-align:left}
+html body #root .lms-enterprise .workspace-summary-icon,
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-icon{display:grid;place-items:center;grid-column:1;grid-row:1/span 2;width:30px;height:30px;margin:0;border-radius:6px;background:var(--soft);color:var(--tab-accent)}
+html body #root .lms-enterprise .workspace-summary-icon svg{width:20px;height:20px}
+html body #root .lms-enterprise :is(.summary-tile,.equipment-activity-kpi,.account-summary-card)>span,
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-card>div>span{grid-column:2;grid-row:1;margin:0;font-size:12px;line-height:1.35;color:var(--enterprise-text)}
+html body #root .lms-enterprise :is(.summary-tile,.equipment-activity-kpi,.account-summary-card)>strong,
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-card strong{grid-column:2;grid-row:2;margin:0;font-size:22px;line-height:1.1;color:var(--enterprise-text)}
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-card>div{display:contents}
+html body #root .lms-enterprise .equipment-activity-kpi>span>small{display:block;margin-top:2px;font-size:10px;line-height:1.3;color:var(--enterprise-secondary)}
+/* Summary filters carry no directional affordance; navigation controls retain theirs. */
+html body #root :is(.lms-enterprise,.lab-enterprise) :is(.summary-tile,.account-summary-card)::after{content:none}
+html body #root .lms-enterprise .intelligent-panel>header{background:#0866e8;color:#fff;border-bottom-color:#0756c4}
+html body #root .lms-enterprise .intelligent-panel>header :is(.intelligent-panel-title,button){color:#fff}
+html body #root .lms-enterprise .intelligent-panel>header small{color:#dbeafe}
+html body #root .lms-enterprise .intelligent-panel>header button{background:#ffffff18;border-color:#ffffff55}
+html body #root .lms-enterprise .intelligent-panel>header button:hover{background:#ffffff30}
+html body #root .lms-enterprise .intelligent-examples summary span{color:var(--tab-accent)}
+html body #root .lms-enterprise .dashboard-content .schedule-search-wrap input:focus-visible{outline:2px solid var(--tab-accent);outline-offset:2px}
+html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-stat-icon{color:var(--tab-accent)!important}

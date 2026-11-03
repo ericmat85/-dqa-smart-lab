@@ -26,3 +26,22 @@ for(const theme of ['light','dark'])test(`page title icons match sidebar icons i
   expect(await page.pageErrors()).toEqual([]);
  }
 });
+
+for(const width of [1920,1366,390])for(const theme of ['light','dark'])test(`summary refinement ${width} ${theme}: frames, icons, assistant and sun`,async({page})=>{
+ await page.setViewportSize({width,height:width===1920?1080:width===390?844:768});await seed(page,theme);await page.goto('/lms/dashboard');
+ const openMenu=async()=>{if(width===390)await page.getByRole('button',{name:'切換側邊欄',exact:true}).click();};
+ const metric=page.locator('.live-metric').filter({has:page.locator('.live-metric-copy>span',{hasText:'設備稼動率'})});await openMenu();const equipmentPath=await page.locator('.sidebar').getByRole('button',{name:'設備管理',exact:true}).locator('svg path').getAttribute('d');if(width===390)await page.locator('.sidebar').getByRole('button',{name:'儀錶板',exact:true}).click();await expect(metric.locator('.live-metric-icon path')).toHaveAttribute('d',equipmentPath);
+ for(const icon of await page.locator('.live-metric-icon svg').all()){await expect(icon).toHaveCSS('width','20px');await expect(icon).toHaveCSS('height','20px');}
+ if(theme==='light')await expect(page.locator('.dashboard-topbar [data-system-icon=sun]')).toHaveCSS('color','rgb(217, 145, 0)');
+ await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();await expect(page.locator('.intelligent-panel>header')).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(page.locator('.intelligent-panel-title')).toHaveCSS('color','rgb(255, 255, 255)');if(width===1366)await page.screenshot({path:test.info().outputPath(`assistant-${theme}.png`)});await page.locator('.intelligent-panel').getByRole('button',{name:'收合AI智能助理',exact:true}).click();
+ for(const label of ['試驗委託','排程管理','設備管理','物料管理','資料庫','報表分析','帳號管理','系統設定']){
+  await openMenu();const nav=page.locator('.sidebar').getByRole('button',{name:label,exact:true});if(!await nav.count()){if(width===390)await page.locator('.sidebar').getByRole('button',{name:'儀錶板',exact:true}).click();continue;}await nav.click();
+  for(const frame of await page.locator('.dashboard-content>.panel>.template-page,.template-page>.schedule-views,.dashboard-content .template-toolbar,.dashboard-content .schedule-search-wrap').all())await expect(frame).toHaveCSS('border-top-width','0px');
+  for(const card of await page.locator('.summary-tiles>.summary-tile,.account-summary-card').all()){await expect(card.locator('.workspace-summary-icon svg')).toHaveCSS('width','20px');expect((await card.boundingBox()).height).toBeLessThanOrEqual(84);expect(await card.evaluate(el=>getComputedStyle(el,'::after').content)).toMatch(/^(none|normal)$/);await expect(card.locator('.workspace-shortcut-arrow,.rq-kpi-arrow')).toHaveCount(0);}
+  if(width===1366&&['試驗委託','排程管理','設備管理','物料管理'].includes(label))await page.screenshot({path:test.info().outputPath(`${label}-${theme}.png`)});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.goto('/lab/dashboard');for(const card of await page.locator('.lab-dashboard-stats>.lab-stat-card').all()){expect((await card.boundingBox()).height).toBe(68);await expect(card.locator('svg')).toHaveCSS('width','20px');await expect(card.locator('.lab-stat-icon')).toHaveCSS('color',theme==='dark'?'rgb(133, 189, 255)':'rgb(8, 102, 232)');}if(width===1366)await page.screenshot({path:test.info().outputPath(`lab-summary-${theme}.png`)});
+ for(const system of ['request','lab']){await page.goto(`/${system}/dashboard`);if(theme==='light')await expect(page.locator('.theme-toggle [data-system-icon=sun]')).toHaveCSS('color','rgb(217, 145, 0)');}
+ await page.goto('/');if(theme==='light'&&await page.locator('[data-theme-symbol=sun]').count())await expect(page.locator('[data-theme-symbol=sun]')).toHaveCSS('color','rgb(217, 145, 0)');expect(await page.pageErrors()).toEqual([]);
+});

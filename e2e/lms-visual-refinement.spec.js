@@ -63,7 +63,7 @@ test('dashboard cards retain neutral surfaces and report filters keep their bord
   await page.locator('.sidebar').getByRole('button',{name:'儀錶板',exact:true}).click();
   for(let i=0;i<4;i++)await expect(page.locator('.live-metric-grid>.live-metric').nth(i)).toHaveCSS('background-color',(night?dark:light)[i]);
   await page.locator('.sidebar').getByRole('button',{name:'報表分析',exact:true}).click();
-  const controls=page.locator('.lab-report-controls');await expect(controls).toHaveCSS('border-top-style','solid');
+  const controls=page.locator('.lab-report-controls');await expect(controls).toHaveCSS('border-top-width','0px');
   for(const control of await controls.locator('input,select').all()){await expect(control).toHaveCSS('border-top-style','solid');await expect(control).toHaveCSS('border-top-width','1px');expect(await control.evaluate(el=>getComputedStyle(el).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)');}
  }
 });
