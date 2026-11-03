@@ -20,3 +20,9 @@ Lint、Production Build通過；既有實驗室流程六項Production E2E（1920
 | 資料庫 | [淺色](lab-format-archive-1920-light.png) · [深色](lab-format-archive-1920-dark.png) | [淺色](lab-format-archive-1366-light.png) · [深色](lab-format-archive-1366-dark.png) | [淺色](lab-format-archive-390-light.png) · [深色](lab-format-archive-390-dark.png) |
 
 更新既有PR #39供檢視，未合併main，未直接變更正式部署。
+
+## 方塊互動同步 LMS
+
+設備狀態與物料管理的統計方塊共用LMS互動規則：懸停藍框、選取藍框與數字強調色、鍵盤焦點外框。點擊套用狀態篩選，再次點擊或按Space取消選取；設備唯讀與原始資料不變。
+
+Lint、Production Build、12項Production E2E通過（LMS六項庫存圖示／篩選回歸，加實驗室六項互動／流程驗收）；涵蓋1920／1366／390深淺色、懸停、選取、鍵盤焦點與篩選筆數。
