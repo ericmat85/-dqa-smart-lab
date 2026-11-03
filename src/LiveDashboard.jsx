@@ -1,3 +1,4 @@
+import './LmsDashboardPhase1.css';
 import ScheduleStatusChart from './ScheduleStatusChart.jsx';
 import DashboardMetricIcon from './DashboardMetricIcon.jsx';
 import HelpTip from './HelpTip.jsx';

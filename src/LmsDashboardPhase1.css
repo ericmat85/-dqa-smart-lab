@@ -1,0 +1,26 @@
+/* Phase 1 only: retain all data, shell and assistant behavior. */
+#root .lms-enterprise .live-dashboard{margin-right:64px}
+#root .lms-enterprise .live-dashboard .live-metric-grid>.live-metric{display:grid;grid-template-columns:32px minmax(0,1fr);column-gap:10px;row-gap:2px;min-height:100px;padding:16px;align-content:center}
+#root .lms-enterprise .live-dashboard .live-metric-copy{display:contents}
+#root .lms-enterprise .live-dashboard .live-metric-icon{grid-column:1;grid-row:1/span 2;align-self:center}
+#root .lms-enterprise .live-dashboard .live-metric-copy>span{grid-column:2;grid-row:1;min-width:0;margin:0}
+#root .lms-enterprise .live-dashboard .live-metric-copy>strong{grid-column:2;grid-row:2;min-width:0}
+#root .lms-enterprise .live-dashboard .live-metric-copy>small{grid-column:1/-1;grid-row:3;margin:2px 0 0;min-width:0;overflow-wrap:anywhere}
+#root .lms-enterprise .live-dashboard .live-legend>button{min-height:28px;font-size:13px}
+#root .lms-enterprise .live-dashboard .live-legend>button.is-active>span{font-size:13px}
+#root .lms-enterprise .live-dashboard .live-record-table :is(th,td){height:42px;font-size:13px}
+#root .lms-enterprise .live-dashboard .live-record-table .live-status{font-size:11px}
+#root .lms-enterprise .live-dashboard .live-attention-strip>button{font-size:13px}
+@media(max-width:600px){#root .lms-enterprise .live-dashboard .live-metric-grid>.live-metric{grid-template-columns:28px minmax(0,1fr);padding:12px;column-gap:8px}#root .lms-enterprise .live-dashboard .live-composition{flex-direction:column}#root .lms-enterprise .live-dashboard .live-legend{width:100%}#root .lms-enterprise .live-dashboard .live-legend>button{min-height:32px}}
+@media(min-width:1101px){
+ #root .lms-enterprise .live-dashboard .live-dashboard-charts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #root .lms-enterprise .live-dashboard .live-dashboard-charts>.live-panel{min-height:0}
+ #root .lms-enterprise .live-dashboard .live-bar-chart{height:184px}
+ #root .lms-enterprise .live-dashboard :is(.live-chart-ticks,.live-bars,.live-bar-column){height:128px}
+ #root .lms-enterprise .live-dashboard .live-bar-slot{height:128px!important}
+ #root .lms-enterprise .live-dashboard .live-composition{min-height:184px;gap:12px}
+ #root .lms-enterprise .live-dashboard .live-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px}
+ #root .lms-enterprise .live-dashboard .live-legend>button{display:grid;grid-template-columns:8px minmax(0,1fr) auto auto;gap:4px;padding:4px;min-width:0}
+ #root .lms-enterprise .live-dashboard .live-legend>button>span{min-width:0;white-space:normal;overflow-wrap:anywhere}
+ #root .lms-enterprise .live-dashboard .live-legend>button>small{width:auto;white-space:nowrap}
+}
