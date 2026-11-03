@@ -6,7 +6,7 @@ test.beforeEach(async({page})=>{
  await page.goto('/lms/dashboard');
 });
 test('compact help follows the request title and dashboard uses three distinct vector icons',async({page})=>{
- await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'COLONG LMS',exact:true})).toHaveText('COLONG LMS');
+ await expect(page.locator('.dashboard-topbar .lms-breadcrumbs').getByRole('button',{name:'實驗室管理系統',exact:true})).toHaveText('實驗室管理系統');
  const icons=page.locator('.live-metric-icon .dashboard-metric-symbol');await expect(icons).toHaveCount(3);
  expect(new Set(await icons.evaluateAll(nodes=>nodes.map(node=>node.innerHTML))).size).toBe(3);
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();

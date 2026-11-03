@@ -46,3 +46,7 @@
 - 無已知未解決的本次功能問題。未驗證正式站部署；依使用者要求未推送或建立 PR。
 
 分支：`ui/unified-workspace-controls`。檢查紀錄保留於本工作樹 `work/workspace-controls-production.log`、`work/workspace-controls-regression.log`、`work/workspace-controls-lms-final.log`。後兩份合計覆蓋 34 項既有 UI 回歸；第一次測試仍載入更新前的分類頁籤預期值，因此 6 項曾失敗，修正後獨立重跑通過。
+
+## 2026-11-03 交付狀態更新
+
+使用者已授權推送並建立 PR；本文件上方「未推送／未建立 PR」為先前本機驗收階段的紀錄。此分支現提交 PR 供審查，尚未合併 main。另已將 LMS 麵包屑名稱改為「實驗室管理系統」，同步更新相關 E2E 驗收文字。
