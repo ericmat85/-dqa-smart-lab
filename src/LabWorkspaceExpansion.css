@@ -13,10 +13,6 @@ html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs{margin:0 0 10p
 html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs button{min-height:36px;padding:8px 2px;font-size:12px}
 html body #root .lab-shell.lab-enterprise .lab-main .archive-toolbar{margin:0 0 12px;padding:0}
 html body #root .lab-shell.lab-enterprise .lab-main .archive-toolbar input{height:36px;min-height:36px;padding:6px 10px;font-size:12px}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace>.panel{padding:0;border:0;background:transparent}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .template-heading>div:first-child{display:none}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .equipment-page:not(.materials-page) .template-heading{display:none}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .equipment-header-actions{margin-left:auto}
 html body #root .lab-shell.lab-enterprise{position:relative}
 html body #root .lab-shell.lab-enterprise>.clear-cases-control{position:absolute;top:64px;right:24px;bottom:auto;flex-direction:column-reverse}
 @media(max-width:1100px){html body #root .lab-shell.lab-enterprise .lab-stats.lab-dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -26,25 +22,23 @@ html body #root .lab-shell.lab-enterprise .lab-dashboard-overview td small.lab-t
 html body #root .lab-shell.lab-enterprise .lab-dashboard-stats .lab-kpi-arrow{color:var(--tab-accent)!important}
 
 /* Lab catalogs and the database share one aligned content surface. */
-html body #root .lab-shell.lab-enterprise .lab-main:has(>.lab-catalog-workspace,>.archive-page)>.lab-workspace-heading{margin-bottom:12px}
-html body #root .lab-shell.lab-enterprise .lab-main .lab-catalog-workspace>.panel{padding:0;border:0!important;background:transparent!important;box-shadow:none}
-html body #root .lab-shell.lab-enterprise .lab-main .lab-catalog-workspace>.panel>.template-page,
+html body #root .lab-shell.lab-enterprise .lab-main:has(>.archive-page)>.lab-workspace-heading{margin-bottom:12px}
 html body #root .lab-shell.lab-enterprise .lab-main>.archive-page{padding:12px;border:1px solid var(--enterprise-border)!important;border-radius:8px;background:var(--enterprise-card)!important;box-shadow:0 2px 6px #132d4b06}
 html body #root .lab-shell.lab-enterprise .lab-main>.archive-page>.template-page{padding:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .materials-page .template-heading{margin:0 0 12px;padding:0;min-height:34px;display:flex;justify-content:flex-end}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .catalog-category-views{margin:12px 0 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .schedule-view-top{margin:0 0 12px;border-bottom:1px solid var(--enterprise-border)}
-html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .schedule-view-tabs button{min-height:40px;padding:10px 2px;font-size:12px}
-html body #root .lab-shell.lab-enterprise .lab-main :is(.template-table-wrap,.archive-table-wrap){border:1px solid var(--enterprise-border);border-radius:6px;overflow:auto;max-width:100%;box-shadow:none}
-html body #root .lab-shell.lab-enterprise .lab-main :is(.template-table-wrap,.archive-table-wrap) table{border:0;margin:0;width:100%;border-collapse:collapse}
-html body #root .lab-shell.lab-enterprise .lab-main :is(.template-table-wrap,.archive-table-wrap) :is(th,td){padding:7px 10px;border:0;border-bottom:1px solid var(--enterprise-border);font-size:12px;line-height:1.4;vertical-align:middle}
-html body #root .lab-shell.lab-enterprise .lab-main :is(.template-table-wrap,.archive-table-wrap) th{background:var(--soft)!important;color:var(--enterprise-secondary)}
-html body #root .lab-shell.lab-enterprise .lab-main :is(.template-table-wrap,.archive-table-wrap) tbody tr:last-child td{border-bottom:0}
-html body #root .lab-shell.lab-enterprise .lab-main .catalog-search-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:0;border:0;background:transparent!important}
-html body #root .lab-shell.lab-enterprise .lab-main .catalog-search-toolbar .schedule-search-wrap{display:flex;align-items:center;flex:1;min-width:0;gap:8px;margin:0;padding:0;border:0;background:transparent}
-html body #root .lab-shell.lab-enterprise .lab-main .catalog-search-toolbar .schedule-search-wrap svg{width:18px;height:18px;flex:none;color:var(--enterprise-secondary)}
-html body #root .lab-shell.lab-enterprise .lab-main .catalog-search-toolbar input{box-sizing:border-box;min-width:0;width:100%;height:36px!important;min-height:36px!important;margin:0;padding:6px 10px!important;font-size:12px!important;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-input);color:var(--enterprise-text)}
-html body #root .lab-shell.lab-enterprise .lab-main .catalog-search-toolbar .catalog-search-clear{height:36px;min-height:36px;flex:none;margin:0;padding:6px 10px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card);color:var(--enterprise-text);font-size:12px;line-height:1.4}
+html body #root .lab-shell.lab-enterprise .lab-main .archive-table-wrap{border:1px solid var(--enterprise-border);border-radius:6px;overflow:auto;max-width:100%;box-shadow:none}
+html body #root .lab-shell.lab-enterprise .lab-main .archive-table-wrap table{border:0;margin:0;width:100%;border-collapse:collapse}
+html body #root .lab-shell.lab-enterprise .lab-main .archive-table-wrap :is(th,td){padding:7px 10px;border:0;border-bottom:1px solid var(--enterprise-border);font-size:12px;line-height:1.4;vertical-align:middle}
+html body #root .lab-shell.lab-enterprise .lab-main .archive-table-wrap th{background:var(--soft)!important;color:var(--enterprise-secondary)}
+html body #root .lab-shell.lab-enterprise .lab-main .archive-table-wrap tbody tr:last-child td{border-bottom:0}
+html body #root .lab-shell.lab-enterprise .lab-main>.archive-page .catalog-search-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:0;border:0;background:transparent!important}
+html body #root .lab-shell.lab-enterprise .lab-main>.archive-page .catalog-search-toolbar .schedule-search-wrap{display:flex;align-items:center;flex:1;min-width:0;gap:8px;margin:0;padding:0;border:0;background:transparent}
+html body #root .lab-shell.lab-enterprise .lab-main>.archive-page .catalog-search-toolbar .schedule-search-wrap svg{width:18px;height:18px;flex:none;color:var(--enterprise-secondary)}
+html body #root .lab-shell.lab-enterprise .lab-main>.archive-page .catalog-search-toolbar input{box-sizing:border-box;min-width:0;width:100%;height:36px!important;min-height:36px!important;margin:0;padding:6px 10px!important;font-size:12px!important;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-input);color:var(--enterprise-text)}
+html body #root .lab-shell.lab-enterprise .lab-main>.archive-page .catalog-search-toolbar .catalog-search-clear{height:36px;min-height:36px;flex:none;margin:0;padding:6px 10px;border:1px solid var(--enterprise-border);border-radius:6px;background:var(--enterprise-card);color:var(--enterprise-text);font-size:12px;line-height:1.4}
 html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs{gap:16px;margin:0 0 12px;border-bottom:1px solid var(--enterprise-border)}
 html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs button{margin:0;min-height:40px;padding:10px 2px;border-radius:0}
-@media(max-width:600px){html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs{gap:14px;overflow-x:auto}html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs button{white-space:nowrap;flex:none}html body #root .lab-shell.lab-enterprise .lab-catalog-workspace .equipment-header-actions{gap:8px;flex-wrap:wrap}}
+@media(max-width:600px){html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs{gap:14px;overflow-x:auto}html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs button{white-space:nowrap;flex:none}}
+/* Reuse the LMS catalog shell and components, including the in-panel title. */
+html body #root .lab-shell.lab-enterprise .lab-catalog-workspace>.dashboard-content{padding:0;display:block;overflow:visible;width:100%;min-height:0}
+html body #root .lab-shell.lab-enterprise .lab-catalog-workspace>.dashboard-content>.panel{margin:0}
+html body #root .lab-shell.lab-enterprise .lab-main>.clear-cases-control{position:static;inset:auto;margin:12px 0 0;width:100%;align-items:flex-end;flex-direction:column;z-index:auto}
