@@ -43,3 +43,11 @@ html body #root .lms-enterprise .role-workspace fieldset{padding:10px 12px;margi
 @media(max-width:600px){.role-editor-fields{grid-template-columns:1fr}html body #root .lms-enterprise .role-workspace>header{flex-wrap:wrap}.role-workspace .role-checks{grid-template-columns:1fr}}
 html body #root .lms-enterprise a.template-btn{text-decoration:none}
 html body #root .lms-enterprise .account-management .account-avatar{background:var(--soft);color:var(--tab-accent)}
+
+/* Trial information: change surfaces only; retain the existing grid and spacing. */
+html body #root .lms-enterprise .request-modal .request-form-preview{background:var(--enterprise-card)!important;border-color:var(--enterprise-border)!important}
+html body #root .lms-enterprise .request-modal .request-form-preview .request-preview-grid>div,
+html body #root .lms-enterprise .request-modal .request-form-preview .request-preview-text{background:var(--enterprise-bg)!important;border-color:var(--enterprise-border)!important}
+html body #root .lms-enterprise .request-modal .request-form-preview h4{color:var(--enterprise-text);border-color:var(--enterprise-border)}
+html body #root .lms-enterprise .request-modal .request-form-preview h4>span{background:#0866e8;color:#fff}
+html body #root .lms-enterprise .request-modal .request-form-preview h4 small{color:var(--tab-accent)}

@@ -14,7 +14,7 @@ const targets={labWorkItems:'requests',labAudit:'requests',borrows:'requests',la
 function SettingsSectionHeading({icon,title,detail}){
  return <><span className="settings-section-icon" aria-hidden="true"><LmsSidebarIcon name={icon}/></span><span className="settings-section-label">{title}</span><span className="settings-section-description">{detail}</span><svg className="settings-section-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 4 4 4-4 4"/></svg></>;
 }
-export default function LabSettings({onNavigate,onHome,focusSection}){
+export default function LabSettings({onNavigate,focusSection}){
  const {snapshot,metrics}=useLabView();
  const ui=useUiPreferences(),activity=useRef(null);
  const [uiError,setUiError]=useState('');
@@ -32,6 +32,6 @@ export default function LabSettings({onNavigate,onHome,focusSection}){
   <details className="management-fold"><summary><SettingsSectionHeading icon="archive" title="資料來源健檢" detail={`${sources.length} 個來源 · ${failures} 項異常`}/></summary><div className="settings-fold-body"><p>顯示目前瀏覽器的來源快照；點選來源名稱前往對應管理頁。大小僅計算列出的來源，不代表完整瀏覽器儲存用量。</p><LabRecordTable columns={[{key:'label',label:'資料來源'},{key:'count',label:'筆數'},{key:'status',label:'讀取狀態'},{key:'size',label:'資料大小'}]} rows={sources} onSelect={row=>onNavigate(targets[row.id]||'dashboard')}/></div></details>
   <details className="management-fold"><summary><SettingsSectionHeading icon="notifications" title="待處理工作提醒" detail={`${metrics.issues.length} 項`}/></summary><div className="settings-fold-body"><p>集中檢視排程衝突、校驗與庫存提醒，點選項目即可前往處理。</p><LabRecordTable columns={[{key:'type',label:'提醒類型'},{key:'detail',label:'內容'}]} rows={metrics.issues} onSelect={row=>onNavigate(targets[row.target]||'schedule')}/></div></details>
   <details className="management-fold"><summary><SettingsSectionHeading icon="review" title="系統規則與資料說明" detail="儲存 · 日期 · 分頁"/></summary><div className="settings-fold-body"><dl className="settings-rules-list"><div><dt>資料儲存</dt><dd><strong>目前瀏覽器</strong><p>同一網站來源共用 localStorage 與 IndexedDB，清除網站資料會影響 Demo 內容。</p></dd></div><div><dt>日期與排程</dt><dd><strong>Asia / Taipei</strong><p>依已儲存日程推進狀態；排程時間與匯出摘要使用台灣時間。</p></dd></div><div><dt>列表規則</dt><dd><label>每頁顯示筆數<select aria-label="每頁顯示筆數" value={ui.pageSize} onChange={event=>updateUi({pageSize:Number(event.target.value)})}>{[10,20,50,100].map(size=><option key={size} value={size}>{size}</option>)}</select></label><p>明細分頁顯示；報表匯出包含全部符合條件的資料。</p></dd></div></dl><SourceNotes snapshot={snapshot}/></div></details>
-  <footer className="settings-home-footer"><div><strong>返回工作入口</strong><HelpTip>回到首頁選擇其他系統；不會清除目前的 Demo 資料。</HelpTip></div><button type="button" className="template-btn secondary" onClick={onHome}>回到首頁</button></footer>
+
  </div></section>;
 }
