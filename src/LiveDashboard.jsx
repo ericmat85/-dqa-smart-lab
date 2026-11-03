@@ -1,5 +1,6 @@
 import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import {LoginSystemIcon} from './EnterpriseLoginLayout.jsx';
+import './LmsDashboardPhase1.css';
 import ScheduleStatusChart from './ScheduleStatusChart.jsx';
 import DashboardMetricIcon from './DashboardMetricIcon.jsx';
 import HelpTip from './HelpTip.jsx';
