@@ -1,3 +1,5 @@
+import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
+import useSidebarMobile from './useSidebarMobile.js';
 import './LabDashboardCompactV2.css';
 import './WorkspacePageHeader.css';
 import WorkspaceSidebarBrand from './WorkspaceSidebarBrand.jsx';
@@ -106,6 +108,7 @@ export default function LabApp({ path, navigate }) {
   const [action, setAction] = useState("");
   const [tab, setTab] = useState("requests");
   const [menuOpen,setMenuOpen]=useState(false);
+  const [sidebarCollapsed,setSidebarCollapsed]=useState(false);const sidebarMobile=useSidebarMobile(720);
   const chooseTab=next=>{setTab(next);setMenuOpen(false);};
   const [notice, setNotice] = useState("");
   const [reportFile, setReportFile] = useState(null);
@@ -236,8 +239,8 @@ export default function LabApp({ path, navigate }) {
   );
 
   return (
-    <div className={`lab-shell lab-enterprise ${dark ? "lab-theme-dark" : "lab-theme-light"}`}>
-      <header className="lab-global-header"><button type="button" className="lab-mobile-menu" aria-label="切換功能選單" aria-controls="lab-navigation" aria-expanded={menuOpen} onClick={()=>setMenuOpen(value=>!value)}>☰</button>
+    <div className={`lab-shell lab-enterprise ${sidebarCollapsed?'lab-sidebar-collapsed':''} ${dark ? "lab-theme-dark" : "lab-theme-light"}`}>
+      <header className="lab-global-header"><WorkspaceMenuToggle className="lab-mobile-menu" label="切換功能選單" controls="lab-navigation" expanded={sidebarMobile?menuOpen:!sidebarCollapsed} onClick={()=>sidebarMobile?setMenuOpen(v=>!v):setSidebarCollapsed(v=>!v)}/>
         <CompanyBrandLogo dark={dark}/><nav className="lab-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={navigateHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>chooseTab('requests')}>COLONG 實驗室</button><span aria-hidden="true">›</span><strong aria-current="page">{tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託與接收'}</strong></nav>
         <SystemHeaderActions compactTheme dark={dark} onToggle={toggleTheme} account={sharedSnapshot.accounts.find(row=>row.id===account.id)||account} onLogout={logout} notifications={[{title:'待接收試驗',detail:'等待實驗室確認接收',count:requests.filter(row=>row.status==='待確認').length,icon:'✓',onClick:()=>chooseTab('requests')}]}/>
       </header>

@@ -1,3 +1,6 @@
+import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
+import useSidebarMobile from './useSidebarMobile.js';
+import WorkspaceSidebarBrand from './WorkspaceSidebarBrand.jsx';
 import './WorkspacePageHeader.css';
 import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
 import HelpTip from './HelpTip.jsx';
@@ -501,9 +504,9 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
 
 
-      <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
+      <aside id="lms-navigation" className={`sidebar ${open ? "sidebar-open" : ""}`}>
 
-        <div className="sidebar-brand live-sidebar-brand colong-sidebar-brand"><CompanyBrandLogo dark whiteText/></div>
+        <WorkspaceSidebarBrand className="sidebar-brand live-sidebar-brand colong-sidebar-brand"/>
 
 
 
@@ -572,8 +575,8 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
 
 
-function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},children}){
- return <header className="dashboard-topbar"><button type="button" className="menu-button" onClick={onMenu} aria-label="切換側邊欄">☰</button>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
+function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,notificationCounts={pendingReview:0,unscheduled:0,conflicts:0},sidebarExpanded,children}){
+ return <header className="dashboard-topbar"><WorkspaceMenuToggle className="menu-button" label="切換側邊欄" controls="lms-navigation" expanded={sidebarExpanded} onClick={onMenu}/>{children}<SystemHeaderActions compactTheme dark={dark} onToggle={onToggle} account={currentUser} onLogout={onLogout} notifications={[
  {title:'待審查試驗委託',detail:'等待主管審核委託內容與報告',count:notificationCounts.pendingReview,icon:'✓',onClick:()=>onNavigate?.('requests','待審查')},
  {title:'待排程試驗',detail:'等待安排設備與試驗時間',count:notificationCounts.unscheduled,icon:'◷',onClick:()=>onNavigate?.('schedule','未排程')},
  {title:'排程衝突',detail:'設備或時段重疊，需要確認',count:notificationCounts.conflicts,icon:'!',onClick:()=>onNavigate?.('schedule','有衝突')}
@@ -1850,6 +1853,7 @@ function DashboardPage({
   const [active, setActive] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarMobile=useSidebarMobile(900);
   const [notificationFilter, setNotificationFilter] = useState(null);
 
   // 全 Dashboard 共用 AI 排程助理，切換側邊頁面時仍保持可用。
@@ -1894,7 +1898,8 @@ function DashboardPage({
 
           onToggle={onToggle}
 
-          onMenu={() => { if (window.matchMedia("(max-width: 900px)").matches) setSidebarOpen(!sidebarOpen); else setSidebarCollapsed(value => !value); }}
+          sidebarExpanded={sidebarMobile?sidebarOpen:!sidebarCollapsed}
+          onMenu={() => { if (sidebarMobile) setSidebarOpen(value=>!value); else setSidebarCollapsed(value => !value); }}
 
           onLogout={onLogout}
           onNavigate={navigate}
