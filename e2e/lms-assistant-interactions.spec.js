@@ -26,7 +26,7 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed 
   await page.locator('.dashboard-content').evaluate(el=>el.scrollTop=el.scrollHeight);
   const after=await launcher.boundingBox();expect(after.x).toBe(position.x);expect(after.y).toBe(position.y);
  }
- const chart=page.getByRole('button',{name:'排程管理圖表',exact:true});
+ const chart=page.getByRole('link',{name:'排程管理圖表',exact:true});
  await expect(chart).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(chart).toHaveCSS('color','rgb(255, 255, 255)');
  await expect(chart.locator('svg')).toHaveCSS('stroke','rgb(255, 255, 255)');
  const headers=page.locator('.schedule-table thead th');
