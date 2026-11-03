@@ -1,0 +1,42 @@
+/* A single compact rhythm from heading through statistics, tabs and search. */
+html body #root .lms-enterprise .panel.account-management{gap:12px}
+html body #root .lms-enterprise .panel.account-management .account-page-heading{margin:0;padding:0;align-items:flex-start}
+html body #root .lms-enterprise .panel.account-management .account-summary{margin:0;gap:12px}
+html body #root .lms-enterprise .panel.account-management .account-access-tabs{margin:0;min-height:40px}
+html body #root .lms-enterprise .panel.account-management .account-access-tabs button{padding:10px 2px}
+html body #root .lms-enterprise .panel.account-management .account-toolbar{margin:0 0 12px}
+html body #root .lms-enterprise .panel.account-management .role-workspace>header{padding:0 0 12px;align-items:flex-start;gap:12px}
+html body #root .lms-enterprise .panel.account-management .role-workspace>header>div{min-width:0;flex:1}
+html body #root .lms-enterprise .panel.account-management .role-workspace>header>.role-primary{flex:none;width:auto;height:34px;min-height:34px;white-space:nowrap;padding:6px 12px;font-size:12px;line-height:1.5;background:#0866e8;color:#fff;border:1px solid #0866e8}
+/* White dialog surfaces, softly tinted header/footer and accessible input contrast. */
+html body #root .lms-enterprise .compact-management-dialog>header{background:var(--soft);border-bottom:1px solid var(--enterprise-border)}
+html body #root .lms-enterprise .compact-management-dialog .account-form{background:var(--enterprise-card)!important;border-radius:0}
+html body #root .lms-enterprise .compact-management-dialog .account-form-grid :is(input,select){background:var(--enterprise-bg)!important;font-weight:400}
+html body #root .lms-enterprise .compact-management-dialog :is(.account-form-actions,.role-editor>footer){border-top:1px solid var(--enterprise-border);padding-top:12px;margin-top:12px;display:flex;justify-content:flex-end;gap:8px}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog{width:min(680px,calc(100vw - 24px))}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog .role-editor{padding:16px;border:0;background:var(--enterprise-card);margin:0}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog :is(input:not([type=checkbox]),select){width:100%;height:36px;min-height:36px;padding:6px 10px;font-size:12px;background:var(--enterprise-bg)!important}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog fieldset{padding:10px 12px;margin:12px 0;border:1px solid var(--enterprise-border);border-radius:6px}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog legend{font-size:12px;padding:0 4px}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog .role-admin-check{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:12px}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog :is(.role-primary,.role-secondary){min-height:34px;padding:6px 12px;font-size:12px;line-height:1.5;white-space:nowrap;border-radius:6px}
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog .role-primary{background:#0866e8;color:#fff}
+/* Compress the disclosure and arrangement while retaining all fields and checks. */
+html body #root .lms-enterprise .schedule-edit-modal .schedule-request-details{margin:0 0 12px;border-radius:8px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-request-details>summary{min-height:40px;padding:8px 12px;box-sizing:border-box;font-size:13px;background:var(--soft)}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-request-details>summary:before{font-size:18px;color:var(--tab-accent)}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-request-preview{padding:12px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-request-preview .request-preview-grid>div{padding:7px 10px;gap:4px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement{margin-top:12px;border-radius:8px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-header{padding:12px 16px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-header h4{font-size:15px;margin:4px 0}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-header>div>span,
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-hint button{color:var(--tab-accent)}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-step span{background:var(--soft);color:var(--tab-accent)}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-hint{padding:8px 16px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-content{padding:16px;gap:16px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-device{padding-right:16px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-step{margin-bottom:12px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement label{gap:6px;margin-bottom:12px}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement :is(input,select){height:36px;min-height:36px;padding:6px 10px;font-size:12px}
+@media(max-width:650px){html body #root .lms-enterprise .panel.account-management .account-summary{gap:8px}html body #root .lms-enterprise .panel.account-management .role-workspace>header{flex-wrap:wrap}html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-device{padding-right:0}html body #root .lms-enterprise .schedule-edit-modal .schedule-request-details>summary{flex-wrap:wrap;gap:4px;font-size:12px;line-height:1.4}html body #root .lms-enterprise .schedule-edit-modal .schedule-request-details>summary small{margin-left:0;width:100%}}
