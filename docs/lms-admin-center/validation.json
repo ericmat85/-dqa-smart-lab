@@ -1,0 +1,55 @@
+{
+  "branch": "feature/lms-admin-center",
+  "base": "55fc1b9",
+  "remote_actions": {
+    "pushed": false,
+    "merged": false,
+    "deployed": false
+  },
+  "unit_test_files": {
+    "passed": 47,
+    "failed": 0
+  },
+  "new_unit_cases": {
+    "passed": 7,
+    "failed": 0
+  },
+  "full_browser_scan": {
+    "startTime": "2026-11-03T17:01:32.937Z",
+    "duration": 1085171.6330000001,
+    "expected": 269,
+    "skipped": 0,
+    "unexpected": 9,
+    "flaky": 0
+  },
+  "repaired_test_recheck": {
+    "startTime": "2026-11-03T17:21:35.495Z",
+    "duration": 81053.014,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "final_admin_production_cases": {
+    "passed": 11,
+    "failed": 0,
+    "viewports": [
+      "1920x1080",
+      "1366x768",
+      "768x1024",
+      "390x844"
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ]
+  },
+  "coverage": "278 full-scan cases + 2 tablet cases + 1 document integration case = 281 current browser cases; nine original harness incompatibilities repaired and rechecked. Final 11 administration cases rerun after signature-error UI polish.",
+  "data_preservation": {
+    "requests": 18,
+    "reports": 6,
+    "business_keys_identical": true,
+    "report_metadata_and_binary_sha256_identical": true
+  },
+  "backend_or_production_environment_tested": false
+}

@@ -5,3 +5,18 @@
 .report-quickfill-panel{padding:14px;border:1px solid #d8e4f4;border-radius:10px;background:#f4f8ff;margin:14px 0 20px}.report-quickfill-panel p{font-size:12px;line-height:1.6;margin:10px 0}.report-review-status{display:flex;flex-direction:column;gap:5px;font-size:12px;line-height:1.6;padding:10px;border-radius:8px;background:#e9eef5;color:#465976;overflow-wrap:anywhere}.report-review-status.is-passed{background:#e4f5eb;color:#216647}.report-demo-review-badge{display:block!important;white-space:normal;background:#e4f5eb;color:#216647!important;border-radius:6px;padding:5px 7px;margin-top:6px;font-size:11px;line-height:1.5;max-width:180px}.report-quickfill-panel small{display:block;margin-top:8px}
 
 .report-submit-modal .report-quickfill-panel{padding:10px 12px;margin:10px 0 14px}.report-quickfill-panel .report-actions{gap:7px}.report-quickfill-panel .report-actions button{font-size:11px;padding:7px 10px}.report-submit-modal .report-quickfill-panel>p{font-size:11px;line-height:1.5;margin:6px 0}.report-quickfill-panel .report-review-status{flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;font-size:11px;gap:4px 10px;padding:7px 9px}.report-quickfill-help{font-size:10px;margin-top:6px;line-height:1.5}.report-quickfill-help summary{cursor:pointer;color:#657b98}.report-quickfill-help small{margin:5px 0 0;font-size:10px}
+
+.report-prearchive-preview{margin-top:14px;padding:12px;border:1px solid var(--enterprise-border,#dce5f1);border-radius:8px;background:var(--enterprise-input,#f4f8ff);min-width:0}.report-prearchive-preview>h4{margin:0 0 8px;font-size:14px}.report-prearchive-preview>p{margin:6px 0}.report-prearchive-preview .workbook-view{margin-top:12px}.rq-theme-dark .report-prearchive-preview{background:#17263b;border-color:#33445d}@media(max-width:620px){.report-prearchive-preview{padding:8px}}
+
+/* One case frame, one frame per document; avoid nested rounded outlines. */
+#root .report-case-panel .report-danger{background:#dc2626!important;border:1px solid #dc2626!important;color:#fff!important;border-radius:6px;padding:7px 12px;font:inherit;cursor:pointer;min-height:34px}
+#root .report-case-panel .report-danger:hover:not(:disabled){background:#b91c1c!important;border-color:#b91c1c!important}
+#root .report-case-panel .report-danger:disabled{opacity:.5;cursor:wait}
+#root .rq-case-detail>.report-case-panel{border:0;border-radius:0;box-shadow:none;margin:0;padding:16px 22px;border-bottom:1px solid var(--enterprise-border,#dce5f1)}
+#root .report-case-panel>.report-prearchive-preview{border:0;border-top:1px solid var(--enterprise-border,#dce5f1);border-radius:0;background:transparent;padding:12px 0 0;margin-top:14px}
+#root .report-prearchive-preview>.workbook-view{border:1px solid var(--enterprise-border,#dce5f1);border-radius:8px;padding:12px;margin:12px 0 0;box-shadow:none;overflow:hidden}
+#root .report-prearchive-preview .workbook-scroll{border:1px solid var(--enterprise-border,#dce5f1);border-radius:4px}
+.report-return-form{margin-top:12px;padding-top:12px;border-top:1px solid var(--enterprise-border,#dce5f1)}
+.report-return-form>label{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.report-return-form textarea{box-sizing:border-box;width:100%;min-height:80px;margin:0 0 10px}
+@media(max-width:620px){#root .rq-case-detail>.report-case-panel{padding:12px}#root .report-prearchive-preview>.workbook-view{padding:10px}}

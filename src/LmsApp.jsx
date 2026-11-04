@@ -1,3 +1,7 @@
+import AiReviewProgress from './AiReviewProgress.jsx';
+import AdminCenterModule from './AdminCenterModule.jsx';
+import {ADMIN_MODULES} from './adminCenterData.mjs';
+import {canViewAdmin} from './adminCenterStore.mjs';
 import './AccountRolePolish.css';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import ScheduleGanttBoard from './ScheduleGanttBoard.jsx';
@@ -116,9 +120,7 @@ const NAV_ITEMS = [
 
   { id: "reports", label: "報表分析" },
 
-  { id: "accounts", label: "帳號管理" },
-
-  { id: "settings", label: "系統設定" },
+  { id: "settings", label: "系統管理" },
 
 ];
 
@@ -519,7 +521,7 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
         <nav className="sidebar-nav">
 
-          {NAV_ITEMS.filter(item=>canAccessLmsPage(currentUser,item.id)&&(item.id!=='archive'||canOpenReportArchive(currentUser,'lms'))&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
+          {NAV_ITEMS.filter(item=>(canAccessLmsPage(currentUser,item.id)||(item.id==='settings'&&canManageAccounts(currentUser)))&&(item.id!=='archive'||canOpenReportArchive(currentUser,'lms'))&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
 
             <div
 
@@ -590,7 +592,7 @@ function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,n
  ]}/></header>;
 }
 
-function AccountManagement({ accounts, setAccounts,currentUser }) {
+function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel='返回系統管理' }) {
   const [roles,setRoles]=useState(()=>readCustomRoles());
   const [roleSettingsOpen,setRoleSettingsOpen]=useState(false);
   const [deleteTarget,setDeleteTarget]=useState(null),[deleteError,setDeleteError]=useState('');
@@ -982,7 +984,7 @@ function AccountManagement({ accounts, setAccounts,currentUser }) {
 
 
 
-        <div className="account-heading-actions"><button
+        <div className="account-heading-actions">{onBack&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}>{backLabel}</button>}<button
 
           type="button"
 
@@ -1555,6 +1557,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  const [aiReview,setAiReview] = useState(null);
  const [aiReviewing,setAiReviewing] = useState(false);
  const [aiProgress,setAiProgress] = useState(0);
+ const aiReviewButton=useRef(null);
  const [pendingReviewResult,setPendingReviewResult] = useState(null);
  useEffect(() => {
    if (!pendingReviewResult) return;
@@ -1682,7 +1685,8 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  <div className="template-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}:${requestStatusFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","優先順序","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(r=><tr key={r.operationId||r.id}><td><button type="button" className="request-id-link" onClick={()=>{if(r.reportId){setApprovalInfo(requestInformation(r,approvalSnapshot));return;}if(r.operationId?.startsWith('borrow:')){setApprovalOperationId(r.operationId);return;}if(r.operationId){setApprovalInfo({...requestInformation(r,approvalSnapshot),status:'待核准'});return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode("view");setComment("");setAiReview(null)}} title={`查看 ${r.id} 委託單細節`}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.priority}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{if(r.operationId){setApprovalOperationId(r.operationId);return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode(r.status==="待審查"?"review":"view");setComment("");setAiReview(null);}}>{r.reportId?'審核':r.operationId?'核准':r.status==="待審查"?"審查":r.status==="退回"?"補件":"查看"}</button></td></tr>)}</tbody></PaginatedTable>{!visible.length&&<div className="template-empty">沒有符合條件的委託</div>}</div></section>
  <div className="template-info">顯示委託審查、申請核准與二／三階報告審核；已結案報告可在案件歷程查閱。</div>
  {showHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal" role="region" aria-labelledby="history-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="history-modal-title">歷史委託</h3><HelpTip>查詢已完成、取消及退回的委託單；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史委託" onClick={()=>subPage?onExit():setShowHistory(false)}>×</button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>{setSearch('');setHistoryFilter('完成');}} className="history-toolbar"><select className="template-select" value={historyFilter} onChange={e=>setHistoryFilter(e.target.value)}>{["完成","取消","退回"].map(x=><option key={x} value={x}>{x}</option>)}</select><span className="request-count">共 {historical.length} 筆</span></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historical.map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>查看</button></td></tr>)}</tbody></PaginatedTable>{!historical.length&&<div className="template-empty">此分類目前沒有歷史委託</div>}</div></div></section></div>}
- {current&&<div className="request-modal-backdrop" role="presentation" onMouseDown={e=>{if(!selectedFromHistory&&e.target===e.currentTarget)setSelected(null)}}><section className="request-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="request-modal-title">{current.id}｜{current.title}</h3><HelpTip>委託詳細資料與簽核歷程</HelpTip></div></div><div className="request-modal-header-actions">{current.status === "待審查" && <button type="button" className="template-btn secondary" onClick={fillDemoReview}>DEMO 填寫</button>}{modalMode==="review"&&<button type="button" className="template-btn ai-review-button" disabled={aiReviewing} onClick={()=>runAIReview(current)}><AssistantIcon/><span>{aiReviewing?"檢查中…":"AI 審查"}</span></button>}{selectedFromHistory?<button type="button" className="template-btn secondary" onClick={()=>{setSelected(null);setSelectedFromHistory(false);setAiReview(null);setShowHistory(true);}}>回上一頁</button>:<button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉視窗" onClick={()=>{setSelected(null);setAiReview(null);}}>×</button>}</div></div><div className="request-modal-body"><ReportCasePanel request={approvalSnapshot.electronic.find(row=>row.id===current.id)||current} account={currentUser}/>{notice && <div className="template-info" role="status">{notice}</div>}{modalMode === "review" && aiReviewing && <section className="ai-review-results" aria-live="polite"><h4>檢查委託資料</h4><p>正在依現有規則檢查欄位，請稍候。</p><div role="progressbar" aria-label="審查進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={aiProgress} style={{height:10,background:"#e6ecf5",borderRadius:10,overflow:"hidden"}}><div style={{height:"100%",width:`${aiProgress}%`,background:"#4857d5",transition:"width 100ms linear"}} /></div><p>{aiProgress}%</p>{["產品代碼", "產品類型", "需求日期", "測試數量", "試驗規範／試驗手法", "判定基準"].map((label,index)=><p key={label} style={{margin:"6px 0",color:aiProgress >= Math.ceil((index+1)*100/6) ? "#25835d" : "#8794aa"}}>{aiProgress >= Math.ceil((index+1)*100/6) ? "✓ 已檢查" : "○ 等待檢查"}　{label}</p>)}</section>}{modalMode==="review"&&aiReview&&aiReview.id===current.id&&<section className="ai-review-results" aria-live="polite"><div className="ai-review-results-heading"><div><span className="ai-review-eyebrow">DQA SMART REVIEW · {aiReview.mode}</span><h4>AI 審查結果</h4><p>{aiReview.summary}</p></div><button type="button" className="ai-review-dismiss" onClick={()=>setAiReview(null)} aria-label="關閉 AI 審查結果">×</button></div><div className="ai-review-metrics"><span>檢查欄位 <strong>{aiReview.checkedFields}</strong></span><span>待確認項目 <strong>{aiReview.findings.length}</strong></span><span>檢查時間 <strong>{aiReview.createdAt}</strong></span></div>{aiReview.findings.length===0?<div className="ai-review-empty"><strong>未發現明顯缺漏</strong><HelpTip>這只代表目前規則檢查未發現明顯問題，不代表試驗規格已獲正式認可。</HelpTip></div>:<div className="ai-review-finding-list">{aiReview.findings.map((finding,index)=><article className={`ai-review-finding ${finding.level}`} key={`${finding.title}-${index}`}><span className="ai-review-finding-icon">{finding.level==="error"?"!":"△"}</span><div><strong>{finding.title}</strong><p>{finding.detail}</p></div><span className="ai-review-level">{finding.level==="error"?"需補正":"待確認"}</span></article>)}</div>}<p className="ai-review-disclaimer">提示：目前為前端 Demo 規則檢查，尚未連接真正的 AI API 或讀取外部規格文件。結果僅供參考，不會自動核准或退回委託。</p></section>}<div className="request-form-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{current.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{current.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{current.customerName||"—"}</strong></div><div><label>客戶品番</label><strong>{current.customerPartNo||"—"}</strong></div><div><label>需求日期</label><strong>{current.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{current.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{(current.intentions||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{(current.sampleSource||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{current.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{current.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{current.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{current.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{current.specification||current.title}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{current.judgment||"依核准之試驗規格判定。"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{current.remarks||"—"}</div></div>{current.source === "electronic-request" && <div className="template-info">此電子委託的簽名與審查結果會同步回委託系統；雙階核准後進入待排程。</div>}<div className="detail-grid"><div><span>委託部門</span><strong>{current.department}</strong></div><div><span>申請人</span><strong>{current.applicant}</strong></div><div><span>目前狀態</span><strong><span className={`template-status status-${current.status}`}>{current.status}</span></strong></div><div><span>審查進度</span><strong>{current.approval}/2 階核准</strong></div></div><h4>雙階主管審查</h4><div className="approval-steps"><div className={current.approval>=1?"approved":""}><b>1</b><span>第一階主管</span><small>{current.approval>=1?"已核准":current.status==="退回"?"已退回":"待審查"}</small></div><div className={current.approval>=2?"approved":""}><b>2</b><span>第二階主管</span><small>{current.approval>=2?"已核准":"待第一階完成"}</small></div></div><SignatureHistory request={current} /><h4>完整操作歷程</h4><PaginatedList items={current.history} resetKey={current.id}>{page=><ul className="history-list">{page.map((h,i)=><li key={i}>{h}</li>)}</ul>}</PaginatedList>{current.status === "待審查" && <section className="request-form-preview"><h4>電子簽名與審核</h4><ApprovalSignature key={`${current.id}-${current.approval}-${reviewInputVersion}`} accountId={currentUser?.id} mode={reviewMode} onModeChange={setReviewMode} value={reviewSignature} onChange={setReviewSignature} onError={setNotice} /><label className="comment-label">審查意見（退回時請填寫）<textarea className="template-input" value={comment} onChange={e=>setComment(e.target.value)} placeholder="例如：請補充測試條件、樣品數量或規格依據" rows={3}/></label><div className="template-form-actions"><button type="button" className="template-btn" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(false)}>核准第 {current.approval+1} 階</button><button type="button" className="template-btn danger" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(true)}>退回委託</button></div></section>}</div></section></div>}
+ {aiReviewing&&current&&modalMode==='review'&&<AiReviewProgress progress={aiProgress} returnFocus={aiReviewButton} onCancel={()=>{setPendingReviewResult(null);setAiReviewing(false);setAiProgress(0);}}/>}
+ {current&&<div className="request-modal-backdrop" role="presentation" onMouseDown={e=>{if(!selectedFromHistory&&e.target===e.currentTarget)setSelected(null)}}><section className="request-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="request-modal-title">{current.id}｜{current.title}</h3><HelpTip>委託詳細資料與簽核歷程</HelpTip></div></div><div className="request-modal-header-actions">{current.status === "待審查" && <button type="button" className="template-btn secondary" onClick={fillDemoReview}>DEMO 填寫</button>}{modalMode==="review"&&<button type="button" ref={aiReviewButton} className="template-btn ai-review-button" disabled={aiReviewing} onClick={()=>runAIReview(current)}><AssistantIcon/><span>{aiReviewing?"檢查中…":"AI 審查"}</span></button>}{selectedFromHistory?<button type="button" className="template-btn secondary" onClick={()=>{setSelected(null);setSelectedFromHistory(false);setAiReview(null);setShowHistory(true);}}>回上一頁</button>:<button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉視窗" onClick={()=>{setSelected(null);setAiReview(null);}}>×</button>}</div></div><div className="request-modal-body"><ReportCasePanel request={approvalSnapshot.electronic.find(row=>row.id===current.id)||current} account={currentUser}/>{notice && <div className="template-info" role="status">{notice}</div>}{modalMode==="review"&&aiReview&&aiReview.id===current.id&&<section className="ai-review-results" aria-live="polite"><div className="ai-review-results-heading"><div><span className="ai-review-eyebrow">DQA SMART REVIEW · {aiReview.mode}</span><h4>AI 審查結果</h4><p>{aiReview.summary}</p></div><button type="button" className="ai-review-dismiss" onClick={()=>setAiReview(null)} aria-label="關閉 AI 審查結果">×</button></div><div className="ai-review-metrics"><span>檢查欄位 <strong>{aiReview.checkedFields}</strong></span><span>待確認項目 <strong>{aiReview.findings.length}</strong></span><span>檢查時間 <strong>{aiReview.createdAt}</strong></span></div>{aiReview.findings.length===0?<div className="ai-review-empty"><strong>未發現明顯缺漏</strong><HelpTip>這只代表目前規則檢查未發現明顯問題，不代表試驗規格已獲正式認可。</HelpTip></div>:<div className="ai-review-finding-list">{aiReview.findings.map((finding,index)=><article className={`ai-review-finding ${finding.level}`} key={`${finding.title}-${index}`}><span className="ai-review-finding-icon">{finding.level==="error"?"!":"△"}</span><div><strong>{finding.title}</strong><p>{finding.detail}</p></div><span className="ai-review-level">{finding.level==="error"?"需補正":"待確認"}</span></article>)}</div>}<p className="ai-review-disclaimer">提示：目前為前端 Demo 規則檢查，尚未連接真正的 AI API 或讀取外部規格文件。結果僅供參考，不會自動核准或退回委託。</p></section>}<div className="request-form-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{current.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{current.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{current.customerName||"—"}</strong></div><div><label>客戶品番</label><strong>{current.customerPartNo||"—"}</strong></div><div><label>需求日期</label><strong>{current.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{current.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{(current.intentions||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{(current.sampleSource||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{current.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{current.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{current.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{current.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{current.specification||current.title}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{current.judgment||"依核准之試驗規格判定。"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{current.remarks||"—"}</div></div>{current.source === "electronic-request" && <div className="template-info">此電子委託的簽名與審查結果會同步回委託系統；雙階核准後進入待排程。</div>}<div className="detail-grid"><div><span>委託部門</span><strong>{current.department}</strong></div><div><span>申請人</span><strong>{current.applicant}</strong></div><div><span>目前狀態</span><strong><span className={`template-status status-${current.status}`}>{current.status}</span></strong></div><div><span>審查進度</span><strong>{current.approval}/2 階核准</strong></div></div><h4>雙階主管審查</h4><div className="approval-steps"><div className={current.approval>=1?"approved":""}><b>1</b><span>第一階主管</span><small>{current.approval>=1?"已核准":current.status==="退回"?"已退回":"待審查"}</small></div><div className={current.approval>=2?"approved":""}><b>2</b><span>第二階主管</span><small>{current.approval>=2?"已核准":"待第一階完成"}</small></div></div><SignatureHistory request={current} /><h4>完整操作歷程</h4><PaginatedList items={current.history} resetKey={current.id}>{page=><ul className="history-list">{page.map((h,i)=><li key={i}>{h}</li>)}</ul>}</PaginatedList>{current.status === "待審查" && <section className="request-form-preview"><h4>電子簽名與審核</h4><ApprovalSignature key={`${current.id}-${current.approval}-${reviewInputVersion}`} accountId={currentUser?.id} mode={reviewMode} onModeChange={setReviewMode} value={reviewSignature} onChange={setReviewSignature} onError={setNotice} /><label className="comment-label">審查意見（退回時請填寫）<textarea className="template-input" value={comment} onChange={e=>setComment(e.target.value)} placeholder="例如：請補充測試條件、樣品數量或規格依據" rows={3}/></label><div className="template-form-actions"><button type="button" className="template-btn" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(false)}>核准第 {current.approval+1} 階</button><button type="button" className="template-btn danger" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(true)}>退回委託</button></div></section>}</div></section></div>}
  </div></section>;
 }
 
@@ -1837,7 +1841,9 @@ function DashboardPage({
 }) {
 
   const lifecycleError=useScheduleLifecycle();
-  const routePage=path.split('/')[2]||'dashboard';
+  const requestedPage=path.split('/')[2]||'dashboard';
+  const routePage=requestedPage==='accounts'?'settings':requestedPage;
+  const settingsModule=requestedPage==='accounts'?'accounts':routePage==='settings'?(path.split('/')[3]||null):null;
   const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
   const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
   const [active, setActive] = useState(routePage);
@@ -1848,6 +1854,7 @@ function DashboardPage({
 
   // 全 Dashboard 共用 AI 排程助理，切換側邊頁面時仍保持可用。
   function navigate(id, filter = null) {
+    if(id==='accounts'||(id==='settings'&&!canAccessLmsPage(currentUser,'settings')&&canManageAccounts(currentUser))){if(!canManageAccounts(currentUser))return;setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/accounts');return;}
     if(!canAccessLmsPage(currentUser,id))return;
     setActive(id);
     setNotificationFilter(filter);
@@ -1896,13 +1903,13 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
         <div className="dashboard-content">{active==='dashboard'&&<div className="lms-dashboard-heading"><h1><LmsSidebarIcon name="dashboard"/>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
 
-          {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
+          {!(canAccessLmsPage(currentUser,active)||(active==='settings'&&settingsModule==='accounts'&&canViewAdmin(currentUser,'accounts')))? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
             <RequestsPage onExit={()=>navigate('requests')} subPage={subPage} initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />
           ) : active === "schedule" ? (
             <SchedulePage onExit={()=>navigate('schedule')} subPage={subPage} currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
@@ -1910,23 +1917,13 @@ function DashboardPage({
             <EquipmentPage currentUser={currentUser} />
           ) : active === "maintenance" ? (
             <MaterialsPage currentUser={currentUser} />
-          ) : active === "accounts" ? (
-
-            canManageAccounts(currentUser) ? <AccountManagement currentUser={currentUser}
-
-              accounts={accounts}
-
-              setAccounts={setAccounts}
-
-            /> : <div className="template-info">帳號管理僅供系統管理員、二階主管或授權角色使用。</div>
-
           ) : active === "dashboard" ? (
 
             <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -1962,9 +1959,11 @@ export default function App({ path, navigate }) {
   });
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
-    const valid=[...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
-    if (path !== '/lms/login' && !valid.includes(path)) navigate('/lms/login', true);
-    else if (valid.includes(path) && !currentUser) navigate('/lms/login', true);
+    const valid=['/lms/accounts',...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
+    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path);
+    if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
+    else if (validRoute && !currentUser) navigate('/lms/login', true);
+    else if(path==='/lms/accounts'&&currentUser)navigate('/lms/settings/accounts',true);
     else if(path==='/lms/login'&&currentUser)navigate('/lms/dashboard',true);
   }, [path, currentUser, navigate]);
 

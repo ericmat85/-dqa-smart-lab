@@ -1,5 +1,5 @@
 export const ROLE_KEY='dqa-custom-roles-v1';
-export const ROLE_PAGES=[['dashboard','儀錶板'],['requests','試驗委託與審查'],['schedule','排程管理'],['equipment','設備管理'],['maintenance','物料管理'],['reports','報表分析'],['archive','資料庫'],['settings','系統設定']];
+export const ROLE_PAGES=[['dashboard','儀錶板'],['requests','試驗委託與審查'],['schedule','排程管理'],['equipment','設備管理'],['maintenance','物料管理'],['reports','報表分析'],['archive','資料庫'],['settings','系統管理']];
 export const BUILTIN_ROLES=['實驗室工程師','實驗室副工程師','委託者','委託者主管','一階主管','二階主管','三階主管','系統管理員','檢視者'];
 export function readCustomRoles(storage=globalThis.window?.localStorage){try{const rows=JSON.parse(storage?.getItem(ROLE_KEY)||'[]');return Array.isArray(rows)?rows.filter(row=>typeof row.name==='string'&&Array.isArray(row.pages)&&[0,1,2,3].includes(row.level)):[];}catch{return [];}}
 export function saveCustomRole(roles,draft,storage=globalThis.window?.localStorage){

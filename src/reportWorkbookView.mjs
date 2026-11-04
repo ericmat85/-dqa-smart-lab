@@ -12,7 +12,7 @@ export async function readReportWorkbook({actorId,requestId,expectedRevision},st
  if(!report||!request||!['lms','lab','request'].some(system=>accessSystem(actor,system,storage))||!canReadReport(actor,report,request,storage))throw Error('目前帳號無權檢視這份報告。請使用對應主管帳號登入。');
  if(expectedRevision&&report.revision!==expectedRevision)throw Error('報告版本已更新，請重新開啟檢視。');
  if(!report.signedExcel?.byteLength)throw Error('簽核 Excel 不存在，請確認上傳檔案。');
- return {bytes:report.signedExcel,fileName:report.fileName,revision:report.revision};
+ return {bytes:report.signedExcel,fileName:report.fileName,revision:report.revision,request};
 }
 function color(value){const argb=value?.argb;if(typeof argb==='string'&&/^(?:[0-9a-f]{6}|[0-9a-f]{8})$/i.test(argb))return '#'+argb.slice(-6);return undefined;}
 function cellStyle(cell){

@@ -9,3 +9,8 @@ export async function saveReport(report,expectedRevision,epoch){
  request.onsuccess=()=>{if(epoch!==undefined&&(caseResetActive()||caseResetVersion()!==epoch)){error=Error("系統已重設，停止儲存報告。");tx.abort();return;}const current=request.result;if((expectedRevision===null&&current?.stage)||(typeof expectedRevision==='string'&&current?.revision!==expectedRevision)){error=Error('報告已更新或已提交，請重新開啟視窗。');tx.abort();return;}store.put(report);const meta=reportMetadata(report);if(meta)tx.objectStore('reportIndex').put(meta);};
  tx.oncomplete=()=>{db.close();resolve(report);};tx.onabort=tx.onerror=()=>{db.close();reject(error||tx.error||Error('報告儲存失敗。'));};});
 }
+
+// Seed replacement is one IndexedDB transaction, including the lightweight index.
+export async function replaceReportSet(reports){
+ const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(['reports','reportIndex'],'readwrite');const store=tx.objectStore('reports'),index=tx.objectStore('reportIndex');store.clear();index.clear();for(const report of reports){store.put(report);const meta=reportMetadata(report);if(meta)index.put(meta);}tx.oncomplete=()=>{db.close();resolve();};tx.onabort=tx.onerror=()=>{db.close();reject(tx.error||Error('Demo報告替換失敗'));};});
+}

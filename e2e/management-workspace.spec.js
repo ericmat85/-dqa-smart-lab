@@ -15,7 +15,7 @@ test.beforeEach(async({page})=>{
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
  await page.goto('/lms/dashboard');
 });
-async function nav(page,name){if(await page.getByRole('button',{name:'切換側邊欄'}).isVisible()&&await page.locator('.sidebar').evaluate(el=>getComputedStyle(el).transform!=='none')&&page.viewportSize().width<=900)await page.getByRole('button',{name:'切換側邊欄'}).click();await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
+async function nav(page,name){if(await page.getByRole('button',{name:'切換側邊欄'}).isVisible()&&await page.locator('.sidebar').evaluate(el=>getComputedStyle(el).transform!=='none')&&page.viewportSize().width<=900)await page.getByRole('button',{name:'切換側邊欄'}).click();await page.locator('.sidebar').getByRole('button',{name:name==='帳號管理'?'系統管理':name,exact:true}).click();if(name==='帳號管理')await page.getByRole('button',{name:'開啟帳號與權限管理',exact:true}).click();}
 test('report export downloads valid complete Excel and Chinese PDF with column selection',async({page})=>{
  await nav(page,'報表分析');await expect(page.getByRole('heading',{name:'報表分析',exact:true})).toBeVisible();
  await page.locator('.management-export-menu>summary').click();await expect(page.locator('.management-export-menu>summary')).toHaveCSS('background-color','rgb(8, 102, 232)');
@@ -39,11 +39,11 @@ test('accounts and roles share a workspace, assign custom permissions and preser
  expect(await page.pageErrors()).toEqual([]);
 });
 test('report export settings persist preferences while system settings retain appearance and health controls',async({page})=>{
- await nav(page,'系統設定');const settings=page.locator('.settings-management');
- await expect(settings.locator('.management-fold')).toHaveCount(5);await expect(settings.getByText('資料來源健檢',{exact:false}).first()).toBeVisible();
+ await nav(page,'系統管理');const settings=page.locator('.settings-management');
+ await expect(settings.locator('.management-fold')).toHaveCount(6);await expect(settings.getByText('資料來源健檢',{exact:false}).first()).toBeVisible();
  await expect(settings.getByLabel('報表預設日期範圍')).toHaveCount(0);await nav(page,'報表分析');await page.getByText('報表顯示與匯出設定',{exact:true}).click();const preferences=page.locator('.report-preferences');await preferences.getByLabel('報表預設日期範圍').selectOption('month');await preferences.locator('.settings-checkbox input').uncheck();await preferences.getByRole('button',{name:'儲存偏好'}).click();await expect(preferences.getByRole('status')).toContainText('偏好已儲存');
  await nav(page,'報表分析');await expect(page.getByLabel('日期範圍',{exact:true})).toHaveValue('month');
- await nav(page,'系統設定');await page.getByRole('button',{name:'切換深色或淺色模式'}).click();await expect(page.locator('.dashboard-shell')).toHaveClass(/theme-dark/);
+ await nav(page,'系統管理');await page.getByRole('button',{name:'切換深色或淺色模式'}).click();await expect(page.locator('.dashboard-shell')).toHaveClass(/theme-dark/);
  await settings.locator('.management-fold').filter({has:page.locator('summary').filter({hasText:'資料來源健檢'})}).locator('summary').first().click();await expect(settings.getByRole('columnheader',{name:'資料來源',exact:true})).toBeVisible();
  await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByText(/重新讀取本機資料/)).toBeVisible();
  await expect(settings.locator('.settings-home-footer')).toHaveCount(0);await page.locator('.sidebar').getByRole('button',{name:'回到首頁',exact:true}).click();await expect(page).toHaveURL(/\/$/);expect(await page.evaluate(()=>sessionStorage.getItem('dqa-lms-account-id'))).toBe('U001');
@@ -54,7 +54,7 @@ for(const width of [1366,375])test(`management pages fit ${width}px in both them
  await page.setViewportSize({width,height:900});
  for(const dark of [false,true]){
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
-  for(const name of ['報表分析','帳號管理','系統設定']){
+  for(const name of ['報表分析','帳號管理','系統管理']){
    await nav(page,name);if(name==='報表分析')await page.locator('.report-config>summary').click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    await page.screenshot({path:test.info().outputPath(`management-${name}-${width}-${dark?'dark':'light'}.png`),fullPage:true});
   }
