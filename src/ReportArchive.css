@@ -25,3 +25,6 @@ html body #root .archive-page[data-system] .archive-toolbar input{margin:6px 0 0
 
 html body #root .archive-page .archive-request-link{border:0;background:transparent;box-shadow:none;border-radius:0;padding:0;margin:0;min-height:0;color:var(--tab-accent,#0866e8);text-align:left;text-decoration:underline;font:inherit;cursor:pointer}
 html body #root .archive-page .archive-request-link:focus-visible{outline:2px solid #368cff;outline-offset:3px}
+.archive-preview .guided-report-preview{flex:1;min-height:0;overflow:auto;margin:12px 0 0;padding:16px;background:#e9eef5;display:block;text-align:center}
+.guided-report-preview figcaption{color:#354f6f;font-size:13px;margin-bottom:12px}
+.guided-report-preview img{display:block;width:min(100%,850px);height:auto;margin:auto;box-shadow:0 4px 18px #102b4720;background:white}

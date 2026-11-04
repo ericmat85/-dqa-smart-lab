@@ -33,3 +33,7 @@
 /* Expanded launcher content aligns to its left padding; the panel stays independent. */
 .dashboard-shell .intelligent-assistant.is-expanded .intelligent-launcher{justify-content:flex-start}
 .dashboard-shell .intelligent-assistant .intelligent-launcher{position:relative;z-index:3}
+/* Compact tour entry uses the same style even when ProductTour.css is not loaded. */
+.intelligent-panel .tour-assistant-entry{display:inline-flex;align-items:center;width:auto;min-height:30px;max-width:100%;box-sizing:border-box;margin:0 0 12px;padding:4px 10px;border:1px solid #bad3f6;border-radius:6px;color:#0967ef;background:var(--surface,#fff);font-size:12px;line-height:1.5;text-decoration:none}
+.intelligent-panel .tour-assistant-entry:hover{border-color:#0967ef;background:var(--soft,#eff5ff)}
+.intelligent-panel .tour-assistant-entry:focus-visible{outline:2px solid #0967ef;outline-offset:3px}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="850" height="1100" viewBox="0 0 850 1100">
+<rect width="850" height="1100" fill="white"/><g font-family="Arial, sans-serif" fill="#142e49">
+<rect x="48" y="44" width="754" height="8" fill="#0967ef"/><text x="48" y="88" font-size="22" font-weight="bold">DQA SMART LAB</text><text x="802" y="87" text-anchor="end" font-size="14" fill="#0967ef">DEMO · REPORT SAMPLE</text>
+<text x="425" y="147" text-anchor="middle" font-size="30" font-weight="bold">試驗報告 / TEST REPORT</text><text x="425" y="178" text-anchor="middle" font-size="14" fill="#62758e">導覽報告示意圖 · 所有數據與簽核皆為虛構</text>
+<rect x="48" y="208" width="754" height="136" rx="4" fill="#f1f6fd"/>
+<g font-size="15"><text x="68" y="239">委託編號：TOUR-DEMO-001</text><text x="445" y="239">設備：TOUR-EQ-001</text><text x="68" y="275">樣品：SAMPLE-DEMO-FLOW-001</text><text x="445" y="275">設備名稱：導覽環境試驗箱</text><text x="68" y="311">文件版本：Demo V1.0</text><text x="445" y="311">文件用途：產品操作導覽</text></g>
+<text x="48" y="390" font-size="21" font-weight="bold">01　試驗條件 / TEST CONDITIONS</text>
+<g stroke="#d3dfed" fill="none"><rect x="48" y="411" width="754" height="132"/><path d="M48 455H802M48 499H802M310 411V543"/></g>
+<g font-size="16"><text x="68" y="439">試驗類型</text><text x="330" y="439">環境試驗（示意）</text><text x="68" y="483">條件與規範</text><text x="330" y="483">依導覽案件設定；非正式試驗規範</text><text x="68" y="527">結果狀態</text><text x="330" y="527">模擬完成 · 僅展示報告版面</text></g>
+<text x="48" y="591" font-size="21" font-weight="bold">02　試驗紀錄 / DEMO MEASUREMENT</text>
+<rect x="48" y="615" width="754" height="230" fill="#f8faff" stroke="#d3dfed"/>
+<g stroke="#dce6f2"><path d="M100 655H765M100 700H765M100 745H765M100 790H765M100 635V810M230 635V810M360 635V810M490 635V810M620 635V810M750 635V810"/></g>
+<path d="M100 774L155 770L210 720L265 670L320 664L375 670L430 668L485 710L540 766L595 772L650 721L705 672L760 668" fill="none" stroke="#0967ef" stroke-width="4"/>
+<text x="120" y="835" font-size="12" fill="#62758e">示意曲線 / Illustrative data only — 非設備實測資料</text>
+<text x="48" y="894" font-size="21" font-weight="bold">03　審核與追溯 / REVIEW TRACE</text>
+<rect x="48" y="916" width="754" height="72" fill="#f1f6fd"/>
+<g font-size="14"><text x="70" y="946">工程師提交</text><text x="265" y="946">LV2 報告審核</text><text x="459" y="946">LV3 報告審核</text><text x="650" y="946">主管查閱</text><text x="70" y="973" fill="#0967ef">DEMO</text><text x="265" y="973" fill="#0967ef">DEMO</text><text x="459" y="973" fill="#0967ef">DEMO</text><text x="650" y="973" fill="#0967ef">DEMO</text></g>
+<path d="M48 1020H802" stroke="#d3dfed"/><text x="48" y="1049" font-size="12" fill="#62758e">模擬文件 · 本圖不代表正式 PDF 內容、真實測量或有效電子簽章。</text><text x="802" y="1075" text-anchor="end" font-size="12" fill="#62758e">DEMO / 1</text>
+</g></svg>
