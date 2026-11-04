@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 for(const system of ['lms','lab'])test(`assistant compact entry opens the real tour from ${system}`,async({page})=>{
  await page.setViewportSize({width:1600,height:900});await page.goto(`/${system}/login`);await page.getByRole('button',{name:/^登入系統/}).click();await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();
- const entry=page.getByRole('link',{name:'機器人九階導覽 →',exact:true});await expect(entry).toBeVisible();const size=await entry.boundingBox();expect(size.height).toBeLessThanOrEqual(38);expect(size.width).toBeLessThan(250);
+ const entry=page.getByRole('link',{name:'AI 機器人導覽 →',exact:true});await expect(entry).toBeVisible();const size=await entry.boundingBox();expect(size.height).toBeLessThanOrEqual(38);expect(size.width).toBeLessThan(250);
  await entry.click();await expect(page).toHaveURL(/\/tour$/);await expect(page.frameLocator('iframe[title="九階導覽實際系統畫面"]').getByRole('button',{name:'簽核',exact:true})).toBeVisible();
 });
 test('desktop tour expands and enters fullscreen while preserving the interactive case',async({page})=>{
@@ -10,4 +10,11 @@ test('desktop tour expands and enters fullscreen while preserving the interactiv
  await page.getByRole('button',{name:'顯示解說',exact:true}).click();await expect(coach).toBeVisible();await page.getByRole('button',{name:'全螢幕',exact:true}).click();await expect.poll(()=>page.evaluate(()=>Boolean(document.fullscreenElement))).toBe(true);await expect(coach).toBeHidden();await page.getByRole('button',{name:'退出全螢幕',exact:true}).click();await expect.poll(()=>page.evaluate(()=>Boolean(document.fullscreenElement))).toBe(false);
  await page.getByRole('button',{name:'顯示解說',exact:true}).click();await page.screenshot({path:test.info().outputPath('desktop-tour-expanded-controls.png')});
  await page.emulateMedia({reducedMotion:'reduce'});await expect.poll(()=>frame.locator('.guided-target').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+});
+test('AI robot speech types progressively, can skip, and advances one sentence without operating the case',async({page})=>{
+ await page.setViewportSize({width:1600,height:900});await page.goto('/tour');const coach=page.getByRole('complementary',{name:'AI機器人導覽'}),frame=page.frameLocator('iframe[title="九階導覽實際系統畫面"]');await expect(frame.getByRole('button',{name:'簽核',exact:true})).toBeVisible();await expect(coach).toContainText('AI 機器人導覽');
+ const typed=coach.locator('[data-typed-text]');await expect.poll(()=>typed.textContent()).not.toBe('');const size=await coach.boundingBox();expect(size.height).toBeLessThan(300);expect(size.width).toBeLessThanOrEqual(300);
+ await frame.getByRole('button',{name:'簽核',exact:true}).click();await expect(coach.locator('.tour-context-instruction')).toContainText('DEMO');await expect(coach.getByRole('button',{name:'立即顯示',exact:true})).toBeVisible();const initial=await typed.textContent();await expect.poll(async()=>(await typed.textContent()).length).toBeGreaterThan(initial.length);await coach.getByRole('button',{name:'立即顯示',exact:true}).click();
+ const before=await typed.textContent();const nextSentence=coach.getByRole('button',{name:'下一句 →',exact:true});await expect(nextSentence).toBeVisible();await nextSentence.click();await expect.poll(()=>typed.textContent()).not.toBe(before);
+ await expect(coach.getByRole('button',{name:'前往 LV1審查 →',exact:true})).toBeDisabled();await page.emulateMedia({reducedMotion:'reduce'});await expect(coach.getByRole('button',{name:'立即顯示',exact:true})).toHaveCount(0);await page.screenshot({path:test.info().outputPath('ai-tour-speech-bubble.png')});
 });
