@@ -15,7 +15,12 @@ test.beforeEach(async({page})=>{
  },{accounts:INITIAL_ACCOUNTS,equipment:DEMO_EQUIPMENT});
  await page.goto('/lms/dashboard');
 });
-async function nav(page,name){if(await page.getByRole('button',{name:'切換側邊欄'}).isVisible()&&await page.locator('.sidebar').evaluate(el=>getComputedStyle(el).transform!=='none')&&page.viewportSize().width<=900)await page.getByRole('button',{name:'切換側邊欄'}).click();await page.locator('.sidebar').getByRole('button',{name:name==='帳號管理'?'系統管理':name,exact:true}).click();if(name==='帳號管理')await page.getByRole('button',{name:'開啟帳號與權限管理',exact:true}).click();}
+async function nav(page,name){
+ await expect(page.locator('.sidebar')).toBeAttached();
+ if(page.viewportSize().width<=900){const toggle=page.getByRole('button',{name:'切換側邊欄',exact:true});await expect(toggle).toBeVisible();if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();await expect(toggle).toHaveAttribute('aria-expanded','true');}
+ await page.locator('.sidebar').getByRole('button',{name:name==='帳號管理'?'系統管理':name,exact:true}).click();
+ if(name==='帳號管理')await page.getByRole('button',{name:'開啟帳號與權限管理',exact:true}).click();
+}
 test('report export downloads valid complete Excel and Chinese PDF with column selection',async({page})=>{
  await nav(page,'報表分析');await expect(page.getByRole('heading',{name:'報表分析',exact:true})).toBeVisible();
  await page.locator('.management-export-menu>summary').click();await expect(page.locator('.management-export-menu>summary')).toHaveCSS('background-color','rgb(8, 102, 232)');

@@ -1,0 +1,32 @@
+import {useEffect,useRef,useState} from 'react';
+import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
+import CompanyBrandLogo from './CompanyBrandLogo.jsx';
+import useSystemTheme from './useSystemTheme.js';
+import {GUIDED_STEPS,guidedStepDone} from './guidedTourSteps.mjs';
+import {tourDatabaseName} from './guidedTourStorage.mjs';
+import './ProductTour.css';
+export default function ProductTour({navigate}){
+ const {dark,toggleTheme}=useSystemTheme(),frame=useRef(null),cache=useRef(null),indexRef=useRef(0),themeRef=useRef('light');
+ const [token,setToken]=useState(()=>`dqa-guided-tour-${crypto.randomUUID()}`),[index,setIndex]=useState(0),[state,setState]=useState(null),[ready,setReady]=useState(false),[error,setError]=useState(''),[completed,setCompleted]=useState(false);
+ const step=GUIDED_STEPS[index],done=guidedStepDone(index,state);
+ useEffect(()=>{themeRef.current=dark?'dark':'light';},[dark]);
+ function command(type,extra={}){frame.current?.contentWindow?.postMessage({token,type,...extra},location.origin);}
+ useEffect(()=>{
+  function receive(event){
+   const message=event.data;if(event.origin!==location.origin||event.source!==frame.current?.contentWindow||message?.source!=='dqa-guided-workspace'||message.token!==token)return;
+   if(message.type==='ready'){frame.current.contentWindow.postMessage({token,type:'init',data:cache.current,index:indexRef.current,theme:themeRef.current},location.origin);setError('');}
+   if(message.type==='snapshot'){cache.current=message.data;if(message.state.index===indexRef.current){setState(message.state);setReady(true);}}
+   if(message.type==='error'){setError(message.message);setReady(false);}
+  }
+  window.addEventListener('message',receive);
+  return()=>{window.removeEventListener('message',receive);const db=tourDatabaseName(token);if(db)indexedDB.deleteDatabase(db);};
+ },[token]);
+ useEffect(()=>{if(ready)frame.current?.contentWindow?.postMessage({token,type:'theme',theme:dark?'dark':'light'},location.origin);},[dark,ready,token]);
+ function next(){if(!done||!ready||indexRef.current!==index)return;if(index===GUIDED_STEPS.length-1){setCompleted(true);return;}const nextIndex=index+1;indexRef.current=nextIndex;setIndex(nextIndex);setReady(false);setState(null);command('navigate',{index:nextIndex});}
+ function restart(){cache.current=null;indexRef.current=0;setIndex(0);setReady(false);setState(null);setCompleted(false);setError('');setToken(`dqa-guided-tour-${crypto.randomUUID()}`);}
+ return <div className={`product-tour interactive-tour ${dark?'tour-dark':''}`}>
+  <header className="tour-header"><CompanyBrandLogo whiteText/><span>機器人實機導覽 <small>隔離 Demo</small></span><div><button onClick={toggleTheme} aria-label="切換深色或淺色模式">{dark?'淺色模式':'深色模式'}</button><button onClick={()=>navigate('/')}>離開導覽</button></div></header>
+  <main className="interactive-tour-layout"><section className="tour-live-workspace" aria-label="實際系統操作區"><div className="tour-live-bar"><strong>{step.system==='request'?'電子委託系統':step.system==='lms'?'實驗室管理系統':'COLONG 實驗室'}</strong><span>目前使用：{step.role} · 虛構角色</span></div><iframe key={token} name={token} ref={frame} src="/" title="九階導覽實際系統畫面" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals"/>{!ready&&!error&&<p className="tour-frame-loading" role="status">正在載入此環節的實際操作畫面…</p>}</section>
+  <aside className="tour-coach" aria-label="AI機器人導覽"><div className="tour-coach-title"><span><EnterpriseBotIcon/></span><div><strong>AI 智能助理</strong><small>你來操作，我來引導</small></div></div><div className="tour-nine-progress" role="progressbar" aria-label="九階導覽進度" aria-valuemin={1} aria-valuemax={9} aria-valuenow={step.stage}>{Array.from({length:9},(_,i)=><span key={i} className={i+1<=step.stage?'is-reached':''}>{i+1}</span>)}</div><h1>{completed?'九階操作已完成！':`第 ${step.stage} 階：${step.title}`}</h1><p className="tour-live-role">本環節角色：{step.role}</p>{completed?<p>你已親自完成簽核、排程、接收、試驗加速、報告審核及結案文件檢視。</p>:<ol className="tour-instructions">{step.instructions.map(text=><li key={text}>{text}</li>)}</ol>}<p className="tour-operation-note">請操作左側原有系統畫面。藍色外框指出目前可操作的位置。</p>{error&&<p role="alert" className="tour-error">工作區載入失敗：{error}。請按「重新開始」重試。</p>}<p className={`tour-step-check ${done?'is-done':''}`} role="status">{done?'✓ 已偵測到本環節操作完成':ready?'等待你完成此環節操作':'載入中'}</p>{!completed?<button className="tour-primary tour-continue" disabled={!ready||!done} onClick={next}>{step.next} →</button>:<button className="tour-primary tour-continue" onClick={()=>navigate('/')}>返回系統入口</button>}<div className="tour-secondary-actions"><button disabled={!ready} onClick={()=>command('navigate',{index})}>返回此環節畫面</button><button onClick={restart}>重新開始</button></div><small>只操作獨立假資料，沿用真實表單與權限檢查；不變更你的登入身分或原有案件。重新整理從第一階開始。</small></aside></main>
+ </div>;
+}
