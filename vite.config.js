@@ -4,6 +4,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Keep existing external-font imports out of dynamic CSS preloads: a font outage must not block app bootstrap.
+  build:{cssCodeSplit:false},
   optimizeDeps:{exclude:['@dqa/i18n/jsx-runtime','@dqa/i18n/jsx-dev-runtime']},
   resolve:{alias:{'@dqa/i18n':fileURLToPath(new URL('./src/localized-jsx',import.meta.url))}},
   plugins: [react({jsxImportSource:'@dqa/i18n'}),{
