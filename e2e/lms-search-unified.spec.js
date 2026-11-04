@@ -9,5 +9,20 @@ for(const width of [1366,390])for(const theme of ['light','dark'])test(`LMS unif
   if(['requests','archive','accounts','requests/history'].includes(path))await page.screenshot({animations:'disabled',path:test.info().outputPath(`search-${path.replace('/','-')}-${width}-${theme}.png`)});
  }
  await page.goto('/lms/reports');await expect(page.locator('.lab-report-category-description')).toHaveCount(0);await expect(page.locator('.lab-report-controls .schedule-search-wrap')).toHaveCount(0);await expect(page.getByRole('searchbox',{name:'搜尋報表',exact:true})).toBeVisible();await page.screenshot({animations:'disabled',path:test.info().outputPath(`reports-clean-${width}-${theme}.png`)});
- await page.goto('/lms/settings');const appearance=page.locator('.management-fold').first();await expect(appearance).not.toHaveAttribute('open','');await expect(appearance.locator('select').first()).not.toBeVisible();await page.screenshot({animations:'disabled',path:test.info().outputPath(`appearance-collapsed-${width}-${theme}.png`)});await appearance.locator('summary').click();await expect(appearance.locator('select').first()).toBeVisible();await appearance.locator('select').first().selectOption('small');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-ui-preferences-v1')).fontSize)).toBe('small');expect(await page.pageErrors()).toEqual([]);
+ await page.goto('/lms/settings');
+ // Settings groups can move; select the appearance section by its visible title.
+ const appearance=page.locator('details').filter({has:page.locator('summary').filter({hasText:'介面外觀'})});
+ const fontSize=appearance.getByRole('combobox',{name:'字體大小',exact:true});
+ await expect(appearance).not.toHaveAttribute('open','');
+ await expect(fontSize).not.toBeVisible();
+ await page.screenshot({animations:'disabled',path:test.info().outputPath(`appearance-collapsed-${width}-${theme}.png`)});
+ await appearance.locator('summary').click();
+ await expect(fontSize).toBeVisible();
+ await fontSize.selectOption('small');
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-ui-preferences-v1')).fontSize)).toBe('small');
+ await page.reload();
+ await expect(appearance).not.toHaveAttribute('open','');
+ await appearance.locator('summary').click();
+ await expect(fontSize).toHaveValue('small');
+ expect(await page.pageErrors()).toEqual([]);
 });
