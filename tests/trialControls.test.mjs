@@ -8,7 +8,7 @@ import {reservationWindow} from '../src/scheduleResources.mjs';
 import {syncScheduleLifecycle} from '../src/scheduleLifecycle.mjs';
 const now=Date.parse('2026-10-30T06:00:00Z'),sig='data:image/png;base64,AAAA';
 const engineer=INITIAL_ACCOUNTS.find(a=>a.role==='實驗室工程師'),manager=INITIAL_ACCOUNTS.find(a=>a.role==='一階主管');
-function fixture(){const data=new Map([['dqa-shared-demo-accounts-v1',JSON.stringify(INITIAL_ACCOUNTS)],['dqa-equipment-demo-v1',JSON.stringify(DEMO_EQUIPMENT)]]);for(const k of ['dqa-request-demo-v2','dqa-schedules-demo-v1','dqa_lab_demo_requests_v1','dqa_lab_demo_audit_v1','dqa-lms-reviews-v1','dqa-lab-operations-v1'])data.set(k,'[]');return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};}
+function fixture(){const data=new Map([['dqa-shared-demo-accounts-v1',JSON.stringify(INITIAL_ACCOUNTS)],['dqa-equipment-demo-v1',JSON.stringify(DEMO_EQUIPMENT)]]);for(const k of ['dqa-request-demo-v2','dqa-schedules-demo-v1','dqa_lab_demo_requests_v1','dqa_lab_demo_audit_v1','dqa-lms-reviews-v1','dqa-lab-operations-v1'])data.set(k,'[]');const time=new Date(now+86400000).toISOString(),end=new Date(now+172800000).toISOString(),machine=DEMO_EQUIPMENT.find(r=>r.status==='待機中');data.set('dqa-request-demo-v2',JSON.stringify([{id:'EXISTING-TRIAL',ownerId:'DEMO-REQUESTER',supervisorId:'DEMO-SUPERVISOR',status:'待排程'}]));data.set('dqa-schedules-demo-v1',JSON.stringify([{id:'EXISTING-SCHEDULE',requestId:'EXISTING-TRIAL',reservationId:'EXISTING-RESERVATION',equipmentId:machine.id,eq:machine.name,ownerId:engineer.id,owner:engineer.name,time,end,status:'已排程'}]));data.set('dqa_lab_demo_requests_v1',JSON.stringify([{id:'EXISTING-TRIAL',scheduleId:'EXISTING-SCHEDULE',reservationId:'EXISTING-RESERVATION',status:'已排程',acceptedAt:new Date(now-60000).toISOString(),scheduledStart:time,scheduledEnd:end}]));return {data,getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};}
 const read=(s,k)=>JSON.parse(s.getItem(k));
 test('accelerator starts at halfway, pause persists and extends the end without advancing progress, resume then complete',()=>{
  const s=fixture();const first=accelerateTrial({actorId:engineer.id,signature:sig,now},s);
@@ -54,13 +54,27 @@ test('pause control stays visible with an explicit reason before starting or wit
  assert.equal(trialPauseAvailability(manager,{status:'暫停中',pauseStartedAt:new Date(now).toISOString()},now,s).enabled,true);
  assert.match(trialPauseAvailability(engineer,{status:'試驗中'},now,s).reason,/lv1/);
 });
-test('accelerator skips orphaned legacy LMS trials instead of completing cases without electronic sources',()=>{
+test('accelerator never creates cases for orphaned or empty data',()=>{
  const s=fixture();s.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{id:'LEGACY',scheduleId:'OLD',acceptedAt:new Date(now).toISOString(),status:'已排程'}]));
- const result=accelerateTrial({actorId:engineer.id,signature:sig,now},s);assert.notEqual(result.id,'LEGACY');assert.equal(result.stage,'running');assert.equal(read(s,'dqa_lab_demo_requests_v1').find(r=>r.id==='LEGACY').status,'已排程');
- assert.ok(read(s,'dqa-request-demo-v2').find(r=>r.id===result.id).supervisorId);
- assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now:now+1000},s).stage,'completed');
+ const before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s),/不會建立新案件/);assert.deepEqual([...s.data],before);
+ for(const key of ['dqa-request-demo-v2','dqa-schedules-demo-v1','dqa_lab_demo_requests_v1'])s.setItem(key,'[]');const empty=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s),/等待開始/);assert.deepEqual([...s.data],empty);
+});
+test('only a current accepted future reservation can start acceleration; excluded cases remain unchanged',()=>{
+ const mutations=[
+  s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].status='待確認';delete rows[0].acceptedAt;s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
+  s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].scheduledStart='CHANGED';s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
+  s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].reservationId='OLD';s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
+  s=>{const rows=read(s,'dqa-schedules-demo-v1'),lab=read(s,'dqa_lab_demo_requests_v1');rows[0].time=new Date(now-3600000).toISOString();rows[0].end=new Date(now+3600000).toISOString();rows[0].status='試驗中';lab[0]={...lab[0],status:'試驗中',scheduledStart:rows[0].time,scheduledEnd:rows[0].end};s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(lab));},
+  s=>s.setItem('dqa-lab-operations-v1',JSON.stringify([{requestId:'EXISTING-TRIAL',status:'待審核'}])),
+  s=>{const rows=read(s,'dqa-schedules-demo-v1');rows[0].reportInfo={stage:'level2'};s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));},
+  ...['已完成','取消','已結案','待審核','待查閱'].map(status=>s=>{const rows=read(s,'dqa-request-demo-v2');rows[0].status=status;s.setItem('dqa-request-demo-v2',JSON.stringify(rows));}),
+ ];
+ for(const mutate of mutations){const s=fixture();mutate(s);const before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s));assert.deepEqual([...s.data],before);}
+ const s=fixture(),ids=read(s,'dqa-request-demo-v2').map(r=>r.id),accountData=s.getItem('dqa-shared-demo-accounts-v1');assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now},s).id,'EXISTING-TRIAL');assert.deepEqual(read(s,'dqa-request-demo-v2').map(r=>r.id),ids);assert.equal(s.getItem('dqa-shared-demo-accounts-v1'),accountData);assert.equal(read(s,'dqa-schedules-demo-v1').length,1);
 });
 test('completed trial cannot be scheduled again even if an old editor calls validation',async()=>{
  const {validateSchedule}=await import('../src/scheduleEquipment.mjs');
  assert.throws(()=>validateSchedule({editing:{status:'已完成'},form:{},equipment:[],accounts:[],rows:[]}),/試驗已完成/);
 });
+
+test('a scoped accelerator cannot select or create a different request',()=>{const s=fixture(),before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,requestId:'OTHER-CASE',now},s));assert.deepEqual([...s.data],before);assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,requestId:'EXISTING-TRIAL',now},s).id,'EXISTING-TRIAL');});
