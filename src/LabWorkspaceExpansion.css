@@ -42,3 +42,10 @@ html body #root .lab-shell.lab-enterprise .lab-main .archive-tabs button{margin:
 html body #root .lab-shell.lab-enterprise .lab-catalog-workspace>.dashboard-content{padding:0;display:block;overflow:visible;width:100%;min-height:0}
 html body #root .lab-shell.lab-enterprise .lab-catalog-workspace>.dashboard-content>.panel{margin:0}
 html body #root .lab-shell.lab-enterprise .lab-main>.clear-cases-control{position:static;inset:auto;margin:12px 0 0;width:100%;align-items:flex-end;flex-direction:column;z-index:auto}
+
+html body #root .lab-enterprise .lab-audit-panel table{height:auto}
+html body #root .lab-enterprise .lab-audit-panel :is(th,td){height:auto;padding:8px 10px;vertical-align:top;line-height:1.5}
+.lab-audit-signature{font-size:12px;max-width:360px}
+.lab-audit-signature>summary{cursor:pointer;color:var(--tab-accent,#0866e8);white-space:nowrap;line-height:1.5}
+.lab-audit-signature .dqa-signature-history{padding:10px 0 0;margin:0}
+.lab-audit-signature .dqa-signature-history>h3{font-size:12px}

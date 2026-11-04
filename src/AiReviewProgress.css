@@ -1,0 +1,19 @@
+.ai-review-progress-dialog{width:min(470px,calc(100vw - 28px));max-height:calc(100dvh - 28px);margin:auto}
+.ai-review-progress-dialog::backdrop{background:#07152599;backdrop-filter:blur(5px)}
+.ai-review-progress-dialog .schedule-ai-progress>span{transition:width .1s linear}
+.ai-review-progress-dialog .schedule-ai-steps{margin:14px 0}
+.ai-review-progress-dialog .schedule-ai-steps li{padding:6px 0}
+.ai-review-progress-dialog footer{display:flex;justify-content:flex-end}
+.ai-review-progress-dialog footer button{min-height:34px;padding:6px 12px;font:inherit;cursor:pointer}
+@media(max-width:600px){.ai-review-progress-dialog{padding:18px}.ai-review-progress-dialog header p{margin-bottom:16px}.ai-review-progress-dialog .schedule-ai-symbol{margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.ai-review-progress-dialog .schedule-ai-progress>span{transition:none}}
+.ai-review-progress-dialog .schedule-ai-explanation{background:var(--soft);border:1px solid var(--enterprise-border);color:var(--enterprise-secondary)}
+.ai-review-progress-dialog .schedule-ai-progress{background:var(--enterprise-border)}
+.ai-review-progress-dialog .schedule-ai-progress-heading strong{color:var(--tab-accent)}
+
+.ai-review-progress-host .ai-review-progress-dialog>header{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.ai-review-progress-dialog>header .schedule-ai-symbol{margin:0 auto}
+.ai-review-progress-dialog>header .ai-progress-eyebrow{display:block;letter-spacing:.16em;line-height:1.5;margin:0}
+.ai-review-progress-dialog>header h3{margin:4px 0 0}
+.ai-review-progress-dialog>header p{margin:0 0 16px}
+.ai-review-progress-dialog footer button:disabled{opacity:.7;cursor:wait}

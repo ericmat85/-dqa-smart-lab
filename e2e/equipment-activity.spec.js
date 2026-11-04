@@ -17,10 +17,10 @@ test.beforeEach(async({page})=>{
 async function nav(page,name){await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
 test('saved activity horizon updates schedule KPI and dashboard calculations, and survives reload',async({page})=>{
  await nav(page,'排程管理');const kpi=page.locator('.equipment-activity-kpi');await expect(kpi.locator('.schedule-activity-period')).toContainText('統計 14 天');await expect(kpi.locator('strong')).toHaveText('50%');
- await nav(page,'系統設定');await page.locator('#equipment-activity-settings>summary').click();await page.getByLabel('設備稼動率統計天數').selectOption('7');await page.getByRole('button',{name:'儲存偏好'}).click();
+ await nav(page,'系統管理');await page.locator('#equipment-activity-settings>summary').click();await page.getByLabel('設備稼動率統計天數').selectOption('7');await page.getByRole('button',{name:'儲存偏好'}).click();
  await nav(page,'排程管理');await expect(kpi.locator('.schedule-activity-period')).toContainText('統計 7 天');await expect(kpi.locator('strong')).toHaveText('100%');
  await nav(page,'儀錶板');await expect(page.locator('.live-metric').filter({hasText:'設備稼動率'})).toContainText('100%');
- await page.reload();await nav(page,'系統設定');await page.locator('#equipment-activity-settings>summary').click();await expect(page.getByLabel('設備稼動率統計天數')).toHaveValue('7');await page.getByLabel('設備稼動率起始日期').fill('2030-02-01');await page.getByRole('button',{name:'儲存偏好'}).click();
+ await page.reload();await nav(page,'系統管理');await page.locator('#equipment-activity-settings>summary').click();await expect(page.getByLabel('設備稼動率統計天數')).toHaveValue('7');await page.getByLabel('設備稼動率起始日期').fill('2030-02-01');await page.getByRole('button',{name:'儲存偏好'}).click();
  await nav(page,'排程管理');await expect(kpi.locator('strong')).toHaveText('0%');await expect(kpi).toContainText('2030-02-01 — 2030-02-07');
  expect(await page.pageErrors()).toEqual([]);
 });

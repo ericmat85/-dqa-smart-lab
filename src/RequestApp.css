@@ -501,3 +501,11 @@ body:has(.rq-theme-dark) .rq-delete-confirm-modal .rq-btn-light{background:#2938
 @media(max-width:620px){.rq-entry-backdrop.rq-app{padding:12px}.rq-entry-backdrop .rq-entry-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);height:auto;border-radius:14px}.rq-entry-dialog .rq-form-header{padding:14px}.rq-entry-dialog .rq-form-header h2{font-size:19px}.rq-entry-dialog .rq-form-header>div:last-child{flex-wrap:wrap}.rq-entry-dialog .rq-form-footer{padding:12px;gap:8px}.rq-entry-dialog .rq-form-footer>div{flex-wrap:wrap;justify-content:flex-end}}
 .rq-entry-dialog .rq-entry-grid>label.rq-entry-grid-one{grid-column:1/-1;margin-top:0}
 .rq-entry-backdrop.rq-theme-dark{--rq-card:var(--surface,#1f2937);--rq-page:var(--page,#111827);--rq-text:var(--text,#e5edf8);--rq-muted:var(--muted,#b4c4d8);--rq-border:var(--border,#40516a)}
+
+/* Shared information dialogs: inset content without nested outer frames. */
+.rq-demo-flow-section{padding:14px 17px}
+.rq-demo-flow-section>.help-title-row{margin:0 0 8px}
+.rq-demo-flow-section h3{margin:0;font-size:14px;line-height:1.5}
+.rq-demo-flow-section ol{margin:8px 0 0;padding-left:22px}
+.rq-request-detail-body>.report-case-panel:first-child{margin-top:0}
+.rq-request-detail-body .rq-detail-section>.dqa-signature-history{margin:0;border:0;border-radius:0}

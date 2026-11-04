@@ -23,7 +23,7 @@ function readEquipment() {
 
 export default function EquipmentPage({ currentUser, readOnly=false }) {
   const [equipment,setEquipment] = useState(readEquipment);
-  const [status,setStatus] = useState(readOnly?'全部':'使用中');
+  const [status,setStatus] = useState('使用中');
   const [search,setSearch] = useState('');
   const [selectedId,setSelectedId] = useState(null);
   const [form,setForm] = useState(null);
