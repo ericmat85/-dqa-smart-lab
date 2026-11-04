@@ -14,3 +14,7 @@ Lint、Production Build、diff check通過；4項新增桌面／手機深淺色�
 [桌面淺色](desktop-light.png) · [手機深色](mobile-dark.png)
 
 僅完成本機提交，未推送、合併或部署。
+
+## 標題排列與報告共用
+
+圖示、SMART REVIEW、主標題改為上下置中，固定8px間距，避免英文與圖示擠在同一列。共用元件新增報告提交模式；[報告進度與截圖](../report-ai-progress/README.md)。
