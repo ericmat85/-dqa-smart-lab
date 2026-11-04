@@ -36,7 +36,16 @@ export function accelerateTrial({actorId,signature,requestId,now=Date.now()},sto
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
  const sources=read(storage,'dqa-request-demo-v2');
  const operations=read(storage,'dqa-lab-operations-v1');
- const completeSource=id=>(!requestId||id===requestId)&&sources.some(r=>r.id===id&&r.ownerId&&r.supervisorId&&!r.reportInfo?.stage&&!['取消','已結案','已完成','待審核','待查閱'].includes(r.status));
+ const reviews=read(storage,'dqa-lms-reviews-v1');
+ const completeSource=id=>{
+  if(requestId&&id!==requestId)return false;
+  const source=sources.find(r=>r.id===id);
+  if(source)return Boolean(source.ownerId&&source.supervisorId)&&!source.reportInfo?.stage&&!['取消','已結案','已完成','待審核','待查閱'].includes(source.status);
+  // Legacy LMS requests use their own review ledger. Its 完成 means review approved,
+  // not trial completed; require both approval levels and never materialize a new case.
+  const review=reviews.find(r=>r.id===id&&r.source!=='electronic-request');
+  return Boolean(review&&Number(review.approval)>=2&&!review.reportInfo?.stage&&!['取消','已結案','已完成','待審核','待查閱','退回','待補件'].includes(review.status));
+ };
  const matchingSchedule=receipt=>schedules.find(row=>row.id===receipt.scheduleId&&row.requestId===receipt.id&&row.reservationId&&row.reservationId===receipt.reservationId&&row.time===receipt.scheduledStart&&row.end===receipt.scheduledEnd);
  const usable=receipt=>{const row=matchingSchedule(receipt);return completeSource(receipt.id)&&Number.isFinite(Date.parse(receipt.acceptedAt))&&Date.parse(receipt.acceptedAt)<=now&&!receipt.reportInfo?.stage&&!receipt.pendingOperationId&&!operations.some(o=>o.requestId===receipt.id&&o.status==='待審核')&&row&&!row.reportInfo?.stage&&!row.pendingOperationId;};
  const running=lab.find(r=>usable(r)&&r.demoAccelerator&&r.status==='試驗中');

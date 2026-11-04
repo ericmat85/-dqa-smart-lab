@@ -78,3 +78,26 @@ test('completed trial cannot be scheduled again even if an old editor calls vali
 });
 
 test('a scoped accelerator cannot select or create a different request',()=>{const s=fixture(),before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,requestId:'OTHER-CASE',now},s));assert.deepEqual([...s.data],before);assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,requestId:'EXISTING-TRIAL',now},s).id,'EXISTING-TRIAL');});
+
+test('accepted legacy LMS trials accelerate both assigned machines without inventing an electronic request',()=>{
+ const s=fixture(),machines=DEMO_EQUIPMENT.filter(m=>m.status==='待機中').slice(0,2),rows=read(s,'dqa-schedules-demo-v1');
+ rows[0]={...rows[0],equipmentIds:machines.map(m=>m.id),equipmentId:machines[0].id,equipmentCount:2,eq:machines.map(m=>m.name).join('、'),allocations:machines.map((m,i)=>({equipmentId:m.id,quantity:i?2:3}))};
+ s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));s.setItem('dqa-request-demo-v2','[]');
+ s.setItem('dqa-lms-reviews-v1',JSON.stringify([{id:'EXISTING-TRIAL',status:'完成',approval:2,history:['兩階主管核准']}])) ;
+ const review=s.getItem('dqa-lms-reviews-v1');
+ assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now},s).stage,'running');
+ for(const machine of machines){const current=read(s,'dqa-equipment-demo-v1').find(m=>m.id===machine.id);assert.equal(current.status,'使用中');assert.equal(current.currentRequest,'EXISTING-TRIAL');}
+ assert.equal(read(s,'dqa_lab_demo_requests_v1')[0].status,'試驗中');assert.equal(read(s,'dqa-schedules-demo-v1')[0].allocations.length,2);
+ assert.equal(accelerateTrial({actorId:engineer.id,signature:sig,now:now+1000},s).stage,'completed');
+ assert.equal(read(s,'dqa-schedules-demo-v1')[0].status,'已完成');assert.equal(read(s,'dqa_lab_demo_requests_v1')[0].status,'已完成');for(const machine of machines)assert.equal(read(s,'dqa-equipment-demo-v1').find(m=>m.id===machine.id).status,'待機中');assert.deepEqual(read(s,'dqa-request-demo-v2'),[]);assert.equal(s.getItem('dqa-lms-reviews-v1'),review);
+ syncScheduleLifecycle(s,now+13*3600000);for(const machine of machines)assert.equal(read(s,'dqa-equipment-demo-v1').find(m=>m.id===machine.id).status,'待機中');
+});
+test('legacy support still rejects unapproved, cancelled, stale and conflicted two-machine reservations',()=>{
+ for(const state of ['unapproved','cancelled','unaccepted','stale','pending','conflict']){
+  const s=fixture(),machines=DEMO_EQUIPMENT.filter(m=>m.status==='待機中').slice(0,2),rows=read(s,'dqa-schedules-demo-v1');rows[0]={...rows[0],equipmentId:machines[0].id,equipmentIds:machines.map(m=>m.id)};s.setItem('dqa-request-demo-v2','[]');s.setItem('dqa-lms-reviews-v1',JSON.stringify([{id:'EXISTING-TRIAL',status:state==='cancelled'?'取消':'完成',approval:state==='unapproved'?1:2}]));
+  if(state==='unaccepted'||state==='stale'){const lab=read(s,'dqa_lab_demo_requests_v1');if(state==='unaccepted')delete lab[0].acceptedAt;else lab[0].reservationId='OLD';s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(lab));}
+  if(state==='pending')s.setItem('dqa-lab-operations-v1',JSON.stringify([{requestId:'EXISTING-TRIAL',status:'待審核'}]));
+  if(state==='conflict')rows.push({...rows[0],id:'OTHER',requestId:'OTHER',time:new Date(now-3600000).toISOString(),end:new Date(now+3600000).toISOString()});
+  s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));const before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s));assert.deepEqual([...s.data],before);
+ }
+});
