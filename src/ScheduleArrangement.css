@@ -3,3 +3,18 @@
 .schedule-edit-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;line-height:1.5;margin-top:10px;padding:5px 9px;border-radius:7px}
 .schedule-edit-status.is-planned{color:var(--tab-accent,#0866e8);background:var(--tab-tint,#eaf3ff)}
 .schedule-edit-status.is-unplanned{color:var(--muted,#71829a);background:var(--soft,#eef3fa)}
+/* Multi-device selection remains readable instead of inheriting single-line select height. */
+.schedule-extra-equipment{min-width:0;margin:14px 0;padding:12px;border:1px solid var(--border,#dce4f1);border-radius:8px}
+.schedule-extra-equipment legend{padding:0 5px;font-size:13px;font-weight:600}.schedule-extra-equipment>small{display:block;color:var(--muted,#657b99);font-size:12px;line-height:1.6}
+.schedule-equipment-selection{margin:0 0 5px;color:var(--tab-accent,#0967ef);font-size:13px;font-weight:600}.schedule-equipment-options{display:grid;gap:8px;max-height:280px;overflow:auto;padding:6px 3px;margin-top:8px;overscroll-behavior:contain}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-equipment-options label{display:flex;flex-direction:row;align-items:center;gap:10px;margin:0;padding:10px;border:1px solid var(--border,#dce4f1);border-radius:6px;cursor:pointer;min-width:0}
+html body #root .lms-enterprise .schedule-edit-modal .schedule-equipment-options input{width:18px;height:18px;min-height:18px;padding:0;flex:none;accent-color:#0967ef}
+.schedule-equipment-options label.is-selected{background:var(--soft,#edf5ff);border-color:#0967ef!important}.schedule-equipment-options label:has(input:disabled){opacity:.6;cursor:default}.schedule-equipment-options span{min-width:0}.schedule-equipment-options strong{font-size:13px;display:block}.schedule-equipment-options small{font-size:12px;display:block;margin-top:4px;color:var(--muted,#657b99)}.schedule-selection-help{font-size:12px;line-height:1.6;color:var(--tab-accent,#0967ef);margin:8px 0 0}
+@media(min-width:900px){
+ html body #root .lms-enterprise .schedule-modal-backdrop{padding:14px}
+ html body #root .lms-enterprise .schedule-edit-modal{width:min(1480px,calc(100vw - 28px));max-height:calc(100dvh - 28px);height:calc(100dvh - 28px)}
+ html body #root .lms-enterprise .schedule-edit-modal>.request-modal-header{padding:12px 20px}
+ html body #root .lms-enterprise .schedule-edit-modal>.schedule-edit-body{flex:1;min-height:0;padding:14px 20px;overflow:auto}
+ html body #root .lms-enterprise .schedule-edit-modal>.schedule-edit-actions{flex-shrink:0;margin:0;padding:10px 20px;border-top:1px solid var(--border,#dce4f1);background:var(--surface,#fff);display:flex;justify-content:flex-end;gap:8px}
+ html body #root .lms-enterprise .schedule-edit-modal .schedule-arrangement-content{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+}

@@ -198,12 +198,12 @@ test('report is returned, revised, signed by two supervisors and archived with r
 });
 
 test('two-machine scheduling checks space and buffers and saves a sample allocation',async({page})=>{
- await page.goto('/');await page.evaluate(()=>{
+ await page.setViewportSize({width:1366,height:900});await page.goto('/');await page.evaluate(()=>{
   localStorage.setItem('dqa-request-demo-v2',JSON.stringify([{id:'MULTI',productCode:'MULTI',testItems:['低溫試驗'],quantity:5,status:'待排程',lmsReview:{approval:2}}]));
   localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(['A','B'].map(id=>({id,name:`環境試驗箱 ${id}`,status:'待機中',capacity:3,usableVolumeLitres:30,specification:'-40～150°C'}))));
  });
  await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
- await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByLabel('每件樣品使用空間 L *').fill('10');
+ await page.getByLabel('設備選擇').selectOption('A');await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByRole('checkbox',{name:/B · 環境試驗箱 B/}).check();await expect(page.getByRole('group',{name:'附加設備（可複選）'})).toContainText('已選 2／需 2 台');await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeInViewport();const modal=await page.locator('.schedule-edit-modal').boundingBox();expect(modal.width).toBeGreaterThan(1300);await page.screenshot({path:test.info().outputPath('multi-equipment-checkboxes.png')});await page.getByLabel('每件樣品使用空間 L *').fill('10');
  await expect(page.getByLabel('準備時間（分鐘）')).toHaveCount(0);await expect(page.getByLabel('清理時間（分鐘）')).toHaveCount(0);
  await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');

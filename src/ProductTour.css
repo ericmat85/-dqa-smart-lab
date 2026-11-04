@@ -24,3 +24,10 @@
 @media(prefers-reduced-motion:reduce){.tour-home-entry,.product-tour .tour-continue:not(:disabled){animation:none}}
 
 .interactive-tour .tour-live-bar .tour-wide-hint{flex-basis:100%;margin:0;color:var(--tour-blue);font-size:12px}
+/* Full-width desktop canvas; contextual guidance floats beside the active control. */
+.tour-floating-layout .interactive-tour-layout{grid-template-columns:minmax(0,1fr)}
+.interactive-tour .tour-floating-coach{position:fixed;z-index:5000;width:300px;max-width:calc(100vw - 32px);max-height:min(380px,calc(100dvh - 130px));overflow:auto;margin:0;padding:12px;border:1px solid var(--tour-blue);box-shadow:0 8px 32px #001b4030;overscroll-behavior:contain}
+.tour-floating-coach .tour-coach-title{padding-bottom:8px;gap:8px;padding-right:22px}.tour-floating-coach .tour-coach-title>span{width:28px;height:28px;border-radius:8px}.tour-floating-coach .tour-coach-title svg{width:20px;height:20px}.product-tour .tour-coach-dismiss{position:absolute;right:7px;top:6px;border:0;padding:2px 7px;font-size:20px;background:transparent}
+.interactive-tour .tour-floating-coach h1{font-size:15px;margin:9px 0 4px}.tour-floating-coach .tour-nine-progress{margin-top:8px;gap:4px}.tour-floating-coach .tour-nine-progress span{width:18px;height:18px;font-size:10px}
+.interactive-tour .tour-floating-coach .tour-context-instruction{margin:8px 0;font-size:13px;line-height:1.7}.tour-floating-coach .tour-all-instructions{font-size:12px;margin:6px 0}.tour-all-instructions summary{cursor:pointer;color:var(--tour-blue)}.tour-floating-coach .tour-instructions{font-size:12px;margin:6px 0;line-height:1.6}.tour-floating-coach .tour-instructions li{margin:6px 0}
+.tour-floating-coach .tour-operation-note,.tour-floating-coach .tour-live-role,.tour-floating-coach>small{display:none}.tour-floating-coach .tour-step-check{margin:8px 0;padding:5px 8px}.tour-floating-coach .tour-continue{padding:7px 10px;margin-bottom:6px}.tour-floating-coach .tour-secondary-actions{margin:4px 0;gap:4px}
