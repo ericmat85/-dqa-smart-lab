@@ -32,7 +32,7 @@ export default function ReportArchive({actor,system,showHeading=true}){
   try{
    const file=await readArchivedPdf({actorId:actor.id,requestId:report.requestId,system}),url=URL.createObjectURL(new Blob([file.bytes],{type:'application/pdf'}));
    if(download){const link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
-   else setPreview({url,name:file.name});
+   else setPreview({url,name:file.name,guided:globalThis.__DQA_GUIDED_CASE_ID__===report.requestId});
   }catch(err){setError(err.message);}finally{setBusy(false);}
  }
  if(!allowed)return <section className={pageClass} data-system={system}><p role="alert">此帳號沒有資料庫權限。</p></section>;
@@ -45,6 +45,6 @@ export default function ReportArchive({actor,system,showHeading=true}){
    {tab==='reports'?<div className={`archive-table-wrap${lms?" template-table-wrap":""}`}><PaginatedTable className={lms?"template-table":undefined} resetKey={search}><thead><tr><th>委託編號</th><th>產品代碼</th><th>報告類型</th><th>查閱主管</th><th>封存時間</th><th>狀態</th><th>操作</th></tr></thead><tbody>{rows.length?rows.map(({report,request})=><tr key={report.requestId}><td><button className="archive-request-link" onClick={()=>setDetail(request)}>{report.requestId}</button></td><td>{request.productCode}</td><td>{report.documentKind}</td><td>{report.confirmedBy}</td><td>{displayTaipei(report.archivedAt)}</td><td>已結案／PDF 已封存</td><td><div className="archive-actions"><button className={lms?"template-btn secondary":undefined} disabled={busy} onClick={()=>open(report,false)}>查看 PDF</button><button className={lms?"template-btn secondary":undefined} disabled={busy} onClick={()=>open(report,true)}>下載 PDF</button></div></td></tr>):<tr><td colSpan="7">目前沒有您可查閱的已封存報告。</td></tr>}</tbody></PaginatedTable></div>:tab==='templates'?<div className={`archive-table-wrap${lms?" template-table-wrap":""}`}><table className={lms?"template-table":undefined}><thead><tr><th>範本名稱</th><th>檔案格式</th><th>操作</th></tr></thead><tbody>{'一般性能試驗報告範本'.includes(search.trim())||!search.trim()||'xlsx'.includes(search.trim().toLowerCase())?<tr><td>一般性能試驗報告範本</td><td>Excel（.xlsx）</td><td><a className="archive-template-download" href={`${import.meta.env.BASE_URL}templates/general-performance-v1.xlsx`} download="一般性能試驗報告範本.xlsx">下載範本</a></td></tr>:<tr><td colSpan="3">沒有符合搜尋條件的報告範本。</td></tr>}</tbody></table></div>:<div className="archive-empty" role="status">目前沒有可查閱的{activeLabel}。</div>}
   </section>
   {detail&&<RequestInfoModal request={detail} account={current} onClose={()=>setDetail(null)}/>}
-  {preview&&<div className="archive-preview" role="dialog" aria-modal="true" aria-label="結案 PDF 預覽"><div><strong>{preview.name}</strong><button onClick={()=>setPreview(null)}>關閉預覽</button></div><iframe title="結案 PDF" src={preview.url}/></div>}
+  {preview&&<div className="archive-preview" role="dialog" aria-modal="true" aria-label="結案 PDF 預覽"><div><strong>{preview.name}</strong><button onClick={()=>setPreview(null)}>關閉預覽</button></div><>{preview.guided?<figure className="guided-report-preview"><figcaption>Demo 報告示意圖 · 非正式試驗結果；實際結案 PDF 可於清單下載。</figcaption><img src="/images/tour-demo-report.svg" alt="導覽 Demo 試驗報告：設備、試驗條件、結果與簽核版面示意"/></figure>:<iframe title="結案 PDF" src={preview.url}/>}</></div>}
  </div></section>;
 }

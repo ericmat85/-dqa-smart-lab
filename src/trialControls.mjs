@@ -1,5 +1,4 @@
 import {canControlTrial} from './trialPermissions.mjs';
-import {createCompletedDemoFlow} from './completedDemoFlow.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
@@ -32,18 +31,29 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
  const audit=[{id:crypto.randomUUID(),requestId:row.requestId,actor:actor.name,actorId,at,time:at,action,reason:'排程管理確認操作',signature:''},...read(storage,'dqa_lab_demo_audit_v1')];
  commitLifecycleTransaction(storage,{schedules:JSON.stringify(next),equipment:JSON.stringify(nextEquipment),labRequests:JSON.stringify(nextLab),labAudit:JSON.stringify(audit),requests:JSON.stringify(updateRequestExecution(read(storage,'dqa-request-demo-v2'),next,nextLab,now))});return updated;
 }
-export function accelerateTrial({actorId,signature,now=Date.now()},storage=window.localStorage){
+export function accelerateTrial({actorId,signature,requestId,now=Date.now()},storage=window.localStorage){
  recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lab');
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
  const sources=read(storage,'dqa-request-demo-v2');
- const completeSource=id=>sources.some(r=>r.id===id&&r.ownerId&&r.supervisorId&&!['取消','已結案'].includes(r.status));
- const running=lab.find(r=>completeSource(r.id)&&r.demoAccelerator&&r.status==='試驗中');
+ const operations=read(storage,'dqa-lab-operations-v1');
+ const reviews=read(storage,'dqa-lms-reviews-v1');
+ const completeSource=id=>{
+  if(requestId&&id!==requestId)return false;
+  const source=sources.find(r=>r.id===id);
+  if(source)return Boolean(source.ownerId&&source.supervisorId)&&!source.reportInfo?.stage&&!['取消','已結案','已完成','待審核','待查閱'].includes(source.status);
+  // Legacy LMS requests use their own review ledger. Its 完成 means review approved,
+  // not trial completed; require both approval levels and never materialize a new case.
+  const review=reviews.find(r=>r.id===id&&r.source!=='electronic-request');
+  return Boolean(review&&Number(review.approval)>=2&&!review.reportInfo?.stage&&!['取消','已結案','已完成','待審核','待查閱','退回','待補件'].includes(review.status));
+ };
+ const matchingSchedule=receipt=>schedules.find(row=>row.id===receipt.scheduleId&&row.requestId===receipt.id&&row.reservationId&&row.reservationId===receipt.reservationId&&row.time===receipt.scheduledStart&&row.end===receipt.scheduledEnd);
+ const usable=receipt=>{const row=matchingSchedule(receipt);return completeSource(receipt.id)&&Number.isFinite(Date.parse(receipt.acceptedAt))&&Date.parse(receipt.acceptedAt)<=now&&!receipt.reportInfo?.stage&&!receipt.pendingOperationId&&!operations.some(o=>o.requestId===receipt.id&&o.status==='待審核')&&row&&!row.reportInfo?.stage&&!row.pendingOperationId;};
+ const running=lab.find(r=>usable(r)&&r.demoAccelerator&&r.status==='試驗中');
  if(running)return {id:running.id,stage:'completed',row:completeLabTrial({requestId:running.id,actorId,signature,now},storage)};
- if(lab.some(r=>completeSource(r.id)&&r.demoAccelerator&&r.status==='暫停中'))throw Error('加速中的試驗已暫停，請先在排程管理恢復試驗。');
- const receipt=lab.find(r=>completeSource(r.id)&&r.acceptedAt&&['已排程','試驗中'].includes(r.status)&&!r.reportInfo?.stage&&!read(storage,'dqa-lab-operations-v1').some(o=>o.requestId===r.id&&o.status==='待審核'));
- if(!receipt){const result=createCompletedDemoFlow({viewerId:actorId,signature,now,newExample:true,halfway:true},storage);return {id:result.id,stage:'running'};}
- const row=schedules.find(r=>r.id===receipt.scheduleId&&r.reservationId===receipt.reservationId);
- if(!row||!['已排程','試驗中','進行中'].includes(row.status)||row.pauseStartedAt)throw Error('原排程已變更，請重新整理。');
+ if(lab.some(r=>usable(r)&&r.demoAccelerator&&r.status==='暫停中'))throw Error('加速中的試驗已暫停，請先在排程管理恢復試驗。');
+ const receipt=lab.find(r=>{const row=matchingSchedule(r);return usable(r)&&r.status==='已排程'&&row.status==='已排程'&&!row.pauseStartedAt&&scheduleProgress(row,now).phase==='waiting';});
+ if(!receipt)throw Error('目前沒有已排程、已接收且等待開始的現有委託單；請先完成排程並由實驗室確認接收。Demo 試驗加速器不會建立新案件。');
+ const row=matchingSchedule(receipt);
  const duration=24*3600000,time=new Date(now-duration/2).toISOString(),end=new Date(now+duration/2).toISOString();
  const updated={...row,time,end,status:'試驗中',pauseTotalMs:0,pauseStartedAt:null,demoAccelerator:true};
  const equipment=read(storage,'dqa-equipment-demo-v1'),machines=equipment.filter(m=>usesEquipment(row,m));
