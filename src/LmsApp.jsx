@@ -1,3 +1,5 @@
+import AdminCenterModule from './AdminCenterModule.jsx';
+import {ADMIN_MODULES} from './adminCenterData.mjs';
 import './AccountRolePolish.css';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import ScheduleGanttBoard from './ScheduleGanttBoard.jsx';
@@ -1838,6 +1840,7 @@ function DashboardPage({
 
   const lifecycleError=useScheduleLifecycle();
   const routePage=path.split('/')[2]||'dashboard';
+  const settingsModule=routePage==='settings'?(path.split('/')[3]||null):null;
   const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
   const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
   const [active, setActive] = useState(routePage);
@@ -1896,7 +1899,7 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統設定</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
@@ -1926,7 +1929,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? <LabSettings focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -1963,8 +1966,9 @@ export default function App({ path, navigate }) {
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
     const valid=[...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
-    if (path !== '/lms/login' && !valid.includes(path)) navigate('/lms/login', true);
-    else if (valid.includes(path) && !currentUser) navigate('/lms/login', true);
+    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path);
+    if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
+    else if (validRoute && !currentUser) navigate('/lms/login', true);
     else if(path==='/lms/login'&&currentUser)navigate('/lms/dashboard',true);
   }, [path, currentUser, navigate]);
 

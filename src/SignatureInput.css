@@ -15,3 +15,13 @@
 .dqa-signature-record strong { font-size:13px; }
 .dqa-signature-record p { font-size:12px; margin:4px 0; line-height:1.5; }
 .dqa-signature-record img { display:block; width:240px; max-width:100%; height:64px; object-fit:contain; object-position:left center; background:#fff; border-radius:4px; margin-top:6px; }
+
+/* Keep signature history readable inside every request information surface. */
+.dqa-signature-history{padding:14px 16px;box-sizing:border-box;min-width:0}
+.dqa-signature-history>h3{margin:0 0 6px;font-size:14px;line-height:1.5}
+.dqa-signature-history>p{margin:4px 0 10px;line-height:1.5}
+.dqa-signature-record{padding:12px 14px;margin:8px 0 0;border-color:var(--enterprise-border,#dce5f1);background:var(--enterprise-card,transparent);border-radius:8px}
+.dqa-signature-record p{margin:5px 0;line-height:1.5}
+.dqa-signature-record img{height:56px;margin-top:8px}
+.rq-theme-dark .dqa-signature-record{border-color:#33445d}
+@media(max-width:620px){.dqa-signature-history{padding:12px}.dqa-signature-record{padding:10px 12px}}

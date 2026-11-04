@@ -1,0 +1,5 @@
+import {defineConfig} from '@playwright/test';
+// Keep source-import integration tests on Vite dev; exercise all other suites on the production build.
+const sourceSuites=['demo.spec.js','nine-stage-seed.spec.js','request-borrow-ui.spec.js','lms-review-tabs.spec.js','system-tabs.spec.js','report-prearchive-preview.spec.js'];
+const launchOptions={executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||'/usr/bin/chromium',args:['--disable-dev-shm-usage']};
+export default defineConfig({testDir:'./e2e',outputDir:'./work/admin-regression',workers:2,timeout:60000,use:{timezoneId:'Asia/Taipei',actionTimeout:15000,trace:'retain-on-failure',launchOptions},projects:[{name:'existing-source-integrations',testMatch:sourceSuites,use:{baseURL:'http://127.0.0.1:4213'}},{name:'production-workspaces',testIgnore:sourceSuites,use:{baseURL:'http://127.0.0.1:4212'}}],webServer:[{command:'npm run dev -- --host 127.0.0.1 --port 4213 --strictPort',url:'http://127.0.0.1:4213',reuseExistingServer:false},{command:'npm run preview -- --host 127.0.0.1 --port 4212 --strictPort',url:'http://127.0.0.1:4212',reuseExistingServer:false}]});
