@@ -1,3 +1,4 @@
+import {seedAcceptedTrial} from './acceptedTrialFixture.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -78,7 +79,7 @@ test('new request passes designated manager and two LMS reviews, then schedules 
  await requestLogin(page,true);await page.goto('/request/reviews');await page.getByRole('button',{name:'簽核',exact:true}).click();await useSignature(page);await page.getByRole('button',{name:'✓ 核准委託單'}).click();
  for(const email of ['level1@example.com','level2@example.com']){
   await lmsLogin(page,email);await page.locator('.sidebar').getByRole('button',{name:/試驗委託/}).click();
-  await page.getByRole('button',{name:'審查',exact:true}).click();await useSignature(page);await page.getByRole('button',{name:/核准/,exact:false}).last().click();
+  await page.getByRole('button',{name:/^LV[12]審查$/,exact:true}).click();await useSignature(page);await page.getByRole('button',{name:/核准/,exact:false}).last().click();
  }
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].status)).toBe('待排程');
  await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
@@ -147,7 +148,7 @@ test.afterEach(async({page})=>{expect(await page.pageErrors()).toEqual([]);});
 test('report is returned, revised, signed by two supervisors and archived with request-first PDF',async({page})=>{
  test.setTimeout(90000);
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
- await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
+ await seedAcceptedTrial(page);await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
  await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].id);
  async function submit(){
@@ -162,7 +163,7 @@ test('report is returned, revised, signed by two supervisors and archived with r
  }
  async function openReview(email){
   await lmsLogin(page,email);await page.locator('.sidebar').getByRole('button',{name:/試驗委託/}).click();
-  await page.getByRole('button',{name:'審核',exact:true}).click();
+  await page.getByRole('button',{name:/^LV[23]審核$/,exact:true}).click();
  }
  await submit();await openReview('level2@example.com');
  await page.getByLabel('退回原因（退回時必填）').fill('DEMO：請補充結果');await page.getByRole('button',{name:'退回報告',exact:true}).click();
@@ -225,7 +226,7 @@ test('general performance upload recognizes the supplied blank template and subm
  await page.setViewportSize({width:1366,height:768});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
- await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
+ await seedAcceptedTrial(page);await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
  const id=await page.evaluate(()=>{
   const records=JSON.parse(localStorage.getItem('dqa-request-demo-v2'));records[0].testItems=['一般性能試驗'];localStorage.setItem('dqa-request-demo-v2',JSON.stringify(records));return records[0].id;
  });
@@ -266,7 +267,7 @@ test('general performance upload recognizes the supplied blank template and subm
   await expect(page.getByRole('dialog',{name:id+'｜委託單資訊'})).toBeVisible();
   await expect(page.getByText('試驗執行結果',{exact:true})).toBeVisible();await expect(page.getByRole('list',{name:'簽核流程',exact:true})).toBeVisible();
   await expect(page.locator('.report-review-dialog')).toHaveCount(0);await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();
-  await page.getByRole('button',{name:'審核',exact:true}).click();
+  await page.getByRole('button',{name:/^LV[23]審核$/,exact:true}).click();
   const workbook=page.getByRole('region',{name:'Excel 報告唯讀檢視',exact:true});
   expect((await page.locator('.report-review-dialog').boundingBox()).width).toBeGreaterThan(1000);
   await expect(workbook.getByRole('tab',{name:'1.1一般性能試驗-1',exact:true})).toBeVisible();
@@ -343,6 +344,7 @@ test('request review tabs separate reading from all requests and history filters
 
 test('Demo accelerator reaches halfway, equipment can be viewed, pause survives reload and resume allows completion',async({page})=>{
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
+ await seedAcceptedTrial(page);
  await page.getByRole('button',{name:'Demo試驗加速器',exact:true}).click();
  await expect(page.locator('.lab-table-wrap tbody')).toContainText('試驗中');await expect(page.getByRole('button',{name:'試驗完成',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'申請中斷',exact:true})).toHaveCount(0);
  await expect(page.getByRole('progressbar',{name:'試驗日程',exact:true})).toHaveAttribute('aria-valuenow','50');

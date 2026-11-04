@@ -1,5 +1,11 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+整合試驗・排程・設備・報告|Connect testing, scheduling, equipment and reports
+打造智慧實驗室|Build a smarter laboratory
+流程標準化|Standardized workflows
+設備高效利用|Efficient equipment use
+AI 智慧應用|Intelligent AI applications
+數據可追溯|Traceable data
 試驗文件與報告查閱|Test documents and report access
 查看試驗接收、操作與申請紀錄|View test receipt, operations and request records
 接收試驗、掌握執行進度與提交報告|Receive tests, track execution and submit reports

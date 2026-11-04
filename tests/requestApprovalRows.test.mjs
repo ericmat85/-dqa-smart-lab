@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {requestApprovalRows} from '../src/requestApprovalRows.mjs';
+import {requestApprovalRows,requestActionLabel} from '../src/requestApprovalRows.mjs';
 test('pending approval shares the request list without altering original review state',()=>{
  const requests=[{id:'R1',title:'高溫試驗',status:'完成',productCode:'P1'},{id:'R2',status:'待審查'}];
  const operations=[{id:'OP',requestId:'R1',action:'interrupt',status:'待審核',at:'2026-10-29T00:00:00Z',actor:'工程師',reason:'故障'}];
@@ -16,4 +16,14 @@ test('an approval replaces a duplicate pending request row in the unified list',
 });
 test('cancellation applications are pending approval alongside interruptions and borrowing',()=>{
  const rows=requestApprovalRows([],[{id:'C',requestId:'R1',action:'cancel',status:'待審核',actor:'A',at:'2026-10-29'}],[],[{id:'BOR1',status:'待核准',requester:'B',createdAt:'2026-10-29'}]);assert.equal(rows.length,2);assert.ok(rows.every(row=>row.status==='待核准'));
+});
+
+test('request and report action labels follow the pending level without changing source rows',()=>{
+ const requests=[{id:'R1',status:'待審查',approval:0},{id:'R2',status:'待審查',approval:1}];
+ const reports=[{requestId:'REPORT2',stage:'level2'},{requestId:'REPORT3',stage:'level3'}];
+ const before=JSON.stringify({requests,reports});const rows=requestApprovalRows(requests,[],[],[],reports);
+ assert.deepEqual(rows.map(requestActionLabel),['LV2審核','LV3審核','LV1審查','LV2審查']);
+ assert.equal(JSON.stringify({requests,reports}),before);
+ assert.equal(requestActionLabel({operationId:'borrow:1',status:'待核准'}),'核准');
+ assert.equal(requestActionLabel({status:'退回'}),'補件');assert.equal(requestActionLabel({status:'完成'}),'查看');
 });
