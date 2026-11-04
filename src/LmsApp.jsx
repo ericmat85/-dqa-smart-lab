@@ -1,5 +1,6 @@
 import AdminCenterModule from './AdminCenterModule.jsx';
 import {ADMIN_MODULES} from './adminCenterData.mjs';
+import {canViewAdmin} from './adminCenterStore.mjs';
 import './AccountRolePolish.css';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import ScheduleGanttBoard from './ScheduleGanttBoard.jsx';
@@ -118,9 +119,7 @@ const NAV_ITEMS = [
 
   { id: "reports", label: "報表分析" },
 
-  { id: "accounts", label: "帳號管理" },
-
-  { id: "settings", label: "系統設定" },
+  { id: "settings", label: "系統管理" },
 
 ];
 
@@ -521,7 +520,7 @@ function Sidebar({ active, onNavigate, onHome, open, currentUser }) {
 
         <nav className="sidebar-nav">
 
-          {NAV_ITEMS.filter(item=>canAccessLmsPage(currentUser,item.id)&&(item.id!=='archive'||canOpenReportArchive(currentUser,'lms'))&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
+          {NAV_ITEMS.filter(item=>(canAccessLmsPage(currentUser,item.id)||(item.id==='settings'&&canManageAccounts(currentUser)))&&(item.id!=='archive'||canOpenReportArchive(currentUser,'lms'))&&(item.id!=='accounts'||canManageAccounts(currentUser))).map((item, index) => (
 
             <div
 
@@ -592,7 +591,7 @@ function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,n
  ]}/></header>;
 }
 
-function AccountManagement({ accounts, setAccounts,currentUser }) {
+function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel='返回系統管理' }) {
   const [roles,setRoles]=useState(()=>readCustomRoles());
   const [roleSettingsOpen,setRoleSettingsOpen]=useState(false);
   const [deleteTarget,setDeleteTarget]=useState(null),[deleteError,setDeleteError]=useState('');
@@ -984,7 +983,7 @@ function AccountManagement({ accounts, setAccounts,currentUser }) {
 
 
 
-        <div className="account-heading-actions"><button
+        <div className="account-heading-actions">{onBack&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}>{backLabel}</button>}<button
 
           type="button"
 
@@ -1839,8 +1838,9 @@ function DashboardPage({
 }) {
 
   const lifecycleError=useScheduleLifecycle();
-  const routePage=path.split('/')[2]||'dashboard';
-  const settingsModule=routePage==='settings'?(path.split('/')[3]||null):null;
+  const requestedPage=path.split('/')[2]||'dashboard';
+  const routePage=requestedPage==='accounts'?'settings':requestedPage;
+  const settingsModule=requestedPage==='accounts'?'accounts':routePage==='settings'?(path.split('/')[3]||null):null;
   const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
   const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
   const [active, setActive] = useState(routePage);
@@ -1851,6 +1851,7 @@ function DashboardPage({
 
   // 全 Dashboard 共用 AI 排程助理，切換側邊頁面時仍保持可用。
   function navigate(id, filter = null) {
+    if(id==='accounts'||(id==='settings'&&!canAccessLmsPage(currentUser,'settings')&&canManageAccounts(currentUser))){if(!canManageAccounts(currentUser))return;setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/accounts');return;}
     if(!canAccessLmsPage(currentUser,id))return;
     setActive(id);
     setNotificationFilter(filter);
@@ -1899,13 +1900,13 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統設定</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
         <div className="dashboard-content">{active==='dashboard'&&<div className="lms-dashboard-heading"><h1><LmsSidebarIcon name="dashboard"/>儀表板</h1><p>試驗進度與設備使用概況</p></div>}{lifecycleError && <div className="template-notice" role="alert">{lifecycleError}</div>}
 
-          {!canAccessLmsPage(currentUser,active)? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
+          {!(canAccessLmsPage(currentUser,active)||(active==='settings'&&settingsModule==='accounts'&&canViewAdmin(currentUser,'accounts')))? <div className="template-info">此角色無權使用此功能。</div> : active === "archive" ? <ReportArchive actor={currentUser} system="lms"/> : active === "requests" ? (
             <RequestsPage onExit={()=>navigate('requests')} subPage={subPage} initialFilter={notificationFilter} onPendingReviewCountChange={updatePendingReviewNotificationCount} currentUser={currentUser} />
           ) : active === "schedule" ? (
             <SchedulePage onExit={()=>navigate('schedule')} subPage={subPage} currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
@@ -1913,23 +1914,13 @@ function DashboardPage({
             <EquipmentPage currentUser={currentUser} />
           ) : active === "maintenance" ? (
             <MaterialsPage currentUser={currentUser} />
-          ) : active === "accounts" ? (
-
-            canManageAccounts(currentUser) ? <AccountManagement currentUser={currentUser}
-
-              accounts={accounts}
-
-              setAccounts={setAccounts}
-
-            /> : <div className="template-info">帳號管理僅供系統管理員、二階主管或授權角色使用。</div>
-
           ) : active === "dashboard" ? (
 
             <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -1965,10 +1956,11 @@ export default function App({ path, navigate }) {
   });
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
-    const valid=[...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
+    const valid=['/lms/accounts',...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
     const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path);
     if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
     else if (validRoute && !currentUser) navigate('/lms/login', true);
+    else if(path==='/lms/accounts'&&currentUser)navigate('/lms/settings/accounts',true);
     else if(path==='/lms/login'&&currentUser)navigate('/lms/dashboard',true);
   }, [path, currentUser, navigate]);
 

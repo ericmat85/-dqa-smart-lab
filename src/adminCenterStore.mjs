@@ -5,10 +5,10 @@ export const ADMIN_KEY='dqa-lms-admin-center-v1';
 export const ADMIN_EVENT='dqa:admin-settings-updated';
 export function canViewAdmin(account,module,storage=globalThis.localStorage){
  if(!accessSystem(account,'lms',storage))return false;
+ if(module==='accounts')return canManageAccounts(account,storage);
  const role=customRole(account,storage);if(role&&!role.pages.includes('settings'))return false;
  if(!module)return true;
  const item=ADMIN_MODULES.find(m=>m.id===module);if(!item)return false;
- if(item.id==='accounts')return canManageAccounts(account,storage);
  return !item.page||!role||role.pages.includes(item.page);
 }
 export function canEditAdmin(account,storage=globalThis.localStorage){return canViewAdmin(account,null,storage)&&canManageAccounts(account,storage);}

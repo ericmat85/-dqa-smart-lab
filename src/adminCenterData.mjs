@@ -1,7 +1,7 @@
 // Administration-only fictional settings. No case, account, asset or service writes.
 export const ADMIN_GROUPS=['基礎與流程管理','安全與維運','智慧與品質管理','組織管理'];
 export const ADMIN_MODULES=[
- ['accounts','帳號與權限管理','accounts',0,'Demo 模擬','沿用帳號、角色、部門與現有 RBAC。','accounts'],
+ ['accounts','帳號與權限管理','accounts',0,'Demo 模擬','集中管理帳號、部門及內建／自訂角色權限。','accounts'],
  ['workflow','九階流程規則','history',0,'已實作','唯讀檢視既有階段、角色與簽核條件。'],
  ['parameters','試驗與設備參數','equipment',0,'已實作','查閱共用試驗目錄、設備規格及排程參數。','equipment'],
  ['documents','文件與報告設定','reports',0,'Demo 模擬','既有範本、報告入口與保存政策展示。','archive'],

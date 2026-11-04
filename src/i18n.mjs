@@ -128,6 +128,9 @@ Borrowed Item & Purpose|Borrowed Item & Purpose
 資料庫|Library
 帳號管理|Account management
 系統設定|Settings
+系統管理|System administration
+返回系統管理|Back to system administration
+返回儀表板|Back to dashboard
 回到首頁|Home
 返回工作入口|Return to workspace selection
 試驗報告|Test reports
