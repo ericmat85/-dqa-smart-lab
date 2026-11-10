@@ -1,0 +1,62 @@
+"""Required synthetic profile values only; no formal policy defaults."""
+from dataclasses import dataclass
+from datetime import datetime,timedelta,timezone
+from uuid import UUID
+from .errors import Denied
+SYNTHETIC='SYNTHETIC_TEST_ONLY'
+def text(v):
+    if type(v) is not str or not v.strip():raise Denied('NONEMPTY_IDENTIFIER_REQUIRED')
+    return v
+def integer(v,*,zero=False):
+    if type(v) is not int or v<(0 if zero else 1):raise Denied('EXPLICIT_INTEGER_PARAMETER_REQUIRED')
+    return v
+def utc(v):
+    if type(v) is not datetime or v.tzinfo is None or v.utcoffset() is None:raise Denied('AWARE_SOURCE_TIME_REQUIRED')
+    return v.astimezone(timezone.utc)
+def micros(delta):return delta.days*86400000000+delta.seconds*1000000+delta.microseconds
+@dataclass(frozen=True)
+class TimeProfile:
+    authority_id:str
+    authority_version:str
+    profile_version:str
+    health_ttl_us:int
+    precision_us:int
+    offset_limit_us:int
+    rollback_tolerance_us:int
+    scope:str
+    def checked(self):
+        for v in (self.authority_id,self.authority_version,self.profile_version):text(v)
+        for v in (self.health_ttl_us,self.precision_us):integer(v)
+        integer(self.offset_limit_us,zero=True);integer(self.rollback_tolerance_us,zero=True)
+        if self.rollback_tolerance_us!=0:raise Denied('NONZERO_ROLLBACK_TOLERANCE_NOT_SELECTED')
+        if self.scope!=SYNTHETIC:raise Denied('FORMAL_TIME_HEALTH_PROFILE_AUTHORITY_PENDING')
+        return self
+@dataclass(frozen=True)
+class LeaseProfile:
+    version:str
+    version_authority:str
+    engine_ttl_us:dict
+    l_max_us:int
+    boundary:str
+    scope:str
+    def checked(self,engine):
+        text(self.version);text(self.version_authority);integer(self.l_max_us)
+        if self.scope!=SYNTHETIC or self.boundary!='CANDIDATE_HALF_OPEN':raise Denied('FORMAL_LEASE_PROFILE_AUTHORITY_PENDING')
+        if type(self.engine_ttl_us) is not dict or engine not in ('E1','E2','E3','E4') or engine not in self.engine_ttl_us:raise Denied('ENGINE_TTL_MISSING')
+        ttl=integer(self.engine_ttl_us[engine])
+        if ttl>self.l_max_us:raise Denied('TTL_OVER_EXPLICIT_SYNTHETIC_MAX')
+        return ttl
+@dataclass(frozen=True)
+class Binding:
+    jobId:str
+    attemptId:str
+    snapshotId:str
+    snapshotRevision:str
+    sourceRevision:str
+    fenceToken:str
+    executionEpoch:int
+    def checked(self):
+        # Internal engineering shape only, not an approved seven-field wire Schema.
+        for v in (self.jobId,self.attemptId,self.snapshotId,self.snapshotRevision,self.sourceRevision,self.fenceToken):text(v)
+        if type(self.executionEpoch) is not int or not 1<=self.executionEpoch<=9007199254740991:raise Denied('EPOCH_INVALID')
+        return self

@@ -1,0 +1,408 @@
+{
+  "$defs": {
+    "Allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "equipment_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Equipment Id",
+          "type": "string"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "equipment_id",
+        "sample_count"
+      ],
+      "title": "Allocation",
+      "type": "object"
+    },
+    "Binding": {
+      "additionalProperties": false,
+      "properties": {
+        "jobId": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Jobid",
+          "type": "string"
+        },
+        "attemptId": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Attemptid",
+          "type": "string"
+        },
+        "snapshotId": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Snapshotid",
+          "type": "string"
+        },
+        "snapshotRevision": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Snapshotrevision",
+          "type": "string"
+        },
+        "sourceRevision": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Sourcerevision",
+          "type": "string"
+        },
+        "fenceToken": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fencetoken",
+          "type": "string"
+        },
+        "executionEpoch": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Executionepoch",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jobId",
+        "attemptId",
+        "snapshotId",
+        "snapshotRevision",
+        "sourceRevision",
+        "fenceToken",
+        "executionEpoch"
+      ],
+      "title": "Binding",
+      "type": "object"
+    },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "trial_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Trial Id",
+          "type": "string"
+        },
+        "proposal_index": {
+          "minimum": 0,
+          "title": "Proposal Index",
+          "type": "integer"
+        },
+        "required_devices": {
+          "exclusiveMinimum": 0,
+          "title": "Required Devices",
+          "type": "integer"
+        },
+        "requested_quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Requested Quantity",
+          "type": "integer"
+        },
+        "allocations": {
+          "items": {
+            "$ref": "#/$defs/Allocation"
+          },
+          "title": "Allocations",
+          "type": "array"
+        },
+        "proposal_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Proposal Digest",
+          "type": "string"
+        },
+        "original_proposal": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Original Proposal",
+          "type": "object"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "trial_id",
+        "proposal_index",
+        "required_devices",
+        "requested_quantity",
+        "allocations",
+        "proposal_digest",
+        "original_proposal"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "SourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        },
+        "locator": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Locator",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "document_id",
+        "version",
+        "locator",
+        "digest"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "Trial": {
+      "additionalProperties": false,
+      "properties": {
+        "trial_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Trial Id",
+          "type": "string"
+        },
+        "trial_index": {
+          "minimum": 0,
+          "title": "Trial Index",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "ADVISORY",
+            "INDETERMINATE",
+            "REFUSED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reasons": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "required_devices": {
+          "exclusiveMinimum": 0,
+          "title": "Required Devices",
+          "type": "integer"
+        },
+        "requested_quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Requested Quantity",
+          "type": "integer"
+        },
+        "source_status": {
+          "enum": [
+            "SYNTHETIC_PRESENT",
+            "MISSING",
+            "INVALID"
+          ],
+          "title": "Source Status",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "request_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "result_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Digest"
+        },
+        "original_request": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Original Request",
+          "type": "object"
+        },
+        "original_result": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Original Result"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "trial_id",
+        "trial_index",
+        "status",
+        "reasons",
+        "required_devices",
+        "requested_quantity",
+        "source_status",
+        "source_refs",
+        "request_digest",
+        "result_digest",
+        "original_request",
+        "original_result",
+        "candidates"
+      ],
+      "title": "Trial",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "wire_version": {
+      "const": "d-e2-allocation/0.1-proposed",
+      "title": "Wire Version",
+      "type": "string"
+    },
+    "approval": {
+      "const": "INTERNAL_DRAFT_NOT_APPROVED",
+      "title": "Approval",
+      "type": "string"
+    },
+    "binding": {
+      "$ref": "#/$defs/Binding"
+    },
+    "digest_profile": {
+      "const": "SHA256_PY_JSON_SORTED_UTF8_COMPACT_V1_PROPOSED",
+      "title": "Digest Profile",
+      "type": "string"
+    },
+    "native_digest_profile": {
+      "const": "EXISTING_D_CORE_MODELS_DIGEST",
+      "title": "Native Digest Profile",
+      "type": "string"
+    },
+    "record_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Record Fingerprint",
+      "type": "string"
+    },
+    "record_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Record Digest",
+      "type": "string"
+    },
+    "original_record": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Original Record",
+      "type": "object"
+    },
+    "status": {
+      "enum": [
+        "ADVISORY",
+        "INDETERMINATE",
+        "REFUSED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "trials": {
+      "items": {
+        "$ref": "#/$defs/Trial"
+      },
+      "title": "Trials",
+      "type": "array"
+    },
+    "integrity": {
+      "const": "CHECKED_SYNTHETIC_ONLY",
+      "title": "Integrity",
+      "type": "string"
+    },
+    "source_trust": {
+      "const": "SYNTHETIC_ONLY",
+      "title": "Source Trust",
+      "type": "string"
+    },
+    "public_projection": {
+      "const": "BLOCKED",
+      "title": "Public Projection",
+      "type": "string"
+    },
+    "full_enumeration": {
+      "const": "NOT_PROVEN",
+      "title": "Full Enumeration",
+      "type": "string"
+    },
+    "digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Digest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "wire_version",
+    "approval",
+    "binding",
+    "digest_profile",
+    "native_digest_profile",
+    "record_fingerprint",
+    "record_digest",
+    "original_record",
+    "status",
+    "trials",
+    "integrity",
+    "source_trust",
+    "public_projection",
+    "full_enumeration",
+    "digest"
+  ],
+  "title": "Envelope",
+  "type": "object"
+}

@@ -1,0 +1,42 @@
+{
+  "task": "D-COMP-1111-AI4-DATA-P02",
+  "status": "PASS_ISOLATED_DATA_AND_CORE_ONLY",
+  "requests": 15,
+  "reports": 15,
+  "report_pages": [
+    3,
+    4,
+    5,
+    2,
+    3,
+    4,
+    5,
+    2,
+    3,
+    4,
+    5,
+    2,
+    3,
+    4,
+    5
+  ],
+  "photo_requirements": 30,
+  "image_files": 0,
+  "pass_reports": 12,
+  "fail_reports": 3,
+  "fixture_engine_cases": 70,
+  "core_calls_in_final_run": 140,
+  "tests": {
+    "tests_run": 127,
+    "pass": 127,
+    "fail": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "actual_pdf_rendering": "NOT_RUN",
+  "A_import": "NOT_RUN",
+  "nine_stage_UI_demo": "NOT_RUN",
+  "G2_GATE": "NOT_PASSED",
+  "P08_STATUS": "POLICY_BLOCKED",
+  "RULE_NOT_APPROVED": "MAINTAINED"
+}

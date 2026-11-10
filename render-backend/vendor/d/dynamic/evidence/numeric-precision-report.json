@@ -1,0 +1,17 @@
+{
+  "profile": "D_DYNAMIC_INPUT_P01_USER_FORMAT",
+  "s": "exact lexical 2 decimals",
+  "min": "integer",
+  "h": "integer",
+  "ms": "integer",
+  "V": "exact lexical 1 decimal",
+  "automatic_rounding": false,
+  "legacy_audited_measurements": 180,
+  "legacy_format_gaps": 12,
+  "legacy_gap_requestIds": [
+    "SYNTH-REQ-004",
+    "SYNTH-REQ-009"
+  ],
+  "core_numeric_projection": "ONLY_EXACT_INTEGERS_OR_EXACT_DYADIC_FLOATS; otherwise BLOCKED",
+  "E1_extra_numeric_rules": "ADAPTER_DECIMAL_ONLY_NOT_NATIVE_CORE_FIELDS"
+}

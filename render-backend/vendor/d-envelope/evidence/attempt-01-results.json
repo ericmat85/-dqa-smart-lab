@@ -1,0 +1,414 @@
+{
+  "mode": "ISOLATED_SYNTHETIC_DIRECT_FUNCTION_ONLY",
+  "suites": [
+    {
+      "suite": "P04",
+      "tests": 64,
+      "pass": 64,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "cases": [
+        {
+          "id": "test_envelope.EnvelopeTests.test_all_trials_and_candidates",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_changes_identity",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_attemptId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_executionEpoch",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_fenceToken",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_jobId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_snapshotId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_snapshotRevision",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_missing_sourceRevision",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_round_trip",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_attemptId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_executionEpoch",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_fenceToken",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_jobId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_snapshotId",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_snapshotRevision",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_binding_type_sourceRevision",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_candidate_identity_stable",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_candidate_ids_distinct",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_day_dates",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_duplicate_json_key",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_dyadic_decimal_unchanged",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_e1_regression",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_e3_original_fail",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_e4_valid_source",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_e4_version_conflict",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_empty_proposals_preserve_source",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_expected_binding_mismatch",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_inexact_decimal_still_blocked",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_missing_result_refused",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_missing_slot_not_silent",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_missing_sources_refused",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_mutable_evidence_cannot_escape",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_nan_rejected",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_native_proposal_digest",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_no_public_success",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_no_trials_preserves_record",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_raw_bytes_digest_is_distinct",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_raw_digest_rejects_string",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_refuse_invalid_source_digest",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_single_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_socket_blocked",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_bool_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_candidate_id",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_demand",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_drop_candidate",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_drop_trial",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_epoch_bool",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_full_proof",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_proposal_digest",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_request_digest",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_result_digest",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_sample_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_source_refs",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_trusted_source",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_unapproved_public",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_tamper_zero_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_unequal_multi_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_unknown_wire_version",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_unsealed_change",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_unsupported_decimal_not_coerced",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_valid_zero_not_no_feasible",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_envelope.EnvelopeTests.test_wire_stable",
+          "status": "CURRENT_PASS"
+        }
+      ],
+      "failure_details": []
+    },
+    {
+      "suite": "P02",
+      "tests": 32,
+      "pass": 32,
+      "fail": 0,
+      "error": 0,
+      "skip": 0,
+      "cases": [
+        {
+          "id": "test_lossless.Lossless.test_all_candidates_preserved",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_candidate_ids_unique",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_day_independent_dates",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_decimal_exact_retained",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_decimal_inexact_blocked",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_detached_copy",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_e1_regression",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_e3_regression",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_e4_regression",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_missing_capacity_blocked",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_multi_device_nonuniform_counts",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_no_business_actions",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_no_network",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_original_sources_and_request_complete",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_provider_dto_missing_fields_rejected",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_applied_schedule",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_bool_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_duplicate_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_hour_granularity",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_missing_sample_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_request_id_swap",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_required_device_mismatch",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_source_swap",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_unknown_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_wrong_sum",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_wrong_trial",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_reject_zero_count",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_single_device",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_trial_relations",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_unknown_input_rejected",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_wrapper_cannot_return_old_lossy_success",
+          "status": "CURRENT_PASS"
+        },
+        {
+          "id": "test_lossless.Lossless.test_zero_candidates_indeterminate",
+          "status": "CURRENT_PASS"
+        }
+      ],
+      "failure_details": []
+    }
+  ],
+  "historical_full_52": "BLOCKED_NOT_RUN; historical external receipt/guard missing",
+  "provider": "NOT_RUN",
+  "API_DB": "NOT_RUN"
+}

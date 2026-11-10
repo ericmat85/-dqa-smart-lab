@@ -1,0 +1,153 @@
+{
+  "requestId": "SYNTH-REQ-008",
+  "reportId": "SYNTH-REP-008",
+  "testItemId": "SYNTH-TI-008",
+  "synthetic": true,
+  "conditions": {
+    "temperature_min": -32,
+    "temperature_max": 102,
+    "humidity_min": 40,
+    "humidity_max": 60
+  },
+  "method": {
+    "lowC": -30,
+    "highC": 100,
+    "dwellMinutes": 5,
+    "transferMinutes": 1,
+    "cycles": 20
+  },
+  "measurements": [
+    {
+      "measurementId": "SYNTH-REQ-008-1-BEFORE-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S1",
+      "phase": "BEFORE",
+      "metric": "continuity_resistance",
+      "value": "1",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-1-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S1",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-1-AFTER-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S1",
+      "phase": "AFTER",
+      "metric": "continuity_resistance",
+      "value": "1",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-1-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S1",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-2-BEFORE-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S2",
+      "phase": "BEFORE",
+      "metric": "continuity_resistance",
+      "value": "1",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-2-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S2",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-2-AFTER-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S2",
+      "phase": "AFTER",
+      "metric": "continuity_resistance",
+      "value": "1",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-2-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S2",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-3-BEFORE-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S3",
+      "phase": "BEFORE",
+      "metric": "continuity_resistance",
+      "value": "1",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-3-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S3",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-3-AFTER-continuity_resistance",
+      "sampleId": "SYNTH-REQ-008-S3",
+      "phase": "AFTER",
+      "metric": "continuity_resistance",
+      "value": "5",
+      "unit": "Ohm",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-008-3-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-008-S3",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-01T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "D_CORE",
+    "commit": "e1b2faefec412dfc061e45595bc8f06aa1119543",
+    "path": "handoff/competition/2026-11-11/DQA-D-COMP-1111-CORE-MAPPER-HANDOFF-01.zip"
+  },
+  {
+    "name": "D_P02",
+    "commit": "05225a7a4a11a2be61493ade8028cd8fe3d46492",
+    "path": "handoff/competition/2026-11-11/d-e2-lossless-p02-p03/D-E2-P02-REVIEW-HANDOFF-P03.zip"
+  },
+  {
+    "name": "B_P04",
+    "commit": "f113dd0b275b91c21ee918dcfe88d83ddf901b66",
+    "path": "handoff/competition/2026-11-11/b-p04-p05/DQA-B-P04-VERIFIED-SOURCE-HANDOFF-P05.zip"
+  },
+  {
+    "name": "C_022",
+    "commit": "8407ceb0a22c32030422a3b50023c3c2625a0c9e",
+    "path": "contracts/0.2.2-proposed-p0-01/proposed-api-contract.openapi.yaml"
+  }
+]

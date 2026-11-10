@@ -1,0 +1,7 @@
+{
+  "status": "FAIL_PREVALIDATION",
+  "error": "SPEC_DEVIATION",
+  "cause": "Fixture construction shared requested/spec condition object; negative-case mutation also changed reference.",
+  "fix": "Detach complete negative fixture through JSON roundtrip before changing requested conditions.",
+  "tests_executed": 0
+}

@@ -1,0 +1,461 @@
+{
+  "tests_run": 110,
+  "pass": 110,
+  "fail": 0,
+  "error": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "id": "test_dynamic.Dynamic.test_all_fifteen_reused",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_001_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_001_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_001_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_001_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_002_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_002_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_002_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_002_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_003_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_003_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_003_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_003_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_004_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_004_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_004_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_004_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_005_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_005_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_005_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_005_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_006_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_006_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_006_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_006_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_007_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_007_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_007_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_007_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_008_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_008_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_008_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_008_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_009_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_009_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_009_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_009_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_010_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_010_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_010_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_010_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_011_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_011_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_011_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_011_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_012_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_012_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_012_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_012_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_013_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_013_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_013_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_013_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_014_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_014_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_014_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_014_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_015_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_015_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_015_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_DYN_015_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_CONDITION_DEVIATION",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_HOURS_FORMAT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_INVALID_DATE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_MINUTES_FORMAT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_MISSING_FIELD",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_MS_FORMAT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_REVOKED_SOURCE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_SECONDS_FORMAT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_VOLTAGE_DEVIATION",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E1_VOLTAGE_FORMAT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_BAD_DATE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_DATE_CONFLICT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_LOW_CAPACITY",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_MISSING_CAPACITY",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_MISSING_VOLUME",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_SPACE_UNIT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E2_WINDOW_MISSING",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_BINDING_MISMATCH",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_NONNUMERIC",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_NO_ROUNDING_12_1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_ORIGINAL_DECISION_CHANGED",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_OUT_OF_RANGE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E3_WRONG_PRECISION",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E4_NONEXISTENT_CLAUSE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E4_NO_SOURCE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E4_STALE_SOURCE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E4_UNSUPPORTED_QUESTION",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_case_NEG_E4_VERSION_CONFLICT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_dynamic_not_original_payload",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e1_core_condition_deviation",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e1_numeric_deviation",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e2_proposal_sums_days",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e2_variation",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e3_outlier_warning",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e3_review_not_generation",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e4_answer_source_exact",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_e4_question_unchanged",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_format_valid_nonrepresentable_is_distinct",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_integer_units",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_missing_evidence_not_no_feasible",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_negative_boolean_rejected_integer",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_no_network",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_no_registration_import",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_no_silent_numeric_rounding",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_nonfinite_rejected",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_precision_invalids",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_seconds_exact_scale",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_unknown_source_version",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dynamic.Dynamic.test_unsupported_questions_refuse",
+      "status": "CURRENT_PASS"
+    }
+  ],
+  "failure_details": [],
+  "dynamic_cases": 88,
+  "observed_actual_core_calls": 142,
+  "calls_by_engine": {
+    "E1": 38,
+    "E2": 34,
+    "E3": 32,
+    "E4": 38
+  },
+  "provider": "NOT_RUN",
+  "registry_required": false,
+  "legacy_format_gaps": 12
+}

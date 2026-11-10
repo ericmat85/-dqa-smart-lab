@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "original_files_match": 19,
+  "product_head": "df2ee6f15aaa7feef9fb0a7ea5fa794bb4c768b8",
+  "head_index_status_unchanged": true,
+  "copied_core_files_match": 8,
+  "core_source_commit": "e1b2faefec412dfc061e45595bc8f06aa1119543",
+  "core_zip_sha256": "5577987950666213bfa566b4ff095d4c27e0cdf46519015958d18cefd1cb385c",
+  "network_provider_calls": 0,
+  "API_DB": "NOT_RUN"
+}

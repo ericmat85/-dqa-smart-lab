@@ -1,0 +1,23 @@
+{
+  "task": "D_COMP_1111_E2_ALLOCATION_ENVELOPE_P04",
+  "status": "PASS_ISOLATED_CANDIDATE_ONLY",
+  "python": "3.12.14",
+  "tests_current_pass": 104,
+  "tests_fail": 0,
+  "tests_error": 0,
+  "tests_skip": 0,
+  "historical_full_suite": "BLOCKED_NOT_RUN",
+  "Binding_authority": "B_P04_ENGINEERING_SHAPE_NOT_APPROVED_WIRE",
+  "public_projection": "BLOCKED",
+  "full_enumeration": "NOT_PROVEN",
+  "source_preservation": {
+    "status": "PASS",
+    "original_files_matched": 48,
+    "original_mutations": [],
+    "product_head_index_status": "UNCHANGED",
+    "copied_dependencies": "BYTE_IDENTICAL",
+    "remote_git_writes": 0,
+    "Provider_calls": 0,
+    "API_DB_tests": "NOT_RUN"
+  }
+}

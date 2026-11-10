@@ -1,0 +1,1622 @@
+[
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-1-BEFORE-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-1-AFTER-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-2-BEFORE-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-2-AFTER-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-3-BEFORE-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-3-AFTER-response_ms",
+    "originalValue": "180",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-001",
+    "measurementId": "SYNTH-REQ-001-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-1-BEFORE-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-1-AFTER-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-2-BEFORE-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-2-AFTER-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-3-BEFORE-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-3-AFTER-display_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-002",
+    "measurementId": "SYNTH-REQ-002-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-1-BEFORE-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-1-AFTER-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-2-BEFORE-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-2-AFTER-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-3-BEFORE-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-3-AFTER-startup_ms",
+    "originalValue": "500",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-003",
+    "measurementId": "SYNTH-REQ-003-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-1-BEFORE-post_storage_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-1-AFTER-post_storage_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-2-BEFORE-post_storage_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-2-AFTER-post_storage_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-3-BEFORE-post_storage_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-3-AFTER-post_storage_voltage",
+    "originalValue": "14",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-004",
+    "measurementId": "SYNTH-REQ-004-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-1-BEFORE-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-1-AFTER-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-2-BEFORE-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-2-AFTER-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-3-BEFORE-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-3-AFTER-post_storage_current",
+    "originalValue": "100",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-005",
+    "measurementId": "SYNTH-REQ-005-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-1-BEFORE-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-1-AFTER-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-2-BEFORE-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-2-AFTER-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-3-BEFORE-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-3-AFTER-insulation_resistance",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-006",
+    "measurementId": "SYNTH-REQ-006-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-1-BEFORE-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-1-AFTER-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-2-BEFORE-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-2-AFTER-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-3-BEFORE-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-3-AFTER-post_cycle_response_ms",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-007",
+    "measurementId": "SYNTH-REQ-007-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-1-BEFORE-continuity_resistance",
+    "originalValue": "1",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-1-AFTER-continuity_resistance",
+    "originalValue": "1",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-2-BEFORE-continuity_resistance",
+    "originalValue": "1",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-2-AFTER-continuity_resistance",
+    "originalValue": "1",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-3-BEFORE-continuity_resistance",
+    "originalValue": "1",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-3-AFTER-continuity_resistance",
+    "originalValue": "5",
+    "unit": "Ohm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-008",
+    "measurementId": "SYNTH-REQ-008-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-1-BEFORE-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-1-AFTER-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-2-BEFORE-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-2-AFTER-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-3-BEFORE-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-3-AFTER-post_shock_voltage",
+    "originalValue": "12",
+    "unit": "V",
+    "state": "REQUIRES_EXPLICIT_SOURCE_CORRECTION",
+    "reason": "FIXED_DECIMAL_FORMAT_REQUIRED:V",
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-009",
+    "measurementId": "SYNTH-REQ-009-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-1-BEFORE-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-1-AFTER-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-2-BEFORE-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-2-AFTER-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-3-BEFORE-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-3-AFTER-contact_resistance",
+    "originalValue": "30",
+    "unit": "mOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-010",
+    "measurementId": "SYNTH-REQ-010-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-1-BEFORE-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-1-AFTER-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-2-BEFORE-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-2-AFTER-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-3-BEFORE-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-3-AFTER-latch_retention_force",
+    "originalValue": "50",
+    "unit": "N",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-011",
+    "measurementId": "SYNTH-REQ-011-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-1-BEFORE-insulation_after_spray",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-1-AFTER-insulation_after_spray",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-2-BEFORE-insulation_after_spray",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-2-AFTER-insulation_after_spray",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-3-BEFORE-insulation_after_spray",
+    "originalValue": "100",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-3-AFTER-insulation_after_spray",
+    "originalValue": "1001",
+    "unit": "MOhm",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-012",
+    "measurementId": "SYNTH-REQ-012-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-1-BEFORE-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-1-AFTER-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-2-BEFORE-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-2-AFTER-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-3-BEFORE-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-3-AFTER-corrosion_area",
+    "originalValue": "1",
+    "unit": "percent",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-013",
+    "measurementId": "SYNTH-REQ-013-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-1-BEFORE-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-1-AFTER-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-2-BEFORE-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-2-AFTER-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-3-BEFORE-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-3-AFTER-recover_time",
+    "originalValue": "200",
+    "unit": "ms",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-014",
+    "measurementId": "SYNTH-REQ-014-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-1-BEFORE-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-1-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-1-AFTER-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-1-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-2-BEFORE-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-2-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-2-AFTER-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-2-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-3-BEFORE-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-3-BEFORE-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-3-AFTER-standby_current",
+    "originalValue": "0.0625",
+    "unit": "mA",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  },
+  {
+    "sourceRequestId": "SYNTH-REQ-015",
+    "measurementId": "SYNTH-REQ-015-3-AFTER-appearance_defect_count",
+    "originalValue": "0",
+    "unit": "count",
+    "state": "FORMAT_VALID",
+    "reason": null,
+    "mutated": false
+  }
+]

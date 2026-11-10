@@ -1,0 +1,153 @@
+{
+  "requestId": "SYNTH-REQ-009",
+  "reportId": "SYNTH-REP-009",
+  "testItemId": "SYNTH-TI-009",
+  "synthetic": true,
+  "conditions": {
+    "temperature_min": -12,
+    "temperature_max": 112,
+    "humidity_min": 40,
+    "humidity_max": 60
+  },
+  "method": {
+    "lowC": -10,
+    "highC": 110,
+    "dwellMinutes": 5,
+    "transferMinutes": 1,
+    "cycles": 20
+  },
+  "measurements": [
+    {
+      "measurementId": "SYNTH-REQ-009-1-BEFORE-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S1",
+      "phase": "BEFORE",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-1-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S1",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-1-AFTER-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S1",
+      "phase": "AFTER",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-1-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S1",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-2-BEFORE-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S2",
+      "phase": "BEFORE",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-2-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S2",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-2-AFTER-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S2",
+      "phase": "AFTER",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-2-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S2",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-3-BEFORE-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S3",
+      "phase": "BEFORE",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-3-BEFORE-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S3",
+      "phase": "BEFORE",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T08:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-3-AFTER-post_shock_voltage",
+      "sampleId": "SYNTH-REQ-009-S3",
+      "phase": "AFTER",
+      "metric": "post_shock_voltage",
+      "value": "12",
+      "unit": "V",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    },
+    {
+      "measurementId": "SYNTH-REQ-009-3-AFTER-appearance_defect_count",
+      "sampleId": "SYNTH-REQ-009-S3",
+      "phase": "AFTER",
+      "metric": "appearance_defect_count",
+      "value": "0",
+      "unit": "count",
+      "recordedAt": "2026-11-02T17:00:00+08:00",
+      "cycleCount": 20,
+      "source": "SYNTHETIC"
+    }
+  ]
+}
