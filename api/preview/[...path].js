@@ -55,12 +55,21 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
    const bootstrap=path==='/ui/bootstrap'&&req.method==='GET';if(!actor&&!bootstrap)return fail(401,'AUTHENTICATION_REQUIRED');
    // Ignore all caller-supplied role and gateway headers. Only signed server sessions assign a role.
    const upstream=new URL(env.RENDER_BACKEND_URL);if(upstream.protocol!=='https:'||upstream.username||upstream.password||upstream.pathname!=='/')return fail(503,'BACKEND_CONFIGURATION_REQUIRED');
-   const response=await fetchImpl(upstream.origin+'/__integration_demo'+path,{method:req.method,headers:{'Content-Type':'application/json','X-Preview-Gateway':env.PREVIEW_GATEWAY_SECRET,'X-Demo-Actor':actor||'outsider'},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});
-   const packet=await response.json();
-   const serialized=JSON.stringify(packet);if(serialized.includes(env.PREVIEW_GATEWAY_SECRET)||serialized.includes(env.PREVIEW_SESSION_SECRET))return fail(503,'UPSTREAM_RESPONSE_REJECTED');
-   if(bootstrap&&!actor&&packet.data)packet.data.requests=[];
-   if(packet.trace_id)res.setHeader('X-Trace-ID',packet.trace_id);
-   res.setHeader('Cache-Control','no-store');return res.status(response.status).json(packet);
+   const upstreamSignal=AbortSignal.timeout(path==='/ui/live/E4'?45000:10000);
+   let upstreamStage='request';
+   try{
+    const response=await fetchImpl(upstream.origin+'/__integration_demo'+path,{method:req.method,headers:{'Content-Type':'application/json','X-Preview-Gateway':env.PREVIEW_GATEWAY_SECRET,'X-Demo-Actor':actor||'outsider'},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:upstreamSignal});
+    upstreamStage='response';
+    const packet=await response.json();
+    const serialized=JSON.stringify(packet);if(serialized.includes(env.PREVIEW_GATEWAY_SECRET)||serialized.includes(env.PREVIEW_SESSION_SECRET))return fail(503,'UPSTREAM_RESPONSE_REJECTED');
+    if(bootstrap&&!actor&&packet.data)packet.data.requests=[];
+    if(packet.trace_id)res.setHeader('X-Trace-ID',packet.trace_id);
+    res.setHeader('Cache-Control','no-store');return res.status(response.status).json(packet);
+   }catch(error){
+    if(path!=='/ui/live/E4')throw error;
+    const timedOut=upstreamSignal.aborted&&upstreamSignal.reason?.name==='TimeoutError'&&(error===upstreamSignal.reason||['AbortError','TimeoutError'].includes(error?.name));
+    return fail(timedOut?504:503,timedOut?'UPSTREAM_TIMEOUT':upstreamStage==='response'?'UPSTREAM_RESPONSE_INVALID':'UPSTREAM_CONNECTION_FAILED');
+   }
   }catch{return fail(503,'PREVIEW_SERVICE_UNAVAILABLE');}
  };
 }
