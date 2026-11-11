@@ -16,7 +16,7 @@ async function inspect(response){
  let data;try{data=await response.json();}catch{data=null;}
  const h=response.headers(),trace=data?.trace_id||h['x-trace-id'];
  const safeTrace=typeof trace==='string'&&/^I-[A-Za-z0-9_-]{1,80}$/.test(trace)?trace:null;
- return {http:response.status(),content_type:h['content-type']?.split(';')[0]||null,trace_id:safeTrace,error_code:typeof data?.error?.code==='string'&&/^[A-Z0-9_]{1,80}$/.test(data.error.code)?data.error.code:null,app_response:Boolean(safeTrace),resolved_route:['/session','/ui/live/E4','REJECTED'].includes(h['x-preview-route'])?h['x-preview-route']:null,pathname:['/api/preview/session','/api/preview/session/','/api/preview/[...path]','/api/preview/[...path].js','/api/preview/ui/live/E4'].includes(h['x-preview-pathname'])?h['x-preview-pathname']:null,route_source:/^[A-Z_]{1,50}$/.test(h['x-preview-route-source']||'')?h['x-preview-route-source']:null};
+ return {entrypoint:h['x-preview-entrypoint']==='E4_EXPLICIT'?'E4_EXPLICIT':null,http:response.status(),content_type:h['content-type']?.split(';')[0]||null,trace_id:safeTrace,error_code:typeof data?.error?.code==='string'&&/^[A-Z0-9_]{1,80}$/.test(data.error.code)?data.error.code:null,app_response:Boolean(safeTrace),resolved_route:['/session','/ui/live/E4','REJECTED'].includes(h['x-preview-route'])?h['x-preview-route']:null,pathname:['/api/preview/session','/api/preview/session/','/api/preview/[...path]','/api/preview/[...path].js','/api/preview/ui/live/E4'].includes(h['x-preview-pathname'])?h['x-preview-pathname']:null,route_source:/^[A-Z_]{1,50}$/.test(h['x-preview-route-source']||'')?h['x-preview-route-source']:null};
 }
 async function check(name,response,expected){const result=await inspect(response);rows.push({check:name,...result,expected,status:result.http===expected&&result.app_response?'CLOUD_PASS':'FAIL'});if(rows.at(-1).status==='FAIL')throw Error('ACCEPTANCE_FAILED');return result;}
 try{
@@ -42,6 +42,8 @@ try{
   await check('Session trailing slash',slash,405);
   await check('valid Demo Session with unrelated Query',await ctx.post(noisySession,{headers:{Origin:url.origin},data:valid}),200);
   await check('inconsistent path hint rejected',await ctx.get('/api/preview/session?path=ui/live/E4&_preview_probe=synthetic'),404);
+  const e4Get=await check('explicit E4 GET method',await ctx.get('/api/preview/ui/live/E4'),405);
+  if(e4Get.entrypoint!=='E4_EXPLICIT'){rows.push({check:'explicit E4 Function entrypoint',status:'FAIL',reason:'ENTRYPOINT_MARKER_MISSING'});throw Error('ACCEPTANCE_FAILED');}
   const state=await ctx.storageState();state.cookies=state.cookies.filter(c=>!c.name.startsWith('dqa_preview_'));
   anonymousApp=await request.newContext({...options,storageState:state});
   await check('E4 route exists and rejects unsigned app Session',await anonymousApp.post('/api/preview/ui/live/E4',{headers:{Origin:url.origin,'X-Preview-System':'lms'},data:{synthetic:true,question:'SYNTH ROUTE CHECK ONLY'}}),401);
