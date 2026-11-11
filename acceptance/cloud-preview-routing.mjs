@@ -27,18 +27,25 @@ try{
   rows.push({check:'protection gate',...evidence,status:'BLOCKED_AUTH_SESSION_UNAVAILABLE'});output.status='BLOCKED_AUTH_SESSION_UNAVAILABLE';
  }else{
   await check('Session GET method',first,405);
+  const noisySession='/api/preview/session?_preview_probe=synthetic';
+  await check('Session GET with unrelated Query',await ctx.get(noisySession),405);
   const valid={system:'lms',accountId:'DEMO-LEVEL1',password:'demo1234'};
   await check('invalid account',await ctx.post('/api/preview/session',{headers:{Origin:url.origin},data:{...valid,accountId:'INVALID-ACCOUNT'}}),401);
   await check('invalid Origin',await ctx.post('/api/preview/session',{headers:{Origin:'https://invalid.example'},data:valid}),403);
+  await check('invalid account with unrelated Query',await ctx.post(noisySession,{headers:{Origin:url.origin},data:{...valid,accountId:'INVALID-ACCOUNT'}}),401);
+  await check('invalid Origin with unrelated Query',await ctx.post(noisySession,{headers:{Origin:'https://invalid.example'},data:valid}),403);
   const login=await ctx.post('/api/preview/session',{headers:{Origin:url.origin},data:valid});await check('valid Demo Session',login,200);
   const cookie=login.headers()['set-cookie']||'';const flags={present:Boolean(cookie),secure:/;\s*Secure(?:;|$)/i.test(cookie),http_only:/;\s*HttpOnly(?:;|$)/i.test(cookie),same_site_strict:/;\s*SameSite=Strict(?:;|$)/i.test(cookie),path_api_preview:/;\s*Path=\/api\/preview(?:;|$)/i.test(cookie)};
   rows.push({check:'Cookie security flags',...flags,status:Object.values(flags).every(Boolean)?'CLOUD_PASS':'FAIL'});if(rows.at(-1).status==='FAIL')throw Error('COOKIE_FLAGS_FAILED');
   let slash=await ctx.get('/api/preview/session/');
   if([307,308].includes(slash.status())&&new URL(slash.headers().location,url).href===url.origin+'/api/preview/session')slash=await ctx.get('/api/preview/session');
   await check('Session trailing slash',slash,405);
+  await check('valid Demo Session with unrelated Query',await ctx.post(noisySession,{headers:{Origin:url.origin},data:valid}),200);
+  await check('inconsistent path hint rejected',await ctx.get('/api/preview/session?path=ui/live/E4&_preview_probe=synthetic'),404);
   const state=await ctx.storageState();state.cookies=state.cookies.filter(c=>!c.name.startsWith('dqa_preview_'));
   anonymousApp=await request.newContext({...options,storageState:state});
   await check('E4 route exists and rejects unsigned app Session',await anonymousApp.post('/api/preview/ui/live/E4',{headers:{Origin:url.origin,'X-Preview-System':'lms'},data:{synthetic:true,question:'SYNTH ROUTE CHECK ONLY'}}),401);
+  await check('E4 unrelated Query still denies unsigned app Session',await anonymousApp.post('/api/preview/ui/live/E4?_preview_probe=synthetic&role=manager',{headers:{Origin:url.origin,'X-Preview-System':'lms'},data:{synthetic:true,question:'SYNTH ROUTE CHECK ONLY'}}),401);
   await ctx.post('/api/preview/session',{headers:{Origin:url.origin},data:{system:'lms',logout:true}});
   output.status='CLOUD_ROUTE_PASS_NOT_PROVIDER_PASS';
  }

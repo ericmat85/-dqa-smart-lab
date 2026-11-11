@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import http from 'node:http';
 Object.assign(process.env,{VERCEL_ENV:'preview',PREVIEW_ORIGIN:'https://preview.test',PREVIEW_GATEWAY_SECRET:'FAKE_GATEWAY_ROUTE_HTTP_ONLY_20261111',PREVIEW_SESSION_SECRET:'FAKE_SESSION_ROUTE_HTTP_ONLY_20261111',RENDER_BACKEND_URL:'https://unused-backend.test',LIVE_PROVIDER_ENABLED:'false',LIVE_AI_ENABLED:'false'});
 const realFetch=globalThis.fetch;let upstreamCalls=0;
-globalThis.fetch=async(url,opts)=>{upstreamCalls++;assert.equal(url,'https://unused-backend.test/__integration_demo/ui/live/E4');assert.equal(opts.headers['X-Preview-Gateway'],process.env.PREVIEW_GATEWAY_SECRET);return {status:503,json:async()=>({trace_id:'I-LOCAL-UPSTREAM',error:{code:'LIVE_PROVIDER_DISABLED'}})}};
+globalThis.fetch=async(url,opts)=>{upstreamCalls++;assert.equal(url,'https://unused-backend.test/__integration_demo/ui/live/E4');assert.equal(opts.headers['X-Preview-Gateway'],process.env.PREVIEW_GATEWAY_SECRET);assert.equal(opts.headers['X-Demo-Actor'],'level1');return {status:503,json:async()=>({trace_id:'I-LOCAL-UPSTREAM',error:{code:'LIVE_PROVIDER_DISABLED'}})}};
 const {default:sessionEntry}=await import('../api/preview/session.js');const {default:catchallEntry}=await import('../api/preview/[...path].js');
 const selected=[];
 const server=http.createServer((req,res)=>{
@@ -21,8 +21,16 @@ test('HTTP filesystem entry and catchall coexist, security and cookies retained'
   assert.equal((await req('/api/preview/session','POST',{...valid,accountId:'INVALID'})).status,401);
   assert.equal((await req('/api/preview/session','POST',valid,{Origin:'https://invalid.test'})).status,403);
   assert.equal((await req('/api/preview/session/','POST',valid)).status,200);
+  const noisy='/api/preview/session?_platform=synthetic&role=manager&token=FAKE_QUERY_VALUE_NOT_SECRET';
+  const noisyGet=await req(noisy,'GET');assert.equal(noisyGet.status,405);const noisyBody=await noisyGet.json();assert.equal(noisyBody.error.code,'METHOD_DENIED');assert.equal(noisyBody.routing.query_policy,'IGNORED_NON_ROUTING_QUERY');assert.ok(!JSON.stringify(noisyBody).includes('FAKE_QUERY_VALUE_NOT_SECRET'));
+  assert.equal((await req(noisy,'POST',valid)).status,200);
+  assert.equal((await req(noisy,'POST',{...valid,accountId:'INVALID'})).status,401);
+  assert.equal((await req(noisy,'POST',valid,{Origin:'https://invalid.test'})).status,403);
+
   const body={synthetic:true,question:'SYNTH ROUTE CHECK'};const noLogin=await req('/api/preview/ui/live/E4','POST',body,{'X-Preview-System':'lms','X-Demo-Actor':'manager'});assert.equal(noLogin.status,401);assert.equal(upstreamCalls,0);assert.equal(selected.at(-1),'CATCHALL');
   const forwarded=await req('/api/preview/ui/live/E4','POST',body,{'X-Preview-System':'lms',Cookie:cookie.split(';')[0]});assert.equal(forwarded.status,503);assert.equal(upstreamCalls,1);assert.equal(forwarded.headers.get('x-preview-route'),'/ui/live/E4');assert.equal((await forwarded.json()).error.code,'LIVE_PROVIDER_DISABLED');
   const badCookie=await req('/api/preview/ui/live/E4','POST',body,{'X-Preview-System':'lms',Cookie:cookie.split(';')[0]+'tampered'});assert.equal(badCookie.status,401);assert.equal(upstreamCalls,1);
+  const noisyE4=await req('/api/preview/ui/live/E4?_platform=synthetic&role=manager&url=https://evil.test','POST',body,{'X-Preview-System':'lms',Cookie:cookie.split(';')[0]});assert.equal(noisyE4.status,503);assert.equal(upstreamCalls,2);assert.equal(noisyE4.headers.get('x-preview-route'),'/ui/live/E4');assert.equal((await noisyE4.json()).error.code,'LIVE_PROVIDER_DISABLED');
+
  }finally{await new Promise(r=>server.close(r));globalThis.fetch=realFetch;}
 });
