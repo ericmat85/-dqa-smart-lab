@@ -1,3 +1,4 @@
+import {askEngineAdvice} from './previewAssistant.mjs';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import AdminCenterModule from './AdminCenterModule.jsx';
 import {ADMIN_MODULES} from './adminCenterData.mjs';
@@ -1599,56 +1600,10 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  }, [selected, selectedFromHistory]);
  const update = (id,fn)=>setRequests(old=>old.map(r=>r.id===id?fn(r):r));
  const stamp=()=>new Date().toLocaleString("zh-TW",{hour12:false});
- function runAIReview(request){
-   if(!request) return;
-   setAiReviewing(true);
-   setAiProgress(0);
-   setAiReview(null);
-   // Demo 階段採用可解釋的規則檢查；尚未呼叫真正的 AI API。
-   const findings=[];
-   const requiredFields=[
-     ["產品代碼",request.productCode],
-     ["產品類型",request.productType],
-     ["需求日期",request.requestedDate],
-     ["測試數量",request.quantity],
-     ["試驗規範／試驗手法",request.specification],
-     ["判定基準",request.judgment]
-   ];
-   requiredFields.forEach(([label,value])=>{
-     if(value===undefined || value===null || String(value).trim()===""){
-       findings.push({level:"error",title:`缺少${label}`,detail:`「${label}」尚未填寫，建議補齊後再送主管審查。`});
-     }
-   });
-   if(request.quantity && (!Number.isFinite(Number(request.quantity)) || Number(request.quantity)<=0)){
-     findings.push({level:"error",title:"測試數量需確認",detail:"測試數量不是正數，請確認樣品數量及填寫格式。"});
-   }
-   if(request.requestedDate){
-     const normalized=String(request.requestedDate).replaceAll("/","-");
-     const parsed=new Date(normalized);
-     if(!Number.isNaN(parsed.getTime()) && parsed.getTime()<new Date("2026-01-01").getTime()){
-       findings.push({level:"warning",title:"需求日期可能過期",detail:"需求日期早於本 Demo 使用的資料年度，請確認日期是否正確。"});
-     }
-   }
-   const spec=String(request.specification||"").trim();
-   const judgment=String(request.judgment||"").trim();
-   if(spec && /依.*規範|依客戶規格|相關.*規範/.test(spec) && !/規範編號|標準編號|JIS|ISO|IEC|SAE|客戶規格/.test(spec)){
-     findings.push({level:"warning",title:"試驗規範引用較籠統",detail:"目前描述未明確列出規範編號或版本；建議補上適用規範、版本及試驗條件。"});
-   }
-   if(judgment && /依.*規格判定|需作判定|依核准/.test(judgment)){
-     findings.push({level:"warning",title:"判定基準可能不夠具體",detail:"目前判定基準偏向一般性描述，建議列出可量測的允收條件或引用明確條文。"});
-   }
-   if(!request.productVersion || !request.pcbaVersion || !request.softwareVersion){
-     findings.push({level:"warning",title:"版本資訊待確認",detail:"產品、PCBA 或軟體版本資訊有缺漏，請確認本次試驗樣品的版本識別是否完整。"});
-   }
-   const result={
-     id:request.id,
-     createdAt:new Date().toLocaleString("zh-TW",{hour12:false}),
-     findings,
-     summary:findings.some(x=>x.level==="error")?"有必要資料缺漏，建議補齊後再送審。":findings.length?"發現需要人工確認的項目，請主管與委託人核對。":"依目前可檢查欄位，未發現明顯缺漏；仍須由主管確認規格適用性。",
-     checkedFields:requiredFields.length,
-     mode:"Demo 規則檢查"
-   };
-   setPendingReviewResult(result);
+ async function runAIReview(request){
+  if(!request)return;setAiReviewing(true);setAiProgress(0);setAiReview(null);
+  try{const result=await askEngineAdvice('E1',request);setPendingReviewResult({id:request.id,createdAt:new Date().toLocaleString('zh-TW'),findings:[...result.issues,...result.advice].map(detail=>({level:'warning',title:'人工確認建議',detail})),summary:result.summary,checkedFields:0,mode:result.mode});}
+  catch(error){setNotice(error.message);setAiReviewing(false);}
  }
  function fillDemoReview() {
    if ((reviewSignature || comment.trim()) && !window.confirm('DEMO 填寫會覆蓋目前的簽名與審查意見，確定繼續？')) return;
@@ -1779,15 +1734,10 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    setEditing(row);setScheduleMessage(catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
    setEditForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??'',preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0});
  }
- function autoScheduleCurrent(){
-   if(!editing||!editForm)return;
-   try{
-     const equipment=readScheduleEquipment();setEquipmentCatalog(equipment);
-     const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
-     const result=recommendSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows:latestSchedules()});
-     setEditForm(previous=>({...previous,...result}));
-     setScheduleMessage('已推薦 '+result.eq+'／'+result.owner+'，'+result.time+' 至 '+result.end+'（'+result.duration+' 天）。每件樣品使用空間 '+result.sampleVolumeLitres+' L'+(result.sampleVolumeEstimated?'（Demo 預設，請依實際樣品確認）':'')+'。請確認後儲存。');
-   }catch(error){setScheduleMessage(error.message||'無法產生建議，請確認設備與人員。');}
+ async function autoScheduleCurrent(){
+  if(!editing||!editForm)return;
+  try{const result=await askEngineAdvice('E2',editing,{equipment:readScheduleEquipment(),rows:latestSchedules()});setScheduleMessage(result.summary+' · UNKNOWN：容量／相容性仍需工程師確認 · Trace '+result.trace);}
+  catch(error){setScheduleMessage(error.message);}
  }
  function saveSchedule(){
    if(!editing||!editForm)return;

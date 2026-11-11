@@ -1,6 +1,7 @@
+import {askPreviewAssistant} from './previewAssistant.mjs';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {ASSISTANT_DEMOS,assistantReply} from './assistantDemo.mjs';
+import {ASSISTANT_DEMOS} from './assistantDemo.mjs';
 import './IntelligentAssistant.css';
 import AssistantIcon from './AssistantIcon.jsx';
 
@@ -46,9 +47,9 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   const timer=window.setTimeout(()=>{timers.current.delete(timer);callback();},delay);
   timers.current.add(timer);
  }
- function ask(text=question,{focusTurn=false}={}){
+ async function ask(text=question,{focusTurn=false}={}){
   if(!text.trim()&&!files.length)return;
-  const reply=text.trim()?assistantReply(text,snapshot,metrics,system):'已附加檔案資訊。本 Demo 不會解析檔案內容，請選擇常見問題進行展示。';
+  let reply;try{reply=text.trim()?await askPreviewAssistant(text.trim(),system,{snapshot}):'附件僅展示檔名，尚未送至模型。';}catch(error){reply=error.message;}
   const characters=typeof Intl.Segmenter==='function'
    ? Array.from(new Intl.Segmenter('zh-TW',{granularity:'grapheme'}).segment(reply),part=>part.segment)
    : Array.from(reply);

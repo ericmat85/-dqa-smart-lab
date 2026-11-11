@@ -1,3 +1,4 @@
+import {closePreviewAISession} from './previewAssistant.mjs';
 export const IDLE_TIMEOUT_MS=30*60*1000;
 export const SESSION_KEYS={lms:'dqa-lms-account-id',request:'dqa-request-account-id',lab:'dqa-lab-account-id'};
 const activityKey=system=>`dqa-session-activity-v1:${system}`;
@@ -11,6 +12,7 @@ export function startSession(system,accountId,storage=globalThis.sessionStorage,
  notify();
 }
 function removeSession(system,storage){
+ closePreviewAISession(system);
  storage.removeItem(SESSION_KEYS[system]);storage.removeItem(activityKey(system));
  if(system==='request'){storage.removeItem('dqa-request-role');storage.removeItem('dqa-request-user');}
 }

@@ -20,5 +20,10 @@
       "source": "/validation/:path*",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "preview/i-render-backend-*": false
+    }
+  }
 }
