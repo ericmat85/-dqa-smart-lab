@@ -1,3 +1,4 @@
+import {resolvePreviewRoute,isAllowedPreviewPath} from '../../server/previewRouting.mjs';
 import {createHmac,timingSafeEqual,randomUUID} from 'node:crypto';
 const ACCOUNTS={
  'DEMO-REQUESTER':{actor:'requester',systems:['request']},
@@ -8,13 +9,13 @@ const ACCOUNTS={
 };
 const safeEqual=(a,b)=>{const x=Buffer.from(a||''),y=Buffer.from(b||'');return x.length===y.length&&timingSafeEqual(x,y);};
 const sign=(text,key)=>createHmac('sha256',key).update(text).digest('base64url');
-const allowed=path=>/^\/(?:health\/(?:live|ready)|ui\/(?:bootstrap|knowledge|live\/E[1-4]|requests(?:\/REQ-\d{4}-[0-9a-f]{8}(?:\/actions|\/engines\/E[1-4])?)?))$/.test(path);
-export function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
+export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entrypointPath}={}){
  const counters=new Map();
  return async(req,res)=>{
   const trace='I-'+randomUUID().replaceAll('-','');
+  let routing;
   const reply=(status,body)=>{res.setHeader('Cache-Control','no-store');res.setHeader('X-Trace-ID',trace);return res.status(status).json(body);};
-  const fail=(status,code)=>reply(status,{scope:'SANDBOX_ONLY',synthetic:true,trace_id:trace,error:{code}});
+  const fail=(status,code)=>reply(status,{scope:'SANDBOX_ONLY',synthetic:true,trace_id:trace,error:{code},...(routing?{routing}:{})});
   try{
    if(env.VERCEL_ENV!=='preview'||!env.PREVIEW_GATEWAY_SECRET||env.PREVIEW_GATEWAY_SECRET.length<32||!env.PREVIEW_SESSION_SECRET||env.PREVIEW_SESSION_SECRET.length<32)return fail(503,'PREVIEW_CONFIGURATION_REQUIRED');
    if(![undefined,'false','0'].includes(env.LIVE_PROVIDER_ENABLED?.toLowerCase())||![undefined,'false','0'].includes(env.LIVE_AI_ENABLED?.toLowerCase()))return fail(503,'LIVE_FLAGS_MUST_REMAIN_DISABLED');
@@ -23,8 +24,10 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
    if(req.method!=='GET'&&req.headers.origin!==origin)return fail(403,'ORIGIN_REQUIRED');
    const ip=req.headers['x-vercel-forwarded-for']||req.socket?.remoteAddress||'unknown';const now=Date.now();
    if(counters.size>5000)counters.clear();const c=counters.get(ip)||{at:now,count:0};if(now-c.at>60000){c.at=now;c.count=0;}c.count++;counters.set(ip,c);if(c.count>60)return fail(429,'PREVIEW_RATE_LIMIT');
-   if(!req.url.startsWith('/api/preview/')||/[\\?#%]/.test(req.url)||req.url.split('/').some(part=>part==='.'||part==='..'))return fail(404,'ROUTE_NOT_FOUND');
-   const path=req.url.slice('/api/preview'.length);
+   const resolved=resolvePreviewRoute(req,{origin,entrypointPath});routing=resolved.diagnostic;
+   res.setHeader('X-Preview-Pathname',routing.pathname);res.setHeader('X-Preview-Route',routing.resolved_path||'REJECTED');res.setHeader('X-Preview-Route-Source',routing.source);
+   if(!resolved.path)return fail(404,'ROUTE_NOT_FOUND');
+   const path=resolved.path;
    let body;
    if(req.method==='POST'){
     if(!String(req.headers['content-type']||'').startsWith('application/json'))return fail(415,'JSON_REQUIRED');
@@ -41,7 +44,7 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch}={}){
     res.setHeader('Set-Cookie',`dqa_preview_${system}=${data}.${sign(data,env.PREVIEW_SESSION_SECRET)}; Path=/api/preview; Secure; HttpOnly; SameSite=Strict; Max-Age=1800`);
     return reply(200,{authenticated:true,accountId,system,scope:'SYNTHETIC_PREVIEW_ONLY'});
    }
-   if(!allowed(path))return fail(404,'ROUTE_NOT_FOUND');
+   if(!isAllowedPreviewPath(path))return fail(404,'ROUTE_NOT_FOUND');
    const expectedMethod=path.startsWith('/health/')||path==='/ui/bootstrap'?'GET':'POST';
    if(req.method!==expectedMethod)return fail(405,'METHOD_DENIED');
    const system=req.headers['x-preview-system'];let actor;
