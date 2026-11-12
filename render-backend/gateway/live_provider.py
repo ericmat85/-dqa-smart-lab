@@ -9,6 +9,9 @@ import httpx
 from gateway.cost_ledger import BudgetLedger
 from jsonschema import Draft202012Validator
 
+def _require_safe(condition):
+ if not condition:raise ValueError('PROVIDER_VALIDATION_FAILED')
+
 class ProviderError(Exception):
  def __init__(self,code,status=503):self.code=code;self.status=status;super().__init__(code)
 
@@ -29,7 +32,7 @@ class Config:
   try:
    self.input_rate=Decimal(e['AI_INPUT_USD_PER_MILLION']);self.output_rate=Decimal(e['AI_OUTPUT_USD_PER_MILLION'])
    self.call_cap=Decimal(e['AI_MAX_CALL_USD']);self.total_cap=Decimal(e['AI_MAX_SESSION_USD']);self.max_output=int(e['AI_MAX_OUTPUT_TOKENS']);self.max_input=int(e['AI_MAX_INPUT_TOKENS'])
-   assert all(v.is_finite() and v>0 for v in [self.input_rate,self.output_rate,self.call_cap,self.total_cap]) and self.call_cap<=Decimal('0.10') and self.total_cap<=Decimal('10.00') and 64<=self.max_output<=2000 and 256<=self.max_input<=32768
+   _require_safe(all(v.is_finite() and v>0 for v in [self.input_rate,self.output_rate,self.call_cap,self.total_cap]) and self.call_cap<=Decimal('0.10') and self.total_cap<=Decimal('10.00') and 64<=self.max_output<=2000 and 256<=self.max_input<=32768)
   except (KeyError,ValueError,InvalidOperation,AssertionError):raise ProviderError('INVALID_COST_CONFIGURATION') from None
   for flag in ('AI_MODEL_ACCESS_VERIFIED','AI_PROJECT_BUDGET_VERIFIED','AI_ROUND_BUDGET_CONTROL_VERIFIED'):
    if e.get(flag)!='1':raise ProviderError(flag+'_REQUIRED')
@@ -92,22 +95,22 @@ class LiveProvider:
   if r.status_code!=200:self.failure(trace,{401:'PROVIDER_AUTHENTICATION_FAILED',403:'PROVIDER_PERMISSION_DENIED',404:'PROVIDER_MODEL_UNAVAILABLE',429:'PROVIDER_RATE_LIMIT'}.get(r.status_code,'PROVIDER_HTTP_ERROR'))
   try:
    raw=r.json();usage=raw['usage'];inp=usage['input_tokens'];out=usage['output_tokens']
-   assert type(inp) is int and type(out) is int and 0<=inp<=min(bound,self.config.max_input) and 0<=out<=self.config.max_output
-   assert raw['status']=='completed' and raw['model']==self.config.model
+   _require_safe(type(inp) is int and type(out) is int and 0<=inp<=min(bound,self.config.max_input) and 0<=out<=self.config.max_output)
+   _require_safe(raw['status']=='completed' and raw['model']==self.config.model)
    request_id=r.headers['x-request-id'];response_id=raw['id']
-   assert re.fullmatch(r'[A-Za-z0-9_-]{1,160}',request_id) and re.fullmatch(r'resp_[A-Za-z0-9_-]{1,160}',response_id)
+   _require_safe(re.fullmatch(r'[A-Za-z0-9_-]{1,160}',request_id) and re.fullmatch(r'resp_[A-Za-z0-9_-]{1,160}',response_id))
    parts=[c for item in raw['output'] if item.get('type')=='message' for c in item['content']]
-   assert parts and all(c['type']=='output_text' for c in parts)
-   result=json.loads(''.join(c['text'] for c in parts));Draft202012Validator(SCHEMA).validate(result);assert result['engine']==engine
-   assert self.config.key not in json.dumps(result,ensure_ascii=False)
-   assert not SENSITIVE.search(json.dumps(result,ensure_ascii=False))
+   _require_safe(parts and all(c['type']=='output_text' for c in parts))
+   result=json.loads(''.join(c['text'] for c in parts));Draft202012Validator(SCHEMA).validate(result);_require_safe(result['engine']==engine)
+   _require_safe(self.config.key not in json.dumps(result,ensure_ascii=False))
+   _require_safe(not SENSITIVE.search(json.dumps(result,ensure_ascii=False)))
    if engine=='E2':
-    assert not re.search(r'\b(?:FEASIBLE|NO_FEASIBLE_SCHEDULE)\b',json.dumps(result,ensure_ascii=False),re.I)
+    _require_safe(not re.search(r'\b(?:FEASIBLE|NO_FEASIBLE_SCHEDULE)\b',json.dumps(result,ensure_ascii=False),re.I))
    if engine=='E3':
     supplied=set(re.findall(r'(?<![A-Za-z])\d+(?:\.\d+)?',text))
-    assert set(re.findall(r'(?<![A-Za-z])\d+(?:\.\d+)?',json.dumps({k:result[k] for k in ['summary','issues','advice']},ensure_ascii=False)))<=supplied
+    _require_safe(set(re.findall(r'(?<![A-Za-z])\d+(?:\.\d+)?',json.dumps({k:result[k] for k in ['summary','issues','advice']},ensure_ascii=False)))<=supplied)
    for c in result['citations']:
-    assert engine=='E4' and any(c['document_id']==d['id'] and c['version']==d['version'] and c['quote'] in d['text'] for d in DOCS)
+    _require_safe(engine=='E4' and any(c['document_id']==d['id'] and c['version']==d['version'] and c['quote'] in d['text'] for d in DOCS))
   except Exception:
    # ValidationError and malformed outputs must never leak raw Provider text.
    self.failure(trace,'PROVIDER_OUTPUT_REJECTED')
@@ -117,9 +120,9 @@ class LiveProvider:
    evidence_validation='EVIDENCE_INSUFFICIENT_REFUSED'
   cost=(Decimal(inp)*self.config.input_rate+Decimal(out)*self.config.output_rate)/1000000
   if self.ledger:
-   try:self.ledger.settle(trace,cost,{'provider_request_id':request_id,'provider_response_id':response_id,'model':raw['model'],'usage':{'input_tokens':inp,'output_tokens':out},'estimated_cost_usd':str(cost),'success':True,'inference':'LIVE_PROVIDER'})
+   try:self.ledger.settle(trace,cost,{'provider_request_id':request_id,'provider_response_id':response_id,'model':raw['model'],'usage':{'input_tokens':inp,'output_tokens':out},'estimated_cost_usd':str(cost),'success':True,'inference':'MOCK' if self.simulated_transport else 'LIVE_PROVIDER'})
    except Exception:raise ProviderError('COST_LEDGER_SETTLEMENT_FAILED',503) from None
   with self.lock:
    self.reserved-=reserve-cost
    self.usage_records.append({'trace_id':trace,'engine':engine,'model':raw['model'],'provider_request_id':request_id,'input_tokens':inp,'output_tokens':out,'estimated_cost_usd':str(cost)})
-  return {'engine':engine,'execution_mode':'LIVE_PROVIDER','provider':'openai_responses','model':raw['model'],'provider_request_id':request_id,'provider_response_id':response_id,'trace_id':trace,'usage':{'input_tokens':inp,'output_tokens':out},'estimated_cost_usd':str(cost),'pricing_kind':'CONFIGURED_VERIFIED_RATES_NO_DISCOUNTS','preview_contract_version':'1.0','scope':'SYNTHETIC_PREVIEW_ADVICE_ONLY','result':result,'evidence_validation':evidence_validation,'deterministic_format_checks':numeric_checks(text),'capacity_status':'UNKNOWN_NOT_AUTHORIZED' if engine=='E2' else None,'human_final_decision':True,'public_dto':None}
+  return {'engine':engine,'execution_mode':'MOCK' if self.simulated_transport else 'LIVE_PROVIDER','real_ai':not self.simulated_transport,'provider':'MOCK_HTTP_TRANSPORT' if self.simulated_transport else 'openai_responses','model':raw['model'],'provider_request_id':request_id,'provider_response_id':response_id,'trace_id':trace,'usage':{'input_tokens':inp,'output_tokens':out},'estimated_cost_usd':str(cost),'pricing_kind':'CONFIGURED_VERIFIED_RATES_NO_DISCOUNTS','preview_contract_version':'1.0','scope':'SYNTHETIC_PREVIEW_ADVICE_ONLY','result':result,'evidence_validation':evidence_validation,'deterministic_format_checks':numeric_checks(text),'capacity_status':'UNKNOWN_NOT_AUTHORIZED' if engine=='E2' else None,'human_final_decision':True,'public_dto':None}
