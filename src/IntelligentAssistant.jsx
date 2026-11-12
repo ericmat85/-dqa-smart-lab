@@ -1,4 +1,5 @@
 import {askPreviewAssistant} from './previewAssistant.mjs';
+import {readE4CurrentData} from './e4ReadonlyContext.mjs';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {ASSISTANT_DEMOS} from './assistantDemo.mjs';
@@ -78,7 +79,11 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   setTurns(rows=>[...rows,{id,question:trimmed||'附加檔案',reply:null,typing:true,files:files.map(file=>file.name)}]);
   setQuestion('');setFiles([]);if(fileInput.current)fileInput.current.value='';
   let reply,failed=false;
-  try{reply=trimmed?await askPreviewAssistant(trimmed,system,{snapshot,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';}
+  try{
+   let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('Storage unavailable');}};}
+   const current=readE4CurrentData(snapshot,metrics,system,storage);
+   reply=trimmed?await askPreviewAssistant(trimmed,system,{...current,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';
+  }
   catch(error){failed=true;reply=error.name==='AbortError'?'請求已取消；Provider 結果可能未知，不會自動重送。':error.message;}
   if(epoch.current===ownerEpoch&&inFlight.current?.id===id&&!controller.signal.aborted){
    inFlight.current.reply=reply;

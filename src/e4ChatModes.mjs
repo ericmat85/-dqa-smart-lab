@@ -26,8 +26,14 @@ export function renderE4Reply(packet,mode) {
   if(!Number.isInteger(u?.input_tokens)||u.input_tokens<0||!Number.isInteger(u?.output_tokens)||u.output_tokens<0||!/^I-[A-Za-z0-9_-]{1,80}$/.test(packet.trace_id||'')||typeof d.estimated_cost_usd!=='string'||!/^\d+(?:\.\d+)?$/.test(d.estimated_cost_usd))throw Error('REAL_AI_NOT_VERIFIED：缺少Trace或使用量證據。');
   if(mode==='GENERAL_CHAT'&&d.result.citations.length)throw Error('AI_OUTPUT_BLOCKED: GENERAL_CHAT_UNVERIFIED_CITATIONS');
   if(mode==='DOCUMENT_QA'&&!d.result.citations.length)throw Error(`EVIDENCE_INSUFFICIENT：沒有可驗證的合成文件引用。Trace ${packet.trace_id} · Tokens ${u.input_tokens}/${u.output_tokens}`);
-  const label=mode==='GENERAL_CHAT'?'一般聊天／非正式試驗依據':'文件問答／合成文件';
-  const execution=mock?'【MOCK測試：未呼叫真實模型；使用量與費用均為模擬】':'【真實Provider回應】';
+  const execution=mock?'【MOCK測試：未呼叫真實模型；使用量與費用均為模擬】\n':'';
   const citations=d.result.citations.map(c=>`引用 ${c.document_id}@${c.version}：${c.quote}`).join('\n');
-  return `${execution}\n【${label}】\n${d.result.summary}${citations?'\n'+citations:''}\n人工最終決策；助理不會自行修改資料或簽核。`;
+  let draft='';
+  if(d.report_draft){
+   const r=d.report_draft;
+   if(r.kind!=='DRAFT_ONLY'||r.measurements!=='NOT_PROVIDED'||r.verdict!=='PENDING_ENGINEER_REVIEW'||r.signatures!=='NOT_SIGNED'||r.saved_to_system!==false||!/^REQ-\d{4}-(?:\d{3}|[a-f0-9]{8})$/.test(r.request_id)||typeof r.title!=='string')throw Error('REPORT_DRAFT_CONTRACT_INVALID');
+   draft=`試驗報告草稿\n委託編號：${r.request_id}\n試驗名稱：${r.title}\n量測結果：尚未提供，不補填數值。\n結果判定：待工程師確認。\n正式簽核：未簽核，未提交至系統。\n\n`;
+  }
+  const source=d.read_context?.source==='BROWSER_DEMO_READONLY'&&d.read_context?.writes==='NONE'?'\n資料來源：目前瀏覽器的 Demo 快照；未載入的資料不代表沒有紀錄。':'';
+  return `${execution}${draft}${d.result.summary}${citations?'\n'+citations:''}${source}\n人工最終決策；助理不會自行修改資料或簽核。`;
 }

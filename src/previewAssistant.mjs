@@ -1,6 +1,7 @@
 import {aiSessionState,setAISessionState} from './aiSessionState.mjs';
 import {selectE4ChatMode,sessionFailure,renderE4Reply} from './e4ChatModes.mjs';
 import {beginE4Activity,finishE4Activity,clearE4Activity} from './e4Activity.mjs';
+import {makeE4ReadonlyContext} from './e4ReadonlyContext.mjs';
 const enabled=import.meta.env?.VITE_PRIVATE_PREVIEW==='1';
 const base=import.meta.env?.VITE_SANDBOX_API_BASE;
 const sessionKey=system=>`dqa-${system}-account-id`;
@@ -30,19 +31,22 @@ async function establishSession(system,accountId,fetchImpl,signal){
  return response;
 }
 
-export async function askPreviewAssistant(question,system,{fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID()}={}){
+export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID()}={}){
  // E4-only Preview: this floating assistant never dispatches other engines.
  const selected=selectE4ChatMode(question);if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
  const url=endpoint('/ui/live/E4');
  if(!['lms','request','lab'].includes(system))throw Error('AI 系統權限不符；未呼叫模型。');
  const accountId=storage?.getItem(sessionKey(system));
  if(!accountId)throw Error('請先使用 Demo 帳號登入，再使用 AI 助理。');
+ const context=selected.mode==='GENERAL_CHAT'&&!selected.question.startsWith('/')?makeE4ReadonlyContext(question,snapshot,metrics,system):undefined;
  // This password is the existing public synthetic Demo credential, never a backend secret.
  const ticket=beginE4Activity({system,accountId,mode:selected.mode,control:selected.question==='/clear'});
  let response,packet,errorCode;
  try{
   await establishSession(system,accountId,fetchImpl,signal);
-  response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify({synthetic:true,question:selected.question,mode:selected.mode}),signal});
+  const payload={synthetic:true,question:selected.question,mode:selected.mode,...(context?{demo_context:context}:{})};
+  if(new TextEncoder().encode(JSON.stringify(payload)).length>8192)throw Error('AI_DTO_BLOCKED: PAYLOAD_TOO_LARGE；未截斷資料。');
+  response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify(payload),signal});
   try{packet=await response.json();}catch{errorCode='NON_JSON_RESPONSE';throw Error(`E4 HTTP ${response.status} · NON_JSON_RESPONSE；未取得模型結果。`);}
   if(!response.ok){errorCode=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
   const reply=renderE4Reply(packet,selected.mode);

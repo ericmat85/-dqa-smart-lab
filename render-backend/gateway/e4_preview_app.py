@@ -12,6 +12,7 @@ class Advice(BaseModel):
  synthetic:bool
  mode:Literal['GENERAL_CHAT','DOCUMENT_QA']='DOCUMENT_QA'
  question:str=Field(min_length=1,max_length=1500)
+ demo_context:dict|None=None
  @field_validator('synthetic',mode='before')
  @classmethod
  def synthetic_true(cls,value):
@@ -63,6 +64,9 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
    if store:store.bind_session(binding,clock())
   except ValueError as e:raise E4Error(str(e),403 if str(e)=='AUTHORIZATION_DENIED' else 401) from None
   trace=req.state.trace
+  from gateway.e4_readonly_context import validate_context
+  context=validate_context(body.demo_context,binding,clock())
+  if context is not None and body.mode!='GENERAL_CHAT':raise E4Error('READONLY_CONTEXT_MODE_DENIED',422)
   if service is None:
    if body.question in ('/clear','/logout'):
     if store is None:raise E4Error('SESSION_STORE_REQUIRED')
@@ -79,7 +83,7 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
    except asyncio.CancelledError:raise
    except Exception:cancel.set()
   watcher=asyncio.create_task(watch_disconnect())
-  task=asyncio.create_task(asyncio.to_thread(service.analyze,binding,body.question,trace,body.mode,req.headers.get('x-preview-operation-id') or trace,cancel))
+  task=asyncio.create_task(asyncio.to_thread(service.analyze,binding,body.question,trace,body.mode,req.headers.get('x-preview-operation-id') or trace,cancel,**({'demo_context':context} if context is not None else {})))
   try:
    data=await task
   except asyncio.CancelledError:

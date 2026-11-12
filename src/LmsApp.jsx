@@ -1879,7 +1879,7 @@ function DashboardPage({
 
         </div>
 
-        <IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/>
+        <IntelligentAssistant snapshot={{...liveSnapshot,reports:reportNotifications}} metrics={liveMetrics}/>
 
       </main>
 
