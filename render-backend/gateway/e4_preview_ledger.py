@@ -10,6 +10,7 @@ def nanos(value):
  return int((d*SCALE).to_integral_value(rounding=ROUND_CEILING))
 class Ledger:
  cloud_coordination_verified=False  # Local SQLite is not a verified cross-instance cloud coordinator.
+ require_unknown_reconciliation=False
  @staticmethod
  def initialize_local_or_operator(path,identity,cap,expires,max_concurrent=1):
   p=Path(path)
@@ -78,6 +79,7 @@ class Ledger:
    if evidence.get('dispatch_sequence'):raise ValueError('REQUEST_ALREADY_DISPATCHED')
    try:
     self._authorize_session(c,binding,now,generation)
+    if now>=c.execute('SELECT expires FROM budget WHERE id=1').fetchone()[0]:raise ValueError('BUDGET_EXPIRED')
     if cancelled:raise ValueError('REQUEST_CANCELLED_NOT_SENT')
    except ValueError as exc:error=str(exc)
    if error:
@@ -114,6 +116,7 @@ class Ledger:
    identity,cap,expires,held,spent,maximum=c.execute('SELECT identity,cap,expires,held,spent,max_concurrent FROM budget WHERE id=1').fetchone()
    if identity!=self.identity:raise ValueError('LEDGER_IDENTITY_MISMATCH')
    if now>=expires:raise ValueError('BUDGET_EXPIRED')
+   if self.require_unknown_reconciliation and c.execute("SELECT COUNT(*) FROM attempts WHERE state='UNKNOWN'").fetchone()[0]:raise ValueError('OUTCOME_RECONCILIATION_REQUIRED')
    prior=c.execute('SELECT session_hash,request_hash,state FROM attempts WHERE trace=?',(trace,)).fetchone()
    if prior:
     if prior[:2]!=(session_hash,request_hash):raise ValueError('REQUEST_ID_CONFLICT')

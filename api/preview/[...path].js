@@ -32,6 +32,7 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
   try{
    if(env.VERCEL_ENV!=='preview'||!env.PREVIEW_GATEWAY_SECRET||env.PREVIEW_GATEWAY_SECRET.length<32||!env.PREVIEW_SESSION_SECRET||env.PREVIEW_SESSION_SECRET.length<32)return fail(503,'PREVIEW_CONFIGURATION_REQUIRED');
    if(![undefined,'false','0'].includes(env.LIVE_PROVIDER_ENABLED?.toLowerCase())||![undefined,'false','0'].includes(env.LIVE_AI_ENABLED?.toLowerCase()))return fail(503,'LIVE_FLAGS_MUST_REMAIN_DISABLED');
+   if(![undefined,'MOCK','CONTROLLED_LIVE'].includes(env.E4_PREVIEW_PROVIDER_MODE))return fail(503,'E4_PROVIDER_MODE_INVALID');
    const origin=env.PREVIEW_ORIGIN||'https://'+env.VERCEL_URL;
    if(!origin.startsWith('https://')||req.headers.origin&&req.headers.origin!==origin)return fail(403,'ORIGIN_DENIED');
    if(req.method!=='GET'&&req.headers.origin!==origin)return fail(403,'ORIGIN_REQUIRED');
@@ -60,7 +61,8 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
    const upstreamSignal=isE4?AbortSignal.any([upstreamDeadline,clientAbort.signal]):upstreamDeadline;
    let upstreamStage='request';
    try{
-    const response=await fetchImpl(upstream.origin+'/__integration_demo'+path,{method:req.method,headers:{'Content-Type':'application/json','X-Preview-Gateway':env.PREVIEW_GATEWAY_SECRET,'X-Demo-Actor':actor||'outsider',...extraHeaders},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:upstreamSignal});
+    const prefix=path==='/ui/live/E4'&&env.E4_PREVIEW_PROVIDER_MODE==='CONTROLLED_LIVE'?'/__integration_live':'/__integration_demo';
+    const response=await fetchImpl(upstream.origin+prefix+path,{method:req.method,headers:{'Content-Type':'application/json','X-Preview-Gateway':env.PREVIEW_GATEWAY_SECRET,'X-Demo-Actor':actor||'outsider',...extraHeaders},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:upstreamSignal});
     upstreamStage='response';
     const packet=await response.json();
     const serialized=JSON.stringify(packet);if(serialized.includes(env.PREVIEW_GATEWAY_SECRET)||serialized.includes(env.PREVIEW_SESSION_SECRET)||(extraHeaders['X-Preview-Session']&&serialized.includes(extraHeaders['X-Preview-Session'])))return fail(503,'UPSTREAM_RESPONSE_REJECTED');

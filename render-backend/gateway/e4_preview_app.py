@@ -28,7 +28,7 @@ class EngineAdvice(BaseModel):
   if type(value) is not bool or value is not True:raise ValueError('SYNTHETIC_REQUIRED')
   return value
 
-def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,session_store=None,advisory=None):
+def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,session_store=None,advisory=None,disabled_code='LIVE_PROVIDER_DISABLED',disabled_status=503):
  if not isinstance(gateway_key,str) or not gateway_key.isascii() or len(gateway_key)<32:raise E4Error('GATEWAY_SECRET_REQUIRED')
  store=session_store or (service.ledger if service else None)
  app=FastAPI(docs_url=None,openapi_url=None,redoc_url=None)
@@ -69,7 +69,7 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
     store.control(binding,clock(),'logout' if body.question=='/logout' else 'clear')
     data={'engine':'E4','control':'SESSION_REVOKED' if body.question=='/logout' else 'CONVERSATION_CLEARED','conversation_id':binding['sid'],'trace_id':trace,'synthetic':True,'real_ai':False}
     return {'scope':'SANDBOX_ONLY','synthetic':True,'trace_id':trace,'data':data}
-   raise E4Error('LIVE_PROVIDER_DISABLED')
+   raise E4Error(disabled_code,disabled_status)
   cancel=threading.Event()
   async def watch_disconnect():
    try:

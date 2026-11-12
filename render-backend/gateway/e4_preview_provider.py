@@ -126,8 +126,8 @@ class E4Service:
    raise E4Error('SERVICE_EXECUTOR_UNAVAILABLE')
   try:self.ledger.reserve(request_id,subject(binding),cfg.call_cap,self.clock(),cfg.rate,fingerprint,cfg.request_timeout+5,trace,binding,history['generation'])
   except Exception as e:
-   code=str(e) if str(e) in ['BUDGET_EXPIRED','RATE_LIMIT','TOTAL_BUDGET_LIMIT','SERVICE_BUSY','CONCURRENCY_RECOVERY_REQUIRED','REQUEST_ID_CONFLICT','REQUEST_ALREADY_COMPLETED','REQUEST_OUTCOME_UNKNOWN','REQUEST_ALREADY_SEEN','SESSION_REVOKED_OR_EXPIRED','SESSION_CONTEXT_CHANGED'] else 'LEDGER_RESERVATION_DENIED'
-   raise E4Error(code,401 if code=='SESSION_REVOKED_OR_EXPIRED' else 409 if code.startswith(('REQUEST_','SESSION_')) else 429) from None
+   code=str(e) if str(e) in ['BUDGET_EXPIRED','RATE_LIMIT','TOTAL_BUDGET_LIMIT','SERVICE_BUSY','CONCURRENCY_RECOVERY_REQUIRED','OUTCOME_RECONCILIATION_REQUIRED','REQUEST_ID_CONFLICT','REQUEST_ALREADY_COMPLETED','REQUEST_OUTCOME_UNKNOWN','REQUEST_ALREADY_SEEN','SESSION_REVOKED_OR_EXPIRED','SESSION_CONTEXT_CHANGED'] else 'LEDGER_RESERVATION_DENIED'
+   raise E4Error(code,401 if code=='SESSION_REVOKED_OR_EXPIRED' else 403 if code=='BUDGET_EXPIRED' else 409 if code.startswith(('REQUEST_','SESSION_')) else 429) from None
   def unknown(code,status=502):
    try:self.ledger.unknown(request_id,code,self.clock())
    except Exception:raise E4Error('LEDGER_FAILURE_RECORD_UNCONFIRMED',503) from None
@@ -135,7 +135,7 @@ class E4Service:
   def perform():
    try:
     try:self.ledger.authorize_dispatch(request_id,binding,history['generation'],self.clock(),cancel.is_set() if cancel else False)
-    except ValueError as error:raise E4Error(str(error),401 if str(error)=='SESSION_REVOKED_OR_EXPIRED' else 409,request_id) from None
+    except ValueError as error:raise E4Error(str(error),401 if str(error)=='SESSION_REVOKED_OR_EXPIRED' else 403 if str(error)=='BUDGET_EXPIRED' else 409,request_id) from None
     return self.client.post(self.ENDPOINT,headers={'Authorization':'Bearer '+key,'Content-Type':'application/json','X-Client-Request-Id':request_id},json=request)
    finally:
     try:self.ledger.transport_done(request_id)
