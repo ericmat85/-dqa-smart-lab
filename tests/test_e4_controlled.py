@@ -54,6 +54,24 @@ class ControlledTests(unittest.TestCase):
  def test_bootstrap_initializes_only_mock_free_budget_no_inference(self):
   with patch.object(controlled.httpx,'Client',side_effect=self.client_factory):state=self.load({'OPENAI_API_KEY':FAKE_KEY,'AI_SPEND_APPROVED':'1'})
   self.assertTrue(state.initialized);self.assertIsNone(state.service);self.assertEqual(state.code,'LIVE_LEDGER_BOOTSTRAP_ONLY');self.assertEqual(self.calls,[]);self.assertEqual(state.ledger.snapshot()['spent_nanos'],0)
+ def test_bootstrap_tightens_owned_existing_directory_without_touching_parent(self):
+  directory=self.root/'live'/self.p['approval_id'];directory.mkdir(parents=True);directory.chmod(0o755);parent_mode=directory.parent.stat().st_mode
+  state=self.load();self.assertEqual(directory.stat().st_mode&0o777,0o700);self.assertEqual(directory.parent.stat().st_mode,parent_mode);self.assertEqual(state.code,'LIVE_LEDGER_BOOTSTRAP_ONLY');self.assertEqual(self.calls,[])
+ def test_bootstrap_does_not_adopt_foreign_owned_directory(self):
+  directory=self.root/'live'/self.p['approval_id'];directory.mkdir(parents=True);directory.chmod(0o755)
+  from types import SimpleNamespace
+  with patch.object(controlled.os,'fstat',return_value=SimpleNamespace(st_uid=os.getuid()+1,st_mode=directory.stat().st_mode)):
+   with self.assertRaisesRegex(E4Error,'PRIVATE_LIVE_STATE_OWNER_REQUIRED'):self.load()
+  self.assertEqual(directory.stat().st_mode&0o777,0o755);self.assertFalse((directory/'budget.sqlite').exists())
+ def test_bootstrap_rejects_symlink_and_preserves_existing_ledger_budget(self):
+  directory=self.root/'live'/self.p['approval_id'];directory.parent.mkdir();target=self.root/'OTHER';target.mkdir();directory.symlink_to(target)
+  with self.assertRaisesRegex(E4Error,'LIVE_STATE_SYMLINK_DENIED'):self.load()
+  directory.unlink();db=self.bootstrap();before=db.read_bytes();directory.chmod(0o755);state=self.load()
+  self.assertFalse(state.initialized);self.assertEqual(db.read_bytes(),before);self.assertEqual(state.ledger.snapshot()['cap_nanos'],1000000000);self.assertEqual(directory.stat().st_mode&0o777,0o700)
+ def test_normal_start_never_silently_repairs_directory_permissions(self):
+  db=self.bootstrap();db.parent.chmod(0o755)
+  with self.assertRaisesRegex(E4Error,'PRIVATE_LIVE_STATE_REQUIRED'):self.load({'E4_LIVE_LEDGER_INITIALIZE':'0'})
+  self.assertEqual(db.parent.stat().st_mode&0o777,0o755)
  def test_normal_reopen_nonpaid_model_metadata_then_mock_transport_service(self):
   db=self.bootstrap()
   with patch.object(controlled.httpx,'Client',side_effect=self.client_factory):state=self.load({'E4_LIVE_LEDGER_INITIALIZE':'0','AI_SPEND_APPROVED':'1','OPENAI_API_KEY':FAKE_KEY})

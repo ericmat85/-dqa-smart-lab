@@ -33,6 +33,24 @@ def verify_mount(env,p):
  if mount!=Path('/var/data/e4-mock') or mount.is_symlink() or not os.path.ismount(mount):raise E4Error('VERIFIED_PERSISTENT_MOUNT_REQUIRED')
  return MountProof(_MOUNT_SEAL,mount,p['render_service_id'])
 
+def prepare_live_directory(directory):
+ """Bootstrap may tighten an owned directory; never adopt another owner's state."""
+ for parent in [directory,*directory.parents]:
+  if parent.is_symlink():raise E4Error('LIVE_STATE_SYMLINK_DENIED')
+ directory.mkdir(mode=0o700,parents=True,exist_ok=True)
+ fd=os.open(directory,os.O_RDONLY|os.O_DIRECTORY|getattr(os,'O_NOFOLLOW',0))
+ try:
+  before=os.fstat(fd)
+  print(json.dumps({'event':'E4_LIVE_DIRECTORY_CHECK','directory_uid':before.st_uid,'process_uid':os.getuid(),'mode_before':oct(stat.S_IMODE(before.st_mode))}),flush=True)
+  if not stat.S_ISDIR(before.st_mode) or before.st_uid!=os.getuid():raise E4Error('PRIVATE_LIVE_STATE_OWNER_REQUIRED')
+  # mkdir(exist_ok=True) preserves permissions of an existing deployment directory.
+  # Only this approved directory changes; never chmod/chown parents or the ledger.
+  if stat.S_IMODE(before.st_mode)!=0o700:os.fchmod(fd,0o700)
+  after=os.fstat(fd)
+  if after.st_uid!=os.getuid() or stat.S_IMODE(after.st_mode)!=0o700:raise E4Error('PRIVATE_LIVE_STATE_REQUIRED')
+  print(json.dumps({'event':'E4_LIVE_DIRECTORY_READY','mode_after':oct(stat.S_IMODE(after.st_mode))}),flush=True)
+ finally:os.close(fd)
+
 class OwnerLock:
  def __init__(self,directory):
   self.directory=Path(directory)
@@ -90,9 +108,7 @@ def load_provider(env,clock=time.time):
  expired=clock()>=cfg.expires
  if expired and (init=='1' or not directory.is_dir()):state.code='BUDGET_EXPIRED';state.status=403;return state
  if init=='1':
-  for parent in [directory,*directory.parents]:
-   if parent.is_symlink():raise E4Error('LIVE_STATE_SYMLINK_DENIED')
-  directory.mkdir(mode=0o700,parents=True,exist_ok=True)
+  prepare_live_directory(directory)
  state.owner=OwnerLock(directory)
  try:
   db=directory/'budget.sqlite'
