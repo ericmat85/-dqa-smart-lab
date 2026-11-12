@@ -18,7 +18,7 @@ export async function sessionFailure(response) {
 }
 export function renderE4Reply(packet,mode) {
   const d=packet?.data;
-  if(d?.control==='CONVERSATION_CLEARED'&&d.real_ai===false&&/^I-[A-Za-z0-9_-]{1,80}$/.test(packet.trace_id||''))return `【對話已清除；未呼叫模型】Trace ${packet.trace_id}`;
+  if(d?.control==='CONVERSATION_CLEARED'&&d.real_ai===false&&/^I-[A-Za-z0-9_-]{1,80}$/.test(packet.trace_id||''))return '【對話已清除；未呼叫模型】';
   const mock=d?.execution_mode==='MOCK'&&d.real_ai===false&&d.provider==='MOCK_HTTP_TRANSPORT';
   const live=d?.execution_mode==='LIVE_PROVIDER'&&d.real_ai===true&&d.provider==='openai_responses';
   if((!mock&&!live)||d.engine!=='E4'||(d.chat_mode??'DOCUMENT_QA')!==mode||typeof d.provider_request_id!=='string'||typeof d.result?.summary!=='string'||!d.result.summary.trim()||!Array.isArray(d.result.citations))throw Error('REAL_AI_NOT_VERIFIED：回應模式或Provider證據不符。');
@@ -29,5 +29,5 @@ export function renderE4Reply(packet,mode) {
   const label=mode==='GENERAL_CHAT'?'一般聊天／非正式試驗依據':'文件問答／合成文件';
   const execution=mock?'【MOCK測試：未呼叫真實模型；使用量與費用均為模擬】':'【真實Provider回應】';
   const citations=d.result.citations.map(c=>`引用 ${c.document_id}@${c.version}：${c.quote}`).join('\n');
-  return `${execution}\n【${label}】\n${d.result.summary}${citations?'\n'+citations:''}\n人工最終決策 · 模型 ${d.model} · Provider ${d.provider_request_id} · Trace ${packet.trace_id} · Tokens ${u.input_tokens}/${u.output_tokens} · USD ${d.estimated_cost_usd} · Context ${d.history_turns_used??0} 回合`;
+  return `${execution}\n【${label}】\n${d.result.summary}${citations?'\n'+citations:''}\n人工最終決策；助理不會自行修改資料或簽核。`;
 }

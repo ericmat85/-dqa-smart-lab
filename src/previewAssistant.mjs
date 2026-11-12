@@ -1,5 +1,6 @@
 import {aiSessionState,setAISessionState} from './aiSessionState.mjs';
 import {selectE4ChatMode,sessionFailure,renderE4Reply} from './e4ChatModes.mjs';
+import {beginE4Activity,finishE4Activity,clearE4Activity} from './e4Activity.mjs';
 const enabled=import.meta.env?.VITE_PRIVATE_PREVIEW==='1';
 const base=import.meta.env?.VITE_SANDBOX_API_BASE;
 const sessionKey=system=>`dqa-${system}-account-id`;
@@ -10,6 +11,7 @@ function endpoint(path){
 }
 const pendingRevocations=new Map();
 export function closePreviewAISession(system){
+ clearE4Activity(system);
  if(!enabled||base!=='/api/preview')return Promise.resolve({status:'NOT_REQUIRED'});
  const operation=setAISessionState(system,'PENDING');
  globalThis.dispatchEvent?.(new CustomEvent('dqa:ai-session-ended',{detail:{system}}));
@@ -23,7 +25,7 @@ async function establishSession(system,accountId,fetchImpl,signal){
  if(pendingRevocations.has(system))await pendingRevocations.get(system);
  const fresh=['PENDING','UNCONFIRMED','CONFIRMED'].includes(aiSessionState(system).status);
  const response=await fetchImpl(endpoint('/session'),{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,accountId,password:'demo1234',...(fresh?{freshConversation:true}:{})}),signal});
- if(!response.ok)throw Error(await sessionFailure(response));
+ if(!response.ok)throw Object.assign(Error(await sessionFailure(response)),{aiHttpStatus:response.status,aiErrorCode:'SESSION_AUTH_FAILED'});
  if(fresh){let packet;try{packet=await response.json();}catch{throw Error('AI_SESSION_RESPONSE_INVALID');}if(packet.authenticated!==true||packet.session_created!==true||!/^[a-f0-9]{32}$/.test(packet.conversation_id||''))throw Error('AI_SESSION_FRESH_CONTEXT_NOT_CONFIRMED');setAISessionState(system,'ACTIVE');}
  return response;
 }
@@ -36,11 +38,21 @@ export async function askPreviewAssistant(question,system,{fetchImpl=globalThis.
  const accountId=storage?.getItem(sessionKey(system));
  if(!accountId)throw Error('請先使用 Demo 帳號登入，再使用 AI 助理。');
  // This password is the existing public synthetic Demo credential, never a backend secret.
- await establishSession(system,accountId,fetchImpl,signal);
- const response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify({synthetic:true,question:selected.question,mode:selected.mode}),signal});
- let packet;try{packet=await response.json();}catch{throw Error(`E4 HTTP ${response.status} · NON_JSON_RESPONSE；未取得模型結果。`);}
- if(!response.ok){const code=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';throw Error(`AI 請求失敗（${code}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
- return renderE4Reply(packet,selected.mode);
+ const ticket=beginE4Activity({system,accountId,mode:selected.mode,control:selected.question==='/clear'});
+ let response,packet,errorCode;
+ try{
+  await establishSession(system,accountId,fetchImpl,signal);
+  response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify({synthetic:true,question:selected.question,mode:selected.mode}),signal});
+  try{packet=await response.json();}catch{errorCode='NON_JSON_RESPONSE';throw Error(`E4 HTTP ${response.status} · NON_JSON_RESPONSE；未取得模型結果。`);}
+  if(!response.ok){errorCode=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
+  const reply=renderE4Reply(packet,selected.mode);
+  finishE4Activity(ticket,{status:'SUCCESS',httpStatus:response.status,packet});
+  return reply;
+ }catch(error){
+  const cancelled=signal?.aborted||error.name==='AbortError';
+  finishE4Activity(ticket,{status:cancelled?'CANCELLED':'ERROR',httpStatus:response?.status??error.aiHttpStatus,packet:{trace_id:packet?.trace_id},errorCode:cancelled?'REQUEST_CANCELLED':errorCode||error.aiErrorCode||(response?'RESPONSE_REJECTED':'NETWORK_OR_SESSION_ERROR')});
+  throw error;
+ }
 }
 
 export async function askEngineAdvice(engine,record,context={},system='lms',{fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID()}={}){

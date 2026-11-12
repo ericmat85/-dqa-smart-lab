@@ -31,11 +31,34 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   drag.current=null;setDragging(false);
   if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
  }
- function toggle(){if(suppressClick.current){suppressClick.current=false;return;}setOpen(value=>!value);}
- function cancelActive(){const active=inFlight.current;if(!active)return;epoch.current++;active.controller.abort();inFlight.current=null;setBusy(false);setTurns(rows=>rows.map(row=>row.id===active.id?{...row,reply:'請求已取消；Provider 結果可能未知，不會自動重送。',typing:false}:row));}
+ function toggle(){if(suppressClick.current){suppressClick.current=false;return;}if(open)close();else setOpen(true);}
+ function cancelActive(){const active=inFlight.current;if(!active)return;epoch.current++;active.controller.abort();inFlight.current=null;setBusy(false);setTurns(rows=>rows.map(row=>row.id===active.id?{...row,reply:active.reply??'請求已取消；Provider 結果可能未知，不會自動重送。',typing:false}:row));}
  function close(){cancelActive();setOpen(false);launcher.current?.focus({preventScroll:true});}
- useEffect(()=>{epoch.current++;setTurns([]);setQuestion('');setFiles([]);const ended=event=>{if(event.detail?.system===system){epoch.current++;inFlight.current?.controller.abort();inFlight.current=null;setBusy(false);setTurns([]);setQuestion('');setFiles([]);}};window.addEventListener('dqa:ai-session-ended',ended);return()=>{epoch.current++;window.removeEventListener('dqa:ai-session-ended',ended);inFlight.current?.controller.abort();inFlight.current=null;};},[system]);
- // Keep focus and scrolling within the panel. Replies are non-streaming.
+ useEffect(()=>{epoch.current++;setTurns([]);setQuestion('');setFiles([]);const ended=event=>{if(event.detail?.system===system){epoch.current++;inFlight.current?.controller.abort();inFlight.current=null;setBusy(false);setTurns([]);setQuestion('');setFiles([]);}};const navigate=()=>cancelActive();window.addEventListener('dqa:ai-session-ended',ended);window.addEventListener('dqa:navigate',navigate);window.addEventListener('popstate',navigate);return()=>{epoch.current++;window.removeEventListener('dqa:ai-session-ended',ended);window.removeEventListener('dqa:navigate',navigate);window.removeEventListener('popstate',navigate);inFlight.current?.controller.abort();inFlight.current=null;};},[system]);
+ // The complete response is validated before this local presentation animation.
+ function animateReply(reply,id,ownerEpoch,signal){
+  return new Promise(resolve=>{
+   let timer=null,position=0,settled=false;
+   const active=()=>epoch.current===ownerEpoch&&inFlight.current?.id===id&&!signal.aborted;
+   const finish=()=>{if(settled)return;settled=true;if(timer!==null)window.clearTimeout(timer);signal.removeEventListener('abort',finish);resolve();};
+   if(!active()){finish();return;}
+   // Keep the Mock status visible while revealing the actual answer one grapheme at a time.
+   const split=reply.startsWith('【MOCK測試：')?reply.indexOf('\n')+1:0,prefix=split>0?reply.slice(0,split):'',bodyText=reply.slice(prefix.length);
+   const characters=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter('zh-TW',{granularity:'grapheme'}).segment(bodyText),part=>part.segment):Array.from(bodyText);
+   signal.addEventListener('abort',finish,{once:true});
+   setTurns(rows=>rows.map(row=>row.id===id?{...row,reply:prefix,typing:true}:row));
+   function typeNext(){
+    if(!active()){finish();return;}
+    position++;const typing=position<characters.length;
+    setTurns(rows=>rows.map(row=>row.id===id?{...row,reply:prefix+characters.slice(0,position).join(''),typing}:row));
+    if(!typing){finish();return;}
+    const character=characters[position-1];const delay=/[。！？.!?]/u.test(character)?240:/[，、；：,;:]/u.test(character)?120:character==='\n'?160:35;
+    timer=window.setTimeout(typeNext,delay);
+   }
+   timer=window.setTimeout(typeNext,400);
+  });
+ }
+ // Keep focus and scrolling within the panel during loading and character reveal.
  useLayoutEffect(()=>{
   if(!open||!body.current)return;
   if(focusNewTurn.current){
@@ -49,7 +72,7 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   if(trimmed==='/cancel'){cancelActive();return;}
   if(inFlight.current&&!clear||!trimmed&&!files.length)return;
   if(clear){cancelActive();epoch.current++;setTurns([]);}
-  const ownerEpoch=epoch.current,controller=new AbortController(),id=crypto.randomUUID();inFlight.current={controller,id};setBusy(true);
+  const ownerEpoch=epoch.current,controller=new AbortController(),id=crypto.randomUUID();inFlight.current={controller,id,reply:null};setBusy(true);
   focusNewTurn.current=focusTurn;
   if(focusTurn&&examples.current)examples.current.open=false;
   setTurns(rows=>[...rows,{id,question:trimmed||'附加檔案',reply:null,typing:true,files:files.map(file=>file.name)}]);
@@ -57,7 +80,11 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   let reply,failed=false;
   try{reply=trimmed?await askPreviewAssistant(trimmed,system,{snapshot,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';}
   catch(error){failed=true;reply=error.name==='AbortError'?'請求已取消；Provider 結果可能未知，不會自動重送。':error.message;}
-  if(epoch.current===ownerEpoch&&inFlight.current?.id===id&&!controller.signal.aborted)setTurns(rows=>rows.map(row=>row.id===id?{...row,reply,typing:false,failed}:row));
+  if(epoch.current===ownerEpoch&&inFlight.current?.id===id&&!controller.signal.aborted){
+   inFlight.current.reply=reply;
+   if(failed||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)setTurns(rows=>rows.map(row=>row.id===id?{...row,reply,typing:false,failed}:row));
+   else await animateReply(reply,id,ownerEpoch,controller.signal);
+  }
   if(inFlight.current?.id===id){inFlight.current=null;setBusy(false);}
   if(!focusTurn&&epoch.current===ownerEpoch)input.current?.focus({preventScroll:true});
  }
