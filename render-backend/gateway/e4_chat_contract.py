@@ -18,7 +18,7 @@ def instructions_for(mode):
         'You have no tools, browsing, company data access or database access. '
         'Never claim to have read private company documents, changed records, '
         'approved work or signed anything. Do not invent measurements, test results, '
-        'official clauses or source citations. State uncertainty and retain human review. '
+        'official clauses or source citations. State specific gaps; avoid routine disclaimers. '
         'Return engine E4 using the required JSON schema. '
     )
     if mode == GENERAL_CHAT:

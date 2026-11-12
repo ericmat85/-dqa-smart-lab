@@ -32,6 +32,7 @@ test('report drafting is chat-only and needs an existing request ID',()=>{
 const packet=mock=>({trace_id:'I-render-check',data:{engine:'E4',chat_mode:'GENERAL_CHAT',real_ai:!mock,execution_mode:mock?'MOCK':'LIVE_PROVIDER',provider:mock?'MOCK_HTTP_TRANSPORT':'openai_responses',provider_request_id:'req_test',usage:{input_tokens:80,output_tokens:40},estimated_cost_usd:'0.000028',result:{summary:'目前有 50 份委託單與 34 筆試驗排程。',citations:[]}}});
 test('Live chat hides both technical headings while Mock disclosure remains immediate',()=>{
  const live=renderE4Reply(packet(false),'GENERAL_CHAT');assert(!live.includes('真實Provider回應'));assert(!live.includes('一般聊天／非正式試驗依據'));assert(live.startsWith('目前有 50'));
+ assert.doesNotMatch(live,/人工最終決策|助理不會自行修改資料|資料來源：目前瀏覽器/);
  assert(renderE4Reply(packet(true),'GENERAL_CHAT').startsWith('【MOCK測試：未呼叫真實模型'));
 });
 test('report presentation cannot claim measurements, signatures or saving',()=>{

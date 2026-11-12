@@ -1,4 +1,5 @@
 import {seedAcceptedTrial} from './acceptedTrialFixture.mjs';
+import {installMockE4Transport} from './mockE4Transport.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -135,11 +136,12 @@ test('schedule UI requires sample space and shows a compact status above the edi
 });
 
 test('assistant reveals characters progressively and retains completed answers',async({page})=>{
- await lmsLogin(page);await page.getByRole('button',{name:'展開AI智能助理'}).click();
+ await installMockE4Transport(page);await lmsLogin(page,'level1@example.com');await page.getByRole('button',{name:'展開AI智能助理'}).click();
  await page.getByRole('textbox',{name:'輸入問題'}).fill('如何安排新的試驗日程？');await page.getByRole('button',{name:'送出問題'}).click();
  const reply=page.locator('.intelligent-reply');await expect(reply).toHaveAttribute('aria-busy','true');
  await expect.poll(async()=>{const text=await reply.textContent();return text.includes('前往')&&!text.includes('儲存排程');}).toBe(true);
  await expect(reply).toHaveAttribute('aria-busy','false',{timeout:12000});await expect(reply).toContainText('儲存排程');
+ await expect(reply).toContainText('MOCK測試');await expect(reply).not.toContainText('人工最終決策');
  await page.getByRole('button',{name:'收合AI智能助理'}).last().click();await page.getByRole('button',{name:'展開AI智能助理'}).click();await expect(reply).toContainText('儲存排程');
 });
 
