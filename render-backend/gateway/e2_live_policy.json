@@ -15,7 +15,7 @@
     "max_concurrent": 1,
     "max_input_tokens": 16384,
     "max_output_tokens": 768,
-    "request_timeout_seconds": 20
+    "request_timeout_seconds": 30
   },
   "live_state_directory": "/var/data/e4-mock/live/E2-PREVIEW-20261113-US1",
   "max_instances": 1,

@@ -132,7 +132,8 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(set(schema['properties']),{'selected_candidate_id'})
         self.assertEqual(schema['properties']['selected_candidate_id']['type'],['string','null'])
         self.assertFalse(schema['additionalProperties']);self.assertEqual(schema['required'],['selected_candidate_id'])
-        self.assertEqual(set(schema['properties']['selected_candidate_id']['enum']),{None,*[x['id'] for x in evaluate(self.context,self.now[0])['candidates']]})
+        self.assertEqual(schema['properties']['selected_candidate_id']['pattern'],'^P-[a-f0-9]{20}$')
+        self.assertNotIn('enum',schema['properties']['selected_candidate_id'])
     def test_provider_http_rejection_keeps_safe_diagnostics_and_never_releases_unknown_cost(self):
         response=httpx.Response(400,headers={'x-request-id':'req_SYNTHETIC_SCHEMA_REJECTION'},json={'error':{'code':'invalid_json_schema','type':'invalid_request_error','param':'text.format.schema','message':PROVIDER_KEY+' https://internal.invalid password=SECRET'}})
         def reject(req):self.calls.append(req);return response
@@ -235,7 +236,7 @@ class LoaderTests(unittest.TestCase):
         original=db.with_name('preserved-original.sqlite');db.rename(original)
         with self.assertRaisesRegex(E4Error,'E2_LEDGER_RECOVERY_REQUIRED'):self.load()
         self.assertFalse(db.exists());self.assertEqual(self.authority.snapshot(),before)
-        with loader.Ledger(original,loader.settings_for(json.loads(loader.POLICY_PATH.read_text())).identity()).connect() as c:self.assertEqual(c.execute('SELECT spent FROM budget').fetchone()[0],1000000)
+        with loader.Ledger(original,loader.ledger_binding_for_policy(json.loads(loader.POLICY_PATH.read_text()))[0].identity()).connect() as c:self.assertEqual(c.execute('SELECT spent FROM budget').fetchone()[0],1000000)
         self.assertFalse(any(method=='POST' for method,url in self.h.calls))
     def test_crash_between_durable_permit_and_file_creation_does_not_auto_reinitialize(self):
         before=self.authority.snapshot()

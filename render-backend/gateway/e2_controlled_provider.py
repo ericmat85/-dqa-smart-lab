@@ -13,6 +13,24 @@ from gateway.e4_preview_provider import E4Error
 from gateway.e2_preview_provider import E2Provider
 
 POLICY_PATH=Path(__file__).with_name('e2_live_policy.json')
+ORIGINAL_BUDGET_POLICY_SHA256='2b2cd315d2b9a134af54bfb66d7ce583c1f9a61af0d17b58bce89be4dedbbd0b'
+
+def ledger_binding_for_policy(policy):
+    """A reviewed timeout change must reopen the original budget, never refill it.
+
+    Settings.identity includes execution limits. Keep the original storage binding
+    only when every policy field except the explicitly bounded timeout is exactly
+    the original approved policy. The release gate still requires the NEW policy
+    hash; this is not an alias accepting an old environment approval for new code.
+    """
+    original=json.loads(json.dumps(policy))
+    if original['limits']['request_timeout_seconds'] not in (20,30):
+        raise E4Error('E2_EXECUTION_TIMEOUT_POLICY_REQUIRED')
+    original['limits']['request_timeout_seconds']=20
+    raw=(json.dumps(original,sort_keys=True,indent=2)+'\n').encode()
+    if hashlib.sha256(raw).hexdigest()!=ORIGINAL_BUDGET_POLICY_SHA256:
+        raise E4Error('E2_ORIGINAL_BUDGET_BINDING_REQUIRED')
+    return settings_for(original),ORIGINAL_BUDGET_POLICY_SHA256
 
 def initialization_guard(authority,db,cfg,digest,initialize,now):
     """Persist a one-time permit in the existing authority before creating E2 state.
@@ -51,6 +69,7 @@ def load_e2_provider(env,authority,clock=time.time):
     if p['input_usd_per_million']!='0.10' or p['output_usd_per_million']!='0.50':raise E4Error('E2_VERIFIED_PRICING_REQUIRED')
     if str(env.get('LIVE_PROVIDER_ENABLED','false')).lower() not in ('0','false') or str(env.get('LIVE_AI_ENABLED','false')).lower() not in ('0','false'):raise E4Error('LEGACY_LIVE_FLAGS_MUST_REMAIN_DISABLED')
     proof=verify_mount(env,p);cfg=settings_for(p);cfg.validate()
+    ledger_cfg,ledger_policy_digest=ledger_binding_for_policy(p)
     if clock()>=cfg.expires:state.code='BUDGET_EXPIRED';state.status=403;return state
     if authority is None:state.code='E2_SESSION_STORE_UNAVAILABLE';return state
     directory=Path(p['live_state_directory'])
@@ -61,11 +80,11 @@ def load_e2_provider(env,authority,clock=time.time):
     state.owner=OwnerLock(directory)
     try:
         db=directory/'budget.sqlite'
-        created=initialization_guard(authority,db,cfg,digest,initialize,clock())
+        created=initialization_guard(authority,db,ledger_cfg,ledger_policy_digest,initialize,clock())
         if created:
-            Ledger.initialize_local_or_operator(db,cfg.identity(),cfg.total_cap,cfg.expires,1);state.initialized=True
-        state.ledger=SingleInstanceLiveLedger(db,cfg.identity(),state.owner,proof)
-        if created:complete_initialization(authority,cfg,db,digest,clock())
+            Ledger.initialize_local_or_operator(db,ledger_cfg.identity(),cfg.total_cap,cfg.expires,1);state.initialized=True
+        state.ledger=SingleInstanceLiveLedger(db,ledger_cfg.identity(),state.owner,proof)
+        if created:complete_initialization(authority,ledger_cfg,db,ledger_policy_digest,clock())
         if not env.get('OPENAI_API_KEY'):state.code='PROVIDER_CREDENTIAL_REQUIRED';return state
         client=httpx.Client(timeout=httpx.Timeout(cfg.request_timeout,connect=5),follow_redirects=False,trust_env=False)
         try:
