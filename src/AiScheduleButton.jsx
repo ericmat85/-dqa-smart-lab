@@ -4,7 +4,7 @@ import {createPortal} from 'react-dom';
 
 import AssistantIcon from './AssistantIcon.jsx';
 
-const steps=['讀取目前條件並建立安全 Session','等待伺服器核對設備、容量與時段','檢查回應與證據，準備待確認建議'];
+const steps=['篩選待機設備，核對試驗類型與樣品容量','檢查可用執行人及設備／人員時段衝突','整理可用時段，準備帶入排程建議'];
 export default function AiScheduleButton({onRecommend}) {
   const {dark}=useSystemTheme();
   const [running,setRunning]=useState(false);
@@ -34,7 +34,7 @@ export default function AiScheduleButton({onRecommend}) {
       <header><span className="schedule-ai-symbol" aria-hidden="true"><AssistantIcon size={22}/></span><span>SMART SCHEDULER</span><h3 id="schedule-ai-title">正在準備排程建議</h3><p id="schedule-ai-description">分析設備狀態與試驗需求，尋找設備和人員皆可用的時段。</p></header>
       <div className="schedule-ai-progress-heading"><span>排程分析</span><strong>處理中</strong></div><div className="schedule-ai-progress" role="progressbar" aria-label="排程分析進度" aria-valuetext={steps[active]}><span style={{width:'100%'}}/></div>
       <ol className="schedule-ai-steps">{steps.map((step,index)=><li key={step} className={index<active?'complete':index===active?'active':''}><span aria-hidden="true">{index<active?'✓':index+1}</span><p>{step}</p></li>)}</ol>
-      <p className="schedule-ai-step-status" role="status">{steps[active]}</p><p className="schedule-ai-explanation">依實際請求狀態更新；證據不足會保留 UNKNOWN。建議需先確認帶入表單，再按儲存排程。</p>
+      <p className="schedule-ai-step-status" role="status">{steps[active]}</p><p className="schedule-ai-explanation">使用既有試驗資料分析可用時段。完成後會帶入表單，確認並儲存後才會套用排程。</p>
       <footer><button ref={cancelRef} type="button" onClick={cancel}>取消分析</button></footer>
     </section></div>,document.body)}
   </>;

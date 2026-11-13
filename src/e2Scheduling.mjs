@@ -12,6 +12,38 @@ const failure=code=>{throw Error('E2_DATA_BLOCKED: '+code);};
 const day=value=>isCalendarDate(value)?Date.parse(value+'T00:00:00+08:00'):NaN;
 const todayAt=now=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now));
 const optional=value=>value===undefined||value===null||String(value).trim()===''?null:Number(value);
+const calendarDay=value=>isCalendarDate(dateOnly(value))?dateOnly(value):null;
+const addCalendarDays=(value,n)=>new Date(Date.parse(value+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+const durationFrom=(start,end)=>{const a=calendarDay(start),b=calendarDay(end);return a&&b&&b>=a?Math.round((day(b)-day(a))/86400000)+1:null;};
+
+// A search window is planning input, never an invented trial date or delivery promise.
+export function e2PlanningWindow({editing,form,now=Date.now()}){
+ const tomorrow=addCalendarDays(todayAt(now),1),manualStart=calendarDay(form.time),manualEnd=calendarDay(form.end);
+ const earliest=form.searchStart!==undefined?calendarDay(form.searchStart):manualStart&&manualStart>=tomorrow?manualStart:tomorrow;
+ const requested=calendarDay(editing.requestedDate),hasRequested=editing.requestedDate!==undefined&&editing.requestedDate!==null&&String(editing.requestedDate).trim()!=='';
+ const deadline=form.searchUntil!==undefined?calendarDay(form.searchUntil):hasRequested?requested:((manualEnd&&earliest&&manualEnd>=earliest)?manualEnd:earliest?addCalendarDays(earliest,13):null);
+ const formDuration=durationFrom(form.time,form.end),savedDuration=durationFrom(editing.time,editing.end);
+ const duration=form.durationDays!==undefined?optional(form.durationDays):formDuration??savedDuration;
+ return {earliest,deadline,duration_days:duration,tomorrow,duration_source:form.durationDays!==undefined?'USER_INPUT':formDuration!==null?'FORM_DATES':savedDuration!==null?'EXISTING_SCHEDULE':'MISSING',default_search_window:form.searchUntil===undefined&&!hasRequested&&!(manualEnd&&earliest&&manualEnd>=earliest)};
+}
+export function e2InputIssues({editing,form,now=Date.now()}){
+ const w=e2PlanningWindow({editing,form,now}),issues=[];
+ const add=(field,message)=>issues.push({field,message});
+ if(!w.earliest||w.earliest<w.tomorrow)add('searchStart','搜尋開始日必須是明日或之後的有效日期。');
+ if(!w.deadline)add('searchUntil','請填寫搜尋最晚完成日。');
+ else if(w.earliest&&w.deadline<w.earliest)add('searchUntil','搜尋最晚完成日早於搜尋開始日；請確認搜尋範圍，原委託交期不會因此變更。');
+ if(!Number.isInteger(w.duration_days)||w.duration_days<1||w.duration_days>14)add('durationDays','請填寫 1～14 天的試驗天數；不會自行假定試驗時長。');
+ else if(w.earliest&&w.deadline&&w.deadline>=w.earliest&&durationFrom(w.earliest,w.deadline)<w.duration_days)add('searchUntil','搜尋期間不足以容納目前試驗天數。');
+ const volume=optional(form.sampleVolumeLitres);if(volume===null||!Number.isFinite(volume)||volume<=0)add('sampleVolumeLitres','請填寫每件樣品使用空間（L），不會預設為 1 L。');
+ const quantity=optional(editing.quantity);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>1000)add('quantity','委託樣品數量必須為 1～1000 的整數，請先確認委託資料。');
+ const entry=cases.get(editing.id),humidity=entry?.family==='TEMPERATURE_HUMIDITY'||['humidityMin','humidityMax'].some(k=>optional(form.conditions?.[k])!==null);
+ if(entry&&entry.family!=='UNVERIFIED_CONDITIONS')for(const [name,label] of [['temperature','溫度'],...(humidity?[['humidity','濕度']]:[])]){
+  const low=optional(form.conditions?.[name+'Min']),high=optional(form.conditions?.[name+'Max']);
+  for(const [suffix,value,text] of [['Min',low,'下限'],['Max',high,'上限']])if(value===null||!Number.isFinite(value))add(name+suffix,`請填寫${label}${text}，不能從設備能力反推試驗條件。`);
+  if(Number.isFinite(low)&&low!==null&&Number.isFinite(high)&&high!==null&&low>high)add(name+'Min',`${label}下限不可大於上限。`);
+ }
+ return issues;
+}
 export function canonicalE2(value){const sort=x=>x&&typeof x==='object'?Array.isArray(x)?x.map(sort):Object.fromEntries(Object.keys(x).filter(k=>x[k]!==undefined).sort().map(k=>[k,sort(x[k])])):x;return JSON.stringify(sort(value));}
 export async function e2Fingerprint(value){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalE2(value)))),n=>n.toString(16).padStart(2,'0')).join('');}
 
@@ -24,10 +56,7 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
  const people=[];const seen=new Set();let personnelComplete=true;
  for(const x of accounts){if(!knownAccounts.has(x.id)){personnelComplete=false;issue('UNVERIFIED_PERSONNEL',x.id);continue;}if(seen.has(x.id))failure('DUPLICATE_PERSONNEL');seen.add(x.id);if(!['啟用中','已停用'].includes(x.status)){personnelComplete=false;issue('UNKNOWN_PERSONNEL_STATUS',x.id);}people.push({id:x.id,enabled:x.status==='啟用中'&&(!catalog.executors.includes(x.id)||['實驗室工程師','實驗室副工程師'].includes(x.role))});}
  for(const id of machines.keys())if(!ids.has(id))issue('MISSING_EQUIPMENT',id);
- const today=todayAt(now);const tomorrow=new Date(day(today)+86400000).toISOString().slice(0,10);
- const earliest=form.time?dateOnly(form.time):tomorrow;
- const deadline=dateOnly(form.searchUntil||editing.requestedDate||form.end)||null;
- const duration=isCalendarDate(dateOnly(form.time))&&isCalendarDate(dateOnly(form.end))?Math.round((day(dateOnly(form.end))-day(dateOnly(form.time)))/86400000)+1:null;
+ const {earliest,deadline,duration_days:duration}=e2PlanningWindow({editing,form,now});
  const conditions={temperature_min:optional(form.conditions?.temperatureMin),temperature_max:optional(form.conditions?.temperatureMax),humidity_min:optional(form.conditions?.humidityMin),humidity_max:optional(form.conditions?.humidityMax)};
  const preparation=Number(form.preparationMinutes||0),cleanup=Number(form.cleanupMinutes||0);
  const request={id:editing.id,status:statuses[editing.status],quantity:optional(editing.quantity),equipment_count:Number(form.equipmentCount||1),sample_volume_litres:optional(form.sampleVolumeLitres),earliest,deadline,duration_days:duration,preparation_minutes:preparation,cleanup_minutes:cleanup,preferred_equipment_ids:equipmentIds(form),conditions};
