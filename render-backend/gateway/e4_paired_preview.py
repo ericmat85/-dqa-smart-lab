@@ -44,7 +44,17 @@ class PairedApp:
   mock_available=self.mock_available and (self.mock_process is None or self.mock_process.poll() is None)
   live_ready=self.live_state.service is not None and time.time()<self.live_state.service.settings.expires
   live_code='BUDGET_EXPIRED' if self.live_state.service is not None and not live_ready else self.live_state.code
-  if path=='/healthz' and method=='GET':return await reply(200 if mock_available or live_ready else 503,{'status':'alive' if mock_available or live_ready else 'unavailable','e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation})
+  if path=='/healthz' and method=='GET':
+   # An expired Provider budget disables inference, while the signed Session
+   # and explicit policy-error endpoints remain usable with a readable ledger.
+   # This is process health, never Provider readiness or spending approval.
+   healthy=mock_available or live_ready
+   if not healthy and live_code=='BUDGET_EXPIRED' and self.live_state.ledger is not None:
+    try:
+     self.live_state.ledger.snapshot()  # Read-only; never initialize or reconcile.
+     healthy=True
+    except Exception:pass
+   return await reply(200 if healthy else 503,{'status':'alive' if healthy else 'unavailable','e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation})
   if path==LIVE_PATH:
    if method!='POST':return await error(405,'METHOD_DENIED')
    return await self.live_app({**scope,'path':MOCK_PATH,'raw_path':MOCK_PATH.encode()},receive,send)
