@@ -22,7 +22,7 @@ export function closePreviewAISession(system){
   const status=confirmed?'CONFIRMED':'UNCONFIRMED';setAISessionState(system,status,operation.epoch);return {status};
  })();pendingRevocations.set(system,result);result.finally(()=>{if(pendingRevocations.get(system)===result)pendingRevocations.delete(system);});return result;
 }
-async function establishSession(system,accountId,fetchImpl,signal){
+export async function establishSession(system,accountId,fetchImpl,signal){
  if(pendingRevocations.has(system))await pendingRevocations.get(system);
  const fresh=['PENDING','UNCONFIRMED','CONFIRMED'].includes(aiSessionState(system).status);
  const response=await fetchImpl(endpoint('/session'),{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,accountId,password:'demo1234',...(fresh?{freshConversation:true}:{})}),signal});

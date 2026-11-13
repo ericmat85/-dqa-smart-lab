@@ -1,4 +1,4 @@
-"""Private E4 route; public DTOs and the offline worker are untouched."""
+"""Signed private E4/E2 routes; public DTOs and the offline worker are untouched."""
 import asyncio,hmac,re,threading,time,uuid
 from fastapi import FastAPI,Request
 from fastapi.exceptions import RequestValidationError
@@ -29,7 +29,7 @@ class EngineAdvice(BaseModel):
   if type(value) is not bool or value is not True:raise ValueError('SYNTHETIC_REQUIRED')
   return value
 
-def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,session_store=None,advisory=None,disabled_code='LIVE_PROVIDER_DISABLED',disabled_status=503):
+def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,session_store=None,advisory=None,disabled_code='LIVE_PROVIDER_DISABLED',disabled_status=503,e2_advisory=None):
  if not isinstance(gateway_key,str) or not gateway_key.isascii() or len(gateway_key)<32:raise E4Error('GATEWAY_SECRET_REQUIRED')
  store=session_store or (service.ledger if service else None)
  app=FastAPI(docs_url=None,openapi_url=None,redoc_url=None)
@@ -57,6 +57,30 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
  async def unexpected(req,error):return JSONResponse({'trace_id':req.state.trace,'error':{'code':'E4_SERVICE_UNAVAILABLE'}},503)
  @app.get('/healthz')
  def health():return {'status':'alive','e4_provider':'DISABLED' if service is None else 'MOCK_HTTP_ONLY' if service.simulation else 'RELEASE_GATES_CONFIGURED_NOT_MODEL_PROOF'}
+ if e2_advisory is not None:
+  from gateway.e2_scheduling import E2Advice
+  @app.post('/__integration_demo/ui/live/E2')
+  async def e2_schedule(body:E2Advice,req:Request):
+   try:binding=verify_session(req.headers.get('x-preview-session',''),gateway_key,req.headers.get('x-demo-actor',''),req.headers.get('x-preview-system',''),clock())
+   except ValueError as error:raise E4Error(str(error),403 if str(error)=='AUTHORIZATION_DENIED' else 401) from None
+   cancel=threading.Event()
+   async def disconnected():
+    while True:
+     event=await req.receive()
+     if event['type']=='http.disconnect':cancel.set();return
+   watcher=asyncio.create_task(disconnected())
+   task=asyncio.create_task(asyncio.to_thread(e2_advisory.analyze,binding,body.schedule_context.model_dump(),req.state.trace,req.headers.get('x-preview-operation-id') or req.state.trace,cancel))
+   try:data=await task
+   except asyncio.CancelledError:
+    cancel.set()
+    try:await asyncio.shield(task)
+    except Exception:pass
+    raise
+   finally:
+    watcher.cancel()
+    try:await watcher
+    except asyncio.CancelledError:pass
+   return {'scope':'SYNTHETIC_PREVIEW_SCHEDULING_ADVICE_ONLY','synthetic':True,'trace_id':req.state.trace,'data':data}
  @app.post('/__integration_demo/ui/live/E4')
  async def chat(body:Advice,req:Request):
   try:

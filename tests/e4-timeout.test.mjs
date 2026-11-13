@@ -58,13 +58,13 @@ test('Session remains local with no upstream timer or fetch',async t=>{
  assert.deepEqual(clock.calls,[]);
 });
 
-test('E1 through E3, bootstrap and health keep 10000ms',async t=>{
+test('E1 and E3, bootstrap and health keep 10000ms while E2 has its own controlled route',async t=>{
  const clock=deadlines(t),handler=createHandler({env,fetchImpl:async()=>({status:503,json:async()=>({trace_id:'I-OFFLINE',error:{code:'LIVE_PROVIDER_DISABLED'}})})});
  const cookie=await login(handler);
- for(const engine of ['E1','E2','E3'])await invoke(handler,'/ui/live/'+engine,input,{cookie,'x-preview-system':'lms'});
+ for(const engine of ['E1','E3'])await invoke(handler,'/ui/live/'+engine,input,{cookie,'x-preview-system':'lms'});
  await invoke(handler,'/ui/bootstrap');
  await invoke(handler,'/health/live',undefined,{cookie,'x-preview-system':'lms'});
- assert.deepEqual(clock.calls,[10000,10000,10000,10000,10000]);
+ assert.deepEqual(clock.calls,[10000,10000,10000,10000]);
 });
 
 test('E4 deadline aborts a pending fetch and returns safe 504 with Trace',async t=>{

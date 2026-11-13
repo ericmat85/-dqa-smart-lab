@@ -148,7 +148,7 @@ class Ledger:
    c.execute('UPDATE attempts SET state=?,evidence=? WHERE trace=?',('SUCCESS',json.dumps(evidence,sort_keys=True),trace))
  def settle_rejected_output(self,trace,cost,evidence,code,now):
   """Account verified usage while refusing the output; never mark it successful."""
-  if code not in ('READONLY_OUTPUT_WRITE_CLAIM_REJECTED','REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED'):raise ValueError('INVALID_OUTPUT_REJECTION')
+  if code not in ('READONLY_OUTPUT_WRITE_CLAIM_REJECTED','REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED','E2_OUTPUT_REJECTED'):raise ValueError('INVALID_OUTPUT_REJECTION')
   if evidence.get('request_id')!=trace or Decimal(evidence.get('cost_usd','NaN'))!=Decimal(cost):raise ValueError('INVALID_USAGE_EVIDENCE')
   n=nanos(cost)
   with self.connect() as c:

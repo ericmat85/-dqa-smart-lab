@@ -1,0 +1,78 @@
+"""Separate E2 spend approval, exact policy hash and private durable ledger."""
+import hashlib
+import json
+import os
+import time
+from pathlib import Path
+from decimal import Decimal
+from datetime import datetime
+import httpx
+from gateway.e4_controlled_provider import ProviderState, OwnerLock, SingleInstanceLiveLedger, verify_mount, prepare_live_directory, settings_for
+from gateway.e4_preview_ledger import Ledger
+from gateway.e4_preview_provider import E4Error
+from gateway.e2_preview_provider import E2Provider
+
+POLICY_PATH=Path(__file__).with_name('e2_live_policy.json')
+
+def initialization_guard(authority,db,cfg,digest,initialize,now):
+    """Persist a one-time permit in the existing authority before creating E2 state.
+
+    The permit survives loss of the separate E2 file. Missing E4 authority already
+    fails closed, so neither an E2-only loss nor whole-disk loss refills this round.
+    """
+    expected={'policy_sha256':digest,'ledger_identity':cfg.identity(),'ledger_path':str(db)}
+    with authority.connect() as c:
+        c.execute('BEGIN IMMEDIATE')
+        rows=c.execute('SELECT kind,detail FROM events WHERE operation=? AND kind IN (?,?) ORDER BY sequence',(cfg.round_id,'E2_INITIALIZATION_RESERVED','E2_INITIALIZATION_COMPLETE')).fetchall()
+        if rows:
+            if len(rows)!=2 or [r[0] for r in rows]!=['E2_INITIALIZATION_RESERVED','E2_INITIALIZATION_COMPLETE'] or any(json.loads(r[1])!=expected for r in rows) or not db.is_file():
+                raise E4Error('E2_LEDGER_RECOVERY_REQUIRED')
+            return False
+        if db.exists():raise E4Error('E2_UNMARKED_LEDGER_REQUIRES_REVIEW')
+        if initialize!='1':raise E4Error('E2_EXPLICIT_INITIALIZATION_REQUIRED')
+        c.execute('INSERT INTO events(at,kind,operation,sid,detail) VALUES(?,?,?,?,?)',(now,'E2_INITIALIZATION_RESERVED',cfg.round_id,'',json.dumps(expected,sort_keys=True)))
+    return True
+
+def complete_initialization(authority,cfg,db,digest,now):
+    expected={'policy_sha256':digest,'ledger_identity':cfg.identity(),'ledger_path':str(db)}
+    with authority.connect() as c:
+        c.execute('BEGIN IMMEDIATE')
+        rows=c.execute('SELECT kind,detail FROM events WHERE operation=? AND kind IN (?,?) ORDER BY sequence',(cfg.round_id,'E2_INITIALIZATION_RESERVED','E2_INITIALIZATION_COMPLETE')).fetchall()
+        if len(rows)!=1 or rows[0][0]!='E2_INITIALIZATION_RESERVED' or json.loads(rows[0][1])!=expected:raise E4Error('E2_LEDGER_RECOVERY_REQUIRED')
+        c.execute('INSERT INTO events(at,kind,operation,sid,detail) VALUES(?,?,?,?,?)',(now,'E2_INITIALIZATION_COMPLETE',cfg.round_id,'',json.dumps(expected,sort_keys=True)))
+
+
+def load_e2_provider(env,authority,clock=time.time):
+    state=ProviderState(code='E2_SPEND_APPROVAL_REQUIRED')
+    raw=POLICY_PATH.read_bytes();p=json.loads(raw);digest=hashlib.sha256(raw).hexdigest();state.policy_sha256=digest
+    # Existing E4 approval flags or budget can never enable E2.
+    if env.get('E2_SPEND_APPROVED')!='1' or env.get('E2_RELEASE_POLICY_SHA256')!=digest:return state
+    if p['scope']!='E2_PRIVATE_PREVIEW_SYNTHETIC_ONLY' or p['approval_id']!='E2-PREVIEW-20261113-US1' or p['model']!='gpt-6-luna' or p['expires_at']!='2026-11-13T23:59:00+08:00' or Decimal(p['per_call_usd'])>Decimal('.05') or Decimal(p['total_usd'])>Decimal('1') or p['max_instances']!=1 or p['max_workers']!=1:raise E4Error('E2_APPROVED_POLICY_REQUIRED')
+    if p['input_usd_per_million']!='0.10' or p['output_usd_per_million']!='0.50':raise E4Error('E2_VERIFIED_PRICING_REQUIRED')
+    if str(env.get('LIVE_PROVIDER_ENABLED','false')).lower() not in ('0','false') or str(env.get('LIVE_AI_ENABLED','false')).lower() not in ('0','false'):raise E4Error('LEGACY_LIVE_FLAGS_MUST_REMAIN_DISABLED')
+    proof=verify_mount(env,p);cfg=settings_for(p);cfg.validate()
+    if clock()>=cfg.expires:state.code='BUDGET_EXPIRED';state.status=403;return state
+    if authority is None:state.code='E2_SESSION_STORE_UNAVAILABLE';return state
+    directory=Path(p['live_state_directory'])
+    if directory!=Path('/var/data/e4-mock/live')/p['approval_id']:raise E4Error('E2_APPROVED_STATE_PATH_REQUIRED')
+    initialize=env.get('E2_LEDGER_INITIALIZE','0')
+    if initialize not in ('0','1'):raise E4Error('E2_EXPLICIT_INITIALIZATION_REQUIRED')
+    if initialize=='1':prepare_live_directory(directory)
+    state.owner=OwnerLock(directory)
+    try:
+        db=directory/'budget.sqlite'
+        created=initialization_guard(authority,db,cfg,digest,initialize,clock())
+        if created:
+            Ledger.initialize_local_or_operator(db,cfg.identity(),cfg.total_cap,cfg.expires,1);state.initialized=True
+        state.ledger=SingleInstanceLiveLedger(db,cfg.identity(),state.owner,proof)
+        if created:complete_initialization(authority,cfg,db,digest,clock())
+        if not env.get('OPENAI_API_KEY'):state.code='PROVIDER_CREDENTIAL_REQUIRED';return state
+        client=httpx.Client(timeout=httpx.Timeout(cfg.request_timeout,connect=5),follow_redirects=False,trust_env=False)
+        try:
+            metadata=client.get('https://api.openai.com/v1/models/'+cfg.model,headers={'Authorization':'Bearer '+env['OPENAI_API_KEY']},timeout=5)
+            if metadata.status_code!=200 or metadata.json().get('id')!=cfg.model:raise E4Error('E2_MODEL_METADATA_NOT_VERIFIED')
+            state.service=E2Provider(cfg,state.ledger,authority,lambda:env.get('OPENAI_API_KEY',''),client,clock)
+        except Exception:client.close();raise
+        state.code='E2_CONTROLLED_LIVE_CONFIGURED_NOT_MODEL_PROOF';return state
+    except Exception:
+        state.close();raise

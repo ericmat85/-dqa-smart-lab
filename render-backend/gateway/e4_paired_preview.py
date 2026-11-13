@@ -1,4 +1,4 @@
-"""One paid E4 parent plus an unchanged, credential-free Mock worker over Unix IPC."""
+"""E4 parent with separately approved E2; credential-free Mock worker over Unix IPC."""
 import argparse,asyncio,json,os,socket,subprocess,sys,tempfile,time,uuid
 from pathlib import Path
 import httpx
@@ -8,6 +8,7 @@ from gateway.e4_preview_provider import E4Error
 
 MOCK_PATH='/__integration_demo/ui/live/E4'
 LIVE_PATH='/__integration_live/ui/live/E4'
+E2_PATH='/__integration_live/ui/live/E2'
 
 def mock_environment(env):
  result={k:env[k] for k in ['PATH','LANG','PYTHONDONTWRITEBYTECODE','RENDER','RENDER_SERVICE_ID','PREVIEW_GATEWAY_SECRET'] if k in env}
@@ -28,9 +29,11 @@ def install_openai_egress_guard():
  socket.getaddrinfo=getaddrinfo;socket.socket.connect=guarded_connect;socket.socket.connect_ex=guarded_connect_ex
 
 class PairedApp:
- def __init__(self,mock_uds,live_state,live_key,mock_available=True,mock_process=None):
+ def __init__(self,mock_uds,live_state,live_key,mock_available=True,mock_process=None,e2_state=None):
   self.mock_uds=mock_uds;self.live_state=live_state;self.mock_available=mock_available;self.mock_process=mock_process
-  self.live_app=create_app(live_state.service,live_key,session_store=live_state.ledger,disabled_code=live_state.code,disabled_status=live_state.status)
+  from gateway.e2_preview_provider import E2SchedulingService
+  e2=E2SchedulingService(live_state.ledger,e2_state.service if e2_state else None,disabled_code=e2_state.code if e2_state else 'E2_SPEND_APPROVAL_REQUIRED')
+  self.live_app=create_app(live_state.service,live_key,session_store=live_state.ledger,disabled_code=live_state.code,disabled_status=live_state.status,e2_advisory=e2)
  async def __call__(self,scope,receive,send):
   if scope['type']!='http':return await self.live_app(scope,receive,send)
   trace='I-'+uuid.uuid4().hex;path=scope['path'];method=scope['method']
@@ -45,6 +48,10 @@ class PairedApp:
   if path==LIVE_PATH:
    if method!='POST':return await error(405,'METHOD_DENIED')
    return await self.live_app({**scope,'path':MOCK_PATH,'raw_path':MOCK_PATH.encode()},receive,send)
+  if path==E2_PATH:
+   if method!='POST':return await error(405,'METHOD_DENIED')
+   mapped='/__integration_demo/ui/live/E2'
+   return await self.live_app({**scope,'path':mapped,'raw_path':mapped.encode()},receive,send)
   if path!=MOCK_PATH:return await error(404,'ROUTE_NOT_FOUND')
   if method!='POST':return await error(405,'METHOD_DENIED')
   if not mock_available:return await error(503,'MOCK_RUNTIME_UNAVAILABLE_OR_EXPIRED')
@@ -106,6 +113,11 @@ def main():
  try:state=load_provider(env)
  except E4Error as error:state=ProviderState(code=error.code,status=error.status)
  except Exception:state=ProviderState(code='LIVE_RELEASE_CONFIGURATION_INVALID')
+ from gateway.e2_controlled_provider import load_e2_provider
+ e2_state=ProviderState(code='E2_SPEND_APPROVAL_REQUIRED')
+ try:e2_state=load_e2_provider(env,state.ledger)
+ except E4Error as error:e2_state=ProviderState(code=error.code,status=error.status)
+ except Exception:e2_state=ProviderState(code='E2_RELEASE_CONFIGURATION_INVALID')
  with tempfile.TemporaryDirectory(prefix='e4-mock-ipc-') as directory:
   os.chmod(directory,0o700);uds=str(Path(directory)/'mock.sock')
   child=subprocess.Popen([sys.executable,'-B','-m','gateway.e4_paired_preview','--mock-worker','--uds',uds],env=mock_environment(env),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -115,9 +127,9 @@ def main():
    if Path(uds).is_socket():available=True;break
    time.sleep(.025)
   import uvicorn
-  try:uvicorn.run(PairedApp(uds,state,live_key,available,child),host='0.0.0.0',port=int(env.get('PORT','10000')),workers=1,log_level='warning',access_log=False)
+  try:uvicorn.run(PairedApp(uds,state,live_key,available,child,e2_state),host='0.0.0.0',port=int(env.get('PORT','10000')),workers=1,log_level='warning',access_log=False)
   finally:
-   state.close()
+   e2_state.close();state.close()
    if child.poll() is None:child.terminate()
    child.wait(timeout=10)
 if __name__=='__main__':main()

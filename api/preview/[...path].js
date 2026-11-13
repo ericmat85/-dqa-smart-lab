@@ -42,26 +42,27 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
    res.setHeader('X-Preview-Pathname',routing.pathname);res.setHeader('X-Preview-Route',routing.resolved_path||'REJECTED');res.setHeader('X-Preview-Route-Source',routing.source);
    if(!resolved.path)return fail(404,'ROUTE_NOT_FOUND');
    const path=resolved.path;
-   function e4Headers(session){
+   function e4Headers(session,engine='E4'){
     if(!/^[a-f0-9]{32}$/.test(session?.sid||''))return null;
     const binding={sid:session.sid,accountId:session.accountId,system:session.system,actor:session.actor,exp:session.exp};
     const data=Buffer.from(JSON.stringify(binding)).toString('base64url');
     const headers={'X-Preview-Session':data+'.'+sign('E4_SESSION_V2.'+data,env.PREVIEW_GATEWAY_SECRET),'X-Preview-System':session.system,'X-Preview-Request-ID':trace};
     const id=req.headers['x-preview-idempotency-key'];
-    if(id!==undefined){if(typeof id!=='string'||!/^[A-Za-z0-9_-]{16,80}$/.test(id))return null;headers['X-Preview-Operation-ID']='O-'+createHmac('sha256',env.PREVIEW_SESSION_SECRET).update('E4_OP_V1.'+session.sid+'.'+session.system+'.'+session.accountId+'.'+id).digest('hex');}
+    if(id!==undefined){if(typeof id!=='string'||!/^[A-Za-z0-9_-]{16,80}$/.test(id))return null;headers['X-Preview-Operation-ID']='O-'+createHmac('sha256',env.PREVIEW_SESSION_SECRET).update((engine==='E2'?'E2_OP_V1.':'E4_OP_V1.')+session.sid+'.'+session.system+'.'+session.accountId+'.'+id).digest('hex');}
     return headers;
    }
    async function forward(path,body,actor,extraHeaders={},bootstrap=false,revoke=false){
    const upstream=new URL(env.RENDER_BACKEND_URL);if(upstream.protocol!=='https:'||upstream.username||upstream.password||upstream.pathname!=='/')return fail(503,'BACKEND_CONFIGURATION_REQUIRED');
-   const upstreamDeadline=AbortSignal.timeout(path==='/ui/live/E4'?45000:10000);
-   const clientAbort=new AbortController();const isE4=path==='/ui/live/E4';
+   const controlled=path==='/ui/live/E4'||path==='/ui/live/E2';
+   const upstreamDeadline=AbortSignal.timeout(controlled?45000:10000);
+   const clientAbort=new AbortController();
    const aborted=()=>clientAbort.abort(new DOMException('Client request cancelled','AbortError'));
    const closed=()=>{if(!res.writableEnded)aborted();};
-   if(isE4){req.once?.('aborted',aborted);res.once?.('close',closed);}
-   const upstreamSignal=isE4?AbortSignal.any([upstreamDeadline,clientAbort.signal]):upstreamDeadline;
+   if(controlled){req.once?.('aborted',aborted);res.once?.('close',closed);}
+   const upstreamSignal=controlled?AbortSignal.any([upstreamDeadline,clientAbort.signal]):upstreamDeadline;
    let upstreamStage='request';
    try{
-    const prefix=path==='/ui/live/E4'&&env.E4_PREVIEW_PROVIDER_MODE==='CONTROLLED_LIVE'?'/__integration_live':'/__integration_demo';
+    const prefix=path==='/ui/live/E2'||path==='/ui/live/E4'&&env.E4_PREVIEW_PROVIDER_MODE==='CONTROLLED_LIVE'?'/__integration_live':'/__integration_demo';
     const response=await fetchImpl(upstream.origin+prefix+path,{method:req.method,headers:{'Content-Type':'application/json','X-Preview-Gateway':env.PREVIEW_GATEWAY_SECRET,'X-Demo-Actor':actor||'outsider',...extraHeaders},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:upstreamSignal});
     upstreamStage='response';
     const packet=await response.json();
@@ -71,10 +72,10 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
     if(packet.trace_id)res.setHeader('X-Trace-ID',packet.trace_id);
     res.setHeader('Cache-Control','no-store');return res.status(response.status).json(packet);
    }catch(error){
-    if(path!=='/ui/live/E4')throw error;
+    if(!controlled)throw error;
     const timedOut=upstreamDeadline.aborted&&upstreamDeadline.reason?.name==='TimeoutError'&&(error===upstreamDeadline.reason||['AbortError','TimeoutError'].includes(error?.name));
     return fail(timedOut?504:503,timedOut?'UPSTREAM_TIMEOUT':upstreamStage==='response'?'UPSTREAM_RESPONSE_INVALID':'UPSTREAM_CONNECTION_FAILED',{request_id:extraHeaders['X-Preview-Operation-ID']||trace});
-   }finally{if(isE4){req.removeListener?.('aborted',aborted);res.removeListener?.('close',closed);}}
+   }finally{if(controlled){req.removeListener?.('aborted',aborted);res.removeListener?.('close',closed);}}
    }
 
    let body;
@@ -110,7 +111,7 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
    if(isLocallyRevoked(session))return fail(401,'SESSION_REVOKED');
    const bootstrap=path==='/ui/bootstrap'&&req.method==='GET';if(!actor&&!bootstrap)return fail(401,'AUTHENTICATION_REQUIRED');
    // Ignore all caller-supplied role and gateway headers. Only signed server sessions assign a role.
-   const extraHeaders=/^\/ui\/live\/E[1-4]$/.test(path)?e4Headers(session):{};
+   const extraHeaders=/^\/ui\/live\/E[1-4]$/.test(path)?e4Headers(session,path==='/ui/live/E2'?'E2':'E4'):{};
    if(!extraHeaders)return fail(401,'SESSION_REFRESH_REQUIRED');
    return await forward(path,body,actor,extraHeaders,bootstrap);
 

@@ -40,10 +40,10 @@ export function resolvePreviewRoute(req,{origin,entrypointPath}={}){
   if(params.getAll('path').length>1)throw Error('DUPLICATE_ROUTE_PARAMETERS');
   if(keys.some(x=>x!=='path'&&suspiciousKey(x))||Object.keys(req.params||{}).some(x=>x!=='path'&&suspiciousKey(x)))throw Error('ROUTE_PARAMETER_POLLUTION');
   const unrelated=keys.filter(x=>x!=='path');
-  // Ignore non-routing query data ONLY for exact Session/E4 pathname matches.
+  // Ignore non-routing query data ONLY for exact Session/E4/E2 pathname matches.
   // These values never enter identity, payload, or the upstream URL. Internal
   // catchall aliases still reject extra query keys while resolving route hints.
-  if(unrelated.length&&!['/session','/ui/live/E4'].includes(canonicalPath))throw Error('UNEXPECTED_QUERY');
+  if(unrelated.length&&!['/session','/ui/live/E4','/ui/live/E2'].includes(canonicalPath))throw Error('UNEXPECTED_QUERY');
   diagnostic.query_policy=unrelated.length?'IGNORED_NON_ROUTING_QUERY':'ROUTING_HINTS_ONLY';
   diagnostic.ignored_query_count=unrelated.length;
   const queryValue=params.has('path')?params.get('path'):undefined;
