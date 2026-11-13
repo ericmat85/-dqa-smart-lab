@@ -11,6 +11,7 @@ from gateway.e4_controlled_provider import ProviderState, OwnerLock, SingleInsta
 from gateway.e4_preview_ledger import Ledger
 from gateway.e4_preview_provider import E4Error
 from gateway.e2_preview_provider import E2Provider
+from gateway.budget_expiry_renewal import OLD_EXPIRY,NEW_EXPIRY,original_policy,verify_renewed_ledger
 
 POLICY_PATH=Path(__file__).with_name('e2_live_policy.json')
 ORIGINAL_BUDGET_POLICY_SHA256='2b2cd315d2b9a134af54bfb66d7ce583c1f9a61af0d17b58bce89be4dedbbd0b'
@@ -23,7 +24,7 @@ def ledger_binding_for_policy(policy):
     the original approved policy. The release gate still requires the NEW policy
     hash; this is not an alias accepting an old environment approval for new code.
     """
-    original=json.loads(json.dumps(policy))
+    original=original_policy(policy,'E2') if policy['expires_at']==NEW_EXPIRY else json.loads(json.dumps(policy))
     if original['limits']['request_timeout_seconds'] not in (20,30):
         raise E4Error('E2_EXECUTION_TIMEOUT_POLICY_REQUIRED')
     original['limits']['request_timeout_seconds']=20
@@ -65,7 +66,7 @@ def load_e2_provider(env,authority,clock=time.time):
     raw=POLICY_PATH.read_bytes();p=json.loads(raw);digest=hashlib.sha256(raw).hexdigest();state.policy_sha256=digest
     # Existing E4 approval flags or budget can never enable E2.
     if env.get('E2_SPEND_APPROVED')!='1' or env.get('E2_RELEASE_POLICY_SHA256')!=digest:return state
-    if p['scope']!='E2_PRIVATE_PREVIEW_SYNTHETIC_ONLY' or p['approval_id']!='E2-PREVIEW-20261113-US1' or p['model']!='gpt-6-luna' or p['expires_at']!='2026-11-13T23:59:00+08:00' or Decimal(p['per_call_usd'])>Decimal('.05') or Decimal(p['total_usd'])>Decimal('1') or p['max_instances']!=1 or p['max_workers']!=1:raise E4Error('E2_APPROVED_POLICY_REQUIRED')
+    if p['scope']!='E2_PRIVATE_PREVIEW_SYNTHETIC_ONLY' or p['approval_id']!='E2-PREVIEW-20261113-US1' or p['model']!='gpt-6-luna' or p['expires_at'] not in (OLD_EXPIRY,NEW_EXPIRY) or Decimal(p['per_call_usd'])>Decimal('.05') or Decimal(p['total_usd'])>Decimal('1') or p['max_instances']!=1 or p['max_workers']!=1:raise E4Error('E2_APPROVED_POLICY_REQUIRED')
     if p['input_usd_per_million']!='0.10' or p['output_usd_per_million']!='0.50':raise E4Error('E2_VERIFIED_PRICING_REQUIRED')
     if str(env.get('LIVE_PROVIDER_ENABLED','false')).lower() not in ('0','false') or str(env.get('LIVE_AI_ENABLED','false')).lower() not in ('0','false'):raise E4Error('LEGACY_LIVE_FLAGS_MUST_REMAIN_DISABLED')
     proof=verify_mount(env,p);cfg=settings_for(p);cfg.validate()
@@ -76,7 +77,9 @@ def load_e2_provider(env,authority,clock=time.time):
     if directory!=Path('/var/data/e4-mock/live')/p['approval_id']:raise E4Error('E2_APPROVED_STATE_PATH_REQUIRED')
     initialize=env.get('E2_LEDGER_INITIALIZE','0')
     if initialize not in ('0','1'):raise E4Error('E2_EXPLICIT_INITIALIZATION_REQUIRED')
-    if initialize=='1':prepare_live_directory(directory)
+    renewed=p['expires_at']==NEW_EXPIRY
+    if renewed and not (directory/'budget.sqlite').is_file():raise E4Error('RENEWAL_EXISTING_LEDGER_REQUIRED')
+    if initialize=='1' and not renewed:prepare_live_directory(directory)
     state.owner=OwnerLock(directory)
     try:
         db=directory/'budget.sqlite'
@@ -84,6 +87,7 @@ def load_e2_provider(env,authority,clock=time.time):
         if created:
             Ledger.initialize_local_or_operator(db,ledger_cfg.identity(),cfg.total_cap,cfg.expires,1);state.initialized=True
         state.ledger=SingleInstanceLiveLedger(db,ledger_cfg.identity(),state.owner,proof)
+        if renewed:verify_renewed_ledger(state.ledger,'E2')
         if created:complete_initialization(authority,ledger_cfg,db,ledger_policy_digest,clock())
         if not env.get('OPENAI_API_KEY'):state.code='PROVIDER_CREDENTIAL_REQUIRED';return state
         client=httpx.Client(timeout=httpx.Timeout(cfg.request_timeout,connect=5),follow_redirects=False,trust_env=False)

@@ -17,14 +17,23 @@ LIVE_KEY='FAKE_LIVE_GATEWAY_TEST_ONLY_1234567890'
 
 class ControlledTests(unittest.TestCase):
  def setUp(self):
-  self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);self.p,self.digest=controlled.load_policy();self.now=[time.time()];self.calls=[];self.states=[]
+  self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
+  # Historical bootstrap cases retain the original approval and clock. Renewals
+  # are existing-ledger-only and tested independently, not a new bootstrap permit.
+  from gateway.budget_expiry_renewal import NEW_EXPIRY,original_policy,canonical
+  from datetime import datetime
+  p=json.loads(controlled.POLICY_PATH.read_bytes())
+  if p['expires_at']==NEW_EXPIRY:p=original_policy(p,'E4')
+  fixture=self.root/'original-e4-policy.json';fixture.write_bytes(canonical(p))
+  self.policy_mapping=patch.object(controlled,'POLICY_PATH',fixture);self.policy_mapping.start()
+  self.p,self.digest=controlled.load_policy();self.now=[datetime.fromisoformat('2026-11-13T00:00:00+08:00').timestamp()];self.calls=[];self.states=[]
   def mapped(value):return REAL_PATH(str(value).replace('/var/data/e4-mock',str(self.root)))
   self.mapping=patch.object(controlled,'Path',mapped);self.mapping.start()
   self.mount=patch.object(controlled.os.path,'ismount',side_effect=lambda p:REAL_PATH(p)==self.root);self.mount.start()
   self.env={'RENDER':'true','RENDER_SERVICE_ID':self.p['render_service_id'],'E4_RELEASE_POLICY_SHA256':self.digest,'LIVE_PROVIDER_ENABLED':'false','LIVE_AI_ENABLED':'false','AI_SPEND_APPROVED':'0','E4_LIVE_LEDGER_INITIALIZE':'1'}
  def tearDown(self):
   for state in self.states:state.close()
-  self.mapping.stop();self.mount.stop();self.temp.cleanup()
+  self.mapping.stop();self.mount.stop();self.policy_mapping.stop();self.temp.cleanup()
  def load(self,changes=None):
   env={**self.env,**(changes or {})}
   state=controlled.load_provider(env,clock=lambda:self.now[0]);self.states.append(state);return state
@@ -208,6 +217,7 @@ class ControlledTests(unittest.TestCase):
   asyncio.run(run());self.assertEqual(cancelled,[True])
  def test_actual_mock_worker_runs_over_private_unix_socket_without_provider_key(self):
   from gateway.e4_mock_preview import MockRuntime
+  self.now[0]=time.time()  # The separate Mock worker verifies the real wall clock.
   state_dir=self.root/'mock';runtime=MockRuntime(state_dir,MOCK_KEY,{},initialize=True);runtime.close();uds=self.root/'worker.sock'
   env={'PATH':os.environ['PATH'],'PYTHONPATH':str(Path(__file__).parents[1]/'render-backend'),'PYTHONDONTWRITEBYTECODE':'1','PREVIEW_GATEWAY_SECRET':MOCK_KEY,'AI_SPEND_APPROVED':'0','LIVE_PROVIDER_ENABLED':'false','LIVE_AI_ENABLED':'false'}
   process=subprocess.Popen([sys.executable,'-B','-m','gateway.e4_paired_preview','--mock-worker','--uds',str(uds),'--mock-state-dir',str(state_dir)],env=env,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)

@@ -206,12 +206,16 @@ class LoaderTests(unittest.TestCase):
     def setUp(self):
         import test_e4_controlled as helpers
         self.h=helpers.ControlledTests();self.h.setUp();self.h.now[0]=datetime.fromisoformat('2026-11-13T00:00:00+08:00').timestamp();self.authority=self.h.load().ledger;self.states=[]
+        from gateway.budget_expiry_renewal import NEW_EXPIRY,OLD_EXPIRY,ENGINES,canonical
+        p=json.loads(loader.POLICY_PATH.read_bytes());p['expires_at']=OLD_EXPIRY;p['evidence']['user_budget']=ENGINES['E2']['original_reference']
+        fixture=self.h.root/'original-e2-policy.json';fixture.write_bytes(canonical(p))
+        self.policy_mapping=patch.object(loader,'POLICY_PATH',fixture);self.policy_mapping.start()
         self.mapping=patch.object(loader,'Path',side_effect=lambda p:Path(str(p).replace('/var/data/e4-mock',str(self.h.root))));self.mapping.start()
         self.digest=hashlib.sha256(loader.POLICY_PATH.read_bytes()).hexdigest()
         self.env={**self.h.env,'OPENAI_API_KEY':PROVIDER_KEY,'E2_SPEND_APPROVED':'1','E2_RELEASE_POLICY_SHA256':self.digest,'E2_LEDGER_INITIALIZE':'1'}
     def tearDown(self):
         for state in self.states:state.close()
-        self.mapping.stop();self.h.tearDown()
+        self.mapping.stop();self.policy_mapping.stop();self.h.tearDown()
     def load(self,changes=None):
         with patch.object(loader.httpx,'Client',side_effect=self.h.client_factory):state=loader.load_e2_provider({**self.env,**(changes or {})},self.authority,clock=lambda:self.h.now[0])
         self.states.append(state);return state
