@@ -48,7 +48,9 @@ export async function askPreviewAssistant(question,system,{snapshot,metrics,fetc
   if(new TextEncoder().encode(JSON.stringify(payload)).length>8192)throw Error('AI_DTO_BLOCKED: PAYLOAD_TOO_LARGE；未截斷資料。');
   response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify(payload),signal});
   try{packet=await response.json();}catch{errorCode='NON_JSON_RESPONSE';throw Error(`E4 HTTP ${response.status} · NON_JSON_RESPONSE；未取得模型結果。`);}
-  if(!response.ok){errorCode=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
+  if(!response.ok){errorCode=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';
+   if(response.status===422&&errorCode==='INPUT_TOKEN_LIMIT')throw Error(`問題與必要資料超過安全輸入上限（INPUT_TOKEN_LIMIT）；未呼叫模型。請縮短問題或指定單一設備／委託編號；必要證據未截斷。Trace ${trace}`);
+   throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
   const reply=renderE4Reply(packet,selected.mode);
   finishE4Activity(ticket,{status:'SUCCESS',httpStatus:response.status,packet});
   return reply;

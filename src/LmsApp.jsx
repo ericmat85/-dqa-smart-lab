@@ -1745,10 +1745,10 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
   const operation=crypto.randomUUID();e2Operation.current=operation;setE2Result(null);setE2Applied(null);setScheduleMessage('正在讀取目前排程條件與資源…');
   try{
    const equipment=readScheduleEquipment(),roster=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
-   const sourceForm=structuredClone(editForm),context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules()});
+   const coverageIssues=[],sourceForm=structuredClone(editForm),context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
    const data=await askE2Scheduling(context,{signal,onStage,idempotencyKey:operation});
    if(signal?.aborted||e2Operation.current!==operation)return;
-   setE2Result({data,context,sourceForm});setScheduleMessage(data.assessment.status==='PROPOSAL_AVAILABLE'?'排程建議已備妥，確認後可帶入編輯表單。':'檢查完成，請查看資料缺漏或搜尋範圍內的限制。');
+   setE2Result({data,context,sourceForm,coverageIssues});setScheduleMessage(data.assessment.status==='PROPOSAL_AVAILABLE'?'排程建議已備妥，確認後可帶入編輯表單。':'檢查完成，請查看資料缺漏或搜尋範圍內的限制。');
   }catch(error){if(e2Operation.current===operation)setScheduleMessage(signal?.aborted?'已停止等待；上游結果未確認，不自動重送。':error.message);}
   finally{if(e2Operation.current===operation)e2Operation.current=null;}
  }

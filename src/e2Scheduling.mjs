@@ -15,13 +15,15 @@ const optional=value=>value===undefined||value===null||String(value).trim()===''
 export function canonicalE2(value){const sort=x=>x&&typeof x==='object'?Array.isArray(x)?x.map(sort):Object.fromEntries(Object.keys(x).filter(k=>x[k]!==undefined).sort().map(k=>[k,sort(x[k])])):x;return JSON.stringify(sort(value));}
 export async function e2Fingerprint(value){return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonicalE2(value)))),n=>n.toString(16).padStart(2,'0')).join('');}
 
-export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now(),observedAt=now}){
+export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now(),observedAt=now,onCoverageIssue=()=>{}}){
+ const issue=(code,id)=>onCoverageIssue({code,id:typeof id==='string'&&/^[A-Za-z0-9_-]{1,80}$/.test(id)?id:'未識別'});
  const entry=cases.get(editing?.id);
  if(!entry||entry.title!==editing.title)failure('UNVERIFIED_SYNTHETIC_CASE');
  if(!Array.isArray(equipment)||equipment.length>24||!Array.isArray(accounts)||accounts.length>30||!Array.isArray(rows)||rows.length>500)failure('RESOURCE_LIMIT');
  const ids=new Set();const devices=equipment.map(x=>{if(!machines.has(x.id)||ids.has(x.id)||!deviceStatuses[x.status])failure('UNVERIFIED_OR_DUPLICATE_EQUIPMENT');const doc=machines.get(x.id);if(['name','model','specification'].some(key=>x[key]!==doc[key]))failure('EQUIPMENT_IDENTITY_OR_SPEC_CHANGED');ids.add(x.id);return {id:x.id,status:deviceStatuses[x.status]};});
  const people=[];const seen=new Set();let personnelComplete=true;
- for(const x of accounts){if(!knownAccounts.has(x.id)){personnelComplete=false;continue;}if(seen.has(x.id))failure('DUPLICATE_PERSONNEL');seen.add(x.id);if(!['啟用中','已停用'].includes(x.status))personnelComplete=false;people.push({id:x.id,enabled:x.status==='啟用中'&&(!catalog.executors.includes(x.id)||['實驗室工程師','實驗室副工程師'].includes(x.role))});}
+ for(const x of accounts){if(!knownAccounts.has(x.id)){personnelComplete=false;issue('UNVERIFIED_PERSONNEL',x.id);continue;}if(seen.has(x.id))failure('DUPLICATE_PERSONNEL');seen.add(x.id);if(!['啟用中','已停用'].includes(x.status)){personnelComplete=false;issue('UNKNOWN_PERSONNEL_STATUS',x.id);}people.push({id:x.id,enabled:x.status==='啟用中'&&(!catalog.executors.includes(x.id)||['實驗室工程師','實驗室副工程師'].includes(x.role))});}
+ for(const id of machines.keys())if(!ids.has(id))issue('MISSING_EQUIPMENT',id);
  const today=todayAt(now);const tomorrow=new Date(day(today)+86400000).toISOString().slice(0,10);
  const earliest=form.time?dateOnly(form.time):tomorrow;
  const deadline=dateOnly(form.searchUntil||editing.requestedDate||form.end)||null;
@@ -33,14 +35,18 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
  if(request.preferred_equipment_ids.some(x=>!machines.has(x)))failure('UNVERIFIED_EQUIPMENT');
  const start=day(earliest)-preparation*60000,end=deadline?day(deadline)+86400000+cleanup*60000:NaN;
  const reservations=[];let reservationsComplete=Number.isFinite(start)&&Number.isFinite(end);
+ if(!reservationsComplete)issue('SEARCH_WINDOW_REQUIRED',editing.id);
  for(const row of rows){
   if(row.id===editing.id||!['已排程','試驗中','進行中','暫停中','待核准','已完成','已結案'].includes(row.status))continue;
-  let period;try{period=reservationWindow(row,now);}catch{reservationsComplete=false;continue;}
-  if(!period||!Number.isFinite(period.start)){reservationsComplete=false;continue;}
+  let period;try{period=reservationWindow(row,now);}catch{reservationsComplete=false;issue('INVALID_RESERVATION_DATES_OR_BUFFER',row.id);continue;}
+  if(!period||!Number.isFinite(period.start)){reservationsComplete=false;issue('RESERVATION_DATES_REQUIRED',row.id);continue;}
   if(Number.isFinite(start)&&period.end<=start||Number.isFinite(end)&&period.start>=end)continue;
   const deviceIds=equipmentIds(row).length?equipmentIds(row):String(row.eq||'').split('、').map(name=>catalog.equipment.find(x=>x.name===name)?.id);
   const owner=row.ownerId||accounts.find(x=>x.name===row.owner)?.id;
-  if(!/^[A-Za-z0-9_-]{1,80}$/.test(row.id||'')||!deviceIds.length||deviceIds.some(id=>!machines.has(id))||new Set(deviceIds).size!==deviceIds.length||!catalog.executors.includes(owner)||!Number.isSafeInteger(period.start)||period.end!==Infinity&&!Number.isSafeInteger(period.end)){reservationsComplete=false;continue;}
+  if(!/^[A-Za-z0-9_-]{1,80}$/.test(row.id||'')){reservationsComplete=false;issue('RESERVATION_ID_INVALID',row.id);continue;}
+  if(!deviceIds.length||deviceIds.some(id=>!machines.has(id))||new Set(deviceIds).size!==deviceIds.length){reservationsComplete=false;issue('RESERVATION_EQUIPMENT_REQUIRED',row.id);continue;}
+  if(!catalog.executors.includes(owner)){reservationsComplete=false;issue('RESERVATION_OWNER_UNVERIFIED',row.id);continue;}
+  if(!Number.isSafeInteger(period.start)||period.end!==Infinity&&!Number.isSafeInteger(period.end)){reservationsComplete=false;issue('INVALID_RESERVATION_DATES_OR_BUFFER',row.id);continue;}
   reservations.push({id:row.id,equipment_ids:deviceIds,owner_id:owner,start_ms:period.start,end_ms:period.end===Infinity?null:period.end,open_ended:period.end===Infinity});
  }
  if(reservations.length>32)failure('RESERVATIONS_TOO_LARGE_NO_TRUNCATION');
@@ -111,3 +117,7 @@ export function validateE2Applied({editing,form,equipment,accounts,rows,approved
 
 const reasons={RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE:'設備、人員或占用資料不完整，無法確認可行性。',SAMPLE_QUANTITY_OR_VOLUME_REQUIRED:'請填寫樣品數量與每件樣品使用空間（L）。',DURATION_AND_SEARCH_DATES_REQUIRED:'請填寫開始、完成日期及搜尋截止日。',TEST_CONDITIONS_INCOMPLETE:'請補齊可查核的溫度／濕度上下限。',MACHINE_CAPACITY_EVIDENCE_MISSING:'設備缺少可查核的尺寸／容量證據。',TEST_TYPE_CONDITION_EVIDENCE_MISSING:'此試驗類型尚缺可查核的條件與設備證據。',SAMPLE_VOLUME_BELOW_DOCUMENTED_ENVELOPE:'輸入的單件體積小於合成樣品外框，請確認單位與尺寸。',ENABLED_ENGINEER_REQUIRED:'沒有可核對的啟用實驗室工程師。',NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW:'在已核對的 Demo 設備與搜尋期間內沒有找到時段。',CONDITION_OUTSIDE_DOCUMENTED_RANGE:'試驗條件超出已記錄的設備範圍。',TRIAL_STATE_NOT_SCHEDULABLE:'此案件狀態不可重新安排排程。',SEARCH_LIMIT_REACHED:'已達搜尋限制，不能據此判定不可行。'};
 export const describeE2Reason=code=>reasons[code]||code;
+export function describeE2CoverageIssue(issue){
+ const messages={UNVERIFIED_PERSONNEL:'帳號尚未列入核准的合成人員資料；不會自動信任其角色。',UNKNOWN_PERSONNEL_STATUS:'帳號狀態無法核對，請在帳號管理檢查。',MISSING_EQUIPMENT:'設備資料未完整讀取，請檢查設備台帳。',SEARCH_WINDOW_REQUIRED:'請填寫有效的開始日期及搜尋最晚完成日，才能檢查占用。',INVALID_RESERVATION_DATES_OR_BUFFER:'排程日期或準備／清理時間無法核對。',RESERVATION_DATES_REQUIRED:'此筆既有占用排程缺少有效開始日期；無法假定設備空閒。',RESERVATION_ID_INVALID:'既有排程編號無法核對。',RESERVATION_EQUIPMENT_REQUIRED:'既有排程的設備編號缺少、重複或未登錄。',RESERVATION_OWNER_UNVERIFIED:'既有排程的執行人無法對照核准的合成工程師。'};
+ return `${issue.id}：${messages[issue.code]||'資料無法核對。'}`;
+}

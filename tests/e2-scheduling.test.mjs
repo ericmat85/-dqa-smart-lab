@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeE2Context,verifyE2Result,makeE2Draft,validateE2Applied,e2Fingerprint} from '../src/e2Scheduling.mjs';
+import {makeE2Context,verifyE2Result,makeE2Draft,validateE2Applied,e2Fingerprint,describeE2CoverageIssue} from '../src/e2Scheduling.mjs';
 import {e2Fixture,e2Packet} from './e2-fixture.mjs';
 
 test('E2 projects only synthetic resource IDs and numeric/date conditions, with current statuses',()=>{
@@ -21,6 +21,20 @@ test('incomplete resource reads are explicit and oversized reservation evidence 
  const f=e2Fixture();f.equipment.pop();assert.equal(makeE2Context(f).equipment_complete,false);
  f.accounts.push({id:'UNVERIFIED-ENGINEER',role:'實驗室工程師',status:'啟用中'});assert.equal(makeE2Context(f).personnel_complete,false);
  const day=f.form.time;f.rows=Array.from({length:33},(_,i)=>({id:'RES-'+i,equipmentId:'EQ-003',ownerId:'U003',time:day,end:day,status:'已排程'}));assert.throws(()=>makeE2Context(f),/NO_TRUNCATION/);
+});
+test('coverage diagnostics identify local missing rows without altering the private DTO or trust rules',()=>{
+ const f=e2Fixture();f.equipment.pop();f.accounts.push({id:'SYNTH-NEW-ENGINEER',role:'實驗室工程師',status:'啟用中',email:'PRIVATE_DO_NOT_SEND'});
+ f.rows=[{id:'SYNTH-MISSING-DATES',status:'已排程',equipmentId:'EQ-003',ownerId:'U003'}];
+ const issues=[],baseline=makeE2Context(f),actual=makeE2Context({...f,onCoverageIssue:issue=>issues.push(issue)});
+ assert.deepEqual(actual,baseline);assert.equal(actual.equipment_complete,false);assert.equal(actual.personnel_complete,false);assert.equal(actual.reservations_complete,false);
+ assert(issues.some(x=>x.code==='MISSING_EQUIPMENT'));assert(issues.some(x=>x.code==='UNVERIFIED_PERSONNEL'&&x.id==='SYNTH-NEW-ENGINEER'));assert(issues.some(x=>x.code==='RESERVATION_DATES_REQUIRED'&&x.id==='SYNTH-MISSING-DATES'));
+ assert.doesNotMatch(JSON.stringify(actual),/PRIVATE_DO_NOT_SEND|coverageIssues|SYNTH-NEW-ENGINEER/);
+ for(const issue of issues)assert.match(describeE2CoverageIssue(issue),new RegExp(issue.id));
+});
+test('missing search dates and unverified reservation owners get specific non-feasibility diagnostics',()=>{
+ const f=e2Fixture();f.rows=[{id:'SYNTH-BAD-OWNER',status:'已排程',time:f.form.time,end:f.form.end,equipmentId:'EQ-003',ownerId:'UNVERIFIED'}];
+ const issues=[];assert.equal(makeE2Context({...f,onCoverageIssue:x=>issues.push(x)}).reservations_complete,false);assert(issues.some(x=>x.code==='RESERVATION_OWNER_UNVERIFIED'));
+ f.form.searchUntil='';f.editing.requestedDate='';f.form.end='';issues.length=0;makeE2Context({...f,onCoverageIssue:x=>issues.push(x)});assert(issues.some(x=>x.code==='SEARCH_WINDOW_REQUIRED'));
 });
 test('paused reservations keep an open-ended interval rather than disappearing',()=>{
  const f=e2Fixture();f.rows=[{id:'RES-PAUSED',equipmentId:'EQ-003',ownerId:'U003',time:f.form.time,end:f.form.end,status:'暫停中',pauseStartedAt:new Date(f.now).toISOString()}];const c=makeE2Context(f);

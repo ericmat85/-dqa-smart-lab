@@ -112,14 +112,14 @@ class E4Service:
   pairs=list(history['pairs']);truncated=history['turns']>len(pairs)
   instructions=instructions_for(mode)
   if demo_context is not None:
-   from gateway.e4_readonly_context import READ_INSTRUCTIONS
-   instructions+=READ_INSTRUCTIONS
+   from gateway.e4_readonly_context import READ_CHAT_INSTRUCTIONS
+   instructions=READ_CHAT_INSTRUCTIONS
   while True:
    inp={'history':pairs,'question':question}
    if demo_context is not None:inp['demo_context']=demo_context
    if mode==DOCUMENT_QA:inp['documents']=DOCS
-   request={'model':cfg.model,'store':False,'service_tier':'default','instructions':instructions,'input':json.dumps(inp,ensure_ascii=False),'max_output_tokens':cfg.max_output,'text':{'format':{'type':'json_schema','name':'e4_'+mode.lower(),'strict':True,'schema':schema_for(mode)}}}
-   bound=len(json.dumps(request,ensure_ascii=False).encode())+4096
+   request={'model':cfg.model,'store':False,'service_tier':'default','instructions':instructions,'input':json.dumps(inp,ensure_ascii=False,separators=(',',':')),'max_output_tokens':cfg.max_output,'text':{'format':{'type':'json_schema','name':'e4_'+mode.lower(),'strict':True,'schema':schema_for(mode)}}}
+   bound=len(json.dumps(request,ensure_ascii=False,separators=(',',':')).encode())+4096
    if bound<=cfg.max_input:break
    if not pairs:raise E4Error('INPUT_TOKEN_LIMIT',422)
    pairs.pop(0);truncated=True
