@@ -2,6 +2,7 @@ import {canControlTrial} from './trialPermissions.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
+import {ALL_DEMO_REQUESTS} from './demoLmsRequests.mjs';
 import {scheduleProgress} from './scheduleProgress.mjs';
 import {usesEquipment,reservationWindow} from './scheduleResources.mjs';
 import {commitLifecycleTransaction,recoverLifecycleTransaction,reconcileSchedules} from './scheduleLifecycle.mjs';
@@ -36,7 +37,13 @@ function findAccelerationTarget({actorId,signature,requestId,now=Date.now()},sto
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
  const sources=read(storage,'dqa-request-demo-v2');
  const operations=read(storage,'dqa-lab-operations-v1');
- const reviews=read(storage,'dqa-lms-reviews-v1');
+ // Match the UI's default Demo source only when the review key is absent.
+ // Existing empty, changed or unreadable records must never be auto-approved.
+ const rawReviews=storage.getItem('dqa-lms-reviews-v1');let reviews;
+ try{
+  reviews=rawReviews===null?ALL_DEMO_REQUESTS:JSON.parse(rawReviews);
+  if(!Array.isArray(reviews))throw Error('INVALID_REVIEW_ARRAY');
+ }catch{throw Error('委託審查資料無法讀取；未套用預設審查狀態，請先確認資料。');}
  const completeSource=id=>{
   if(requestId&&id!==requestId)return false;
   const source=sources.find(r=>r.id===id);
