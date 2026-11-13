@@ -146,6 +146,22 @@ class Ledger:
    if not row or row[1]!='RESERVED_INFLIGHT' or n>row[0]:raise ValueError('INVALID_SETTLEMENT')
    c.execute('UPDATE budget SET held=held-?,spent=spent+? WHERE id=1',(row[0],n))
    c.execute('UPDATE attempts SET state=?,evidence=? WHERE trace=?',('SUCCESS',json.dumps(evidence,sort_keys=True),trace))
+ def settle_rejected_output(self,trace,cost,evidence,code,now):
+  """Account verified usage while refusing the output; never mark it successful."""
+  if code not in ('READONLY_OUTPUT_WRITE_CLAIM_REJECTED','REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED'):raise ValueError('INVALID_OUTPUT_REJECTION')
+  if evidence.get('request_id')!=trace or Decimal(evidence.get('cost_usd','NaN'))!=Decimal(cost):raise ValueError('INVALID_USAGE_EVIDENCE')
+  n=nanos(cost)
+  with self.connect() as c:
+   c.execute('BEGIN IMMEDIATE')
+   row=c.execute('SELECT reserved,state,active FROM attempts WHERE trace=?',(trace,)).fetchone()
+   if not row or row[1]!='RESERVED_INFLIGHT' or row[2] or n>row[0]:raise ValueError('INVALID_REJECTED_OUTPUT_SETTLEMENT')
+   if c.execute('SELECT COUNT(*) FROM events WHERE operation=? AND kind=?',(trace,'DISPATCH_GRANTED')).fetchone()[0]!=1:raise ValueError('DISPATCH_EVIDENCE_REQUIRED')
+   held,spent,cap=c.execute('SELECT held,spent,cap FROM budget WHERE id=1').fetchone()
+   if held<row[0] or spent+n>cap:raise ValueError('INVALID_BUDGET_ACCOUNTING')
+   record={**evidence,'error_code':code,'outcome':'KNOWN_USAGE_OUTPUT_REJECTED','output_released':False,'accounted_at':now}
+   c.execute('UPDATE budget SET held=held-?,spent=spent+? WHERE id=1',(row[0],n))
+   c.execute('UPDATE attempts SET state=?,evidence=? WHERE trace=?',('OUTPUT_REJECTED_ACCOUNTED',json.dumps(record,sort_keys=True),trace))
+   self._event(c,now,'OUTPUT_REJECTED_USAGE_ACCOUNTED',trace,'',{'error_code':code,'cost_nanos':n,'reserved_nanos':row[0],'output_released':False})
  def snapshot(self):
   with self.connect() as c:
    r=c.execute('SELECT cap,expires,held,spent,max_concurrent FROM budget WHERE id=1').fetchone()

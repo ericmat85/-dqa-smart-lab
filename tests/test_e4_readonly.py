@@ -68,13 +68,13 @@ class ReadonlyTests(unittest.TestCase):
    response=original(req);packet=response.json();result=json.loads(packet['output'][0]['content'][0]['text']);result['summary']='量測結果：100.0 V，結果：合格';packet['output'][0]['content'][0]['text']=json.dumps(result);return controlled.httpx.Response(200,headers=response.headers,json=packet)
   s.client._transport.handler=fake
   with self.assertRaisesRegex(E4Error,'REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED'):s.analyze(self.h.binding(),'製作 REQ-2026-001 報告草稿','I-fake-result','GENERAL_CHAT',demo_context=c)
-  self.assertEqual(s.ledger.attempt('I-fake-result')['state'],'UNKNOWN');self.assertEqual(s.ledger.snapshot()['spent_nanos'],0);self.assertEqual(s.ledger.snapshot()['held_nanos'],50000000)
+  self.assertEqual(s.ledger.attempt('I-fake-result')['state'],'OUTPUT_REJECTED_ACCOUNTED');self.assertGreater(s.ledger.snapshot()['spent_nanos'],0);self.assertEqual(s.ledger.snapshot()['held_nanos'],0)
  def test_provider_cannot_claim_business_mutation(self):
   s=self.service();original=self.h.fake_provider
   def fake(req):
    response=original(req);packet=response.json();result=json.loads(packet['output'][0]['content'][0]['text']);result['summary']='已修改委託單並已簽核。';packet['output'][0]['content'][0]['text']=json.dumps(result);return controlled.httpx.Response(200,headers=response.headers,json=packet)
   s.client._transport.handler=fake
   with self.assertRaisesRegex(E4Error,'READONLY_OUTPUT_WRITE_CLAIM_REJECTED'):s.analyze(self.h.binding(),'請修改委託','I-write-claim','GENERAL_CHAT',demo_context=self.context)
-  self.assertEqual(s.ledger.attempt('I-write-claim')['state'],'UNKNOWN')
+  self.assertEqual(s.ledger.attempt('I-write-claim')['state'],'OUTPUT_REJECTED_ACCOUNTED')
 
 if __name__=='__main__':unittest.main(verbosity=2)

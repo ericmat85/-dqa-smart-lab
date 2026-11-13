@@ -179,14 +179,19 @@ class E4Service:
    serialized=json.dumps(result,ensure_ascii=False);_require_safe(key not in serialized and not SENSITIVE.search(serialized))
    for cite in result['citations']:_require_safe(any(cite['document_id']==d['id'] and cite['version']==d['version'] and cite['quote'] and cite['quote'] in d['text'] for d in DOCS))
   except Exception:unknown('PROVIDER_OUTPUT_REJECTED_RESERVATION_HELD',502)
+  cost=(Decimal(i)*cfg.input_rate+Decimal(o)*cfg.output_rate)/1000000
+  record={'request_id':request_id,'chat_mode':mode,'trace_id':trace,'provider_request_id':rid,'provider_response_id':response_id,'model':cfg.model,'input_tokens':i,'output_tokens':o,'cost_usd':str(cost),'transport':'MOCK_HTTP_ONLY' if self.simulation else 'LIVE_PROVIDER'}
+  def reject_accounted_output(code):
+   # Usage and schema have been verified. A refused answer is not an unknown charge.
+   try:self.ledger.settle_rejected_output(request_id,cost,record,code,self.clock())
+   except Exception:unknown('REJECTED_OUTPUT_ACCOUNTING_FAILED_RESERVATION_HELD',503)
+   raise E4Error(code,502,request_id)
   evidence='GENERAL_INFORMATION_ONLY' if mode==GENERAL_CHAT else 'VALIDATED'
   if demo_context is not None:
    # This layer exposes no mutators; reject claims that a write/signoff occurred.
-   if re.search(r'已(?:經)?(?:自動)?(?:修改|刪除|更新|寫入|簽核|簽名|排程|提交報告)',result['summary']):unknown('READONLY_OUTPUT_WRITE_CLAIM_REJECTED',502)
-   if demo_context['intent']=='REPORT_DRAFT' and re.search(r'(?:實測|測得|量測結果)[^。\n]{0,24}\d|(?:判定|結果)[：:]\s*(?:合格|不合格|PASS|FAIL)|(?:已完成|已代為)(?:簽核|簽名)',result['summary'],re.I):unknown('REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED',502)
+   if re.search(r'已(?:經)?(?:自動)?(?:修改|刪除|更新|寫入|簽核|簽名|排程|提交報告)',result['summary']):reject_accounted_output('READONLY_OUTPUT_WRITE_CLAIM_REJECTED')
+   if demo_context['intent']=='REPORT_DRAFT' and re.search(r'(?:實測|測得|量測結果)[^。\n]{0,24}\d|(?:判定|結果)[：:]\s*(?:合格|不合格|PASS|FAIL)|(?:已完成|已代為)(?:簽核|簽名)',result['summary'],re.I):reject_accounted_output('REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED')
   if mode==DOCUMENT_QA and not result['citations']:result={'engine':'E4','summary':'資料不足：沒有可驗證引用，無法回答。','issues':[],'advice':[],'citations':[]};evidence='EVIDENCE_INSUFFICIENT_REFUSED'
-  cost=(Decimal(i)*cfg.input_rate+Decimal(o)*cfg.output_rate)/1000000
-  record={'request_id':request_id,'chat_mode':mode,'trace_id':trace,'provider_request_id':rid,'provider_response_id':response_id,'model':cfg.model,'input_tokens':i,'output_tokens':o,'cost_usd':str(cost),'transport':'MOCK_HTTP_ONLY' if self.simulation else 'LIVE_PROVIDER'}
   try:self.ledger.settle(request_id,cost,record)
   except Exception:unknown('LEDGER_SETTLEMENT_FAILED_RESERVATION_HELD',503)
   try:
