@@ -69,7 +69,7 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
      event=await req.receive()
      if event['type']=='http.disconnect':cancel.set();return
    watcher=asyncio.create_task(disconnected())
-   task=asyncio.create_task(asyncio.to_thread(e2_advisory.analyze,binding,body.schedule_context.model_dump(),req.state.trace,req.headers.get('x-preview-operation-id') or req.state.trace,cancel))
+   task=asyncio.create_task(asyncio.to_thread(e2_advisory.analyze,binding,body.schedule_context.model_dump(exclude_unset=True),req.state.trace,req.headers.get('x-preview-operation-id') or req.state.trace,cancel))
    try:data=await task
    except asyncio.CancelledError:
     cancel.set()

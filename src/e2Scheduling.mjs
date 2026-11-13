@@ -34,7 +34,8 @@ export function e2InputIssues({editing,form,now=Date.now()}){
  else if(w.earliest&&w.deadline<w.earliest)add('searchUntil','搜尋最晚完成日早於搜尋開始日；請確認搜尋範圍，原委託交期不會因此變更。');
  if(!Number.isInteger(w.duration_days)||w.duration_days<1||w.duration_days>14)add('durationDays','請填寫 1～14 天的試驗天數；不會自行假定試驗時長。');
  else if(w.earliest&&w.deadline&&w.deadline>=w.earliest&&durationFrom(w.earliest,w.deadline)<w.duration_days)add('searchUntil','搜尋期間不足以容納目前試驗天數。');
- const volume=optional(form.sampleVolumeLitres);if(volume===null||!Number.isFinite(volume)||volume<=0)add('sampleVolumeLitres','請填寫每件樣品使用空間（L），不會預設為 1 L。');
+ const volume=optional(form.sampleVolumeLitres);if(volume===null||!Number.isFinite(volume)||volume<=0)add('sampleVolumeLitres','原始試驗資料缺少可查核的樣品體積。');
+ if(form.sampleSpaceUnits!==undefined){const units=optional(form.sampleSpaceUnits);if(!Number.isSafeInteger(units)||units<1||units>1000)add('sampleSpaceUnits','請填寫每件樣品使用空間（U）的正整數。');}
  const quantity=optional(editing.quantity);if(!Number.isSafeInteger(quantity)||quantity<1||quantity>1000)add('quantity','委託樣品數量必須為 1～1000 的整數，請先確認委託資料。');
  const entry=cases.get(editing.id),humidity=entry?.family==='TEMPERATURE_HUMIDITY'||['humidityMin','humidityMax'].some(k=>optional(form.conditions?.[k])!==null);
  if(entry&&entry.family!=='UNVERIFIED_CONDITIONS')for(const [name,label] of [['temperature','溫度'],...(humidity?[['humidity','濕度']]:[])]){
@@ -52,7 +53,7 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
  const entry=cases.get(editing?.id);
  if(!entry||entry.title!==editing.title)failure('UNVERIFIED_SYNTHETIC_CASE');
  if(!Array.isArray(equipment)||equipment.length>24||!Array.isArray(accounts)||accounts.length>30||!Array.isArray(rows)||rows.length>500)failure('RESOURCE_LIMIT');
- const ids=new Set();const devices=equipment.map(x=>{if(!machines.has(x.id)||ids.has(x.id)||!deviceStatuses[x.status])failure('UNVERIFIED_OR_DUPLICATE_EQUIPMENT');const doc=machines.get(x.id);if(['name','model','specification'].some(key=>x[key]!==doc[key]))failure('EQUIPMENT_IDENTITY_OR_SPEC_CHANGED');ids.add(x.id);return {id:x.id,status:deviceStatuses[x.status]};});
+ let unitsComplete=true;const ids=new Set();const devices=equipment.map(x=>{if(!machines.has(x.id)||ids.has(x.id)||!deviceStatuses[x.status])failure('UNVERIFIED_OR_DUPLICATE_EQUIPMENT');const doc=machines.get(x.id);if(['name','model','specification'].some(key=>x[key]!==doc[key]))failure('EQUIPMENT_IDENTITY_OR_SPEC_CHANGED');if(form.sampleSpaceUnits!==undefined&&Number(x.capacity)!==doc.space_units){unitsComplete=false;issue('EQUIPMENT_SPACE_UNITS_CHANGED',x.id);}ids.add(x.id);return {id:x.id,status:deviceStatuses[x.status]};});
  const people=[];const seen=new Set();let personnelComplete=true;
  for(const x of accounts){if(!knownAccounts.has(x.id)){personnelComplete=false;issue('UNVERIFIED_PERSONNEL',x.id);continue;}if(seen.has(x.id))failure('DUPLICATE_PERSONNEL');seen.add(x.id);if(!['啟用中','已停用'].includes(x.status)){personnelComplete=false;issue('UNKNOWN_PERSONNEL_STATUS',x.id);}people.push({id:x.id,enabled:x.status==='啟用中'&&(!catalog.executors.includes(x.id)||['實驗室工程師','實驗室副工程師'].includes(x.role))});}
  for(const id of machines.keys())if(!ids.has(id))issue('MISSING_EQUIPMENT',id);
@@ -60,6 +61,7 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
  const conditions={temperature_min:optional(form.conditions?.temperatureMin),temperature_max:optional(form.conditions?.temperatureMax),humidity_min:optional(form.conditions?.humidityMin),humidity_max:optional(form.conditions?.humidityMax)};
  const preparation=Number(form.preparationMinutes||0),cleanup=Number(form.cleanupMinutes||0);
  const request={id:editing.id,status:statuses[editing.status],quantity:optional(editing.quantity),equipment_count:Number(form.equipmentCount||1),sample_volume_litres:optional(form.sampleVolumeLitres),earliest,deadline,duration_days:duration,preparation_minutes:preparation,cleanup_minutes:cleanup,preferred_equipment_ids:equipmentIds(form),conditions};
+ if(form.sampleSpaceUnits!==undefined)request.sample_space_units=optional(form.sampleSpaceUnits);
  if(!request.status||!Number.isInteger(request.equipment_count)||request.equipment_count<1||request.equipment_count>4||request.quantity!==null&&(!Number.isSafeInteger(request.quantity)||request.quantity<1||request.quantity>1000)||request.sample_volume_litres!==null&&(!Number.isFinite(request.sample_volume_litres)||request.sample_volume_litres<=0)||Object.values(conditions).some(x=>x!==null&&!Number.isFinite(x))||![preparation,cleanup].every(x=>Number.isInteger(x)&&x>=0&&x<=1440)||duration!==null&&(!Number.isInteger(duration)||duration<1||duration>14))failure('INVALID_SCHEDULE_FIELDS');
  if(request.preferred_equipment_ids.some(x=>!machines.has(x)))failure('UNVERIFIED_EQUIPMENT');
  const start=day(earliest)-preparation*60000,end=deadline?day(deadline)+86400000+cleanup*60000:NaN;
@@ -79,12 +81,12 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
   reservations.push({id:row.id,equipment_ids:deviceIds,owner_id:owner,start_ms:period.start,end_ms:period.end===Infinity?null:period.end,open_ended:period.end===Infinity});
  }
  if(reservations.length>32)failure('RESERVATIONS_TOO_LARGE_NO_TRUNCATION');
- const c={version:1,source:'BROWSER_SYNTHETIC_SCHEDULE_V1',observed_at:observedAt,equipment_complete:ids.size===catalog.equipment.length,personnel_complete:personnelComplete,reservations_complete:reservationsComplete,request,equipment:devices,personnel:people,reservations};
+ const c={version:1,source:'BROWSER_SYNTHETIC_SCHEDULE_V1',observed_at:observedAt,equipment_complete:ids.size===catalog.equipment.length&&unitsComplete,personnel_complete:personnelComplete,reservations_complete:reservationsComplete,request,equipment:devices,personnel:people,reservations};
  if(new TextEncoder().encode(JSON.stringify({synthetic:true,question:'CHECK_SYNTHETIC_SCHEDULE',schedule_context:c})).length>8192)failure('PAYLOAD_TOO_LARGE_NO_TRUNCATION');
  return c;
 }
 
-export function e2EquipmentOverlay(equipment){return equipment.map(row=>{const e=machines.get(row.id)?.evidence;return e?{...row,capacity:e.max_samples,usableVolumeLitres:e.inner_mm.reduce((a,b)=>a*b,1)/1000000}:row;});}
+export function e2EquipmentOverlay(equipment){return equipment.map(row=>{const m=machines.get(row.id),e=m?.evidence;return e?{...row,capacity:e.max_samples,spaceUnits:m.space_units,usableVolumeLitres:e.inner_mm.reduce((a,b)=>a*b,1)/1000000}:row;});}
 export const e2MachineEvidence=id=>structuredClone(machines.get(id)?.evidence||null);
 export const e2SampleEvidence=id=>structuredClone(cases.get(id)?.sample||null);
 
@@ -97,7 +99,8 @@ function assertCandidate(candidate,context){
   if(!e||names.some(name=>!e[name]||request.conditions[name+'_min']===null||request.conditions[name+'_max']===null||request.conditions[name+'_min']>request.conditions[name+'_max']||request.conditions[name+'_min']<e[name][0]||request.conditions[name+'_max']>e[name][1])||request.sample_volume_litres<sample.dimensions_mm.reduce((a,b)=>a*b,1)/1000000)failure('CAPACITY_OR_CONDITION_UNVERIFIED');
   const [a,b,c]=sample.dimensions_mm,shapes=[[a,b,c],[a,c,b],[b,a,c],[b,c,a],[c,a,b],[c,b,a]],gap=sample.clearance_mm;
   const grid=Math.max(...shapes.map(shape=>shape.reduce((n,size,i)=>n*Math.floor((e.inner_mm[i]+gap)/(size+gap)),1)));
-  const capacity=Math.min(e.max_samples,grid,Math.floor(e.inner_mm.reduce((n,x)=>n*x,1)/1000000/request.sample_volume_litres),Math.floor(e.max_load_kg/sample.mass_kg));
+  const unitLimit=request.sample_space_units===undefined?Infinity:Math.floor(machines.get(allocation.equipment_id).space_units/request.sample_space_units);
+  const capacity=Math.min(e.max_samples,grid,Math.floor(e.inner_mm.reduce((n,x)=>n*x,1)/1000000/request.sample_volume_litres),Math.floor(e.max_load_kg/sample.mass_kg),unitLimit);
   if(allocation.capacity!==capacity||allocation.quantity>capacity)failure('CAPACITY_OR_GEOMETRY_MISMATCH');
  }
  const begin=day(candidate.start)-request.preparation_minutes*60000,finish=day(candidate.end)+86400000+request.cleanup_minutes*60000;
@@ -144,9 +147,10 @@ export function validateE2Applied({editing,form,equipment,accounts,rows,approved
  return validateSchedule({editing,form,equipment:e2EquipmentOverlay(equipment),accounts,rows,today:todayAt(now)});
 }
 
-const reasons={RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE:'設備、人員或占用資料不完整，無法確認可行性。',SAMPLE_QUANTITY_OR_VOLUME_REQUIRED:'請填寫樣品數量與每件樣品使用空間（L）。',DURATION_AND_SEARCH_DATES_REQUIRED:'請填寫開始、完成日期及搜尋截止日。',TEST_CONDITIONS_INCOMPLETE:'請補齊可查核的溫度／濕度上下限。',MACHINE_CAPACITY_EVIDENCE_MISSING:'設備缺少可查核的尺寸／容量證據。',TEST_TYPE_CONDITION_EVIDENCE_MISSING:'此試驗類型尚缺可查核的條件與設備證據。',SAMPLE_VOLUME_BELOW_DOCUMENTED_ENVELOPE:'輸入的單件體積小於合成樣品外框，請確認單位與尺寸。',ENABLED_ENGINEER_REQUIRED:'沒有可核對的啟用實驗室工程師。',NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW:'在已核對的 Demo 設備與搜尋期間內沒有找到時段。',CONDITION_OUTSIDE_DOCUMENTED_RANGE:'試驗條件超出已記錄的設備範圍。',TRIAL_STATE_NOT_SCHEDULABLE:'此案件狀態不可重新安排排程。',SEARCH_LIMIT_REACHED:'已達搜尋限制，不能據此判定不可行。'};
+const reasons={RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE:'設備、人員或占用資料不完整，無法確認可行性。',SAMPLE_QUANTITY_OR_VOLUME_REQUIRED:'請確認樣品數量與原始試驗的體積資料。',SAMPLE_SPACE_UNITS_REQUIRED:'請填寫每件樣品使用空間（U）。',MACHINE_SPACE_UNITS_EVIDENCE_MISSING:'設備缺少可核對的空間容量（U）。',DURATION_AND_SEARCH_DATES_REQUIRED:'請填寫開始、完成日期及搜尋截止日。',TEST_CONDITIONS_INCOMPLETE:'請補齊可查核的溫度／濕度上下限。',MACHINE_CAPACITY_EVIDENCE_MISSING:'設備缺少可查核的尺寸／容量證據。',TEST_TYPE_CONDITION_EVIDENCE_MISSING:'此試驗類型尚缺可查核的條件與設備證據。',SAMPLE_VOLUME_BELOW_DOCUMENTED_ENVELOPE:'輸入的單件體積小於合成樣品外框，請確認單位與尺寸。',ENABLED_ENGINEER_REQUIRED:'沒有可核對的啟用實驗室工程師。',NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW:'在已核對的 Demo 設備與搜尋期間內沒有找到時段。',CONDITION_OUTSIDE_DOCUMENTED_RANGE:'試驗條件超出已記錄的設備範圍。',TRIAL_STATE_NOT_SCHEDULABLE:'此案件狀態不可重新安排排程。',SEARCH_LIMIT_REACHED:'已達搜尋限制，不能據此判定不可行。'};
 export const describeE2Reason=code=>reasons[code]||code;
 export function describeE2CoverageIssue(issue){
  const messages={UNVERIFIED_PERSONNEL:'帳號尚未列入核准的合成人員資料；不會自動信任其角色。',UNKNOWN_PERSONNEL_STATUS:'帳號狀態無法核對，請在帳號管理檢查。',MISSING_EQUIPMENT:'設備資料未完整讀取，請檢查設備台帳。',SEARCH_WINDOW_REQUIRED:'請填寫有效的開始日期及搜尋最晚完成日，才能檢查占用。',INVALID_RESERVATION_DATES_OR_BUFFER:'排程日期或準備／清理時間無法核對。',RESERVATION_DATES_REQUIRED:'此筆既有占用排程缺少有效開始日期；無法假定設備空閒。',RESERVATION_ID_INVALID:'既有排程編號無法核對。',RESERVATION_EQUIPMENT_REQUIRED:'既有排程的設備編號缺少、重複或未登錄。',RESERVATION_OWNER_UNVERIFIED:'既有排程的執行人無法對照核准的合成工程師。'};
+ if(issue.code==='EQUIPMENT_SPACE_UNITS_CHANGED')return `${issue.id}：設備空間容量（U）與核准的合成台帳不同，請先確認資料。`;
  return `${issue.id}：${messages[issue.code]||'資料無法核對。'}`;
 }

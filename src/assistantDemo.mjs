@@ -3,9 +3,9 @@ export const ASSISTANT_DEMOS=[
  {id:'pending',category:'排程',question:'目前有多少試驗還沒排程？',keywords:['還沒排程','待排程','未排程'],answer:'pending'},
  {id:'running',category:'排程',question:'目前有多少試驗正在進行？',keywords:['正在進行','試驗中','進行中'],answer:'running'},
  {id:'schedule',category:'排程',question:'如何安排新的試驗日程？',keywords:['安排','新增排程'],answer:'前往「排程管理」，選擇委託並開啟「編輯排程」。在設備與排程安排中選擇待機設備、執行人、開始與完成日期，按下儲存排程。'},
- {id:'automatic',category:'排程',question:'AI自動化排程怎麼使用？',keywords:['自動','推薦','ai排程'],answer:'開啟編輯排程，填寫樣品使用空間、開始與完成日期、搜尋最晚完成日及試驗條件，再按 AI 自動化排程。系統檢查合成設備容量、人員與占用資料；資料不足會列出缺漏。若取得候選，確認套用只填入草稿，按「儲存排程」才會保存。出現連線或預算錯誤時不會自動重送。'},
+ {id:'automatic',category:'排程',question:'AI自動化排程怎麼使用？',keywords:['自動','推薦','ai排程'],answer:'開啟編輯排程，填寫每件樣品使用空間 U，再按 AI 自動化排程。試驗條件會從既有試驗資料讀取；U 是 Demo 空間單位，不能當成公升。系統核對設備、人員與時段後，將建議帶入草稿，按「儲存排程」才會保存。資料不足、連線或預算錯誤時不會自動重送。'},
  {id:'conflict',category:'排程',question:'發生排程衝突時怎麼辦？',keywords:['衝突','重疊'],answer:'查看排程的衝突說明，改選可用設備或調整試驗時段，再儲存安排。助理只提供操作說明，不會直接更動排程。'},
- {id:'progress',category:'排程',question:'試驗日程的進度條如何計算？',keywords:['進度','百分比','日程'],answer:'儲存開始與預計完成日期後，開始前顯示已排程；開始時間到達後轉為試驗中，進度條依實際時間推進。缺少任一日期時不顯示進度條。'},
+ {id:'progress',category:'排程',question:'試驗日程的進度條如何計算？',keywords:['進度','百分比','日程'],answer:'儲存開始與預計完成日期後，開始前顯示已排程；開始時間到達後轉為試驗中，進度條依實際時間推進。缺少任一日期時不顯示進度條。Demo 試驗加速器依開始時間最接近的已接收試驗逐筆處理：第一次 50%，第二次 100% 完成，下一次切換下一筆；沒有試驗時停用，不建立案件。'},
  {id:'finish',category:'排程',question:'試驗完成後設備會自動釋放嗎？',keywords:['釋放','試驗完成','已完成'],answer:'已儲存的試驗日程走完後會轉為已完成。若設備沒有其他進行中的試驗，會恢復待機；維護中或校驗中的設備不會被強制改回待機。'},
  {id:'stop',category:'排程',question:'如何中止試驗排程？',keywords:['中止','取消排程'],answer:'在編輯排程最下方按「中止排程」，確認視窗會說明取消範圍。確認後會取消整張委託與相關排程，並依設備占用情況釋放設備。'},
  {id:'standby',category:'設備',question:'現在有多少設備可以安排試驗？',keywords:['待機','可用設備','多少設備'],answer:'standby'},
@@ -27,7 +27,7 @@ export function findCommonQuestion(question){
 }
 export function commonQuestionReply(question,snapshot,metrics,system='lms'){
  const item=findCommonQuestion(question);if(!item)return null;
- const prefix='常見問題解答（非 AI）\n';
+ const prefix='常見問題解答\n';
  const dynamic=['overview','pending','running','standby','stock'].includes(item.id);
  if(!dynamic)return prefix+assistantReply(question,snapshot,metrics,system);
  const dependencies=system==='lab'&&['overview','pending','running'].includes(item.id)?['labWorkItems']:item.id==='stock'?['materials']:item.id==='standby'?['equipment']:item.id==='overview'?['schedules','equipment']:['schedules'];

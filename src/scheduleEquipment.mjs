@@ -55,9 +55,9 @@ export function findScheduleConflict(rows,proposal) {
 function deviceCount(form){const count=Number(form.equipmentCount||1);if(!Number.isInteger(count)||count<1||count>4)throw Error('Demo 設備台數須為 1～4 台。');return count;}
 function sampleVolume(form){
  const value=form.sampleVolumeLitres;
- if(value===undefined||value===null||String(value).trim()==='')throw Error('請填寫每件樣品使用空間（L），此欄位為必填。');
+ if(value===undefined||value===null||String(value).trim()==='')throw Error('樣品體積（L）是必填的來源資料；請先補齊試驗資料。');
  const volume=Number(value);
- if(!Number.isFinite(volume)||volume<=0)throw Error('每件樣品使用空間須為正數（L）。');
+ if(!Number.isFinite(volume)||volume<=0)throw Error('試驗資料中的樣品體積（L）須為正數。');
  return volume;
 }
 function effectiveCapacity(machine,form){
@@ -65,7 +65,14 @@ function effectiveCapacity(machine,form){
  const volume=sampleVolume(form);
  const available=Number(machine.usableVolumeLitres);
  if(!Number.isFinite(available)||available<=0)throw Error('設備缺少可驗證的使用空間，請確認設備台帳。');
- return Math.min(capacity,Math.floor(available/Number(volume)));
+ let count=Math.min(capacity,Math.floor(available/Number(volume)));
+ if(form.sampleSpaceUnits!==undefined){
+  const units=Number(form.sampleSpaceUnits),availableUnits=Number(machine.spaceUnits??machine.capacity);
+  if(!String(form.sampleSpaceUnits??'').trim()||!Number.isSafeInteger(units)||units<1)throw Error('每件樣品使用空間須為正整數（U）。');
+  if(!Number.isSafeInteger(availableUnits)||availableUnits<1)throw Error('設備缺少可核對的空間容量（U）。');
+  count=Math.min(count,Math.floor(availableUnits/units));
+ }
+ return count;
 }
 function allocateSamples(machines,form,quantity){
  let remaining=quantity;

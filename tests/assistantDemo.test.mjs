@@ -7,13 +7,13 @@ test('demo board has twenty distinct questions with working answers',()=>{
  assert.equal(ASSISTANT_DEMOS.length,20);assert.equal(new Set(ASSISTANT_DEMOS.map(row=>row.id)).size,20);
  for(const item of ASSISTANT_DEMOS)assert.ok(assistantReply(item.question,snapshot,metrics).length>20);
 });
-test('all twenty exact FAQs return disclosed non-AI answers without transport or storage writes',()=>{
+test('all twenty exact FAQs return direct answers without provider claims without transport or storage writes',()=>{
  const data={...snapshot,schedules:[],materials:[],labWorkItems:[{status:'試驗中'}]};
  const before=JSON.stringify({data,metrics});
  for(const system of ['lms','lab'])for(const item of ASSISTANT_DEMOS){
   assert.equal(findCommonQuestion(' '+item.question+' ').id,item.id);
   const answer=commonQuestionReply(item.question,data,metrics,system);
-  assert.match(answer,/^常見問題解答（非 AI）\n/);assert.ok(answer.length>30);assert.doesNotMatch(answer,/3 秒|真實Provider|已呼叫/);
+  assert.match(answer,/^常見問題解答\n/);assert.ok(answer.length>30);assert.doesNotMatch(answer,/非\s*AI/);assert.doesNotMatch(answer,/3 秒|真實Provider|已呼叫/);
  }
  assert.equal(JSON.stringify({data,metrics}),before);
 });
@@ -28,7 +28,7 @@ test('FAQ totals refresh and unavailable sources never masquerade as zero',()=>{
  assert.match(commonQuestionReply(item.question,data,{...metrics,counts:{'未排程':12}}),/12 筆/);
  assert.match(commonQuestionReply(item.question,{...data,sources:[{id:'schedules',error:'unreadable'}]},metrics),/不能確認數量/);
  assert.match(commonQuestionReply(item.question,{},{}),/不能確認數量/);
- assert.match(commonQuestionReply(ASSISTANT_DEMOS.find(x=>x.id==='automatic').question),/確認套用只填入草稿/);
+ assert.match(commonQuestionReply(ASSISTANT_DEMOS.find(x=>x.id==='automatic').question),/帶入草稿/);
 });
 test('count answers read live snapshot instead of fixed demo counts',()=>{
  assert.match(assistantReply('目前有多少試驗還沒排程？',snapshot,metrics),/4 筆/);

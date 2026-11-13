@@ -67,10 +67,11 @@ export function prepareScheduleTrialForm({editing,form,request=null,now=Date.now
  let deadline=initial.deadline;
  if(due&&isCalendarDate(due)){if(due>=initial.earliest)deadline=due;else notes.push('原需求日期已過；本次只產生重排草稿，原交期未變更。');}
  else if(due)throw new TrialInputError('原始委託需求日期無效，請先確認委託資料。');
- const resolved={...form,conditions:{...conditions},durationDays:duration??'',sampleVolumeLitres:volume??'',searchStart:initial.earliest,searchUntil:deadline};
+ const units=form.sampleSpaceUnits!==undefined?form.sampleSpaceUnits:source.sampleSpaceUnits??editing.sampleSpaceUnits??1;
+ const resolved={...form,conditions:{...conditions},durationDays:duration??'',sampleVolumeLitres:volume??'',sampleSpaceUnits:units,searchStart:initial.earliest,searchUntil:deadline};
  const issues=e2InputIssues({editing,form:resolved,now});if(issues.length)throw new TrialInputError('請先確認原始試驗資料：'+issues.map(x=>x.message).join(' '));
  const provenance={source:generated?'GENERATED_SYNTHETIC_DEMO_EXAMPLE':'EXISTING_TRIAL_DATA',profile_id:generated?profile?.id:null,official_standard:false,sample_evidence_id:entry.sample.evidence_id,generated_conditions:!read.supplied,generated_duration:existingDuration===null};
- const signature=canonicalE2({conditions:resolved.conditions,durationDays:resolved.durationDays,sampleVolumeLitres:resolved.sampleVolumeLitres,provenance,due});
+ const signature=canonicalE2({conditions:resolved.conditions,durationDays:resolved.durationDays,sampleVolumeLitres:resolved.sampleVolumeLitres,sampleSpaceUnits:resolved.sampleSpaceUnits,provenance,due});
  const describe=(a,b,unit)=>a===b?`${a}${unit}`:`${a}～${b}${unit}`;
  const parts=[];if(conditions.temperatureMin!==undefined)parts.push(`溫度 ${describe(conditions.temperatureMin,conditions.temperatureMax,'°C')}`);if(conditions.humidityMin!==undefined)parts.push(`濕度 ${describe(conditions.humidityMin,conditions.humidityMax,'%RH')}`);parts.push(`排程占用 ${duration} 天`);
  return {form:resolved,provenance,signature,notes,summary:(generated?'合成試驗範例':'既有試驗資料')+'（'+parts.join('、')+'）'};

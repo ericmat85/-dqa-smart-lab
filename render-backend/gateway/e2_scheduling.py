@@ -41,6 +41,7 @@ class Trial(Strict):
     quantity: int | None = Field(ge=1, le=1000)
     equipment_count: int = Field(ge=1, le=4)
     sample_volume_litres: float | None = Field(ge=.01, le=1000,multiple_of=.001)
+    sample_space_units: int | None = Field(default=None,ge=1,le=1000)
     earliest: str | None = Field(max_length=10)
     deadline: str | None = Field(max_length=10)
     duration_days: int | None = Field(ge=1, le=14)
@@ -100,7 +101,7 @@ class E2Advice(Strict):
 
 def validate_context(raw, now):
     try:
-        c = Context.model_validate(raw).model_dump()
+        c = Context.model_validate(raw).model_dump(exclude_unset=True)
     except Exception:
         raise E4Error('E2_INVALID_SYNTHETIC_CONTEXT', 422) from None
     if not now * 1000 - 300000 <= c['observed_at'] <= now * 1000 + 10000:
@@ -162,6 +163,11 @@ def capacity(machine, case, request):
     grid = max(math.prod(math.floor((d + spacing) / (s + spacing)) for d, s in zip(e['inner_mm'], shape)) for shape in itertools.permutations(sample['dimensions_mm']))
     chamber_litres = math.prod(e['inner_mm']) / 1000000
     bound = min(e['max_samples'], grid, math.floor(chamber_litres / request['sample_volume_litres']), math.floor(e['max_load_kg'] / sample['mass_kg']))
+    if 'sample_space_units' in request:
+        if request['sample_space_units'] is None:return None, 'SAMPLE_SPACE_UNITS_REQUIRED'
+        units=machine.get('space_units')
+        if type(units) is not int or units<1:return None, 'MACHINE_SPACE_UNITS_EVIDENCE_MISSING'
+        bound=min(bound,units//request['sample_space_units'])
     return bound, 'DOCUMENTED_SYNTHETIC_GEOMETRY_COUNT_AND_LOAD'
 
 
@@ -177,6 +183,8 @@ def evaluate(raw, now):
         return missing('RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE')
     if req['quantity'] is None or req['sample_volume_litres'] is None:
         return missing('SAMPLE_QUANTITY_OR_VOLUME_REQUIRED')
+    if 'sample_space_units' in req and req['sample_space_units'] is None:
+        return missing('SAMPLE_SPACE_UNITS_REQUIRED')
     if req['duration_days'] is None or req['earliest'] is None or req['deadline'] is None:
         return missing('DURATION_AND_SEARCH_DATES_REQUIRED')
     if case['family'] == 'UNVERIFIED_CONDITIONS':

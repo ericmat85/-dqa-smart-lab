@@ -1,7 +1,7 @@
 import {prepareScheduleTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
 import {askEngineAdvice} from './previewAssistant.mjs';
 import {askE2Scheduling} from './e2PreviewClient.mjs';
-import {canonicalE2,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
+import {canonicalE2,e2SampleEvidence,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import AdminCenterModule from './AdminCenterModule.jsx';
 import {ADMIN_MODULES} from './adminCenterData.mjs';
@@ -1740,19 +1740,31 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    const machine=catalog.find(item=>row.equipmentId?item.id===row.equipmentId:item.name===row.eq);
    const executor=accounts.find(item=>row.ownerId?item.id===row.ownerId:item.name===row.owner);
    setEditing(row);setScheduleMessage(catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
-   setSchedulingForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??'',preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0});
+   setSchedulingForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??currentTrialRequest(row.requestId)?.sampleVolumeLitres??(e2SampleEvidence(row.id)?.dimensions_mm?.reduce((a,b)=>a*b,1)/1000000||''),sampleSpaceUnits:row.sampleSpaceUnits??currentTrialRequest(row.requestId)?.sampleSpaceUnits??1,preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0});
  }
- function currentTrialRequest(){
+ function currentTrialRequest(requestId=editing?.requestId){
    for(const key of ['dqa-lms-reviews-v1','dqa-request-demo-v2']){const raw=window.localStorage.getItem(key);if(raw!==null){let rows;try{rows=JSON.parse(raw);}catch{throw new Error('委託資料無法讀取，未以合成範例覆蓋。');}if(!Array.isArray(rows)||!rows.every(row=>row&&typeof row.id==='string'&&(key!=='dqa-lms-reviews-v1'||Array.isArray(row.history))))throw new Error('委託資料格式不完整，請先確認原始資料。');}}
    const list=mergeImportedRequests(readStoredRequests(ALL_DEMO_REQUESTS),readApprovedRequestsForLms());
-   return list.find(row=>row.id===editing?.requestId)||null;
+   return list.find(row=>row.id===requestId)||null;
  }
  async function autoScheduleCurrent({signal,onStage=()=>{}}={}){
   if(!editing||!editForm)return;
   if(e2Operation.current){setScheduleMessage('上一筆請求仍在處理，請稍候。');return;}
   const operation=crypto.randomUUID();e2Operation.current=operation;setE2Applied(null);setScheduleMessage('正在讀取試驗與可用資源…');
   try{
-   const originalForm=structuredClone(editForm),resolved=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
+   const originalForm=structuredClone(editForm);
+   if(globalThis.__DQA_GUIDED_CASE_ID__===editing.requestId&&window.parent!==window){
+    onStage(0);const {recommendSchedule}=await import('./scheduleEquipment.mjs');
+    if(signal?.aborted)return;
+    const equipment=readScheduleEquipment(),rows=latestSchedules();onStage(1);
+    const suggestion=recommendSchedule({editing,form:originalForm,equipment,accounts,rows,today:getRequestDate()});
+    const draft={...originalForm,...suggestion};onStage(2);
+    validateSchedule({editing,form:draft,equipment,accounts,rows,today:getRequestDate()});
+    if(signal?.aborted)return;
+    setSchedulingForm(draft);setScheduleMessage('導覽規則示範：未呼叫模型。排程建議已帶入表單，確認後按「儲存排程」。');
+    return {status:'applied'};
+   }
+   const resolved=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
    const equipment=readScheduleEquipment(),roster=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
    const sourceForm=resolved.form,coverageIssues=[],context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
    setSchedulingForm(sourceForm);
@@ -1772,6 +1784,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    const approved=makeE2Draft({editing,form:sourceForm,equipment:readScheduleEquipment(),accounts:liveAccounts,rows:latestSchedules(),context,candidate});
    setSchedulingForm(approved.form);setE2Applied({...approved,trace:data.trace_id,mode:data.execution_mode,trialSourceForm:originalForm,trialInputSignature:resolved.signature,trialInputProvenance:resolved.provenance});
    setScheduleMessage((data.execution_mode==='MOCK'?'模擬測試：未呼叫真實模型。':'')+'依'+resolved.summary+'完成建議並帶入表單，尚未儲存排程。'+resolved.notes.join(' '));
+   return {status:'applied'};
   }catch(error){if(e2Operation.current===operation)setScheduleMessage(signal?.aborted?'已取消等待；不會自動重送。':schedulingErrorMessage(error));}
   finally{if(e2Operation.current===operation)e2Operation.current=null;}
  }
