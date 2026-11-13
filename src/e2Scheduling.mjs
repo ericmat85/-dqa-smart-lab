@@ -136,7 +136,7 @@ export function makeE2Draft({editing,form,equipment,accounts,rows,context,candid
  const owner=accounts.find(x=>x.id===candidate.owner_id),chosen=candidate.equipment_ids.map(id=>equipment.find(x=>x.id===id));
  if(!owner||chosen.some(x=>!x))failure('RESOURCE_REMOVED');
  const draft={...form,equipmentId:chosen[0].id,equipmentIds:chosen.map(x=>x.id),equipmentCount:chosen.length,eq:chosen.map(x=>x.name).join('、'),ownerId:owner.id,owner:owner.name,time:candidate.start,end:candidate.end};
- const proposal=validateSchedule({editing,form:draft,equipment:e2EquipmentOverlay(equipment),accounts,rows,today:todayAt(now)});
+ const proposal=validateSchedule({editing,form:draft,equipment:e2EquipmentOverlay(equipment),accounts,rows,today:todayAt(now),requirePhysicalVolume:true});
  if(canonicalE2(proposal.allocations)!==canonicalE2(candidate.allocations.map(x=>({equipmentId:x.equipment_id,quantity:x.quantity}))))failure('CAPACITY_REVALIDATION_FAILED');
  return {form:draft,context,sourceForm:structuredClone(form),candidate,appliedForm:structuredClone(draft)};
 }
@@ -144,7 +144,7 @@ export function makeE2Draft({editing,form,equipment,accounts,rows,context,candid
 export function validateE2Applied({editing,form,equipment,accounts,rows,approved,now=Date.now()}){
  if(canonicalE2(form)!==canonicalE2(approved.appliedForm))failure('APPLIED_FORM_CHANGED');
  makeE2Draft({editing,form:approved.sourceForm,equipment,accounts,rows,context:approved.context,candidate:approved.candidate,now});
- return validateSchedule({editing,form,equipment:e2EquipmentOverlay(equipment),accounts,rows,today:todayAt(now)});
+ return validateSchedule({editing,form,equipment:e2EquipmentOverlay(equipment),accounts,rows,today:todayAt(now),requirePhysicalVolume:true});
 }
 
 const reasons={RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE:'設備、人員或占用資料不完整，無法確認可行性。',SAMPLE_QUANTITY_OR_VOLUME_REQUIRED:'請確認樣品數量與原始試驗的體積資料。',SAMPLE_SPACE_UNITS_REQUIRED:'請填寫每件樣品使用空間（U）。',MACHINE_SPACE_UNITS_EVIDENCE_MISSING:'設備缺少可核對的空間容量（U）。',DURATION_AND_SEARCH_DATES_REQUIRED:'請填寫開始、完成日期及搜尋截止日。',TEST_CONDITIONS_INCOMPLETE:'請補齊可查核的溫度／濕度上下限。',MACHINE_CAPACITY_EVIDENCE_MISSING:'設備缺少可查核的尺寸／容量證據。',TEST_TYPE_CONDITION_EVIDENCE_MISSING:'此試驗類型尚缺可查核的條件與設備證據。',SAMPLE_VOLUME_BELOW_DOCUMENTED_ENVELOPE:'輸入的單件體積小於合成樣品外框，請確認單位與尺寸。',ENABLED_ENGINEER_REQUIRED:'沒有可核對的啟用實驗室工程師。',NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW:'在已核對的 Demo 設備與搜尋期間內沒有找到時段。',CONDITION_OUTSIDE_DOCUMENTED_RANGE:'試驗條件超出已記錄的設備範圍。',TRIAL_STATE_NOT_SCHEDULABLE:'此案件狀態不可重新安排排程。',SEARCH_LIMIT_REACHED:'已達搜尋限制，不能據此判定不可行。'};
