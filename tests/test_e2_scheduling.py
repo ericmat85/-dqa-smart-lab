@@ -127,6 +127,35 @@ class ProviderTests(unittest.TestCase):
     def test_provider_timeout_remains_unknown_and_blocks_only_e2(self):self.assert_unknown('TIMEOUT')
     def test_invalid_usage_remains_unknown_and_blocks_only_e2(self):self.assert_unknown('USAGE')
     def test_http_failure_remains_unknown_and_blocks_only_e2(self):self.assert_unknown('HTTP')
+    def test_strict_provider_schema_has_explicit_types_and_closed_candidate_ids(self):
+        self.call();schema=json.loads(self.calls[0].content)['text']['format']['schema']
+        self.assertEqual(schema['properties']['engine'],{'type':'string','enum':['E2']})
+        self.assertEqual(schema['properties']['selected_candidate_id']['type'],['string','null'])
+        self.assertFalse(schema['additionalProperties']);self.assertEqual(set(schema['required']),set(schema['properties']))
+        self.assertEqual(set(schema['properties']['selected_candidate_id']['enum']),{None,*[x['id'] for x in evaluate(self.context,self.now[0])['candidates']]})
+    def test_provider_http_rejection_keeps_safe_diagnostics_and_never_releases_unknown_cost(self):
+        response=httpx.Response(400,headers={'x-request-id':'req_SYNTHETIC_SCHEMA_REJECTION'},json={'error':{'code':'invalid_json_schema','type':'invalid_request_error','param':'text.format.schema','message':PROVIDER_KEY+' https://internal.invalid password=SECRET'}})
+        def reject(req):self.calls.append(req);return response
+        self.client._transport.handler=reject
+        e4_before=self.authority.snapshot()
+        with self.assertRaisesRegex(E4Error,'E2_PROVIDER_REQUEST_REJECTED_RESERVATION_HELD'):self.call()
+        row=self.ledger.attempt('O-local-1');record=json.dumps(row)
+        self.assertEqual(row['state'],'UNKNOWN');self.assertNotIn(PROVIDER_KEY,record);self.assertNotIn('internal.invalid',record);self.assertNotIn('password',record)
+        self.assertEqual(row['evidence']['upstream'],{'http_status':400,'provider_request_id':'req_SYNTHETIC_SCHEMA_REJECTION','provider_error_code':'invalid_json_schema','provider_error_type':'invalid_request_error','provider_error_param':'text.format.schema'})
+        self.assertEqual(self.ledger.snapshot()['held_nanos'],50000000);self.assertEqual(self.authority.snapshot(),e4_before)
+        with self.assertRaisesRegex(E4Error,'OUTCOME_RECONCILIATION_REQUIRED'):self.call('O-no-retry')
+        self.assertEqual(len(self.calls),1)
+    def test_auth_rate_limit_and_server_rejections_are_classified_without_error_prose(self):
+        from gateway.e2_preview_provider import record_http_rejection
+        expected={401:'AUTH_REJECTED',403:'AUTH_REJECTED',429:'RATE_LIMITED',503:'HTTP_ERROR'}
+        for status,suffix in expected.items():
+            ledger=StrictLedger(self.ledger.path,self.cfg.identity());op='O-'+str(status)
+            ledger.require_unknown_reconciliation=False
+            ledger.reserve(op,'synthetic',Decimal('.05'),self.now[0],10)
+            ledger.transport_done(op)
+            response=httpx.Response(status,headers={'x-request-id':'req_'+PROVIDER_KEY},json={'error':{'code':PROVIDER_KEY,'type':PROVIDER_KEY,'param':PROVIDER_KEY,'message':PROVIDER_KEY}})
+            with self.assertRaisesRegex(E4Error,'E2_PROVIDER_'+suffix+'_RESERVATION_HELD'):record_http_rejection(ledger,op,response,PROVIDER_KEY,self.now[0])
+            self.assertEqual(ledger.attempt(op)['evidence']['upstream'],{'http_status':status})
     def test_rejected_content_records_known_usage_without_leaking_or_locking_later_calls(self):
         self.mode='BAD_CHOICE'
         with self.assertRaisesRegex(E4Error,'E2_OUTPUT_REJECTED'):self.call()

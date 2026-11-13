@@ -3,7 +3,7 @@ export const ASSISTANT_DEMOS=[
  {id:'pending',category:'排程',question:'目前有多少試驗還沒排程？',keywords:['還沒排程','待排程','未排程'],answer:'pending'},
  {id:'running',category:'排程',question:'目前有多少試驗正在進行？',keywords:['正在進行','試驗中','進行中'],answer:'running'},
  {id:'schedule',category:'排程',question:'如何安排新的試驗日程？',keywords:['安排','新增排程'],answer:'前往「排程管理」，選擇委託並開啟「編輯排程」。在設備與排程安排中選擇待機設備、執行人、開始與完成日期，按下儲存排程。'},
- {id:'automatic',category:'排程',question:'AI自動化排程怎麼使用？',keywords:['自動','推薦','ai排程'],answer:'開啟編輯排程，在「設備與排程安排」按下 AI 自動化排程。Demo 會顯示約 3 秒分析進度並提出安排建議，確認內容後再儲存。'},
+ {id:'automatic',category:'排程',question:'AI自動化排程怎麼使用？',keywords:['自動','推薦','ai排程'],answer:'開啟編輯排程，填寫樣品使用空間、開始與完成日期、搜尋最晚完成日及試驗條件，再按 AI 自動化排程。系統檢查合成設備容量、人員與占用資料；資料不足會列出缺漏。若取得候選，確認套用只填入草稿，按「儲存排程」才會保存。出現連線或預算錯誤時不會自動重送。'},
  {id:'conflict',category:'排程',question:'發生排程衝突時怎麼辦？',keywords:['衝突','重疊'],answer:'查看排程的衝突說明，改選可用設備或調整試驗時段，再儲存安排。助理只提供操作說明，不會直接更動排程。'},
  {id:'progress',category:'排程',question:'試驗日程的進度條如何計算？',keywords:['進度','百分比','日程'],answer:'儲存開始與預計完成日期後，開始前顯示已排程；開始時間到達後轉為試驗中，進度條依實際時間推進。缺少任一日期時不顯示進度條。'},
  {id:'finish',category:'排程',question:'試驗完成後設備會自動釋放嗎？',keywords:['釋放','試驗完成','已完成'],answer:'已儲存的試驗日程走完後會轉為已完成。若設備沒有其他進行中的試驗，會恢復待機；維護中或校驗中的設備不會被強制改回待機。'},
@@ -20,7 +20,23 @@ export const ASSISTANT_DEMOS=[
  {id:'role',category:'權限',question:'如何新增帳號並設定角色權限？',keywords:['帳號','權限','角色'],answer:'具有帳號管理權限的人員可在帳號管理新增或編輯帳號。切換「角色與權限」頁籤，建立新角色或編輯內建角色的功能頁面與審查階級，再將角色指派給帳號。'},
  {id:'sync',category:'系統',question:'資料會自動同步嗎？重新整理會不會不見？',keywords:['同步','儲存','重新整理','資料'],answer:'目前 Demo 使用同一網站、同一瀏覽器的本機儲存，管理頁面的變更會同步到儀錶板。重新整理通常會保留已儲存資料；清除網站資料、使用不同瀏覽器或不同裝置不會共用這些資料。'},
 ];
-export function assistantReply(question,snapshot,metrics,system='lms'){
+export function findCommonQuestion(question){
+ if(typeof question!=='string')return null;
+ const normalized=question.trim().toLowerCase().replace(/\s/g,'');
+ return ASSISTANT_DEMOS.find(item=>item.question.toLowerCase().replace(/\s/g,'')===normalized)||null;
+}
+export function commonQuestionReply(question,snapshot,metrics,system='lms'){
+ const item=findCommonQuestion(question);if(!item)return null;
+ const prefix='常見問題解答（非 AI）\n';
+ const dynamic=['overview','pending','running','standby','stock'].includes(item.id);
+ if(!dynamic)return prefix+assistantReply(question,snapshot,metrics,system);
+ const dependencies=system==='lab'&&['overview','pending','running'].includes(item.id)?['labWorkItems']:item.id==='stock'?['materials']:item.id==='standby'?['equipment']:item.id==='overview'?['schedules','equipment']:['schedules'];
+ const invalid=dependencies.some(key=>!Array.isArray(snapshot?.[key])||(snapshot?.sources||[]).some(source=>source.id===key&&source.error));
+ const needsCounts=system!=='lab'&&['overview','pending','running'].includes(item.id);
+ if(invalid||needsCounts&&(!metrics?.counts||Object.values(metrics.counts).some(n=>!Number.isSafeInteger(n)||n<0))||item.id==='stock'&&!Array.isArray(metrics?.lowStock))return prefix+'目前資料無法完整讀取，不能確認數量；請重新整理或查看對應清單。';
+ return prefix+assistantReply(question,snapshot,metrics,system);
+}
+export function assistantReply(question,snapshot={},metrics={},system='lms'){
  const normalized=question.trim().toLowerCase().replace(/\s/g,'');
  const item=ASSISTANT_DEMOS.find(item=>item.question.toLowerCase().replace(/\s/g,'')===normalized)||ASSISTANT_DEMOS.find(item=>item.keywords.some(word=>normalized.includes(word)));
  if(!item)return '這是 Demo 示範助理，目前提供 20 組實驗室常見問答。請展開「常見問題」選擇題目，或詢問排程、設備、物料、簽名、報表與權限相關問題。';
@@ -33,7 +49,7 @@ export function assistantReply(question,snapshot,metrics,system='lms'){
   if(item.id==='breakdown')return '設備狀態頁僅供查閱，無法修改屬性或狀態。請先依現場規範處置試驗，再通知授權管理人員處理設備。';
   if(item.id==='report')return '實驗室完成試驗後，可在試驗委託提交報告；資料庫提供授權報告與範本查閱。統計報表的 PDF／Excel 匯出請使用實驗室管理系統的報表分析。';
  }
- const counts=metrics.counts;
+ const counts=metrics.counts||{};
  if(item.answer==='overview')return `依目前資料：待排程 ${counts['未排程']||0} 筆、已排程 ${counts['已排程']||0} 筆、試驗中 ${counts['試驗中']||0} 筆、已完成 ${counts['已完成']||0} 筆；設備共 ${snapshot.equipment.length} 台。`;
  if(item.answer==='pending')return `目前有 ${counts['未排程']||0} 筆待排程，另有 ${counts['有衝突']||0} 筆排程衝突待確認。可前往排程管理查看明細。`;
  if(item.answer==='running')return `目前有 ${counts['試驗中']||0} 筆試驗正在進行，另有 ${counts['已排程']||0} 筆已安排但尚未開始。`;

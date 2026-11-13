@@ -2,7 +2,7 @@ import {askPreviewAssistant} from './previewAssistant.mjs';
 import {readE4CurrentData} from './e4ReadonlyContext.mjs';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
-import {ASSISTANT_DEMOS} from './assistantDemo.mjs';
+import {ASSISTANT_DEMOS,findCommonQuestion,commonQuestionReply} from './assistantDemo.mjs';
 import './IntelligentAssistant.css';
 import AssistantIcon from './AssistantIcon.jsx';
 
@@ -80,9 +80,14 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   setQuestion('');setFiles([]);if(fileInput.current)fileInput.current.value='';
   let reply,failed=false;
   try{
-   let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('Storage unavailable');}};}
-   const current=readE4CurrentData(snapshot,metrics,system,storage);
-   reply=trimmed?await askPreviewAssistant(trimmed,system,{...current,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';
+   const faq=findCommonQuestion(trimmed);
+   const dynamic=faq&&['overview','pending','running','standby','stock'].includes(faq.id);
+   let current={snapshot,metrics};
+   if(!faq||dynamic){
+    let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('Storage unavailable');}};}
+    current=readE4CurrentData(snapshot,metrics,system,storage);
+   }
+   reply=faq?commonQuestionReply(trimmed,current.snapshot,current.metrics,system):trimmed?await askPreviewAssistant(trimmed,system,{...current,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';
   }
   catch(error){failed=true;reply=error.name==='AbortError'?'請求已取消；Provider 結果可能未知，不會自動重送。':error.message;}
   if(epoch.current===ownerEpoch&&inFlight.current?.id===id&&!controller.signal.aborted){
