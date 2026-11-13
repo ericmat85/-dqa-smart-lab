@@ -23,7 +23,7 @@ def fake(req):
     request=json.loads(req.content);context=json.loads(request['input']);calls.append({'operation_id':req.headers['x-client-request-id'],'model':request['model']})
     (root/'provider-calls.json').write_text(json.dumps(calls))
     time.sleep(.65)
-    answer={'engine':'E2','summary':'MOCK：已核對合成尺寸、容量、條件與時段；未呼叫真實模型。','selected_candidate_id':context['assessment']['candidates'][0]['id'],'risks':[]}
+    answer={'selected_candidate_id':context['assessment']['candidates'][0]['id']}
     return httpx.Response(200,headers={'x-request-id':'req_MOCK_E2_BROWSER'},json={'id':'resp_MOCK_E2_BROWSER','status':'completed','model':cfg.model,'usage':{'input_tokens':90,'output_tokens':40},'output':[{'type':'message','content':[{'type':'output_text','text':json.dumps(answer)}]}]})
 client=httpx.Client(transport=httpx.MockTransport(fake))
 provider=E2Provider(cfg,cost,authority,lambda:'FAKE_E2_PROVIDER_NOT_A_REAL_CREDENTIAL',client)

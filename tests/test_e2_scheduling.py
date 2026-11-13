@@ -76,7 +76,7 @@ class ProviderTests(unittest.TestCase):
         self.calls.append(req);payload=json.loads(req.content);self.assertEqual(str(req.url),'https://api.openai.com/v1/responses');self.assertFalse(payload['store']);self.assertNotIn('tools',payload)
         if self.mode=='TIMEOUT':raise httpx.ReadTimeout('SYNTHETIC_TIMEOUT')
         if self.mode=='HTTP':return httpx.Response(429,json={'error':'SYNTHETIC_ONLY'})
-        inp=json.loads(payload['input']);answer={'engine':'E2','summary':'MOCK：依合成證據提供待確認建議，未呼叫真實模型。','selected_candidate_id':inp['assessment']['candidates'][0]['id'],'risks':[]}
+        inp=json.loads(payload['input']);answer={'selected_candidate_id':inp['assessment']['candidates'][0]['id']}
         if self.mode=='BAD_CHOICE':answer['selected_candidate_id']='INVENTED'
         if self.mode=='WRITE':answer['summary']='已自動排程。'
         if self.mode=='SECRET':answer['summary']=PROVIDER_KEY
@@ -129,9 +129,9 @@ class ProviderTests(unittest.TestCase):
     def test_http_failure_remains_unknown_and_blocks_only_e2(self):self.assert_unknown('HTTP')
     def test_strict_provider_schema_has_explicit_types_and_closed_candidate_ids(self):
         self.call();schema=json.loads(self.calls[0].content)['text']['format']['schema']
-        self.assertEqual(schema['properties']['engine'],{'type':'string','enum':['E2']})
+        self.assertEqual(set(schema['properties']),{'selected_candidate_id'})
         self.assertEqual(schema['properties']['selected_candidate_id']['type'],['string','null'])
-        self.assertFalse(schema['additionalProperties']);self.assertEqual(set(schema['required']),set(schema['properties']))
+        self.assertFalse(schema['additionalProperties']);self.assertEqual(schema['required'],['selected_candidate_id'])
         self.assertEqual(set(schema['properties']['selected_candidate_id']['enum']),{None,*[x['id'] for x in evaluate(self.context,self.now[0])['candidates']]})
     def test_provider_http_rejection_keeps_safe_diagnostics_and_never_releases_unknown_cost(self):
         response=httpx.Response(400,headers={'x-request-id':'req_SYNTHETIC_SCHEMA_REJECTION'},json={'error':{'code':'invalid_json_schema','type':'invalid_request_error','param':'text.format.schema','message':PROVIDER_KEY+' https://internal.invalid password=SECRET'}})
