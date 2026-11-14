@@ -27,8 +27,8 @@ export const WORKFLOW_RULES=[
  ['已結案','依既有案件與封存文件存取權限','查閱、下載模擬合併 PDF','無（終點）','無直接退回控制','委託單在前、簽核報告在後；DEMO 文件不具正式認證。'],
 ].map(([stage,role,actions,next,returned,conditions],i)=>({id:i+1,stage,role,actions,next,returned,conditions}));
 export const AI_ENGINES=[
- ['request','AI 委託單審查','委託內容檢查展示；正式簽核仍由既有角色執行。'],
- ['report','AI 試驗報告審查','既有前端工作簿格式與必要欄位規則檢核。'],
+ ['request','AI 智能審查系統','E1 統一審查委託單、電子簽名完整性與報告；保留原有簽核流程。'],
+ ['report','AI 報告生成機','E3 依目前報表資料產生客製化報表與特殊報告草稿，支援 Excel／PDF 匯出。'],
  ['schedule','AI 排程智慧化','試驗資料與資源核對、可調整的規劃偏好，以及請求、用量與 Trace 監控。'],
  ['assistant','AI 智能助理','一般聊天與合成文件問答；狀態取自實際回應。'],
 ].map(([id,name,description])=>({id,name,description}));
