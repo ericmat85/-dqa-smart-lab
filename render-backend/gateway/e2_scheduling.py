@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from gateway.e4_preview_provider import E4Error
+from gateway.trial_rules import PROFILES, resolve_case, machine_matches, machine_evidence, execution, operation_buffers_allowed
 
 CATALOG = json.loads(Path(__file__).with_name('e2_demo_catalog.json').read_text())
 CASES = {x['id']: x for x in CATALOG['cases']}
@@ -33,6 +34,8 @@ class Conditions(Strict):
     temperature_max: float | None = Field(ge=-273.15,le=1000,multiple_of=.001)
     humidity_min: float | None = Field(ge=0,le=100,multiple_of=.001)
     humidity_max: float | None = Field(ge=0,le=100,multiple_of=.001)
+    frequency_min: float | None = Field(default=None,gt=0,le=100000)
+    frequency_max: float | None = Field(default=None,gt=0,le=100000)
 
 
 class Trial(Strict):
@@ -49,6 +52,9 @@ class Trial(Strict):
     cleanup_minutes: int = Field(ge=0, le=1440)
     preferred_equipment_ids: list[str] = Field(max_length=4)
     conditions: Conditions
+    profile_id: str | None = Field(default=None,max_length=80)
+    duration_hours: float | None = Field(default=None,gt=0,le=24000)
+    test_title: str | None = Field(default=None,max_length=80)
 
 
 class Machine(Strict):
@@ -106,8 +112,17 @@ def validate_context(raw, now):
         raise E4Error('E2_INVALID_SYNTHETIC_CONTEXT', 422) from None
     if not now * 1000 - 300000 <= c['observed_at'] <= now * 1000 + 10000:
         raise E4Error('E2_CONTEXT_EXPIRED', 422)
-    if c['request']['id'] not in CASES:
+    case=resolve_case(c['request'],CASES)
+    if case is None:
         raise E4Error('E2_UNVERIFIED_SYNTHETIC_CASE', 422)
+    profile_id=c['request'].get('profile_id')
+    if not profile_id and (c['request'].get('duration_hours') is not None or c['request'].get('test_title') is not None or any(c['request']['conditions'].get(k) is not None for k in ('frequency_min','frequency_max'))):raise E4Error('E2_TRIAL_PROFILE_REQUIRED',422)
+    if profile_id:
+        profile=PROFILES.get(profile_id)
+        if not profile or case.get('profile_id')!=profile_id:raise E4Error('E2_TRIAL_PROFILE_MISMATCH',422)
+        if c['request'].get('test_title') is not None and c['request']['test_title']!=case['title']:raise E4Error('E2_TRIAL_PROFILE_MISMATCH',422)
+        hours=c['request'].get('duration_hours')
+        if hours is None or profile['fixed_duration'] and hours!=profile['hours']:raise E4Error('E2_TRIAL_HOURS_MISMATCH',422)
     for name, allow in [('equipment', EQUIPMENT), ('personnel', set(CATALOG['executors']) | {'U001','U002','U004','DEMO-REQUESTER','DEMO-SUPERVISOR','DEMO-LEVEL1','DEMO-LEVEL2','DEMO-LEVEL3'})]:
         ids = [x['id'] for x in c[name]]
         if len(set(ids)) != len(ids) or any(x not in allow for x in ids):
@@ -139,18 +154,20 @@ def parse_date(value):
 
 def capacity(machine, case, request):
     """Use documented synthetic geometry, count, mass and volume independently."""
-    e = machine['evidence']
+    profile=PROFILES.get(request.get('profile_id'))
+    e = machine_evidence(machine) if profile else machine['evidence']
     if not e:
         return None, 'MACHINE_CAPACITY_EVIDENCE_MISSING'
     condition = request['conditions']
-    humidity_required=case['family']=='TEMPERATURE_HUMIDITY' or any(condition[x] is not None for x in ['humidity_min','humidity_max'])
-    for name in ['temperature', *(['humidity'] if humidity_required else [])]:
-        low, high = condition[name + '_min'], condition[name + '_max']
+    humidity_required=(profile['family'] if profile else case['family'])=='TEMPERATURE_HUMIDITY' or any(condition[x] is not None for x in ['humidity_min','humidity_max'])
+    thermal_required=profile is None or any(x in profile['conditions'] for x in ('temperatureMin','temperatureMax')) or any(condition[x] is not None for x in ('temperature_min','temperature_max'))
+    for name in [*(['temperature'] if thermal_required else []), *(['humidity'] if humidity_required else []), *(['frequency'] if profile and 'frequencyMin' in profile['conditions'] else [])]:
+        low, high = condition.get(name + '_min'), condition.get(name + '_max')
         if low is None or high is None:
             return None, 'TEST_CONDITIONS_INCOMPLETE'
         if low > high:
             raise E4Error('E2_INVALID_CONDITION_RANGE', 422)
-        limit = e[name]
+        limit = e.get(name)
         if limit is None:
             return None, 'MACHINE_CONDITION_EVIDENCE_MISSING'
         if low < limit[0] or high > limit[1]:
@@ -168,11 +185,13 @@ def capacity(machine, case, request):
         units=machine.get('space_units')
         if type(units) is not int or units<1:return None, 'MACHINE_SPACE_UNITS_EVIDENCE_MISSING'
         bound=min(bound,units//request['sample_space_units'])
+    if profile and profile['id']=='VIBRATION_DURABILITY':bound=min(1,bound)
     return bound, 'DOCUMENTED_SYNTHETIC_GEOMETRY_COUNT_AND_LOAD'
 
 
 def evaluate(raw, now):
     c = validate_context(raw, now)
+    if c['request'].get('profile_id'):return evaluate_profile(c,now)
     req = c['request'];case = CASES[req['id']]
     result = {'status': 'UNKNOWN', 'reasons': [], 'candidates': [], 'context_fingerprint': fingerprint(c), 'synthetic': True, 'capacity_source': 'SYNTHETIC_DIMENSION_DOCUMENTS', 'planning_scope': 'STANDBY_EQUIPMENT_ONLY_BOUNDED_WINDOW', 'writes': 'NONE', 'requires_confirmation': True}
     def missing(*codes):
@@ -253,3 +272,63 @@ def evaluate(raw, now):
         return missing(*uncertain)
     result.update(status='INFEASIBLE_IN_WINDOW', reasons=list(dict.fromkeys(rejected + ['NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW'])))
     return result
+
+
+def evaluate_profile(c, now):
+    """Profile hours, machine fit and weekday operations remain server-owned."""
+    req=c['request'];case=resolve_case(req,CASES);profile=PROFILES[req['profile_id']]
+    result={'status':'UNKNOWN','reasons':[],'candidates':[],'context_fingerprint':fingerprint(c),'synthetic':True,'capacity_source':'SYNTHETIC_DIMENSION_DOCUMENTS','planning_scope':'STANDBY_EQUIPMENT_ONLY_BOUNDED_WINDOW','writes':'NONE','requires_confirmation':True,'profile_id':profile['id'],'case_basis':'DECLARED_SYNTHETIC_TEMPLATE' if case.get('template') else 'REGISTERED_SYNTHETIC_CASE'}
+    def missing(*codes):result['reasons']=list(dict.fromkeys(codes));return result
+    if req['status'] not in ['UNSCHEDULED','CONFLICT','SCHEDULED']:return missing('TRIAL_STATE_NOT_SCHEDULABLE')
+    if not all(c[k+'_complete'] for k in ('equipment','personnel','reservations')):return missing('RESOURCE_OR_RESERVATION_COVERAGE_INCOMPLETE')
+    if req['quantity'] is None or req['sample_volume_litres'] is None:return missing('SAMPLE_QUANTITY_OR_VOLUME_REQUIRED')
+    if 'sample_space_units' in req and req['sample_space_units'] is None:return missing('SAMPLE_SPACE_UNITS_REQUIRED')
+    if not req['earliest'] or not req['deadline']:return missing('DURATION_AND_SEARCH_DATES_REQUIRED')
+    try:start,deadline=parse_date(req['earliest']),parse_date(req['deadline'])
+    except ValueError:raise E4Error('E2_INVALID_SEARCH_DATE',422) from None
+    if start.date()<=datetime.fromtimestamp(now,TAIPEI).date() or deadline<start:raise E4Error('E2_INVALID_SEARCH_WINDOW',422)
+    window_end=min(deadline,start+timedelta(days=CATALOG['limits']['horizon_days']-1))
+    owners=[p['id'] for p in c['personnel'] if p['enabled'] and p['id'] in CATALOG['executors']]
+    if not owners:return missing('ENABLED_ENGINEER_REQUIRED')
+    available=[];uncertain=[];rejected=[];matching=False
+    for row in c['equipment']:
+        machine=EQUIPMENT[row['id']]
+        if not machine_matches(profile,machine):continue
+        matching=True
+        if row['status']!='STANDBY':continue
+        count,code=capacity(machine,case,req)
+        if count is None:uncertain.append(code)
+        elif count<1:rejected.append(code)
+        else:available.append((machine,count))
+    if not matching:return missing('MATCHING_EQUIPMENT_NOT_REGISTERED')
+    available.sort(key=lambda item:(item[0]['id'] not in req['preferred_equipment_ids'],-item[1],item[0]['id']))
+    work=0
+    for offset in range(CATALOG['limits']['horizon_days']):
+        date=start+timedelta(days=offset)
+        if date>window_end:break
+        if profile['calendar']=='weekdays' and date.weekday()>=5:continue
+        for selected in itertools.combinations(available,req['equipment_count']):
+            if req['quantity']<len(selected):continue
+            if profile['mode']=='batch' and sum(n for _,n in selected)<req['quantity']:continue
+            remaining=req['quantity'];allocations=[]
+            for i,(machine,count) in enumerate(selected):
+                quantity=math.ceil(remaining/(len(selected)-i)) if profile['mode']=='serial' else min(count,remaining-(len(selected)-i-1));remaining-=quantity
+                allocations.append({'equipment_id':machine['id'],'quantity':quantity,'capacity':count,'evidence_id':machine_evidence(machine)['id']})
+            if profile['mode']=='serial':
+                days=sum(1 for n in range((window_end-date).days+1) if profile['calendar']!='weekdays' or (date+timedelta(days=n)).weekday()<5)
+                if any(a['quantity']>a['capacity']*math.floor(profile['daily_hours']/req['duration_hours'])*days for a in allocations):continue
+            try:plan=execution(profile,date.date().isoformat(),allocations,req['duration_hours'])
+            except ValueError:continue
+            if not operation_buffers_allowed(plan,req['preparation_minutes'],req['cleanup_minutes']):continue
+            if plan['end_date']>window_end.date().isoformat():continue
+            begin=plan['start_ms']-req['preparation_minutes']*60000;finish=plan['end_ms']+req['cleanup_minutes']*60000;ids=[m['id'] for m,_ in selected]
+            for owner in owners:
+                work+=1
+                if work>20000:return missing('SEARCH_LIMIT_REACHED')
+                if any(r['id']!=req['id'] and begin<(r['end_ms'] if r['end_ms'] is not None else math.inf) and r['start_ms']<finish and (r['owner_id']==owner or set(r['equipment_ids'])&set(ids)) for r in c['reservations']):continue
+                candidate={'equipment_ids':ids,'owner_id':owner,'start':date.date().isoformat(),'end':plan['end_date'],'allocations':allocations,'sample_evidence_id':case['sample']['evidence_id']}
+                candidate['id']='P-'+fingerprint(candidate)[:20];result['candidates'].append(candidate)
+                if len(result['candidates'])==3:result.update(status='PROPOSAL_AVAILABLE',reasons=[]);return result
+    if result['candidates']:result.update(status='PROPOSAL_AVAILABLE',reasons=[]);return result
+    if uncertain:return missing(*uncertain)
+    result.update(status='INFEASIBLE_IN_WINDOW',reasons=list(dict.fromkeys(rejected+['NO_SLOT_WITHIN_VERIFIED_DEMO_WINDOW'])));return result

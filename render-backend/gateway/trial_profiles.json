@@ -1,0 +1,916 @@
+{
+  "version": 1,
+  "scope": "SYNTHETIC_DEMO_ONLY",
+  "note": "User-defined 250h humidity and 20h/sample weekday vibration rules. All other defaults are explicitly synthetic examples, not standards or measured facts. Equipment without matching documented evidence remains unavailable.",
+  "profiles": [
+    {
+      "id": "HIGH_HUMIDITY",
+      "label": "高溫高濕試驗",
+      "match": "高溫高濕",
+      "equipment_pattern": "恆溫恆濕|環境試驗箱",
+      "hours": 250,
+      "family": "TEMPERATURE_HUMIDITY",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": true,
+      "conditions": {
+        "temperatureMin": 60,
+        "temperatureMax": 60,
+        "humidityMin": 90,
+        "humidityMax": 90
+      },
+      "source": "USER_DEFINED_DEMO_RULE",
+      "official_standard": false,
+      "aliases": [
+        "高溫高濕試驗",
+        "高溫高濕"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-HIGH_HUMIDITY-v1"
+      }
+    },
+    {
+      "id": "THERMAL_SHOCK",
+      "label": "熱衝擊試驗",
+      "match": "冷熱衝擊|熱衝擊",
+      "equipment_pattern": "冷熱衝擊",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": -40,
+        "temperatureMax": 125
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "熱衝擊試驗",
+        "熱衝擊",
+        "冷熱衝擊試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-THERMAL_SHOCK-v1"
+      }
+    },
+    {
+      "id": "VIBRATION_DURABILITY",
+      "label": "振動耐久試驗",
+      "match": "振動",
+      "equipment_pattern": "振動",
+      "hours": 20,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 20,
+      "fixed_duration": true,
+      "conditions": {
+        "frequencyMin": 5,
+        "frequencyMax": 200
+      },
+      "source": "USER_DEFINED_DEMO_RULE",
+      "official_standard": false,
+      "aliases": [
+        "振動耐久試驗",
+        "振動試驗",
+        "耐久振動試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-VIBRATION_DURABILITY-v1"
+      }
+    },
+    {
+      "id": "HUMIDITY_CYCLE",
+      "label": "溫濕度試驗",
+      "match": "溫濕度|恆溫恆濕",
+      "equipment_pattern": "恆溫恆濕|環境試驗箱",
+      "hours": 48,
+      "family": "TEMPERATURE_HUMIDITY",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": 60,
+        "temperatureMax": 60,
+        "humidityMin": 90,
+        "humidityMax": 90
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "溫濕度試驗",
+        "溫濕度循環",
+        "溫濕度循環試驗",
+        "溫濕度儲存試驗",
+        "恆溫恆濕試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-HUMIDITY_CYCLE-v1"
+      }
+    },
+    {
+      "id": "THERMAL_CYCLE",
+      "label": "高低溫循環試驗",
+      "match": "高低溫|溫度循環",
+      "equipment_pattern": "環境試驗箱|恆溫恆濕",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": -20,
+        "temperatureMax": 80
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "高低溫循環試驗",
+        "溫度循環",
+        "溫度循環試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-THERMAL_CYCLE-v1"
+      }
+    },
+    {
+      "id": "LOW_TEMPERATURE",
+      "label": "低溫試驗",
+      "match": "低溫",
+      "equipment_pattern": "環境試驗箱|恆溫恆濕",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": -20,
+        "temperatureMax": -20
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "低溫試驗",
+        "低溫啟動試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-LOW_TEMPERATURE-v1"
+      }
+    },
+    {
+      "id": "HIGH_TEMPERATURE",
+      "label": "高溫試驗",
+      "match": "高溫",
+      "equipment_pattern": "環境試驗箱|恆溫恆濕|高溫爐",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": 100,
+        "temperatureMax": 100
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "高溫試驗",
+        "高溫儲存試驗",
+        "高溫運作試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-HIGH_TEMPERATURE-v1"
+      }
+    },
+    {
+      "id": "SALT_SPRAY",
+      "label": "鹽霧腐蝕試驗",
+      "match": "鹽霧|腐蝕",
+      "equipment_pattern": "鹽霧",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": 35,
+        "temperatureMax": 35
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "鹽霧腐蝕試驗",
+        "鹽霧試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-SALT_SPRAY-v1"
+      }
+    },
+    {
+      "id": "WATER_INGRESS",
+      "label": "防水試驗",
+      "match": "IPX|防水|淋雨",
+      "equipment_pattern": "防水",
+      "hours": 1,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "防水試驗",
+        "IPX6 防水",
+        "IPX6 防水試驗",
+        "防水 IPX6 試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-WATER_INGRESS-v1"
+      }
+    },
+    {
+      "id": "ESD",
+      "label": "靜電放電試驗",
+      "match": "ESD|靜電",
+      "equipment_pattern": "ESD",
+      "hours": 0.5,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "靜電放電試驗",
+        "ESD 靜電",
+        "ESD 靜電試驗",
+        "ESD 靜電放電試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-ESD-v1"
+      }
+    },
+    {
+      "id": "WEATHERING",
+      "label": "日照耐候試驗",
+      "match": "日曬|日照|耐候|光照",
+      "equipment_pattern": "耐候",
+      "hours": 48,
+      "family": "TEMPERATURE",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {
+        "temperatureMin": 60,
+        "temperatureMax": 60
+      },
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "日照耐候試驗",
+        "日照試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-WEATHERING-v1"
+      }
+    },
+    {
+      "id": "DUST",
+      "label": "防塵試驗",
+      "match": "防塵|粉塵",
+      "equipment_pattern": "防塵",
+      "hours": 8,
+      "family": "ENVIRONMENT",
+      "calendar": "continuous",
+      "mode": "batch",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "防塵試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-DUST-v1"
+      }
+    },
+    {
+      "id": "TENSILE",
+      "label": "拉力試驗",
+      "match": "拉力",
+      "equipment_pattern": "拉力",
+      "hours": 1,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "拉力試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-TENSILE-v1"
+      }
+    },
+    {
+      "id": "INSPECTION",
+      "label": "量測觀察",
+      "match": "顯微|量測觀察",
+      "equipment_pattern": "顯微鏡",
+      "hours": 0.25,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "量測觀察"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-INSPECTION-v1"
+      }
+    },
+    {
+      "id": "MECHANICAL_SHOCK",
+      "label": "機械衝擊試驗",
+      "match": "機械衝擊",
+      "equipment_pattern": "機械衝擊",
+      "hours": 1,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "機械衝擊試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-MECHANICAL_SHOCK-v1"
+      }
+    },
+    {
+      "id": "DROP",
+      "label": "跌落試驗",
+      "match": "跌落",
+      "equipment_pattern": "跌落",
+      "hours": 1,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "跌落試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-DROP-v1"
+      }
+    },
+    {
+      "id": "INSERTION",
+      "label": "插拔試驗",
+      "match": "插拔",
+      "equipment_pattern": "插拔",
+      "hours": 20,
+      "family": "OPERATION",
+      "calendar": "continuous",
+      "mode": "serial",
+      "daily_hours": 24,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "插拔試驗",
+        "接插件插拔試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-INSERTION-v1"
+      }
+    },
+    {
+      "id": "VOLTAGE",
+      "label": "電壓變動試驗",
+      "match": "電壓",
+      "equipment_pattern": "電源|電壓",
+      "hours": 1,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "電壓變動試驗"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-VOLTAGE-v1"
+      }
+    },
+    {
+      "id": "EMC",
+      "label": "電磁相容試驗",
+      "match": "EMC|電磁相容",
+      "equipment_pattern": "EMC|電磁相容",
+      "hours": 2,
+      "family": "OPERATION",
+      "calendar": "weekdays",
+      "mode": "serial",
+      "daily_hours": 8,
+      "fixed_duration": false,
+      "conditions": {},
+      "source": "GENERATED_SYNTHETIC_DEMO_EXAMPLE",
+      "official_standard": false,
+      "aliases": [
+        "電磁相容試驗",
+        "EMC 電磁相容"
+      ],
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-TEMPLATE-EMC-v1"
+      }
+    }
+  ],
+  "machine_evidence": {
+    "EQ-001": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 6,
+      "max_load_kg": 5,
+      "temperature": [
+        -40,
+        150
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-001-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-002": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 6,
+      "max_load_kg": 5,
+      "temperature": [
+        -40,
+        150
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-002-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-003": {
+      "inner_mm": [
+        500,
+        500,
+        600
+      ],
+      "max_samples": 8,
+      "max_load_kg": 5,
+      "temperature": [
+        -70,
+        180
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-CHAMBER-EQ-003-v1",
+      "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+    },
+    "EQ-004": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 4,
+      "max_load_kg": 5,
+      "temperature": [
+        -20,
+        150
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-004-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-005": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 8,
+      "max_load_kg": 5,
+      "temperature": [
+        -40,
+        150
+      ],
+      "humidity": [
+        20,
+        98
+      ],
+      "id": "SYNTH-E2-FIXTURE-EQ-005-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-006": {
+      "inner_mm": [
+        500,
+        400,
+        550
+      ],
+      "max_samples": 6,
+      "max_load_kg": 4,
+      "temperature": [
+        -40,
+        150
+      ],
+      "humidity": [
+        20,
+        98
+      ],
+      "id": "SYNTH-E2-CHAMBER-EQ-006-v1",
+      "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+    },
+    "EQ-007": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 4,
+      "max_load_kg": 5,
+      "temperature": [
+        -20,
+        150
+      ],
+      "humidity": [
+        30,
+        95
+      ],
+      "id": "SYNTH-E2-FIXTURE-EQ-007-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-008": {
+      "inner_mm": [
+        600,
+        500,
+        600
+      ],
+      "max_samples": 10,
+      "max_load_kg": 8,
+      "temperature": [
+        -70,
+        150
+      ],
+      "humidity": [
+        20,
+        98
+      ],
+      "id": "SYNTH-E2-CHAMBER-EQ-008-v1",
+      "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+    },
+    "EQ-009": {
+      "inner_mm": [
+        300,
+        300,
+        300
+      ],
+      "max_samples": 1,
+      "max_load_kg": 100,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-009-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS",
+      "frequency": [
+        5,
+        2000
+      ]
+    },
+    "EQ-010": {
+      "inner_mm": [
+        300,
+        300,
+        300
+      ],
+      "max_samples": 1,
+      "max_load_kg": 200,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-010-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS",
+      "frequency": [
+        5,
+        2500
+      ]
+    },
+    "EQ-011": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 8,
+      "max_load_kg": 5,
+      "temperature": [
+        35,
+        60
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-011-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-012": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 12,
+      "max_load_kg": 5,
+      "temperature": [
+        35,
+        60
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-012-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-013": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 1,
+      "max_load_kg": 5,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-013-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-014": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 1,
+      "max_load_kg": 5,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-014-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-015": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 1,
+      "max_load_kg": 5,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-015-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-016": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 3,
+      "max_load_kg": 5,
+      "temperature": [
+        -70,
+        200
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-016-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-017": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 8,
+      "max_load_kg": 5,
+      "temperature": [
+        35,
+        85
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-017-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-018": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 6,
+      "max_load_kg": 5,
+      "temperature": [
+        35,
+        250
+      ],
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-018-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-019": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 1,
+      "max_load_kg": 5,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-019-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    },
+    "EQ-020": {
+      "inner_mm": [
+        400,
+        400,
+        400
+      ],
+      "max_samples": 4,
+      "max_load_kg": 5,
+      "temperature": null,
+      "humidity": null,
+      "id": "SYNTH-E2-FIXTURE-EQ-020-v2",
+      "source": "GENERATED_SYNTHETIC_FIXTURE_DOCUMENT_NOT_ACTUAL_MACHINE_MEASUREMENTS"
+    }
+  },
+  "fixture_note": "All newly filled fixture dimensions/counts are synthetic Demo documents, not actual hardware evidence. U remains an independent abstract space quota."
+}

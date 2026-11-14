@@ -1,4 +1,4 @@
-import {prepareScheduleTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
+import {prepareScheduleTrialForm,prepareManualTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
 import {askEngineAdvice} from './previewAssistant.mjs';
 import {askE2Scheduling} from './e2PreviewClient.mjs';
 import {canonicalE2,e2SampleEvidence,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
@@ -1740,7 +1740,8 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    const machine=catalog.find(item=>row.equipmentId?item.id===row.equipmentId:item.name===row.eq);
    const executor=accounts.find(item=>row.ownerId?item.id===row.ownerId:item.name===row.owner);
    setEditing(row);setScheduleMessage(catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
-   setSchedulingForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??currentTrialRequest(row.requestId)?.sampleVolumeLitres??(e2SampleEvidence(row.id)?.dimensions_mm?.reduce((a,b)=>a*b,1)/1000000||''),sampleSpaceUnits:row.sampleSpaceUnits??currentTrialRequest(row.requestId)?.sampleSpaceUnits??1,preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0});
+   const initial={equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??currentTrialRequest(row.requestId)?.sampleVolumeLitres??(e2SampleEvidence(row.id)?.dimensions_mm?.reduce((a,b)=>a*b,1)/1000000||''),sampleSpaceUnits:row.sampleSpaceUnits??currentTrialRequest(row.requestId)?.sampleSpaceUnits??1,preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0};
+   try{setSchedulingForm(prepareManualTrialForm({editing:row,form:initial}));}catch(error){setSchedulingForm(initial);setScheduleMessage(error.message);}
  }
  function currentTrialRequest(requestId=editing?.requestId){
    for(const key of ['dqa-lms-reviews-v1','dqa-request-demo-v2']){const raw=window.localStorage.getItem(key);if(raw!==null){let rows;try{rows=JSON.parse(raw);}catch{throw new Error('委託資料無法讀取，未以合成範例覆蓋。');}if(!Array.isArray(rows)||!rows.every(row=>row&&typeof row.id==='string'&&(key!=='dqa-lms-reviews-v1'||Array.isArray(row.history))))throw new Error('委託資料格式不完整，請先確認原始資料。');}}

@@ -8,6 +8,7 @@ import {usesEquipment,reservationWindow} from './scheduleResources.mjs';
 import {commitLifecycleTransaction,recoverLifecycleTransaction,reconcileSchedules} from './scheduleLifecycle.mjs';
 import {updateRequestExecution} from './requestExecution.mjs';
 import {completeLabTrial} from './labReceipts.mjs';
+import {shiftedOperationAllowed} from './trialProfiles.mjs';
 const read=(s,k)=>JSON.parse(s.getItem(k)||'[]');
 function actorFor(storage,id,system){
  const a=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS)).find(a=>a.id===id);
@@ -24,6 +25,7 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
  if(paused&&schedules.some(r=>r.id!==row.id&&machines.some(m=>usesEquipment(r,m))&&['試驗中','進行中','暫停中'].includes(r.status)))throw Error('設備由其他試驗共用中，請先確認其他試驗，避免一併暫停。');
  const at=new Date(now).toISOString(),action=paused?'暫停試驗':'恢復試驗';
  const updated={...row,status:paused?'暫停中':'試驗中',pauseStartedAt:paused?at:null,pauseTotalMs:Number(row.pauseTotalMs||0)+(paused?0:Math.max(0,now-Date.parse(row.pauseStartedAt))),history:[...(row.history||[]),`${at} ${actor.name} ${action}`]};
+ if(!paused&&!row.demoAccelerator&&row.trialExecution&&!shiftedOperationAllowed(row.trialExecution,updated.pauseTotalMs,Date.parse(row.pauseStartedAt)-Number(row.pauseTotalMs||0)))throw Error('恢復後的操作時段會跨週末，請先重新安排平日作業時段。');
  const resumed=reservationWindow(updated,now);
  if(!paused&&schedules.some(r=>r.id!==row.id&&['已排程','試驗中','進行中','暫停中','待核准'].includes(r.status)&&machines.some(m=>usesEquipment(r,m))&&(()=>{const w=reservationWindow(r,now);return w&&w.start<resumed.end&&resumed.start<w.end;})()))throw Error('順延後與其他設備排程衝突，請先調整其他排程再恢復。');
  const next=schedules.map(r=>r.id===row.id?updated:r),nextLab=lab.map(r=>r.scheduleId===row.id?{...r,status:updated.status}:r);

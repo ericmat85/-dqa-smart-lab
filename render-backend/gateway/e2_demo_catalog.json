@@ -17,7 +17,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-01-v1"
-      }
+      },
+      "profile_id": "HIGH_TEMPERATURE"
     },
     {
       "id": "SCH-026-02",
@@ -33,7 +34,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-02-v1"
-      }
+      },
+      "profile_id": "HUMIDITY_CYCLE"
     },
     {
       "id": "SCH-026-03",
@@ -49,7 +51,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-03-v1"
-      }
+      },
+      "profile_id": "VIBRATION_DURABILITY"
     },
     {
       "id": "SCH-026-04",
@@ -65,7 +68,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-04-v1"
-      }
+      },
+      "profile_id": "SALT_SPRAY"
     },
     {
       "id": "SCH-026-05",
@@ -81,7 +85,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-05-v1"
-      }
+      },
+      "profile_id": "THERMAL_CYCLE"
     },
     {
       "id": "SCH-026-06",
@@ -97,7 +102,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-06-v1"
-      }
+      },
+      "profile_id": "HIGH_TEMPERATURE"
     },
     {
       "id": "SCH-026-07",
@@ -113,7 +119,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-07-v1"
-      }
+      },
+      "profile_id": "LOW_TEMPERATURE"
     },
     {
       "id": "SCH-026-08",
@@ -129,7 +136,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-08-v1"
-      }
+      },
+      "profile_id": "HUMIDITY_CYCLE"
     },
     {
       "id": "SCH-026-09",
@@ -145,7 +153,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-09-v1"
-      }
+      },
+      "profile_id": "THERMAL_SHOCK"
     },
     {
       "id": "SCH-026-10",
@@ -161,7 +170,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-10-v1"
-      }
+      },
+      "profile_id": "VIBRATION_DURABILITY"
     },
     {
       "id": "SCH-026-11",
@@ -177,7 +187,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-11-v1"
-      }
+      },
+      "profile_id": "MECHANICAL_SHOCK"
     },
     {
       "id": "SCH-026-12",
@@ -193,7 +204,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-12-v1"
-      }
+      },
+      "profile_id": "SALT_SPRAY"
     },
     {
       "id": "SCH-026-13",
@@ -209,7 +221,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-13-v1"
-      }
+      },
+      "profile_id": "WATER_INGRESS"
     },
     {
       "id": "SCH-026-14",
@@ -225,7 +238,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-14-v1"
-      }
+      },
+      "profile_id": "ESD"
     },
     {
       "id": "SCH-026-15",
@@ -241,7 +255,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-15-v1"
-      }
+      },
+      "profile_id": "THERMAL_CYCLE"
     },
     {
       "id": "SCH-026-16",
@@ -257,7 +272,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-16-v1"
-      }
+      },
+      "profile_id": "HIGH_TEMPERATURE"
     },
     {
       "id": "SCH-026-17",
@@ -273,7 +289,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-17-v1"
-      }
+      },
+      "profile_id": "LOW_TEMPERATURE"
     },
     {
       "id": "SCH-026-18",
@@ -289,7 +306,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-18-v1"
-      }
+      },
+      "profile_id": "HUMIDITY_CYCLE"
     },
     {
       "id": "SCH-026-19",
@@ -305,7 +323,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-19-v1"
-      }
+      },
+      "profile_id": "THERMAL_SHOCK"
     },
     {
       "id": "SCH-026-20",
@@ -321,7 +340,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-20-v1"
-      }
+      },
+      "profile_id": "VIBRATION_DURABILITY"
     },
     {
       "id": "SCH-026-21",
@@ -337,7 +357,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-21-v1"
-      }
+      },
+      "profile_id": "MECHANICAL_SHOCK"
     },
     {
       "id": "SCH-026-22",
@@ -353,7 +374,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-22-v1"
-      }
+      },
+      "profile_id": "SALT_SPRAY"
     },
     {
       "id": "SCH-026-23",
@@ -369,7 +391,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-23-v1"
-      }
+      },
+      "profile_id": "WATER_INGRESS"
     },
     {
       "id": "SCH-026-24",
@@ -385,7 +408,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-24-v1"
-      }
+      },
+      "profile_id": "ESD"
     },
     {
       "id": "SCH-026-25",
@@ -401,7 +425,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-25-v1"
-      }
+      },
+      "profile_id": "THERMAL_CYCLE"
     },
     {
       "id": "SCH-026-26",
@@ -417,7 +442,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-26-v1"
-      }
+      },
+      "profile_id": "HIGH_TEMPERATURE"
     },
     {
       "id": "SCH-026-27",
@@ -433,7 +459,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-27-v1"
-      }
+      },
+      "profile_id": "LOW_TEMPERATURE"
     },
     {
       "id": "SCH-026-28",
@@ -449,7 +476,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-28-v1"
-      }
+      },
+      "profile_id": "HUMIDITY_CYCLE"
     },
     {
       "id": "SCH-026-29",
@@ -465,7 +493,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-29-v1"
-      }
+      },
+      "profile_id": "THERMAL_SHOCK"
     },
     {
       "id": "SCH-026-30",
@@ -481,7 +510,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-30-v1"
-      }
+      },
+      "profile_id": "VIBRATION_DURABILITY"
     },
     {
       "id": "SCH-026-31",
@@ -497,7 +527,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-31-v1"
-      }
+      },
+      "profile_id": "MECHANICAL_SHOCK"
     },
     {
       "id": "SCH-026-32",
@@ -513,7 +544,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-32-v1"
-      }
+      },
+      "profile_id": "SALT_SPRAY"
     },
     {
       "id": "SCH-026-33",
@@ -529,7 +561,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-33-v1"
-      }
+      },
+      "profile_id": "WATER_INGRESS"
     },
     {
       "id": "SCH-026-34",
@@ -545,7 +578,8 @@
         "mass_kg": 0.1,
         "clearance_mm": 10,
         "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-34-v1"
-      }
+      },
+      "profile_id": "ESD"
     }
   ],
   "equipment": [

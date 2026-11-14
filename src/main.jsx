@@ -1,4 +1,3 @@
-import AISessionNotice from './AISessionNotice.jsx';
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -12,7 +11,7 @@ import './SummaryTiles.css'
 let root;
 function mount(Component,key='app'){
  if(!root)root=createRoot(document.getElementById('root'));
- root.render(<StrictMode><Component key={key}/><AISessionNotice/></StrictMode>);
+ root.render(<StrictMode><Component key={key}/></StrictMode>);
  return root;
 }
 function bootError(error){
