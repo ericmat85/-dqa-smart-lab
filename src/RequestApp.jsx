@@ -1,4 +1,5 @@
-import {testOptions,buildSpecification,buildAcceptanceCriteria,getTestReference} from './requestTestCatalog.mjs';
+import useTrialCatalog from './useTrialCatalog.js';
+import {buildSpecification,buildAcceptanceCriteria,getTestReference} from './requestTestCatalog.mjs';
 import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
 import useSidebarMobile from './useSidebarMobile.js';
 import BorrowResourceFields from './BorrowResourceFields.jsx';
@@ -62,6 +63,7 @@ function readRequests() { try { const v = JSON.parse(localStorage.getItem(STORAG
 function getPath() { return (window.location.pathname.replace(/\/+$/, '') || '/')+window.location.search; }
 
 export default function RequestApp() {
+  const trialCatalog=useTrialCatalog(),testOptions=trialCatalog.rows.map(row=>row.name);
   const {pageSize}=useUiPreferences();
   const [path, setPath] = useState(getPath());
   const {dark,toggleTheme}=useSystemTheme();
@@ -405,10 +407,10 @@ export default function RequestApp() {
       <header className="rq-test-picker-header"><div><p className="rq-eyebrow">TEST CATALOG</p><div className="help-title-row"><h2>選擇試驗項目</h2><HelpTip>請選擇一個試驗項目，右側會顯示參考規格；確認後帶入表單，內容仍可修改。</HelpTip></div></div><button type="button" className="rq-close" onClick={()=>setTestPickerOpen(false)} aria-label="關閉">×</button></header>
       <div className="rq-test-picker-content rq-test-picker-columns"><section className="rq-test-picker-list" aria-label="試驗項目清單">
         <div className="rq-test-search-wrap"><span>⌕</span><input autoFocus className="rq-input" value={testSearch} onChange={e=>setTestSearch(e.target.value)} placeholder="搜尋試驗名稱，例如：高溫、振動、IPX6…"/><button type="button" className="rq-btn rq-btn-light" onClick={()=>setTestSearch('')}>清除</button></div>
-        <div className="rq-test-picker-meta"><span>試驗項目清單（單選）</span><b>共 {testOptions.length} 項</b></div>
+        {trialCatalog.error&&<p role="alert" className="rq-field-error">{trialCatalog.error}</p>}<div className="rq-test-picker-meta"><span>試驗項目清單（單選）</span><b>共 {testOptions.length} 項</b></div>
         <div className="rq-test-results"><PaginatedList items={testOptions.filter(t=>t.toLowerCase().includes(testSearch.trim().toLowerCase()))} resetKey={testSearch}>{page=>page.map(t=><label key={t} className={testCandidate===t?'selected':''}><input type="radio" name="requestTestItem" aria-label={t} checked={testCandidate===t} onChange={()=>setTestCandidate(t)}/><span><b>{t}</b><small>試驗條件與設備參考</small></span><i>{testCandidate===t?'✓':''}</i></label>)}</PaginatedList>{testOptions.filter(t=>t.toLowerCase().includes(testSearch.trim().toLowerCase())).length===0 && <div className="rq-test-no-results">找不到符合的試驗名稱，請更換關鍵字。</div>}</div>
       </section><aside className="rq-test-reference" aria-label="試驗規格參考" aria-live="polite">{testReference?<>
-        <p className="rq-eyebrow">TEST REFERENCE</p><h3>{testReference.name}</h3><p className="rq-test-reference-note">合成 Demo 參考；確認選擇後可在委託單中修改。</p>
+        <p className="rq-eyebrow">TEST REFERENCE</p><h3>{testReference.name}</h3><small>規範版本：{testReference.version}</small><p className="rq-test-reference-note">合成 Demo 參考；確認選擇後可在委託單中修改。</p>
         <dl><div><dt>適用設備</dt><dd>{testReference.equipment}</dd></div><div><dt>試驗條件</dt><dd>{testReference.conditions}</dd></div><div><dt>試驗工時</dt><dd>{testReference.duration}</dd></div><div><dt>作業日規則</dt><dd>{testReference.calendar}</dd></div></dl>
         <h4>試驗規範／試驗手法</h4><pre>{buildSpecification([testCandidate])}</pre><h4>判定參考</h4><p>{testReference.acceptance}</p>
       </>:<div className="rq-test-reference-empty"><h3>試驗規格參考</h3><p>選取左側試驗項目，即可查看設備、條件、工時與試驗手法。</p></div>}</aside></div>

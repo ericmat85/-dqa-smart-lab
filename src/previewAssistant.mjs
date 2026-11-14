@@ -1,7 +1,9 @@
+import {clearE2Activity} from './e2Activity.mjs';
 import {aiSessionState,setAISessionState} from './aiSessionState.mjs';
 import {selectE4ChatMode,sessionFailure,renderE4Reply} from './e4ChatModes.mjs';
 import {beginE4Activity,finishE4Activity,clearE4Activity} from './e4Activity.mjs';
-import {makeE4ReadonlyContext} from './e4ReadonlyContext.mjs';
+import {makeE4LabContext as makeE4ReadonlyContext} from './e4LabContext.mjs';
+import {e4LabScope} from './e4LabScope.mjs';
 const enabled=import.meta.env?.VITE_PRIVATE_PREVIEW==='1';
 const base=import.meta.env?.VITE_SANDBOX_API_BASE;
 const sessionKey=system=>`dqa-${system}-account-id`;
@@ -10,9 +12,11 @@ function endpoint(path){
  if(base!=='/api/preview')throw Error('AI Proxy 設定未完成；未呼叫模型。');
  return base+path;
 }
-const pendingRevocations=new Map();
+const pendingRevocations=new Map(),labCursors=new Map();
 export function closePreviewAISession(system){
  clearE4Activity(system);
+ for(const key of labCursors.keys())if(key.startsWith(system+':'))labCursors.delete(key);
+ if(system==='lms')clearE2Activity();
  if(!enabled||base!=='/api/preview')return Promise.resolve({status:'NOT_REQUIRED'});
  const operation=setAISessionState(system,'PENDING');
  globalThis.dispatchEvent?.(new CustomEvent('dqa:ai-session-ended',{detail:{system}}));
@@ -31,14 +35,16 @@ export async function establishSession(system,accountId,fetchImpl,signal){
  return response;
 }
 
-export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID()}={}){
+export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[]}={}){
  // E4-only Preview: this floating assistant never dispatches other engines.
- const selected=selectE4ChatMode(question);if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
+ const selected=selectE4ChatMode(question);const scope=e4LabScope(selected.question,{document:selected.mode==='DOCUMENT_QA'});if(!scope.allowed)throw Object.assign(Error(scope.reply),{code:scope.code});if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
  const url=endpoint('/ui/live/E4');
  if(!['lms','request','lab'].includes(system))throw Error('AI 系統權限不符；未呼叫模型。');
  const accountId=storage?.getItem(sessionKey(system));
  if(!accountId)throw Error('請先使用 Demo 帳號登入，再使用 AI 助理。');
- const context=selected.mode==='GENERAL_CHAT'&&!selected.question.startsWith('/')?makeE4ReadonlyContext(question,snapshot,metrics,system):undefined;
+ const cursorKey=system+':'+accountId,cursor=labCursors.get(cursorKey);
+ const retrievalQuestion=/^下一頁[！!。？?\s]*$/.test(question.trim())&&cursor?`從第${cursor.offset+1}筆查詢${cursor.kind}`:question;
+ const context=selected.mode==='GENERAL_CHAT'&&!selected.question.startsWith('/')?makeE4ReadonlyContext(retrievalQuestion,snapshot,metrics,system,Date.now(),globalThis.localStorage,contextHint):undefined;
  // This password is the existing public synthetic Demo credential, never a backend secret.
  const ticket=beginE4Activity({system,accountId,mode:selected.mode,control:selected.question==='/clear'});
  let response,packet,errorCode;
@@ -52,6 +58,7 @@ export async function askPreviewAssistant(question,system,{snapshot,metrics,fetc
    if(response.status===422&&errorCode==='INPUT_TOKEN_LIMIT')throw Error(`問題與必要資料超過安全輸入上限（INPUT_TOKEN_LIMIT）；未呼叫模型。請縮短問題或指定單一設備／委託編號；必要證據未截斷。Trace ${trace}`);
    throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
   const reply=renderE4Reply(packet,selected.mode);
+  if(context?.version===2){const kinds={equipment:'設備清單',trialCatalog:'試驗項目清單',requests:'委託清單',schedules:'排程清單',materials:'物料清單',reports:'報告清單',borrows:'借用清單',labWorkItems:'試驗清單',labOperations:'中斷申請清單',labAudit:'操作歷程'};const kind=kinds[context.items[0]?.kind];if(context.selection.complete===false&&kind)labCursors.set(cursorKey,{kind,offset:context.selection.next_offset});else labCursors.delete(cursorKey);}
   finishE4Activity(ticket,{status:'SUCCESS',httpStatus:response.status,packet});
   return reply;
  }catch(error){

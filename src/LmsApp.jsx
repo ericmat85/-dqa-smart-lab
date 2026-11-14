@@ -1,3 +1,5 @@
+import {requireE2Enabled,applyE2Settings} from './e2PlanningSettings.mjs';
+import {beginE2Activity,finishE2Activity,draftE2Activity} from './e2Activity.mjs';
 import {prepareScheduleTrialForm,prepareManualTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
 import {askEngineAdvice} from './previewAssistant.mjs';
 import {askE2Scheduling} from './e2PreviewClient.mjs';
@@ -1752,9 +1754,11 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
   if(!editing||!editForm)return;
   if(e2Operation.current){setScheduleMessage('上一筆請求仍在處理，請稍候。');return;}
   const operation=crypto.randomUUID();e2Operation.current=operation;setE2Applied(null);setScheduleMessage('正在讀取試驗與可用資源…');
+  const guided=globalThis.__DQA_GUIDED_CASE_ID__===editing.requestId&&window.parent!==window;
+  const activityTicket=guided?null:beginE2Activity(currentUser?.id);
   try{
    const originalForm=structuredClone(editForm);
-   if(globalThis.__DQA_GUIDED_CASE_ID__===editing.requestId&&window.parent!==window){
+   if(guided){
     onStage(0);const {recommendSchedule}=await import('./scheduleEquipment.mjs');
     if(signal?.aborted)return;
     const equipment=readScheduleEquipment(),rows=latestSchedules();onStage(1);
@@ -1765,11 +1769,12 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
     setSchedulingForm(draft);setScheduleMessage('導覽規則示範：未呼叫模型。排程建議已帶入表單，確認後按「儲存排程」。');
     return {status:'applied'};
    }
+   const preferences=requireE2Enabled();
    const resolved=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
    const equipment=readScheduleEquipment(),roster=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
-   const sourceForm=resolved.form,coverageIssues=[],context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
+   const sourceForm=applyE2Settings({editing,form:resolved.form,settings:preferences.settings}),coverageIssues=[],context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
    setSchedulingForm(sourceForm);
-   const data=await askE2Scheduling(context,{signal,onStage,idempotencyKey:operation});
+   const data=await askE2Scheduling(context,{signal,onStage,idempotencyKey:operation,activityTicket});
    if(signal?.aborted||e2Operation.current!==operation)return;
    if(data.assessment.status!=='PROPOSAL_AVAILABLE'){
     const details=coverageIssues.length?coverageIssues.map(describeE2CoverageIssue):data.assessment.reasons.map(describeE2Reason);
@@ -1783,10 +1788,15 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    if(fresh.signature!==resolved.signature)throw new Error('試驗資料已更新，請重新分析。');
    const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
    const approved=makeE2Draft({editing,form:sourceForm,equipment:readScheduleEquipment(),accounts:liveAccounts,rows:latestSchedules(),context,candidate});
-   setSchedulingForm(approved.form);setE2Applied({...approved,trace:data.trace_id,mode:data.execution_mode,trialSourceForm:originalForm,trialInputSignature:resolved.signature,trialInputProvenance:resolved.provenance});
+   draftE2Activity(activityTicket,'APPLIED');
+   setSchedulingForm(approved.form);setE2Applied({...approved,activityTicket,trace:data.trace_id,mode:data.execution_mode,trialSourceForm:originalForm,trialInputSignature:resolved.signature,trialInputProvenance:resolved.provenance});
    setScheduleMessage((data.execution_mode==='MOCK'?'模擬測試：未呼叫真實模型。':'')+'依'+resolved.summary+'完成建議並帶入表單，尚未儲存排程。'+resolved.notes.join(' '));
    return {status:'applied'};
-  }catch(error){if(e2Operation.current===operation)setScheduleMessage(signal?.aborted?'已取消等待；不會自動重送。':schedulingErrorMessage(error));}
+  }catch(error){
+   finishE2Activity(activityTicket,{status:signal?.aborted?'CANCELLED':'ERROR',httpStatus:error.httpStatus??error.aiHttpStatus,traceId:error.trace,errorCode:signal?.aborted?'REQUEST_CANCELLED':error.code||error.aiErrorCode||(/E2_DATA_BLOCKED/.test(error.message)?'SYNTHETIC_DATA_BLOCKED':'TRIAL_DATA_INCOMPLETE')});
+   draftE2Activity(activityTicket,'REJECTED');
+   if(e2Operation.current===operation)setScheduleMessage(signal?.aborted?'已取消等待；不會自動重送。':schedulingErrorMessage(error));
+  }
   finally{if(e2Operation.current===operation)e2Operation.current=null;}
  }
  function saveSchedule(){
@@ -1803,6 +1813,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
      if(e2Applied)proposal.e2Review={trace:e2Applied.trace,mode:e2Applied.mode,candidateId:e2Applied.candidate.id,source:'SYNTHETIC_DIMENSION_DOCUMENTS',confirmation:'USER_SAVED_FORM',trialInputProvenance:e2Applied.trialInputProvenance};
      const updated=rows.map(row=>row.id===editing.id?proposal:row);
      try{window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
+     if(e2Applied)draftE2Activity(e2Applied.activityTicket,'SAVED');
      setScheduleRows(updated);window.dispatchEvent(new Event('dqa:schedules-updated'));setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
      setEditing(null);setSchedulingForm(null);
    }catch(error){setScheduleMessage(schedulingErrorMessage(error));}
@@ -1858,6 +1869,7 @@ function DashboardPage({
   function navigate(id, filter = null) {
     if(id==='accounts'||(id==='settings'&&!canAccessLmsPage(currentUser,'settings')&&canManageAccounts(currentUser))){if(!canManageAccounts(currentUser))return;setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/accounts');return;}
     if(!canAccessLmsPage(currentUser,id))return;
+    if(id==='settings'&&filter==='activity'){setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/parameters?section=activity');return;}
     setActive(id);
     setNotificationFilter(filter);
     setSidebarOpen(false);
@@ -1925,7 +1937,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 

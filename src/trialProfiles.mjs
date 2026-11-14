@@ -1,13 +1,14 @@
+import {findTrialDefinition} from './trialCatalogStore.mjs';
 import data from '../render-backend/gateway/trial_profiles.json' with {type:'json'};
 const HOUR=3600000,DAY=24*HOUR;
 export const TRIAL_PROFILES=data.profiles;
-export const trialProfile=title=>/[、,，;]/.test(String(title||''))?null:TRIAL_PROFILES.find(p=>new RegExp(p.match,'i').test(String(title||'')))||null;
+export const trialProfile=title=>{if(/[、,，;]/.test(String(title||'')))return null;let entry;try{entry=findTrialDefinition(title);}catch{return null;}return TRIAL_PROFILES.find(p=>entry?p.id===entry.profileId:new RegExp(p.match,'i').test(String(title||'')))||null;};
 export const profileById=id=>TRIAL_PROFILES.find(p=>p.id===id)||null;
 export const profileMachineEvidence=machine=>machine?.evidence||data.machine_evidence[machine?.id]||null;
 export function scheduleCase(editing,cases){
  const stored=cases.find(x=>x.id===editing?.id&&x.title===editing.title);if(stored)return stored;
  const profile=trialProfile(editing?.title);
- if(profile&&profile.aliases.includes(editing.title)&&/^SCH-REQ-2026-[a-f0-9]{8}$/.test(editing.id||'')&&editing.requestId===editing.id.slice(4))return {id:editing.id,request_id:editing.requestId,title:editing.title,profile_id:profile.id,family:profile.family,sample:profile.sample,template:true};
+ if(profile&&(profile.aliases.includes(editing.title)||findTrialDefinition(editing.title)?.profileId===profile.id)&&/^SCH-REQ-2026-[a-f0-9]{8}$/.test(editing.id||'')&&editing.requestId===editing.id.slice(4))return {id:editing.id,request_id:editing.requestId,title:editing.title,canonical_title:profile.aliases[0],profile_id:profile.id,family:profile.family,sample:profile.sample,template:true};
  return null;
 }
 export const profileEquipmentMatches=(profile,machine)=>Boolean(profile&&new RegExp(profile.equipment_pattern,'i').test(String(machine?.name||'')));

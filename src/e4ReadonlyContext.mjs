@@ -6,7 +6,9 @@ const safeId=value=>typeof value==='string'&&/^(?:REQ-\d{4}-(?:\d{3}|[a-f0-9]{8}
 const bytes=value=>new TextEncoder().encode(JSON.stringify(value)).length;
 export function readE4CurrentData(snapshot,metrics,system,storage,now=Date.now()){
  if(system!=='lms')return {snapshot,metrics};
- const fresh=readLabSnapshot(storage,now);
+ // The assistant refresh does not read the account or permission stores.
+  const labStorage={getItem:key=>key==='dqa-shared-demo-accounts-v1'?'[]':storage.getItem(key)};
+  const fresh=readLabSnapshot(labStorage,now);
  return {snapshot:{...fresh,reports:snapshot?.reports},metrics:deriveLabMetrics(fresh,now)};
 }
 function project(kind,row){

@@ -12,6 +12,9 @@ def require(ok):
 def validate_context(value,binding,now=None):
  if now is None:now=time.time()
  if value is None:return None
+ if isinstance(value,dict) and value.get('version')==2:
+  from gateway.e4_lab_context import validate_lab_context
+  return validate_lab_context(value,binding,now)
  if binding['system']!='lms' or binding['actor'] not in ('level1','level2'):raise E4Error('READONLY_CONTEXT_FORBIDDEN',403)
  require(isinstance(value,dict) and set(value)=={'version','source','observed_at','intent','totals','coverage','schedule_status','state_counts','items','selection'})
  require(type(value['version']) is int and value['version']==1 and value['source']=='BROWSER_DEMO_READONLY' and value['intent'] in ('LOOKUP','REPORT_DRAFT'))
@@ -76,4 +79,4 @@ READ_CHAT_INSTRUCTIONS=(
 def draft_metadata(context):
  if not context or context['intent']!='REPORT_DRAFT':return None
  item=next(x for x in context['items'] if x['kind']=='requests')
- return {'kind':'DRAFT_ONLY','request_id':item['id'],'title':item['fields'].get('title','未提供試驗名稱'),'source':'BROWSER_DEMO_READONLY','observed_at':context['observed_at'],'measurements':'NOT_PROVIDED','verdict':'PENDING_ENGINEER_REVIEW','signatures':'NOT_SIGNED','saved_to_system':False}
+ return {'kind':'DRAFT_ONLY','request_id':item['id'],'title':item['fields'].get('title','未提供試驗名稱'),'source':context['source'],'observed_at':context['observed_at'],'measurements':'NOT_PROVIDED','verdict':'PENDING_ENGINEER_REVIEW','signatures':'NOT_SIGNED','saved_to_system':False}

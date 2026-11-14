@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {readE4Activity,clearE4Activity} from '../src/e4Activity.mjs';
 let code=fs.readFileSync(new URL('../src/previewAssistant.mjs',import.meta.url),'utf8').replaceAll('import.meta.env?.VITE_PRIVATE_PREVIEW',"'1'").replaceAll('import.meta.env?.VITE_SANDBOX_API_BASE',"'/api/preview'");
-for(const module of ['e4Activity.mjs','e4ChatModes.mjs','aiSessionState.mjs','aiSyntheticInput.mjs','e4ReadonlyContext.mjs'])code=code.replaceAll("'./"+module+"'",JSON.stringify(new URL('../src/'+module,import.meta.url).href));
+for(const module of ['e4LabContext.mjs','e4LabScope.mjs','e2Activity.mjs','e4Activity.mjs','e4ChatModes.mjs','aiSessionState.mjs','aiSyntheticInput.mjs','e4ReadonlyContext.mjs'])code=code.replaceAll("'./"+module+"'",JSON.stringify(new URL('../src/'+module,import.meta.url).href));
 const api=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
 const storage={getItem:()=> 'DEMO-LEVEL1'};
 const packet=(mode='GENERAL_CHAT')=>({trace_id:'I-client-monitor',data:{engine:'E4',chat_mode:mode,execution_mode:'MOCK',real_ai:false,provider:'MOCK_HTTP_TRANSPORT',model:'MOCK_ONLY',provider_request_id:'req_MOCK_MONITOR',usage:{input_tokens:80,output_tokens:40},estimated_cost_usd:'0.000028',history_turns_used:2,result:{summary:'你好，這是清楚標示的模擬回答。',citations:mode==='DOCUMENT_QA'?[{document_id:'SYNTH-TECH-001',version:'1',quote:'合成條件'}]:[]}}});
@@ -25,7 +25,7 @@ test('logout clears observations before backend revocation completes',async t=>{
 test('chat request carries only current read-only projection through the existing E4 endpoint',async()=>{
  const {readLabSnapshot,deriveLabMetrics}=await import('../src/labData.mjs');const snapshot=structuredClone(readLabSnapshot({getItem:()=>null}));snapshot.accounts[0].password='PRIVATE_ACCOUNT';let sent;
  await api.askPreviewAssistant('目前有多少委託單與試驗','lms',{storage,snapshot,metrics:deriveLabMetrics(snapshot),fetchImpl:async(url,options)=>{if(url.endsWith('/session'))return{ok:true,status:200,json:async()=>({authenticated:true,session_created:true,conversation_id:'a'.repeat(32)})};assert.equal(url,'/api/preview/ui/live/E4');sent=JSON.parse(options.body);return{ok:true,status:200,json:async()=>packet()};}});
- assert.equal(sent.demo_context.totals.requests,50);assert.equal(sent.demo_context.totals.schedules,34);assert.doesNotMatch(JSON.stringify(sent),/PRIVATE_ACCOUNT|password|accounts/);
+ assert.equal(sent.demo_context.source,'BROWSER_LAB_READONLY');assert.equal(sent.demo_context.totals.requests,53);assert.equal(sent.demo_context.totals.commission_forms,53);assert.equal(sent.demo_context.totals.schedules,34);assert.doesNotMatch(JSON.stringify(sent),/PRIVATE_ACCOUNT|password|accounts/);
 });
 test('Live presentation omits technical headings and still records Provider evidence in monitor',async()=>{
  const p=packet();Object.assign(p.data,{execution_mode:'LIVE_PROVIDER',real_ai:true,provider:'openai_responses',model:'gpt-6-luna',provider_request_id:'req_REAL_FORMAT_TEST'});

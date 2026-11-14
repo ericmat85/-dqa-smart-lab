@@ -59,6 +59,7 @@ class Trial(Strict):
 
 class Machine(Strict):
     id: str = Field(max_length=30)
+    space_units: int | None = Field(default=None,ge=1,le=100000)
     status: Literal['STANDBY', 'IN_USE', 'MAINTENANCE', 'CALIBRATION']
 
 
@@ -224,7 +225,7 @@ def evaluate(raw, now):
         return missing('ENABLED_ENGINEER_REQUIRED')
     available = [];uncertain = [];rejected = []
     for m in c['equipment']:
-        machine = EQUIPMENT[m['id']]
+        machine = {**EQUIPMENT[m['id']],**({'space_units':m['space_units']} if m.get('space_units') is not None else {})}
         if m['status'] != 'STANDBY':
             continue
         thermal = bool(re.search('環境試驗箱|恆溫恆濕|高溫爐', machine['name']))
@@ -292,7 +293,7 @@ def evaluate_profile(c, now):
     if not owners:return missing('ENABLED_ENGINEER_REQUIRED')
     available=[];uncertain=[];rejected=[];matching=False
     for row in c['equipment']:
-        machine=EQUIPMENT[row['id']]
+        machine={**EQUIPMENT[row['id']],**({'space_units':row['space_units']} if row.get('space_units') is not None else {})}
         if not machine_matches(profile,machine):continue
         matching=True
         if row['status']!='STANDBY':continue

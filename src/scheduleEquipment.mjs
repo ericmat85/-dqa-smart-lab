@@ -1,3 +1,4 @@
+import {equipmentSpaceUnits} from './equipmentSpace.mjs';
 import {trialProfile,profileEquipmentMatches,trialExecution,sequentialAllocations,operationBuffersAllowed} from './trialProfiles.mjs';
 import {explicitHours} from './trialSourceFacts.mjs';
 import {equipmentIds,reservationWindow,bufferMinutes} from './scheduleResources.mjs';
@@ -64,16 +65,16 @@ function sampleSpaceUnits(form){
  return units;
 }
 function effectiveCapacity(machine,form,requirePhysicalVolume=false){
- const capacity=Number(machine.capacity);if(!Number.isSafeInteger(capacity)||capacity<1)throw Error('設備容量無效，請先修正設備台帳。');
+ const capacity=Number(requirePhysicalVolume?machine.capacity:equipmentSpaceUnits(machine));if(!Number.isSafeInteger(capacity)||capacity<1)throw Error('設備容量無效，請先修正設備台帳。');
  // The original Demo quota is an abstract U allocation, not a litre estimate.
  // Guarded AI candidates opt into their independent physical evidence checks.
- if(form.sampleSpaceUnits!==undefined&&!requirePhysicalVolume)return Math.floor(capacity/sampleSpaceUnits(form));
+ if(form.sampleSpaceUnits!==undefined&&!requirePhysicalVolume){const units=equipmentSpaceUnits(machine);if(units===null)throw Error('設備缺少必填的可用空間 U。');return Math.floor(units/sampleSpaceUnits(form));}
  const volume=sampleVolume(form);
  const available=Number(machine.usableVolumeLitres);
  if(!Number.isFinite(available)||available<=0)throw Error('設備缺少可驗證的使用空間，請確認設備台帳。');
  let count=Math.min(capacity,Math.floor(available/Number(volume)));
  if(form.sampleSpaceUnits!==undefined){
-  const units=sampleSpaceUnits(form),availableUnits=Number(machine.spaceUnits??machine.capacity);
+  const units=sampleSpaceUnits(form),availableUnits=equipmentSpaceUnits(machine);
   if(!Number.isSafeInteger(availableUnits)||availableUnits<1)throw Error('設備缺少可核對的空間容量（U）。');
   count=Math.min(count,Math.floor(availableUnits/units));
  }
@@ -87,7 +88,7 @@ function allocateSamples(machines,form,quantity,requirePhysicalVolume=false,prof
  let remaining=quantity;
  const allocations=machines.map((machine,index)=>{const count=Math.max(0,Math.min(remaining-(machines.length-index-1),effectiveCapacity(machine,form,requirePhysicalVolume)));remaining-=count;return {equipmentId:machine.id,quantity:count};});
  if(allocations.some(row=>row.quantity<1))throw Error('每台設備至少須分配一件樣品，請減少台數或確認空間。');
- if(remaining>0)throw Error(machines.length===1&&quantity>Number(machines[0].capacity)?`樣品數量超過設備容量（${machines[0].capacity} 件）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
+ if(remaining>0)throw Error(machines.length===1&&quantity>Number(machines[0].capacity)?`樣品占用空間超過設備可用空間（${equipmentSpaceUnits(machines[0])??'待確認'} U）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
  return allocations;
 }
 export function validateSchedule({editing,form,equipment,accounts,rows,today,requirePhysicalVolume=false}) {

@@ -75,6 +75,8 @@ class E4Service:
   if mode not in MODES:raise E4Error('INVALID_CHAT_MODE',422)
   try:validate_binding(binding,self.clock());generation=self.ledger.bind_session(binding,self.clock())
   except ValueError as e:raise E4Error(str(e),403 if str(e)=='AUTHORIZATION_DENIED' else 401) from None
+  from gateway.lab_scope import ensure_lab_scope
+  ensure_lab_scope(question,mode==DOCUMENT_QA)
   from gateway.e4_readonly_context import validate_context
   context=validate_context(demo_context,binding,self.clock())
   if context is not None and mode!=GENERAL_CHAT:raise E4Error('READONLY_CONTEXT_MODE_DENIED',422)
@@ -110,10 +112,13 @@ class E4Service:
   for pair in history['pairs']:
    if not isinstance(pair,dict) or set(pair)!={'user','assistant'} or not all(isinstance(pair[k],str) and 0<len(pair[k])<=limit for k,limit in [('user',1500),('assistant',2400)]):raise E4Error('INVALID_HISTORY',422)
   pairs=list(history['pairs']);truncated=history['turns']>len(pairs)
-  instructions=instructions_for(mode)
+  instructions=instructions_for(mode)+' Laboratory/testing topics only. DQA is not built; refuse identities, permissions, credentials and unrelated topics.'
   if demo_context is not None:
    from gateway.e4_readonly_context import READ_CHAT_INSTRUCTIONS
-   instructions=READ_CHAT_INSTRUCTIONS
+   if demo_context.get('version')==2:
+    from gateway.e4_lab_context import LAB_CHAT_INSTRUCTIONS
+    instructions=LAB_CHAT_INSTRUCTIONS
+   else:instructions=READ_CHAT_INSTRUCTIONS
   while True:
    inp={'history':pairs,'question':question}
    if demo_context is not None:inp['demo_context']=demo_context
@@ -202,6 +207,7 @@ class E4Service:
   if demo_context is not None:
    from gateway.e4_readonly_context import draft_metadata
    packet['read_context']={'source':demo_context['source'],'observed_at':demo_context['observed_at'],'totals':demo_context['totals'],'coverage':demo_context['coverage'],'selection':demo_context['selection'],'writes':'NONE'}
+   if demo_context.get('version')==2:packet['read_context']['references']=[{'kind':x['kind'],'id':x['id'],'name':x['fields'].get('name',x['fields'].get('title','')),'version':x['fields'].get('version','')} for x in demo_context['items']]
    draft=draft_metadata(demo_context)
    if draft:packet['report_draft']=draft
   return packet

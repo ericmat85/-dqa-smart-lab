@@ -1,3 +1,4 @@
+import {e4LabScope} from './e4LabScope.mjs';
 import {askPreviewAssistant} from './previewAssistant.mjs';
 import {readE4CurrentData} from './e4ReadonlyContext.mjs';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
@@ -80,14 +81,16 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   setQuestion('');setFiles([]);if(fileInput.current)fileInput.current.value='';
   let reply,failed=false;
   try{
-   const faq=findCommonQuestion(trimmed);
+   const scope=e4LabScope(trimmed,{document:/^文件問答\s*[:：]/.test(trimmed)});
+   const faq=scope.allowed&&findCommonQuestion(trimmed);
    const dynamic=faq&&['overview','pending','running','standby','stock'].includes(faq.id);
    let current={snapshot,metrics};
-   if(!faq||dynamic){
+   if(scope.allowed&&(!faq||dynamic)){
     let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('Storage unavailable');}};}
     current=readE4CurrentData(snapshot,metrics,system,storage);
+    if(!faq&&system==='lms'){try{const {allReports}=await import('./reportStore.mjs');current.snapshot={...current.snapshot,reports:await allReports()};}catch{current.snapshot={...current.snapshot,reports:undefined};}}
    }
-   reply=faq?commonQuestionReply(trimmed,current.snapshot,current.metrics,system):trimmed?await askPreviewAssistant(trimmed,system,{...current,signal:controller.signal}):'附件僅展示檔名，尚未送至模型。';
+   reply=!scope.allowed?scope.reply:faq?commonQuestionReply(trimmed,current.snapshot,current.metrics,system):trimmed?await askPreviewAssistant(trimmed,system,{...current,signal:controller.signal,contextHint:turns.slice(-4).map(turn=>turn.question)}):'附件僅展示檔名，尚未送至模型。';
   }
   catch(error){failed=true;reply=error.name==='AbortError'?'請求已取消；Provider 結果可能未知，不會自動重送。':error.message;}
   if(epoch.current===ownerEpoch&&inFlight.current?.id===id&&!controller.signal.aborted){

@@ -34,5 +34,12 @@ export function renderE4Reply(packet,mode) {
    if(r.kind!=='DRAFT_ONLY'||r.measurements!=='NOT_PROVIDED'||r.verdict!=='PENDING_ENGINEER_REVIEW'||r.signatures!=='NOT_SIGNED'||r.saved_to_system!==false||!/^REQ-\d{4}-(?:\d{3}|[a-f0-9]{8})$/.test(r.request_id)||typeof r.title!=='string')throw Error('REPORT_DRAFT_CONTRACT_INVALID');
    draft=`試驗報告草稿\n委託編號：${r.request_id}\n試驗名稱：${r.title}\n量測結果：尚未提供，不補填數值。\n結果判定：待工程師確認。\n正式簽核：未簽核，未提交至系統。\n\n`;
   }
-  return `${execution}${draft}${d.result.summary}${citations?'\n'+citations:''}`;
+  let source='';const context=d.read_context;
+  if(context?.source==='BROWSER_LAB_READONLY'){
+   const refs=(context.references||[]).filter(r=>r.kind==='trialCatalog'&&typeof r.name==='string'&&r.name.length<=80&&typeof r.version==='string'&&r.version.length<=80);
+   if(refs.length)source+='\n資料來源：'+refs.map(r=>r.name+(r.version?'・'+r.version:'')).join('、');
+   const s=context.selection;if(s&&s.complete===false&&Number.isSafeInteger(s.next_offset))source+=`\n本次顯示 ${s.shown}／${s.matched} 筆，續查可指定從第 ${s.next_offset+1} 筆開始。`;
+   if(s?.omitted_fields?.length)source+='\n部分來源欄位未提供，回答不包含這些內容。';
+  }
+  return `${execution}${draft}${d.result.summary}${citations?'\n'+citations:''}${source}`;
 }

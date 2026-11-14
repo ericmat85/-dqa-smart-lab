@@ -432,7 +432,7 @@ PCBA 版次 PCBA Version|PCBA version
 樣品資訊|Sample information
 樣品來源|Sample source
 樣品來源與樣品資訊|Sample source and information
-樣品容量|Sample capacity
+可用空間 U|Available space U
 樣品編號|Sample ID
 每件樣品使用空間 L|Space per sample (L)
 判定基準|Acceptance criteria
@@ -494,8 +494,8 @@ PCBA 版次 PCBA Version|PCBA version
 保養檢查重點|Maintenance checklist
 獨立設備台帳|Individual equipment register
 每日可用時間|Available hours per day
-最大樣品數|Maximum samples
-可用空間 L（選填）|Available space in L (optional)
+可用空間 U|Available space U
+可用空間 U|Available space U
 人員與試驗時段|Operator and test dates
 排程備註|Schedule notes
 排程分析|Schedule analysis

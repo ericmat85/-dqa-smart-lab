@@ -8,7 +8,8 @@ export const ADMIN_MODULES=[
  ['backup','系統備份設定','archive',1,'Demo 模擬','設定模擬排程；不備份、不還原業務資料。'],
  ['security','資訊安全設定','review',1,'Demo 模擬','區分瀏覽器安全機制與尚未接入的防護。'],
  ['monitoring','系統監控','equipment',1,'Demo 模擬','前端實況及分開標示的服務示意。'],
- ['ai','AI 引擎管理','dashboard',2,'E4 請求監控','E4 助理運行監控與既有引擎 Demo 設定。'],
+ ['interface','介面設定','settings',1,'已實作','調整字體、語言與列表每頁顯示筆數。'],
+ ['ai','AI 引擎管理','dashboard',2,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
  ['notifications','通知與提醒設定','notifications',2,'Demo 模擬','保存提醒規則草稿，不實際發送通知。'],
  ['quality','品質與稽核設定','review',2,'Demo 模擬','不符合、CAPA 與稽核追溯展示。'],
  ['qualifications','人員資格管理','accounts',2,'Demo 模擬','假資格與授權展示，不影響業務判定。'],
@@ -28,7 +29,7 @@ export const WORKFLOW_RULES=[
 export const AI_ENGINES=[
  ['request','AI 委託單審查','委託內容檢查展示；正式簽核仍由既有角色執行。'],
  ['report','AI 試驗報告審查','既有前端工作簿格式與必要欄位規則檢核。'],
- ['schedule','AI 排程智慧化','既有前端設備相容與時段建議，不變更演算法。'],
+ ['schedule','AI 排程智慧化','試驗資料與資源核對、可調整的規劃偏好，以及請求、用量與 Trace 監控。'],
  ['assistant','AI 智能助理','一般聊天與合成文件問答；狀態取自實際回應。'],
 ].map(([id,name,description])=>({id,name,description}));
 export const NOTICE_RULES=[['approval','委託單待簽核提醒'],['overdue','審查逾期提醒'],['schedule','試驗排程異動通知'],['completed','試驗完成通知'],['report','報告待審核提醒'],['calibration','設備校正到期提醒'],['ai','AI 審查異常提醒']];
