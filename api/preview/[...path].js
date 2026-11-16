@@ -1,3 +1,4 @@
+import {previewHealth} from '../../server/previewHealth.mjs';
 import {resolvePreviewRoute,isAllowedPreviewPath} from '../../server/previewRouting.mjs';
 import {createHmac,timingSafeEqual,randomUUID} from 'node:crypto';
 const ACCOUNTS={
@@ -110,6 +111,10 @@ export function createHandler({env=process.env,fetchImpl=globalThis.fetch,entryp
    const system=req.headers['x-preview-system'];const session=['request','lms','lab'].includes(system)?readSignedSession(req.headers.cookie,system,env.PREVIEW_SESSION_SECRET,true):null;const actor=session?.actor;
    if(isLocallyRevoked(session))return fail(401,'SESSION_REVOKED');
    const bootstrap=path==='/ui/bootstrap'&&req.method==='GET';if(!actor&&!bootstrap)return fail(401,'AUTHENTICATION_REQUIRED');
+   if(path==='/health/status'){
+    if(system!=='lms')return fail(403,'HEALTH_SCOPE_DENIED');
+    const result=await previewHealth({env,fetchImpl,trace});return result.body?reply(result.status,result.body):fail(result.status,result.code);
+   }
    // Ignore all caller-supplied role and gateway headers. Only signed server sessions assign a role.
    const extraHeaders=/^\/ui\/live\/E[1-4]$/.test(path)?e4Headers(session,path==='/ui/live/E2'?'E2':'E4'):{};
    if(!extraHeaders)return fail(401,'SESSION_REFRESH_REQUIRED');

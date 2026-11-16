@@ -1,19 +1,19 @@
-// Administration-only fictional settings. No case, account, asset or service writes.
+// Administration configuration only. Business sources and server security policies remain independent.
 export const ADMIN_GROUPS=['基礎與流程管理','安全與維運','智慧與品質管理','組織管理'];
 export const ADMIN_MODULES=[
- ['accounts','帳號與權限管理','accounts',0,'Demo 模擬','集中管理帳號、部門及內建／自訂角色權限。','accounts'],
+ ['accounts','帳號與權限管理','accounts',0,'資料連動','集中管理帳號、部門及內建／自訂角色權限。','accounts'],
  ['workflow','九階流程規則','history',0,'已實作','唯讀檢視既有階段、角色與簽核條件。'],
  ['parameters','試驗與設備參數','equipment',0,'已實作','查閱共用試驗目錄、設備規格及排程參數。','equipment'],
- ['documents','文件與報告設定','reports',0,'Demo 模擬','既有範本、報告入口與保存政策展示。','archive'],
- ['backup','系統備份設定','archive',1,'Demo 模擬','設定模擬排程；不備份、不還原業務資料。'],
- ['security','資訊安全設定','review',1,'Demo 模擬','區分瀏覽器安全機制與尚未接入的防護。'],
- ['monitoring','系統監控','equipment',1,'Demo 模擬','前端實況及分開標示的服務示意。'],
+ ['documents','文件與報告設定','reports',0,'資料連動','管理 Excel 範本、文件保存政策與個人簽名。','archive'],
+ ['backup','系統備份設定','archive',1,'設定備份','下載、完整性檢查及還原管理設定。'],
+ ['security','資訊安全設定','review',1,'稽核紀錄','檢視既有安全邊界、管理與實驗室操作紀錄。'],
+ ['monitoring','系統監控','equipment',1,'服務檢查','來源健康、儲存狀態與受保護的後端健康檢查。'],
  ['interface','介面設定','settings',1,'已實作','調整字體、語言與列表每頁顯示筆數。'],
  ['ai','AI 引擎管理','dashboard',2,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
- ['notifications','通知與提醒設定','notifications',2,'Demo 模擬','保存提醒規則草稿，不實際發送通知。'],
- ['quality','品質與稽核設定','review',2,'Demo 模擬','不符合、CAPA 與稽核追溯展示。'],
- ['qualifications','人員資格管理','accounts',2,'Demo 模擬','假資格與授權展示，不影響業務判定。'],
- ['organization','組織與租戶設定','maintenance',3,'Demo 模擬','虛構組織結構；不切換真實租戶。'],
+ ['notifications','通知與提醒設定','notifications',2,'資料連動','依現有案件與設備資料整理站內提醒。'],
+ ['quality','品質與稽核設定','review',2,'資料連動','建立改善追蹤，連結案件、設備與試驗來源。'],
+ ['qualifications','人員資格管理','accounts',2,'資料連動','管理訓練與資格到期紀錄，對照現有人員。'],
+ ['organization','組織與租戶設定','maintenance',3,'資料連動','工作區設定與現有人員、部門及據點概況。'],
 ].map(([id,title,icon,group,status,description,page])=>({id,title,icon,group,status,description,page}));
 export const WORKFLOW_RULES=[
  ['待簽核','指定委託者主管','核准、退回補正','待審查','原委託者補件／重新送簽','委託必填資料、委託者簽名；核准需主管簽名，退回需原因。'],
@@ -34,13 +34,13 @@ export const AI_ENGINES=[
 ].map(([id,name,description])=>({id,name,description}));
 export const NOTICE_RULES=[['approval','委託單待簽核提醒'],['overdue','審查逾期提醒'],['schedule','試驗排程異動通知'],['completed','試驗完成通知'],['report','報告待審核提醒'],['calibration','設備校正到期提醒'],['ai','AI 審查異常提醒']];
 export const ADMIN_FIELDS={
- backup:[{key:'enabled',label:'模擬自動備份啟用',type:'checkbox'},{key:'frequency',label:'備份頻率',options:[['daily','每日'],['weekly','每週一'],['manual','手動']]},{key:'time',label:'預定備份時間',type:'time'},{key:'retentionDays',label:'模擬保留天數',type:'number',min:1,max:3650}],
+ backup:[{key:'enabled',label:'開頁期間顯示備份提醒',type:'checkbox'},{key:'frequency',label:'備份頻率',options:[['daily','每日'],['weekly','每週一'],['manual','手動']]},{key:'time',label:'預定備份時間',type:'time'},{key:'retentionDays',label:'建議備份保留天數',type:'number',min:1,max:3650}],
  documents:[{key:'retentionDays',label:'文件保存期限（天，Demo 草稿）',type:'number',min:1,max:36500}],
  ai:AI_ENGINES.map(e=>({key:e.id,label:`${e.name}模擬啟用`,type:'checkbox'})),
- notifications:NOTICE_RULES.flatMap(([id,label])=>[{key:id,label:`${label}（模擬）`,type:'checkbox'},{key:id+'Time',label:`${label}時間`,type:'time'}]),
+ notifications:NOTICE_RULES.flatMap(([id,label])=>[{key:id,label:`${label}（站內）`,type:'checkbox'},{key:id+'Time',label:`${label}時間`,type:'time'}]),
  quality:[{key:'category',label:'不符合事項分類（Demo）',type:'text'},{key:'auditItem',label:'稽核項目（Demo）',type:'text'}],
  qualifications:[{key:'person',label:'假人員名稱',type:'text'},{key:'equipment',label:'設備操作授權（Demo）',type:'text'},{key:'test',label:'試驗項目授權（Demo）',type:'text'},{key:'training',label:'訓練紀錄（Demo）',type:'text'},{key:'expires',label:'授權到期日期',type:'date'}],
- organization:[{key:'company',label:'虛構公司名稱',type:'text'},{key:'departments',label:'部門（Demo）',type:'text'},{key:'hierarchy',label:'組織層級（Demo）',type:'text'},{key:'sites',label:'實驗室據點（Demo）',type:'text'}],
+ organization:[{key:'company',label:'工作區名稱',type:'text'},{key:'departments',label:'部門說明',type:'text'},{key:'hierarchy',label:'組織層級說明',type:'text'},{key:'sites',label:'據點說明',type:'text'}],
 };
 export function adminSeed(){return {version:1,settings:{
  backup:{enabled:false,frequency:'daily',time:'02:00',retentionDays:30},documents:{retentionDays:365},
@@ -48,7 +48,7 @@ export function adminSeed(){return {version:1,settings:{
  notifications:Object.fromEntries(NOTICE_RULES.flatMap(([id])=>[[id,false],[id+'Time','09:00']])),
  quality:{category:'Demo：試驗偏差／文件缺漏／設備異常',auditItem:'Demo：案件、樣品、設備、報告版本與簽核追溯'},
  qualifications:{person:'Demo 工程師甲',equipment:'DEMO-EQUIPMENT-A（非真實設備）',test:'Demo 高溫試驗',training:'Demo 安全操作課程／2026-10-01',expires:'2027-12-31'},
- organization:{company:'Demo 示範科技（虛構）',departments:'Demo 研發部、Demo 品質部',hierarchy:'Demo 總部 → 品質處 → 示範實驗室',sites:'Demo 台北據點、Demo 測試據點'},
+ organization:{company:'DQA Smart Lab',departments:'依現有人員資料彙整',hierarchy:'尚未設定組織層級',sites:'依設備據點彙整'},
  },events:[],backups:[]};}
 export const QUALITY_EXAMPLES=[{id:'DEMO-CAPA-01',category:'文件缺漏',correction:'補齊示範檢查清單',prevention:'教育訓練及複核（展示）',status:'Demo 待評估，非正式 CAPA'},{id:'DEMO-AUDIT-01',category:'設備異常',correction:'示範設備重新確認',prevention:'檢查週期建議（展示）',status:'Demo 追溯至案件／樣品／設備／報告版本'}];
 export const AI_USAGE=AI_ENGINES.map((e,i)=>({id:e.id,name:e.name,model:'Demo 規則模擬器（未接模型）',rules:'DEMO-RULES-1.0（展示）',tokens:`${(i+1)*1200}（Demo 示例）`,cost:`USD ${((i+1)*0.012).toFixed(3)}（Demo 示例）`}));

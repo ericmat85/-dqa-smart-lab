@@ -1,7 +1,7 @@
 // Canonicalize only known Preview paths. Routing metadata never grants identity.
 const prefix='/api/preview';
 const internal=new Set([prefix,prefix+'/',prefix+'/[...path]',prefix+'/[...path].js']);
-export const isAllowedPreviewPath=path=>/^\/(?:session|health\/(?:live|ready)|ui\/(?:bootstrap|knowledge|live\/E[1-4]|requests(?:\/REQ-\d{4}-[0-9a-f]{8}(?:\/actions|\/engines\/E[1-4])?)?))$/.test(path);
+export const isAllowedPreviewPath=path=>/^\/(?:session|health\/(?:live|ready|status)|ui\/(?:bootstrap|knowledge|live\/E[1-4]|requests(?:\/REQ-\d{4}-[0-9a-f]{8}(?:\/actions|\/engines\/E[1-4])?)?))$/.test(path);
 function segments(value){
  if(value===undefined)return null;
  const list=typeof value==='string'?value.split('/'):Array.isArray(value)?value:null;
@@ -43,7 +43,7 @@ export function resolvePreviewRoute(req,{origin,entrypointPath}={}){
   // Ignore non-routing query data ONLY for exact Session/E4/E2 pathname matches.
   // These values never enter identity, payload, or the upstream URL. Internal
   // catchall aliases still reject extra query keys while resolving route hints.
-  if(unrelated.length&&!['/session','/ui/live/E4','/ui/live/E2'].includes(canonicalPath))throw Error('UNEXPECTED_QUERY');
+  if(unrelated.length&&!['/session','/ui/live/E4','/ui/live/E2','/health/status'].includes(canonicalPath))throw Error('UNEXPECTED_QUERY');
   diagnostic.query_policy=unrelated.length?'IGNORED_NON_ROUTING_QUERY':'ROUTING_HINTS_ONLY';
   diagnostic.ignored_query_count=unrelated.length;
   const queryValue=params.has('path')?params.get('path'):undefined;

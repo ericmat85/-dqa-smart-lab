@@ -1,3 +1,4 @@
+import {AdminModuleNav} from './AdminCenterCards.jsx';
 import {requireE2Enabled,applyE2Settings} from './e2PlanningSettings.mjs';
 import {beginE2Activity,finishE2Activity,draftE2Activity} from './e2Activity.mjs';
 import {prepareScheduleTrialForm,prepareManualTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
@@ -1926,7 +1927,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
