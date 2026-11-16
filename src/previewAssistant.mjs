@@ -1,4 +1,6 @@
 import {clearE2Activity} from './e2Activity.mjs';
+import {clearE3Activity} from './e3Activity.mjs';
+import {clearReportDraftHandoff} from './reportDraftHandoff.mjs';
 import {aiSessionState,setAISessionState} from './aiSessionState.mjs';
 import {selectE4ChatMode,sessionFailure,renderE4Reply} from './e4ChatModes.mjs';
 import {beginE4Activity,finishE4Activity,clearE4Activity} from './e4Activity.mjs';
@@ -16,7 +18,7 @@ const pendingRevocations=new Map(),labCursors=new Map();
 export function closePreviewAISession(system){
  clearE4Activity(system);
  for(const key of labCursors.keys())if(key.startsWith(system+':'))labCursors.delete(key);
- if(system==='lms')clearE2Activity();
+ if(system==='lms'){clearE2Activity();clearE3Activity();clearReportDraftHandoff();}
  if(!enabled||base!=='/api/preview')return Promise.resolve({status:'NOT_REQUIRED'});
  const operation=setAISessionState(system,'PENDING');
  globalThis.dispatchEvent?.(new CustomEvent('dqa:ai-session-ended',{detail:{system}}));
@@ -35,7 +37,7 @@ export async function establishSession(system,accountId,fetchImpl,signal){
  return response;
 }
 
-export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[]}={}){
+export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[],onReportDraft=()=>{}}={}){
  // E4-only Preview: this floating assistant never dispatches other engines.
  const selected=selectE4ChatMode(question);const scope=e4LabScope(selected.question,{document:selected.mode==='DOCUMENT_QA'});if(!scope.allowed)throw Object.assign(Error(scope.reply),{code:scope.code});if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
  const url=endpoint('/ui/live/E4');
@@ -58,6 +60,8 @@ export async function askPreviewAssistant(question,system,{snapshot,metrics,fetc
    if(response.status===422&&errorCode==='INPUT_TOKEN_LIMIT')throw Error(`問題與必要資料超過安全輸入上限（INPUT_TOKEN_LIMIT）；未呼叫模型。請縮短問題或指定單一設備／委託編號；必要證據未截斷。Trace ${trace}`);
    throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
   const reply=renderE4Reply(packet,selected.mode);
+  // Only expose the already validated draft identifier; E3 resolves fresh authorized data.
+  if(system==='lms'&&packet.data?.report_draft)onReportDraft({requestId:packet.data.report_draft.request_id});
   if(context?.version===2){const kinds={equipment:'設備清單',trialCatalog:'試驗項目清單',requests:'委託清單',schedules:'排程清單',materials:'物料清單',reports:'報告清單',borrows:'借用清單',labWorkItems:'試驗清單',labOperations:'中斷申請清單',labAudit:'操作歷程'};const kind=kinds[context.items[0]?.kind];if(context.selection.complete===false&&kind)labCursors.set(cursorKey,{kind,offset:context.selection.next_offset});else labCursors.delete(cursorKey);}
   finishE4Activity(ticket,{status:'SUCCESS',httpStatus:response.status,packet});
   return reply;
