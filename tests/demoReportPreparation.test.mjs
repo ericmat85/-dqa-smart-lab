@@ -9,7 +9,7 @@ test('quick fill creates a downloadable case-bound ordinary report and runs actu
  assert.equal(prepared.fileName,'REQ-QUICK-1-DEMO.xlsx');assert.equal(passedDemoReview(prepared.check),true);
  assert.equal((await inspectReport(prepared.bytes,request.id,prepared.fileName,request)).ok,true);
  const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(prepared.bytes);const sheet=book.worksheets[0];
- assert.equal(sheet.getCell('B4').text,request.id);assert.equal(sheet.getCell('E4').text,request.productCode);assert.equal(sheet.getCell('E6').value,3);assert.match(sheet.getCell('B7').text,/-40°C/);
+ assert.equal(sheet.name,'報告首頁');assert.equal(sheet.getCell('I16').text,`DQA-${request.id}`);assert.equal(sheet.getCell('C16').text,request.productCode);assert.match(sheet.getCell('C18').text,/樣品數：3/);assert.match(sheet.getCell('A24').text,/-40°C/);
  assert.equal(request.status,undefined);
 });
 test('general quick fill respects the uploaded layout, product, quantity and customer',async()=>{

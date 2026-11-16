@@ -1,26 +1,20 @@
-import {applyReportPresentation} from './reportPresentation.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {getSignatureHistory} from './signatureHistory.mjs';
-
-// Shared document layout for readonly preview and the existing final PDF conversion.
-export async function requestWorkbookBytes(request) {
- const Excel=await excelModule(),book=new Excel.Workbook(),sheet=book.addWorksheet('電子委託單');
- sheet.columns=[20,24,24,24,24,20].map(width=>({width}));
- sheet.mergeCells('A1:F1');sheet.getCell('A1').value='電子委託信賴性評價單｜Demo';sheet.getRow(1).height=30;
- sheet.mergeCells('A2:F2');sheet.getCell('A2').value='假資料展示／圖片簽名不具正式電子簽章效力';
- const fields=[['委託編號',request.id],['產品代碼／品名',request.productCode||request.product],['產品類型',request.productType],['客戶／客戶品番',[request.customer,request.customerPartNo].filter(Boolean).join('／')],['委託者／部門',[request.requester,request.department].filter(Boolean).join('／')],['需求日期／樣品數',[request.dueDate,request.quantity].filter(value=>value!==undefined).join('／')],['試驗項目',(request.testItems||[]).join('、')],['試驗目的',(request.purpose||[]).join('、')],['樣品來源',(request.sampleSource||[]).join('、')],['樣品版次',[request.productVersion,request.pcbaVersion,request.softwareVersion].filter(Boolean).join('／')],['試驗規範／手法',request.specification],['判定基準',request.judgementCriteria],['備註',request.notes]];
- fields.forEach(([label,value],index)=>{const row=index+4;sheet.getCell(row,1).value=label;sheet.mergeCells(`B${row}:F${row}`);sheet.getCell(row,2).value=String(value??'—');});
- const signatures=getSignatureHistory(request).filter(item=>item.signature);
- signatures.forEach((signature,index)=>{
-  const row=19+Math.floor(index/2)*3,column=index%2?4:1;
-  const first=column===1?'A':'D',last=column===1?'C':'F';
-  sheet.mergeCells(`${first}${row}:${last}${row}`);sheet.getCell(row,column).value=`${signature.stage}｜${signature.actor||signature.actorId}｜${signature.decision||''}｜${signature.at||''}`;
-  if(/^data:image\/(png|jpeg);base64,/i.test(signature.signature)){
-   const id=book.addImage({base64:signature.signature,extension:/^data:image\/jpeg/i.test(signature.signature)?'jpeg':'png'});
-   sheet.getRow(row+1).height=55;sheet.addImage(id,{tl:{col:column-1,row},ext:{width:180,height:60},editAs:'oneCell'});
-  }
- });
- sheet.eachRow({includeEmpty:true},item=>item.eachCell({includeEmpty:true},cell=>{cell.alignment={wrapText:true,vertical:'middle'};}));
- applyReportPresentation(book);
- return book.xlsx.writeBuffer();
+import {addRequestForm,formAssets} from './labFormLayout.mjs';
+function addSignature(book,sheet,value,col,row,width=145,height=48){
+ if(!/^data:image\/(png|jpeg);base64,/i.test(value||''))return;
+ const image=book.addImage({base64:value,extension:/^data:image\/jpeg/i.test(value)?'jpeg':'png'});sheet.addImage(image,{tl:{col,row},ext:{width,height},editAs:'oneCell'});
+}
+// Layout uses only the case's actual signature history; never the reference PDF signatures.
+export async function requestWorkbookBytes(request,{assets}={}){
+ if(!assets&&typeof window!=='undefined')assets=await formAssets(globalThis.fetch,{photos:false});
+ const Excel=await excelModule(),book=new Excel.Workbook(),sheet=addRequestForm(book,request,null,assets);
+ const records=getSignatureHistory(request).filter(x=>x.signature),requester=records.filter(x=>x.stage==='委託送出'||x.actorId===request.ownerId&&x.decision==='送出').at(-1)||{signature:request.requesterSignature,actor:request.requester,at:request.requesterSignatureAt},supervisor=records.filter(x=>x.stage==='直屬主管簽核'&&!/退回|退件/.test(x.decision||'')).at(-1);
+ sheet.getCell('H44').value='';addSignature(book,sheet,requester?.signature,7.12,43.2);addSignature(book,sheet,supervisor?.signature,2.12,43.2);
+ sheet.mergeCells('A55:F57');sheet.getCell('A55').value=`主管：${supervisor?.actor||supervisor?.actorId||''}\n日期：${supervisor?.at||''}`;sheet.mergeCells('G55:L57');sheet.getCell('G55').value=`委託者：${requester?.actor||request.requester||''}\n日期：${requester?.at||''}`;
+ if(records.length>2){
+  const history=book.addWorksheet('簽核追溯');history.columns=[16,20,25,25,24].map(width=>({width}));history.addRow(['階段','操作者','時間','決定','簽名']);
+  records.forEach((r,i)=>{const row=i+2;history.addRow([r.stage,r.actor||r.actorId,r.at||'',r.decision||'','']);history.getRow(row).height=60;addSignature(book,history,r.signature,4,row-1,130,45);});history.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0};
+ }
+ return new Uint8Array(await book.xlsx.writeBuffer());
 }

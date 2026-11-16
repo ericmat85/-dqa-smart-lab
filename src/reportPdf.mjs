@@ -1,3 +1,5 @@
+import {labTemplateProfile,LAB_FORM_VERSION,LAB_REPORT_SHEETS} from './labFormLayout.mjs';
+import {drawLabForms} from './labFormPdf.mjs';
 import {pdfTextLayout} from './pdfTextLayout.mjs';
 import {applyReportPresentation} from './reportPresentation.mjs';
 import {generalProfile,refreshHeaderReferences} from './reportProfiles.mjs';
@@ -5,10 +7,15 @@ import {drawGeneralReport} from './generalReportPdf.mjs';
 import {reportBounds,cellText,normalizeReportMerges} from './reportLayout.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 const clean=value=>Array.from(String(value??'')).filter(char=>char.charCodeAt(0)>=32||char==='\n'||char==='\t').join('');
-export async function reportToPdf(bytes,{fontBytes,requestId=''}={}){
+export async function reportToPdf(bytes,{fontBytes,requestId='',templatePreview=false}={}){
  const [{PDFDocument,rgb,StandardFonts},kit,Excel]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit'),excelModule()]);
  if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('PDF 中文字型載入失敗，尚未封存。');fontBytes=await response.arrayBuffer();}
  const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:false}),latin=await document.embedFont(StandardFonts.Helvetica),textLayout=pdfTextLayout(font,latin);const book=new Excel.Workbook();await book.xlsx.load(bytes);normalizeReportMerges(book);applyReportPresentation(book);
+ const lab=labTemplateProfile(book),requestForm=book.getWorksheet('委託單');
+ if(lab||requestForm?.getCell('J63').text===LAB_FORM_VERSION){
+  const sheets=book.worksheets.filter(s=>(!s.state||s.state==='visible')&&(!lab||LAB_REPORT_SHEETS.includes(s.name)||/^(規範|判定)續頁/.test(s.name)||templatePreview&&s.name==='委託單'));
+  await drawLabForms({book,document,font,latin,rgb,sheets});document.setTitle(`試驗委託與報告 ${requestId}`);return new Uint8Array(await document.save());
+ }
  if(generalProfile(book)){refreshHeaderReferences(book);await drawGeneralReport({book,document,font,latin,rgb,requestId});document.setTitle(`一般性能試驗報告 ${requestId}`);return new Uint8Array(await document.save());}
  function wrap(text,size,width){const lines=[];for(const paragraph of clean(text).split('\n')){let line='';for(const char of paragraph){if(line&&textLayout.width(line+char,size)>width){lines.push(line);line='';}line+=char;}lines.push(line);}return lines;}
  let pageNumber=0;
