@@ -2,7 +2,7 @@ import {requireE2Enabled,applyE2Settings} from './e2PlanningSettings.mjs';
 import {beginE2Activity,finishE2Activity,draftE2Activity} from './e2Activity.mjs';
 import {prepareScheduleTrialForm,prepareManualTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
 import {reviewE1Request} from './e1Review.mjs';
-import {askE2Scheduling} from './e2PreviewClient.mjs';
+import {askE2Scheduling,e2ProviderUnavailableMessage} from './e2PreviewClient.mjs';
 import {canonicalE2,e2SampleEvidence,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import AdminCenterModule from './AdminCenterModule.jsx';
@@ -1769,7 +1769,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
     const details=coverageIssues.length?coverageIssues.map(describeE2CoverageIssue):data.assessment.reasons.map(describeE2Reason);
     setScheduleMessage('目前無法提出可查核的排程建議。'+details.filter(text=>!/^[A-Z0-9_]+$/.test(text)).join(' '));return;
    }
-   if(data.execution_mode==='RULE_BASED_ONLY'){setScheduleMessage('目前模型尚未就緒，未取得模型建議，也未帶入新的排程日期。');return;}
+   if(data.execution_mode==='RULE_BASED_ONLY'){setScheduleMessage(e2ProviderUnavailableMessage(data.provider_status));return;}
    const candidate=data.assessment.candidates.find(item=>item.id===data.selected_candidate_id);
    if(!candidate){setScheduleMessage('模型未選出可用方案，尚未變更排程。');return;}
    if(canonicalE2(editFormRef.current)!==canonicalE2(sourceForm))throw Object.assign(Error('編輯內容已變更，請重新分析。'),{code:'STALE_INPUT'});

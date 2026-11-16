@@ -1,3 +1,5 @@
+import {readUiPreferences} from './uiPreferences.mjs';
+import {assistantLanguage} from './assistantLanguage.mjs';
 import {clearE2Activity} from './e2Activity.mjs';
 import {clearE3Activity} from './e3Activity.mjs';
 import {clearReportDraftHandoff} from './reportDraftHandoff.mjs';
@@ -37,7 +39,7 @@ export async function establishSession(system,accountId,fetchImpl,signal){
  return response;
 }
 
-export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[],onReportDraft=()=>{}}={}){
+export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[],onReportDraft=()=>{},language=readUiPreferences().language}={}){
  // E4-only Preview: this floating assistant never dispatches other engines.
  const selected=selectE4ChatMode(question);const scope=e4LabScope(selected.question,{document:selected.mode==='DOCUMENT_QA'});if(!scope.allowed)throw Object.assign(Error(scope.reply),{code:scope.code});if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
  const url=endpoint('/ui/live/E4');
@@ -52,14 +54,14 @@ export async function askPreviewAssistant(question,system,{snapshot,metrics,fetc
  let response,packet,errorCode;
  try{
   await establishSession(system,accountId,fetchImpl,signal);
-  const payload={synthetic:true,question:selected.question,mode:selected.mode,...(context?{demo_context:context}:{})};
+  const payload={synthetic:true,question:selected.question,mode:selected.mode,language:assistantLanguage(language),...(context?{demo_context:context}:{})};
   if(new TextEncoder().encode(JSON.stringify(payload)).length>8192)throw Error('AI_DTO_BLOCKED: PAYLOAD_TOO_LARGE；未截斷資料。');
   response=await fetchImpl(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Preview-System':system,'X-Preview-Idempotency-Key':idempotencyKey},body:JSON.stringify(payload),signal});
   try{packet=await response.json();}catch{errorCode='NON_JSON_RESPONSE';throw Error(`E4 HTTP ${response.status} · NON_JSON_RESPONSE；未取得模型結果。`);}
   if(!response.ok){errorCode=/^[A-Z0-9_]{1,80}$/.test(packet?.error?.code||'')?packet.error.code:'SERVICE_UNAVAILABLE';const trace=/^I-[A-Za-z0-9_-]{1,80}$/.test(packet?.trace_id||'')?packet.trace_id:'UNKNOWN';
    if(response.status===422&&errorCode==='INPUT_TOKEN_LIMIT')throw Error(`問題與必要資料超過安全輸入上限（INPUT_TOKEN_LIMIT）；未呼叫模型。請縮短問題或指定單一設備／委託編號；必要證據未截斷。Trace ${trace}`);
    throw Error(`AI 請求失敗（${errorCode}）；未取得模型結果。Trace ${trace}${/^(?:O-|I-)[A-Za-z0-9_-]{1,100}$/.test(packet?.request_id||'')?' · Request '+packet.request_id:''}；結果未知時不自動重送。`);}
-  const reply=renderE4Reply(packet,selected.mode);
+  const reply=renderE4Reply(packet,selected.mode,assistantLanguage(language));
   // Only expose the already validated draft identifier; E3 resolves fresh authorized data.
   if(system==='lms'&&packet.data?.report_draft)onReportDraft({requestId:packet.data.report_draft.request_id});
   if(context?.version===2){const kinds={equipment:'設備清單',trialCatalog:'試驗項目清單',requests:'委託清單',schedules:'排程清單',materials:'物料清單',reports:'報告清單',borrows:'借用清單',labWorkItems:'試驗清單',labOperations:'中斷申請清單',labAudit:'操作歷程'};const kind=kinds[context.items[0]?.kind];if(context.selection.complete===false&&kind)labCursors.set(cursorKey,{kind,offset:context.selection.next_offset});else labCursors.delete(cursorKey);}

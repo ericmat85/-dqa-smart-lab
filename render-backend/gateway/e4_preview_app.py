@@ -11,6 +11,7 @@ class Advice(BaseModel):
  model_config=ConfigDict(strict=True,extra='forbid')
  synthetic:bool
  mode:Literal['GENERAL_CHAT','DOCUMENT_QA']='DOCUMENT_QA'
+ language:Literal['zh-TW','en']='zh-TW'
  question:str=Field(min_length=1,max_length=1500)
  demo_context:dict|None=None
  @field_validator('synthetic',mode='before')
@@ -107,7 +108,7 @@ def create_app(service=None,gateway_key='',legacy_uds=None,clock=time.time,sessi
    except asyncio.CancelledError:raise
    except Exception:cancel.set()
   watcher=asyncio.create_task(watch_disconnect())
-  task=asyncio.create_task(asyncio.to_thread(service.analyze,binding,body.question,trace,body.mode,req.headers.get('x-preview-operation-id') or trace,cancel,**({'demo_context':context} if context is not None else {})))
+  task=asyncio.create_task(asyncio.to_thread(service.analyze,binding,body.question,trace,body.mode,req.headers.get('x-preview-operation-id') or trace,cancel,**({'demo_context':context} if context is not None else {}),**({'language':body.language} if body.language!='zh-TW' else {})))
   try:
    data=await task
   except asyncio.CancelledError:

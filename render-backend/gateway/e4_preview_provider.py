@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor,TimeoutError as FutureTimeout
 from gateway.e4_session import validate_binding,subject
 from jsonschema import Draft202012Validator
 from gateway.live_provider import DOCS,SCHEMA,SENSITIVE
-from gateway.e4_chat_contract import DOCUMENT_QA,GENERAL_CHAT,MODES,schema_for,instructions_for
+from gateway.e4_chat_contract import DOCUMENT_QA,GENERAL_CHAT,MODES,schema_for,instructions_for,language_instruction
 def _require_safe(condition):
  if not condition:raise ValueError('PROVIDER_VALIDATION_FAILED')
 
@@ -71,8 +71,9 @@ class E4Service:
     self.histories[sid]={'at':now,'pairs':[],'turns':0}
    self.locks.setdefault(lock_sid,threading.Lock())
    return self.histories[sid],self.locks[lock_sid]
- def analyze(self,binding,question,trace,mode=DOCUMENT_QA,request_id=None,cancel=None,demo_context=None):
+ def analyze(self,binding,question,trace,mode=DOCUMENT_QA,request_id=None,cancel=None,demo_context=None,language='zh-TW'):
   if mode not in MODES:raise E4Error('INVALID_CHAT_MODE',422)
+  if language not in ('zh-TW','en'):raise E4Error('INVALID_RESPONSE_LANGUAGE',422)
   try:validate_binding(binding,self.clock());generation=self.ledger.bind_session(binding,self.clock())
   except ValueError as e:raise E4Error(str(e),403 if str(e)=='AUTHORIZATION_DENIED' else 401) from None
   from gateway.lab_scope import ensure_lab_scope
@@ -101,11 +102,11 @@ class E4Service:
   with self.guard:self.cancellations[sid]=cancel
   try:
    if history.get('generation')!=generation:history.update(pairs=[],turns=0,generation=generation)
-   return self._analyze(history,binding,question,trace,mode,request_id,cancel,context)
+   return self._analyze(history,binding,question,trace,mode,request_id,cancel,context,language)
   finally:
    with self.guard:self.cancellations.pop(sid,None)
    lock.release()
- def _analyze(self,history,binding,question,trace,mode,request_id,cancel,demo_context=None):
+ def _analyze(self,history,binding,question,trace,mode,request_id,cancel,demo_context=None,language='zh-TW'):
   cfg=self.settings
   if self.clock()>=cfg.expires:raise E4Error('BUDGET_EXPIRED',403)
   if not isinstance(history.get('pairs'),list) or len(history['pairs'])>cfg.history_pairs:raise E4Error('INVALID_HISTORY',422)
@@ -119,6 +120,7 @@ class E4Service:
     from gateway.e4_lab_context import LAB_CHAT_INSTRUCTIONS
     instructions=LAB_CHAT_INSTRUCTIONS
    else:instructions=READ_CHAT_INSTRUCTIONS
+  instructions+=language_instruction(language)
   while True:
    inp={'history':pairs,'question':question}
    if demo_context is not None:inp['demo_context']=demo_context
@@ -131,7 +133,7 @@ class E4Service:
   estimate=(Decimal(bound)*cfg.input_rate+Decimal(cfg.max_output)*cfg.output_rate)/1000000
   if estimate>cfg.call_cap:raise E4Error('PER_CALL_BUDGET_LIMIT',429)
   if cancel is not None and cancel.is_set():raise E4Error('REQUEST_CANCELLED_NOT_SENT',409)
-  fingerprint_data={'mode':mode,'question':question}
+  fingerprint_data={'mode':mode,'question':question,'language':language}
   if demo_context is not None:fingerprint_data['demo_context']=demo_context
   fingerprint=hashlib.sha256(json.dumps(fingerprint_data,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
   key=self.key_source()
@@ -185,7 +187,7 @@ class E4Service:
    for cite in result['citations']:_require_safe(any(cite['document_id']==d['id'] and cite['version']==d['version'] and cite['quote'] and cite['quote'] in d['text'] for d in DOCS))
   except Exception:unknown('PROVIDER_OUTPUT_REJECTED_RESERVATION_HELD',502)
   cost=(Decimal(i)*cfg.input_rate+Decimal(o)*cfg.output_rate)/1000000
-  record={'request_id':request_id,'chat_mode':mode,'trace_id':trace,'provider_request_id':rid,'provider_response_id':response_id,'model':cfg.model,'input_tokens':i,'output_tokens':o,'cost_usd':str(cost),'transport':'MOCK_HTTP_ONLY' if self.simulation else 'LIVE_PROVIDER'}
+  record={'request_id':request_id,'chat_mode':mode,'response_language':language,'trace_id':trace,'provider_request_id':rid,'provider_response_id':response_id,'model':cfg.model,'input_tokens':i,'output_tokens':o,'cost_usd':str(cost),'transport':'MOCK_HTTP_ONLY' if self.simulation else 'LIVE_PROVIDER'}
   def reject_accounted_output(code):
    # Usage and schema have been verified. A refused answer is not an unknown charge.
    try:self.ledger.settle_rejected_output(request_id,cost,record,code,self.clock())
@@ -194,16 +196,16 @@ class E4Service:
   evidence='GENERAL_INFORMATION_ONLY' if mode==GENERAL_CHAT else 'VALIDATED'
   if demo_context is not None:
    # This layer exposes no mutators; reject claims that a write/signoff occurred.
-   if re.search(r'已(?:經)?(?:自動)?(?:修改|刪除|更新|寫入|簽核|簽名|排程|提交報告)',result['summary']):reject_accounted_output('READONLY_OUTPUT_WRITE_CLAIM_REJECTED')
-   if demo_context['intent']=='REPORT_DRAFT' and re.search(r'(?:實測|測得|量測結果)[^。\n]{0,24}\d|(?:判定|結果)[：:]\s*(?:合格|不合格|PASS|FAIL)|(?:已完成|已代為)(?:簽核|簽名)',result['summary'],re.I):reject_accounted_output('REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED')
-  if mode==DOCUMENT_QA and not result['citations']:result={'engine':'E4','summary':'資料不足：沒有可驗證引用，無法回答。','issues':[],'advice':[],'citations':[]};evidence='EVIDENCE_INSUFFICIENT_REFUSED'
+   if re.search(r'已(?:經)?(?:自動)?(?:修改|刪除|更新|寫入|簽核|簽名|排程|提交報告)|\b(?:I|we)\s+(?:have\s+)?(?:already\s+)?(?:updated|modified|deleted|saved|signed|approved|scheduled|submitted)\b',result['summary'],re.I):reject_accounted_output('READONLY_OUTPUT_WRITE_CLAIM_REJECTED')
+   if demo_context['intent']=='REPORT_DRAFT' and re.search(r'(?:實測|測得|量測結果)[^。\n]{0,24}\d|(?:判定|結果)[：:]\s*(?:合格|不合格|PASS|FAIL)|(?:已完成|已代為)(?:簽核|簽名)|(?:measured|measurement results?)[^。\n]{0,24}\d|(?:verdict|result)[：:]\s*(?:PASS|FAIL)',result['summary'],re.I):reject_accounted_output('REPORT_DRAFT_UNSUPPORTED_RESULT_REJECTED')
+  if mode==DOCUMENT_QA and not result['citations']:result={'engine':'E4','summary':('Insufficient evidence: no verifiable citations are available.' if language=='en' else '資料不足：沒有可驗證引用，無法回答。'),'issues':[],'advice':[],'citations':[]};evidence='EVIDENCE_INSUFFICIENT_REFUSED'
   try:self.ledger.settle(request_id,cost,record)
   except Exception:unknown('LEDGER_SETTLEMENT_FAILED_RESERVATION_HELD',503)
   try:
    with self.ledger.session_guard(binding,self.clock(),history['generation']):
     history['pairs']=(pairs+[{'user':question,'assistant':result['summary']}])[-cfg.history_pairs:];history['at']=self.clock();history['turns']+=1
   except ValueError as e:raise E4Error(str(e),409 if str(e)=='SESSION_CONTEXT_CHANGED' else 401) from None
-  packet={'engine':'E4','conversation_id':binding['sid'],'request_id':request_id,'chat_mode':mode,'execution_mode':'MOCK' if self.simulation else 'LIVE_PROVIDER','real_ai':not self.simulation,'synthetic':True,'provider':'MOCK_HTTP_TRANSPORT' if self.simulation else 'openai_responses','model':cfg.model,'provider_request_id':rid,'provider_response_id':response_id,'usage':{'input_tokens':i,'output_tokens':o},'estimated_cost_usd':str(cost),'trace_id':trace,'result':result,'evidence_validation':evidence,'history_turns_used':len(pairs),'history_truncated':truncated,'history_policy':'BOUNDED_RECENT_PAIRS_RESET_ON_RESTART','human_final_decision':True}
+  packet={'engine':'E4','conversation_id':binding['sid'],'request_id':request_id,'chat_mode':mode,'response_language':language,'execution_mode':'MOCK' if self.simulation else 'LIVE_PROVIDER','real_ai':not self.simulation,'synthetic':True,'provider':'MOCK_HTTP_TRANSPORT' if self.simulation else 'openai_responses','model':cfg.model,'provider_request_id':rid,'provider_response_id':response_id,'usage':{'input_tokens':i,'output_tokens':o},'estimated_cost_usd':str(cost),'trace_id':trace,'result':result,'evidence_validation':evidence,'history_turns_used':len(pairs),'history_truncated':truncated,'history_policy':'BOUNDED_RECENT_PAIRS_RESET_ON_RESTART','human_final_decision':True}
   if demo_context is not None:
    from gateway.e4_readonly_context import draft_metadata
    packet['read_context']={'source':demo_context['source'],'observed_at':demo_context['observed_at'],'totals':demo_context['totals'],'coverage':demo_context['coverage'],'selection':demo_context['selection'],'writes':'NONE'}

@@ -26,3 +26,8 @@ export async function askE2Scheduling(context,{fetchImpl=globalThis.fetch,storag
   throw error;
  }
 }
+
+export function e2ProviderUnavailableMessage(code){
+ const reason=({BUDGET_EXPIRED:'AI 排程的模型預算期限已到期，需更新既有帳本期限。',E2_SPEND_APPROVAL_REQUIRED:'AI 排程尚未取得有效的獨立模型預算授權。',PROVIDER_CREDENTIAL_REQUIRED:'AI 排程的伺服器模型憑證尚未就緒。',MODEL_METADATA_ACCESS_NOT_VERIFIED:'AI 排程尚未確認模型存取權。',E2_SESSION_STORE_UNAVAILABLE:'AI 排程的安全對話儲存尚未就緒。',E2_LEDGER_RECOVERY_REQUIRED:'AI 排程的持久帳本需先完成復原核對。'})[code]||'AI 排程模型尚未就緒。';
+ return reason+' 確定性規則檢查已完成，但未呼叫模型、未帶入新的排程日期。';
+}

@@ -10,6 +10,8 @@ from gateway.e4_preview_ledger import Ledger,nanos
 from gateway.budget_expiry_renewal import OLD_EXPIRY,NEW_EXPIRY,original_policy,verify_renewed_ledger
 from gateway.e4_budget_renewal_20261116 import NEW_EXPIRY as E4_NEW_EXPIRY,original_policy as e4_original_policy,verify_renewed_ledger as verify_e4_renewal
 
+from gateway.budget_renewal_20261231 import NEW_EXPIRY as DEC_EXPIRY,original_policy as december_original,verify_renewed_ledger as verify_december
+
 POLICY_PATH=Path(__file__).with_name('e4_live_policy.json')
 _MOUNT_SEAL=object()
 
@@ -25,9 +27,10 @@ def load_policy():
  raw=policy_bytes();p=json.loads(raw)
  if p['scope']!='E4_PRIVATE_PREVIEW_SYNTHETIC_ONLY' or p['model']!='gpt-6-luna':raise E4Error('APPROVED_POLICY_REQUIRED')
  if Decimal(p['per_call_usd'])>Decimal('.05') or Decimal(p['total_usd'])>Decimal('1'):raise E4Error('APPROVED_BUDGET_BOUND_EXCEEDED')
- if p['expires_at'] not in (OLD_EXPIRY,NEW_EXPIRY,E4_NEW_EXPIRY) or p['max_instances']!=1 or p['max_workers']!=1:raise E4Error('APPROVED_RELEASE_BOUND_REQUIRED')
+ if p['expires_at'] not in (OLD_EXPIRY,NEW_EXPIRY,E4_NEW_EXPIRY,DEC_EXPIRY) or p['max_instances']!=1 or p['max_workers']!=1:raise E4Error('APPROVED_RELEASE_BOUND_REQUIRED')
  if p['expires_at']==NEW_EXPIRY:original_policy(p,'E4')
  if p['expires_at']==E4_NEW_EXPIRY:e4_original_policy(p)
+ if p['expires_at']==DEC_EXPIRY:december_original(p,'E4')
  if p['input_usd_per_million']!='0.10' or p['output_usd_per_million']!='0.50':raise E4Error('VERIFIED_PRICING_REQUIRED')
  return p,hashlib.sha256(raw).hexdigest()
 
@@ -107,8 +110,8 @@ def load_provider(env,clock=time.time):
  if str(env.get('LIVE_PROVIDER_ENABLED','false')).lower() not in ('false','0') or str(env.get('LIVE_AI_ENABLED','false')).lower() not in ('false','0'):raise E4Error('LEGACY_LIVE_FLAGS_MUST_REMAIN_DISABLED')
  init=env.get('E4_LIVE_LEDGER_INITIALIZE','0')
  if init not in ('0','1') or env.get('AI_SPEND_APPROVED','0') not in ('0','1'):raise E4Error('EXPLICIT_RELEASE_FLAGS_REQUIRED')
- renewed=p['expires_at'] in (NEW_EXPIRY,E4_NEW_EXPIRY)
- cfg=settings_for(p);cfg.validate();ledger_cfg=settings_for(e4_original_policy(p) if p['expires_at']==E4_NEW_EXPIRY else original_policy(p,'E4')) if renewed else cfg;directory=Path(p['live_state_directory'])
+ renewed=p['expires_at'] in (NEW_EXPIRY,E4_NEW_EXPIRY,DEC_EXPIRY)
+ cfg=settings_for(p);cfg.validate();ledger_cfg=settings_for(december_original(p,'E4') if p['expires_at']==DEC_EXPIRY else e4_original_policy(p) if p['expires_at']==E4_NEW_EXPIRY else original_policy(p,'E4')) if renewed else cfg;directory=Path(p['live_state_directory'])
  if renewed and init!='0':raise E4Error('RENEWAL_CANNOT_INITIALIZE_LEDGER')
  if renewed and not (directory/'budget.sqlite').is_file():raise E4Error('RENEWAL_EXISTING_LEDGER_REQUIRED')
  if directory!=Path('/var/data/e4-mock/live')/p['approval_id']:raise E4Error('APPROVED_LIVE_STATE_PATH_REQUIRED')
@@ -123,7 +126,8 @@ def load_provider(env,clock=time.time):
    if init!='1':raise E4Error('EXPLICIT_LIVE_LEDGER_INITIALIZATION_REQUIRED')
    Ledger.initialize_local_or_operator(db,cfg.identity(),cfg.total_cap,cfg.expires,1);state.initialized=True
   state.ledger=SingleInstanceLiveLedger(db,ledger_cfg.identity(),state.owner,proof)
-  if p['expires_at']==E4_NEW_EXPIRY:verify_e4_renewal(state.ledger)
+  if p['expires_at']==DEC_EXPIRY:verify_december(state.ledger,'E4')
+  elif p['expires_at']==E4_NEW_EXPIRY:verify_e4_renewal(state.ledger)
   elif renewed:verify_renewed_ledger(state.ledger,'E4')
   snap=state.ledger.snapshot()
   if snap['cap_nanos']!=nanos(cfg.total_cap) or snap['expires']!=cfg.expires or snap['max_concurrent']!=1:raise E4Error('LEDGER_POLICY_MISMATCH')

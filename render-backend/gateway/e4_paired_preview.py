@@ -30,7 +30,7 @@ def install_openai_egress_guard():
 
 class PairedApp:
  def __init__(self,mock_uds,live_state,live_key,mock_available=True,mock_process=None,e2_state=None):
-  self.mock_uds=mock_uds;self.live_state=live_state;self.mock_available=mock_available;self.mock_process=mock_process
+  self.mock_uds=mock_uds;self.live_state=live_state;self.mock_available=mock_available;self.mock_process=mock_process;self.e2_state=e2_state
   from gateway.e2_preview_provider import E2SchedulingService
   e2=E2SchedulingService(live_state.ledger,e2_state.service if e2_state else None,disabled_code=e2_state.code if e2_state else 'E2_SPEND_APPROVAL_REQUIRED')
   self.live_app=create_app(live_state.service,live_key,session_store=live_state.ledger,disabled_code=live_state.code,disabled_status=live_state.status,e2_advisory=e2)
@@ -54,7 +54,9 @@ class PairedApp:
      self.live_state.ledger.snapshot()  # Read-only; never initialize or reconcile.
      healthy=True
     except Exception:pass
-   return await reply(200 if healthy else 503,{'status':'alive' if healthy else 'unavailable','e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation})
+   e2_ready=self.e2_state is not None and self.e2_state.service is not None and time.time()<self.e2_state.service.settings.expires
+   e2_code=('BUDGET_EXPIRED' if self.e2_state and self.e2_state.service and not e2_ready else self.e2_state.code) if self.e2_state else 'E2_SPEND_APPROVAL_REQUIRED'
+   return await reply(200 if healthy else 503,{'status':'alive' if healthy else 'unavailable','e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation,'e2_provider':e2_code,'e2_ledger':'AVAILABLE' if self.e2_state and self.e2_state.ledger else 'UNAVAILABLE','e2_paid_inference_approved':bool(e2_ready and not self.e2_state.service.simulation)})
   if path==LIVE_PATH:
    if method!='POST':return await error(405,'METHOD_DENIED')
    return await self.live_app({**scope,'path':MOCK_PATH,'raw_path':MOCK_PATH.encode()},receive,send)

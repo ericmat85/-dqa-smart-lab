@@ -1,3 +1,4 @@
+import {faqQuestion,faqEnglishReply} from './assistantLanguage.mjs';
 export const ASSISTANT_DEMOS=[
  {id:'overview',category:'總覽',question:'目前實驗室的試驗狀況如何？',keywords:['總覽','狀況','概況'],answer:'overview'},
  {id:'pending',category:'排程',question:'目前有多少試驗還沒排程？',keywords:['還沒排程','待排程','未排程'],answer:'pending'},
@@ -23,18 +24,18 @@ export const ASSISTANT_DEMOS=[
 export function findCommonQuestion(question){
  if(typeof question!=='string')return null;
  const normalized=question.trim().toLowerCase().replace(/\s/g,'');
- return ASSISTANT_DEMOS.find(item=>item.question.toLowerCase().replace(/\s/g,'')===normalized)||null;
+ return ASSISTANT_DEMOS.find(item=>[item.question,faqQuestion(item,'en')].some(text=>text.toLowerCase().replace(/\s/g,'')===normalized))||null;
 }
-export function commonQuestionReply(question,snapshot,metrics,system='lms'){
+export function commonQuestionReply(question,snapshot,metrics,system='lms',language='zh-TW'){
  const item=findCommonQuestion(question);if(!item)return null;
  const prefix='常見問題解答\n';
  const dynamic=['overview','pending','running','standby','stock'].includes(item.id);
- if(!dynamic)return prefix+assistantReply(question,snapshot,metrics,system);
+ if(!dynamic){const reply=prefix+assistantReply(item.question,snapshot,metrics,system);return language==='en'?faqEnglishReply(item,reply,snapshot,metrics,system):reply;}
  const dependencies=system==='lab'&&['overview','pending','running'].includes(item.id)?['labWorkItems']:item.id==='stock'?['materials']:item.id==='standby'?['equipment']:item.id==='overview'?['schedules','equipment']:['schedules'];
  const invalid=dependencies.some(key=>!Array.isArray(snapshot?.[key])||(snapshot?.sources||[]).some(source=>source.id===key&&source.error));
  const needsCounts=system!=='lab'&&['overview','pending','running'].includes(item.id);
- if(invalid||needsCounts&&(!metrics?.counts||Object.values(metrics.counts).some(n=>!Number.isSafeInteger(n)||n<0))||item.id==='stock'&&!Array.isArray(metrics?.lowStock))return prefix+'目前資料無法完整讀取，不能確認數量；請重新整理或查看對應清單。';
- return prefix+assistantReply(question,snapshot,metrics,system);
+ if(invalid||needsCounts&&(!metrics?.counts||Object.values(metrics.counts).some(n=>!Number.isSafeInteger(n)||n<0))||item.id==='stock'&&!Array.isArray(metrics?.lowStock))return language==='en'?faqEnglishReply(item,'目前資料無法完整讀取',snapshot,metrics,system):prefix+'目前資料無法完整讀取，不能確認數量；請重新整理或查看對應清單。';
+ const reply=prefix+assistantReply(item.question,snapshot,metrics,system);return language==='en'?faqEnglishReply(item,reply,snapshot,metrics,system):reply;
 }
 export function assistantReply(question,snapshot={},metrics={},system='lms'){
  const normalized=question.trim().toLowerCase().replace(/\s/g,'');
