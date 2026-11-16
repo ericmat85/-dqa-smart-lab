@@ -24,7 +24,7 @@ test('the isolated tour can recommend and validate its 48-hour trial using docum
  assert.equal(saved.status,'已排程');assert.deepEqual({...c.storage},before); // Recommendation and validation never save or advance the tour.
 });
 test('tour scheduling still rejects missing, incompatible, busy or undersized equipment',()=>{
- for(const patch of [{specification:''},{specification:'DEMO：-40～80°C'},{name:'導覽振動機'},{status:'使用中'},{capacity:0}]){
+ for(const patch of [{specification:''},{specification:'DEMO：-40～80°C'},{name:'導覽振動機'},{status:'使用中'},{spaceUnits:0}]){
   const c=tourScheduling();c.equipment=c.equipment.map(row=>({...row,...patch}));
   assert.throws(()=>recommendSchedule(c),/沒有足夠符合/);
  }

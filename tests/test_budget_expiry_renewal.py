@@ -22,6 +22,15 @@ REAL_PATH = Path
 REAL_CLIENT = httpx.Client
 POLICIES = {engine: json.loads((Path(__file__).parents[1] / 'render-backend/gateway' / (engine.lower() + '_live_policy.json')).read_bytes()) for engine in renewal.ENGINES}
 
+# These are regression fixtures for the already-approved 11/14 operator, not the new runtime policy.
+if POLICIES['E4']['expires_at']=='2026-11-16T23:59:00+08:00':
+    from gateway.e4_budget_renewal_20261116 import original_policy as original_20261116
+    previous_e4=original_20261116(POLICIES['E4'])
+    previous_e4['expires_at']=renewal.NEW_EXPIRY
+    previous_e4['evidence']['user_budget']=renewal.NEW_REFERENCE
+    assert hashlib.sha256(renewal.canonical(previous_e4)).hexdigest()==renewal.ENGINES['E4']['renewed_sha256']
+    POLICIES['E4']=previous_e4
+
 
 class RenewalTests(unittest.TestCase):
     def setUp(self):

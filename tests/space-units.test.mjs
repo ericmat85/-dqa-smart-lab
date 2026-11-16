@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {e2Fixture,e2Packet} from './e2-fixture.mjs';
-import {makeE2Context,e2Fingerprint,verifyE2Result,makeE2Draft,e2InputIssues} from '../src/e2Scheduling.mjs';
+import {makeE2Context,e2Fingerprint,verifyE2Result,makeE2Draft,e2InputIssues,e2MachineEvidence} from '../src/e2Scheduling.mjs';
 import {prepareScheduleTrialForm} from '../src/scheduleTrialInput.mjs';
 
 test('U is a separate integer quota and never changes the physical litre value',()=>{
@@ -25,7 +25,8 @@ test('candidate verification and draft application enforce U quota independently
  await assert.rejects(()=>verifyE2Result(packet,c),/CAPACITY_OR_GEOMETRY_MISMATCH/);
 });
 test('editing displayed equipment U does not silently change trusted backend capacity evidence',()=>{
- const f=e2Fixture();f.form.sampleSpaceUnits=1;f.equipment[0].capacity=999;
+ const f=e2Fixture();const index=f.equipment.findIndex(row=>e2MachineEvidence(row.id));assert(index>=0);const machine=f.equipment[index],trusted=e2MachineEvidence(machine.id);f.form.sampleSpaceUnits=1;machine.capacity=999;
  const issues=[],c=makeE2Context({...f,onCoverageIssue:x=>issues.push(x)});
- assert.equal(c.equipment_complete,false);assert(issues.some(x=>x.code==='EQUIPMENT_SPACE_UNITS_CHANGED'));
+ assert.equal(c.equipment_complete,true);assert.equal(issues.length,0);assert(!Object.hasOwn(c.equipment.find(row=>row.id===machine.id),'capacity'));assert.deepEqual(e2MachineEvidence(machine.id),trusted);
+ machine.spaceUnits=0;const blocked=makeE2Context({...f,onCoverageIssue:x=>issues.push(x)});assert.equal(blocked.equipment_complete,false);assert(issues.some(x=>x.code==='EQUIPMENT_SPACE_UNITS_CHANGED'));
 });

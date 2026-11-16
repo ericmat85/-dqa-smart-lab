@@ -5,9 +5,9 @@
     "network": "FIXED_OPENAI_TLS_ONLY_PARENT_EGRESS_WITH_CREDENTIAL_FREE_NO_TCP_MOCK_CHILD_RUNTIME_MODEL_GET_REQUIRED",
     "pricing": "https://developers.openai.com/api/docs/pricing#standard",
     "storage": "RENDER_DISK_dsk-dbqsscdbedkc73ekro20_NORMAL_START_REDEPLOY_DEP_dbqsuuom7kps73dlnr30",
-    "user_budget": "USER_APPROVED_EXPIRY_ONLY_USD0.05_PER_CALL_USD1_CUMULATIVE_UNTIL_2026-11-14T23:59+08:00_NO_REFILL"
+    "user_budget": "USER_APPROVED_E4_EXPIRY_ONLY_USD0.05_PER_CALL_USD1_CUMULATIVE_UNTIL_2026-11-16T23:59+08:00_NO_REFILL_MAX_TWO_OPERATOR_TEST_CALLS"
   },
-  "expires_at": "2026-11-14T23:59:00+08:00",
+  "expires_at": "2026-11-16T23:59:00+08:00",
   "input_usd_per_million": "0.10",
   "limits": {
     "calls_per_minute": 2,
