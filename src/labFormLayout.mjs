@@ -65,14 +65,14 @@ const procedures={
  VOLTAGE:['核對電壓範圍、變化速率、負載與工作模式','使用受控電源依程序施加條件，記錄波形','保存實測供電與功能變化，待依據判定'],
 };
 export function trialProcedure(row){
- if(row.name==='高溫運作試驗')return ['核對通電電壓、負載、工作模式及監測項目','依高溫運作條件執行，保存供電與溫度紀錄','恢復後檢查功能；不得使用不通電儲存結果替代'];
+ if(row.id==='TRIAL-020'||row.name==='高溫運作試驗')return ['核對通電電壓、負載、工作模式及監測項目','依高溫運作條件執行，保存供電與溫度紀錄','恢復後檢查功能；不得使用不通電儲存結果替代'];
  return procedures[row.profileId]||['核對試驗規範、樣品及設備來源','依核准程序執行並保存原始紀錄','記錄實際結果、異常及人工審查依據'];
 }
 export function addTrialReportForms(book,row,{request={},assets,demo=false}={}){
  const ref=getTestReference(row.name),cover=sheet(book,'報告首頁','試驗報告單\nTest Report',assets,2),process=sheet(book,'試驗過程',`${row.name}\nTest Procedure`,assets,3),results=sheet(book,'結果與照片',`${row.name}\nTest Results & Photo Record`,assets,4);
  area(cover,'A5:B8','試驗目的\nTest intention',{fill:true});area(cover,'C5:L8',list(request.purpose||request.intent)||'□ 新產品    □ 設計變更    □ 量產品    □ 再現試驗    □ 定期抽測');
  area(cover,'A9:B11','樣品來源\nSample source',{fill:true});area(cover,'C9:L11',list(request.sampleSource)||'□ 社內    □ 海外廠    □ 客戶    □ 廠商    □ 競品');
- for(const [n,a,b,c,d]of [[12,'試驗項目',row.name,'客戶',request.customer],[14,'品名',request.productName||request.productCode,'報告日期',request.reportDate],[16,'品番',request.productCode,'報告編號',request.id?`DQA-${request.id}`:'']]){area(cover,`A${n}:B${n+1}`,a,{fill:true});area(cover,`C${n}:F${n+1}`,b);area(cover,`G${n}:H${n+1}`,c,{fill:true});area(cover,`I${n}:L${n+1}`,d);}
+ for(const [n,a,b,c,d]of [[12,'試驗項目',request.testItems?.length===1?request.testItems[0]:row.name,'客戶',request.customer],[14,'品名',request.productName||request.productCode,'報告日期',request.reportDate],[16,'品番',request.productCode,'報告編號',request.id?`DQA-${request.id}`:'']]){area(cover,`A${n}:B${n+1}`,a,{fill:true});area(cover,`C${n}:F${n+1}`,b);area(cover,`G${n}:H${n+1}`,c,{fill:true});area(cover,`I${n}:L${n+1}`,d);}
  area(cover,'A18:B21','樣品資訊\nSample note',{fill:true});area(cover,'C18:L21',`委託編號：${request.id||''}    樣品數：${request.quantity||''}\n樣品編號：${request.execution?.sampleCode||''}\n設備：${request.execution?.equipment||''}    規範版本：${row.version}\n試驗期間：${request.execution?.plannedStart||''} ～ ${request.execution?.completedAt||request.execution?.plannedEnd||''}`,{size:8});
  area(cover,'A22:L23','試驗基準 Test Conditions',{fill:true,bold:true,center:true});area(cover,'A24:L32',addEvidenceContinuations(book,request.specification||row.specification,assets));
  area(cover,'A33:L34','判定基準 Judgment Criteria',{fill:true,bold:true,center:true});area(cover,'A35:L41',addEvidenceContinuations(book,request.judgementCriteria||row.acceptance,assets,'判定續頁',250));
@@ -80,7 +80,7 @@ export function addTrialReportForms(book,row,{request={},assets,demo=false}={}){
  area(cover,'A50:L52','判定 Judgment：□ 合格 OK    □ 不合格 NG    ■ 待確認 Pending（須有實際證據後填寫）');
  area(cover,'A53:B60','實驗室\nLaboratory',{fill:true,center:true});
  for(const [label,header,sign,name]of [['承認 Approved by','C53:E54','C55:E58','C59:E60'],['確認 Confirmed by','F53:H54','F55:H58','F59:H60'],['作成 Issued by','I53:L54','I55:L58','I59:L60']]){area(cover,header,label,{fill:true,center:true});area(cover,sign,'');area(cover,name,'',{size:7,center:true});}
- const steps=trialProcedure(row);area(process,'A5:L7',`試驗項目：${row.name}    版本：${row.version}\n適用設備：${row.equipment}`,{bold:true});area(process,'A8:L12',`試驗條件／工時：${ref?.conditions||'依來源規範補齊'}；${row.durationHours}H\n${ref?.calendar||'尚未設定排程規則'}\nU 為 Demo 可用空間單位，不代表公升；設備實體規格保留原單位。`);
+ const steps=trialProcedure(row);area(process,'A5:L7',`試驗項目：${row.name}    版本：${row.version}\n適用設備：${row.equipment}`,{bold:true});area(process,'A8:L12',`${request.id?'本案條件／工時：以報告首頁委託規範及本案排程為準。\n':''}範本參考工時：${row.durationHours}H\n${ref?.calendar||'作業日依試驗規範及排程來源確認'}\nU 為 Demo 可用空間單位，不代表公升；設備實體規格保留原單位。`);
  for(const [i,step]of steps.entries()){const n=14+i*8;area(process,`A${n}:B${n+5}`,String(i+1).padStart(2,'0'),{fill:true,bold:true,size:14,center:true});area(process,`C${n}:L${n+5}`,step+'\n實際時間／執行人／證據編號：________________');}
  area(process,'A40:L42','試驗過程紀錄（空白，請按實際執行填寫）',{fill:true,bold:true});
  for(let i=0;i<4;i++){const n=43+i*4;area(process,`A${n}:C${n+3}`,'日期／時間：');area(process,`D${n}:J${n+3}`,'條件、觀察、中斷／恢復：');area(process,`K${n}:L${n+3}`,'執行人：');}

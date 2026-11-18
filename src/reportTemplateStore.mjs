@@ -1,3 +1,4 @@
+import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {canOpenReportArchive} from './reportArchive.mjs';
@@ -44,7 +45,21 @@ export async function validateUploadedTemplate(bytes,name){
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('Excel 無法讀取，可能已加密或損壞。');}
  if(book.worksheets.length>16||book.worksheets.every(s=>s.state&&s.state!=='visible'))throw Error('範本沒有可預覽的工作表。');
  let cells=0;book.eachSheet(s=>{if(s.rowCount>2000||s.columnCount>48)throw Error('範本最多 2000 列、48 欄。');s.eachRow(r=>r.eachCell(c=>{cells++;if(cells>100000)throw Error('範本儲存格數量超限。');if(c.value?.formula||c.value?.sharedFormula||c.value?.hyperlink)throw Error('上傳範本不得含公式或超連結；請另存為純欄位版。');}));for(const image of s.getImages()){const media=book.getImage(image.imageId);if(!media||!['png','jpeg','jpg'].includes(media.extension))throw Error('圖片只接受內嵌 PNG／JPEG。');}});
- if(book.media.length>32)throw Error('範本圖片數量超限。');return {sheets:book.worksheets.map(s=>s.name),cells};
+ if(book.media.length>32)throw Error('範本圖片數量超限。');
+ const declared=[];const add=value=>{if(typeof value==='string'&&value.trim())declared.push(value.trim());};
+ add(book.getWorksheet('報告首頁')?.getCell('C12').text);
+ const info=book.getWorksheet('範本資訊');if(info)info.eachRow(r=>{if(['試驗範本','試驗'].includes(r.getCell(1).text.trim()))add(r.getCell(2).text);});
+ const request=book.getWorksheet('委託單')?.getCell('C19').text||'';if(request.startsWith('試驗項目 Test item：'))add(request.slice('試驗項目 Test item：'.length));
+ add(book.getWorksheet('1.1一般性能試驗-1')?.getCell('F9').text);
+ return {sheets:book.worksheets.map(s=>s.name),cells,declaredTrials:[...new Set(declared)]};
+}
+export function assertUploadedTrialBinding(trialId,details,storage=globalThis.localStorage){
+ if(trialId==='CUSTOM')return {status:'CUSTOM_ONLY'};
+ if(trialId==='BLANK'){if(details.declaredTrials?.length)throw Error('這份範本含有指定試驗項目，不能標示為空白委託單。');return {status:'BLANK'};}
+ const row=readTrialCatalog(storage).rows.find(r=>r.id===trialId);if(!row)throw Error('所選的對應試驗不存在，請重新選擇。');
+ const names=details.declaredTrials||[];
+ if(!names.length||names.some(name=>findTrialDefinition(name,storage)?.id!==row.id))throw Error('範本內的試驗項目與所選對應試驗不一致，已停止；請下載正確試驗範本，或歸類為自訂報告範本。');
+ return {status:'VERIFIED',trialId:row.id,trialName:row.name,declaredTrials:names};
 }
 const guided=globalThis.__DQA_GUIDED_REPORT_DB__;const dbName=typeof guided==='string'&&/^dqa-tour-reports-[a-f0-9-]+$/.test(guided)?guided+'-templates':'dqa-report-template-library-v1';
 function openDb(){return new Promise((resolve,reject)=>{const q=indexedDB.open(dbName,1);q.onupgradeneeded=()=>q.result.createObjectStore('templates',{keyPath:'id'});q.onerror=()=>reject(q.error);q.onsuccess=()=>resolve(q.result);});}
@@ -58,13 +73,13 @@ const repository={
 const meta=({bytes:_bytes,...value})=>value;
 const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
 export async function saveUploadedTemplate(file,{actorId,system='lms',syntheticConfirmed=false,trialId='CUSTOM',version='CUSTOM-1',signal}={},storage=globalThis.localStorage,repo=repository){
- const access={actorId,system},authorize=()=>{if(signal?.aborted)throw Error('範本上傳已取消。');return assertTemplateAccess(access,storage,true);};authorize();
+ const access={actorId,system};let details;const authorize=()=>{if(signal?.aborted)throw Error('範本上傳已取消。');const actor=assertTemplateAccess(access,storage,true);if(details)assertUploadedTrialBinding(trialId,details,storage);return actor;};authorize();
  if(!syntheticConfirmed)throw Error('請先確認範本只含合成資料，沒有真實客戶、機密或個人簽名。');
  if(!['CUSTOM','BLANK'].includes(trialId)&&!/^TRIAL-(?:\d{3}|[a-f0-9]{32})$/.test(trialId)||typeof version!=='string'||!version.trim()||version.length>80)throw Error('範本分類或版本無效。');
  if(!file||file.size>10*1024*1024||typeof file.name!=='string')throw Error('範本須小於 10 MB。');
- const bytes=new Uint8Array(await file.arrayBuffer()),details=await validateUploadedTemplate(bytes,file.name),digest=await hash(bytes);authorize();
- const record={id:crypto.randomUUID(),name:file.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,160),version:version.trim(),trialId,synthetic:true,createdBy:actorId,createdAt:new Date().toISOString(),sha256:digest,byteLength:bytes.byteLength,sheets:details.sheets,bytes};
+ const bytes=new Uint8Array(await file.arrayBuffer());details=await validateUploadedTemplate(bytes,file.name);const digest=await hash(bytes),trialBinding=assertUploadedTrialBinding(trialId,details,storage);authorize();
+ const record={id:crypto.randomUUID(),name:file.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,160),version:version.trim(),trialId,synthetic:true,createdBy:actorId,createdAt:new Date().toISOString(),sha256:digest,byteLength:bytes.byteLength,sheets:details.sheets,trialBinding,bytes};
  await repo.put(record,authorize);globalThis.dispatchEvent?.(new Event(TEMPLATE_EVENT));return meta(record);
 }
 export async function listUploadedTemplates(access,storage=globalThis.localStorage,repo=repository){assertTemplateAccess(access,storage);const records=await repo.list();assertTemplateAccess(access,storage);return records.map(meta).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));}
-export async function readUploadedTemplate(id,access,storage=globalThis.localStorage,repo=repository){assertTemplateAccess(access,storage);const record=await repo.get(id);if(!record||record.synthetic!==true||await hash(record.bytes)!==record.sha256)throw Error('範本已不存在或完整性驗證失敗。');assertTemplateAccess(access,storage);return record;}
+export async function readUploadedTemplate(id,access,storage=globalThis.localStorage,repo=repository){assertTemplateAccess(access,storage);const record=await repo.get(id);if(!record||record.synthetic!==true||await hash(record.bytes)!==record.sha256)throw Error('範本已不存在或完整性驗證失敗。');const details=await validateUploadedTemplate(record.bytes,record.name),trialBinding=assertUploadedTrialBinding(record.trialId,details,storage);assertTemplateAccess(access,storage);return {...record,trialBinding};}

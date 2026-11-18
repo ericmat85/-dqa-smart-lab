@@ -1,10 +1,11 @@
+import {isGeneralTrialName} from './trialTemplateMatching.mjs';
 import {cellText} from './reportLayout.mjs';
 export const GENERAL_PROFILE='general-performance-v1';
 export const GENERAL_COVER='1.1一般性能試驗-1';
 export const GENERAL_DETAIL='1.1一般性能試驗-2';
 export const GENERAL_PAGE_ENDS=[64,100,129,171,195,229];
 export const GENERAL_SIGNATURE_CELLS={level3:'F54',level2:'S54',executor:'AF54'};
-export const isGeneralRequest=request=>(request.testItems||[]).some(item=>/一般性能/.test(item));
+export const isGeneralRequest=request=>(request.testItems||[]).some(isGeneralTrialName);
 export function generalProfile(book){
  const cover=book.getWorksheet(GENERAL_COVER),detail=book.getWorksheet(GENERAL_DETAIL);
  if(!cover||!detail||(cover.state&&cover.state!=='visible')||(detail.state&&detail.state!=='visible')||cellText(cover.getCell('F9')).trim()!=='一般性能試驗'||!cellText(cover.getCell('S1')).includes('試驗報告單'))return null;

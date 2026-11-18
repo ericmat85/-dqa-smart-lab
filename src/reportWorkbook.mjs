@@ -1,4 +1,4 @@
-import {findTrialDefinition} from './trialCatalogStore.mjs';
+import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {addTrialReportForms,labTemplateProfile,formAssets} from './labFormLayout.mjs';
 import {fillGeneralDemo} from './generalDemoData.mjs';
 import {applyReportPresentation,reportDate} from './reportPresentation.mjs';
@@ -7,9 +7,14 @@ import {reportBounds,cellText,normalizeReportMerges} from './reportLayout.mjs';
 import {DEFAULT_SIGNATURE_CELLS} from './reportRules.mjs';
 export async function excelModule(){const module=await import('exceljs/dist/exceljs.min.js');return module.default;}
 export async function createReportTemplate(request={},demo=false,options={}){
+ if(options.requireTrialMatch&&request.testItems?.length!==1)throw Error('本案試驗項目不明確，未改用通用範本。');
  if(isGeneralRequest(request))return createGeneralTemplate(request,demo,options);
- const trial=request.testItems?.length===1?findTrialDefinition(request.testItems[0]):null;
+ // Interactive case downloads opt into strict historical-name matching. Preserve
+ // established layouts of archived/internal Demo reports during regeneration.
+ const name=request.testItems?.length===1?request.testItems[0]:null;
+ const trial=name?(options.requireTrialMatch?findTrialDefinition(name,options.storage):readTrialCatalog(options.storage).rows.find(r=>r.name===name||r.aliases.includes(name))):null;
  if(trial)return createLabTemplate(request,trial,demo,options);
+ if(options.requireTrialMatch)throw Error('找不到本案試驗對應範本，未改用通用範本。');
  const Excel=await excelModule(),book=new Excel.Workbook(),sheet=book.addWorksheet('試驗報告');
  sheet.columns=[12,12,12,12,12,12,12,12,12].map(width=>({width}));
  sheet.mergeCells('A1:I1');sheet.getCell('A1').value=`DQA SMART LAB｜${(request.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告'}（Demo）`;sheet.getCell('A1').font={size:18,bold:true};sheet.getRow(1).height=32;
@@ -41,7 +46,7 @@ export async function inspectReport(bytes,requestId,fileName,request){
  if(labProfile){
   const cover=book.getWorksheet('報告首頁'),results=book.getWorksheet('結果與照片');
   checks.push({label:'委託編號一致',ok:cover.getCell('I16').text===`DQA-${requestId}`,detail:cover.getCell('I16').text});
-  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||request.testItems.includes(cover.getCell('C12').text)),detail:cover.getCell('C12').text});
+  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0])?.id===findTrialDefinition(cover.getCell('C12').text)?.id&&!!findTrialDefinition(cover.getCell('C12').text))),detail:cover.getCell('C12').text});
   checks.push({label:'試驗結果已填寫',ok:Boolean(cover.getCell('A44').text.trim())&&['C12','G12','C16','G16','C20','G20'].some(a=>Boolean(results.getCell(a).text.trim())),detail:'結果摘要與至少一筆試驗觀察須填寫；範本提示及照片不能當成量測證據。'});
   checks.push({label:'工作表皆有對應輸出',ok:book.worksheets.every(s=>['委託單','報告首頁','試驗過程','結果與照片','範本資訊','試驗紀錄'].includes(s.name)||/^(規範|判定)續頁\d+$/.test(s.name)),detail:'未辨識工作表不可併入簽核。'});
  }
@@ -108,6 +113,6 @@ async function createLabTemplate(request,trial,demo,{assets}={}){
  if(!assets&&typeof window!=='undefined')assets=await formAssets();
  const Excel=await excelModule(),book=new Excel.Workbook(),{results}=addTrialReportForms(book,trial,{request:{...request,reportDate:new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'})},assets,demo});
  if(demo)results.getCell('G12').value='DEMO：外觀／功能檢查流程示範，非實際量測。';
- const meta=book.addWorksheet('範本資訊');meta.state='hidden';meta.addRow(['版型','lab-reference-20261116-v1']);meta.addRow(['試驗',trial.name]);meta.addRow(['版本',trial.version]);
+ const meta=book.addWorksheet('範本資訊');meta.state='hidden';meta.addRow(['版型','lab-reference-20261116-v1']);meta.addRow(['試驗',trial.name]);meta.addRow(['版本',trial.version]);meta.addRow(['對應試驗ID',trial.id]);meta.addRow(['委託試驗名稱',request.testItems.join('、')]);
  applyReportPresentation(book);return new Uint8Array(await book.xlsx.writeBuffer());
 }

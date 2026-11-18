@@ -1,3 +1,4 @@
+import {matchTrialDefinition} from './trialTemplateMatching.mjs';
 import {explicitHours,sourceConditions} from './trialSourceFacts.mjs';
 import data from '../render-backend/gateway/trial_profiles.json' with {type:'json'};
 import {testOptions as defaults,getTestReference as reference} from './trialCatalogData.mjs';
@@ -28,7 +29,7 @@ export function readTrialCatalog(storage=globalThis.localStorage){
   const result=Object.freeze({version:1,revision:stored.revision,rows:Object.freeze(rows.map(row=>Object.freeze({...row,aliases:Object.freeze(row.aliases)})))});if(storage)caches.set(storage,{raw,data:result});return result;
  }catch{error('TRIAL_CATALOG_UNAVAILABLE','試驗目錄無法讀取；原資料未覆寫，請檢查試驗與設備參數。');}
 }
-export function findTrialDefinition(name,storage=globalThis.localStorage){return readTrialCatalog(storage).rows.find(r=>r.name===name||r.aliases.includes(name))||null;}
+export function findTrialDefinition(name,storage=globalThis.localStorage){return matchTrialDefinition(name,readTrialCatalog(storage).rows);}
 export function saveTrialDefinition(value,actor,{storage=globalThis.localStorage,expectedRevision}={}){
  let accounts;try{accounts=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||'[]');}catch{error('TRIAL_CATALOG_FORBIDDEN','帳號資料無法核對。');}
  const fresh=Array.isArray(accounts)&&accounts.find(a=>a.id===actor?.id);if(!fresh||!canEditAdmin(fresh,storage))error('TRIAL_CATALOG_FORBIDDEN','目前帳號沒有新增或編輯試驗目錄的權限。');
