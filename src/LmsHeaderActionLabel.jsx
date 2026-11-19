@@ -3,6 +3,10 @@ import './LmsMobileLayout.css';
 
 const paths={
  add:'M12 5v14M5 12h14',
+ 'equipment-add':'M12 21H3V3h14v8M6 7h8M6 11h3M6 15h3M18 14v8M14 18h8',
+ 'material-add':'m12 2 9 5-9 5-9-5 9-5zm0 10v10M3 7v10l9 5M21 7v4M18 14v8M14 18h8',
+ 'status-change':'M3 7h18M3 17h18M8 4v6M16 14v6',
+ 'report-export':'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M14 3v6h6M14 3l6 6M12 11v6m-3-3 3 3 3-3',
  back:'m10 5-7 7 7 7M3 12h18',
  history:'M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2',
  settings:'M9 3h6l1 4 4 1v6l-4 1-1 4H9l-1-4-4-1V8l4-1zM15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0',

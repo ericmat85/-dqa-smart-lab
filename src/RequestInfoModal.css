@@ -1,0 +1,12 @@
+/* Reserve close controls before wrapping long request identifiers and titles. */
+.rq-request-detail-header>div:first-child{flex:1;min-width:0}
+.rq-request-detail-header h2{min-width:0;overflow-wrap:anywhere}
+.rq-request-detail-header>.rq-close{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;min-width:36px;height:36px;padding:0;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:8px;color:inherit;background:var(--enterprise-card,#fff)}
+.request-close-icon{display:block;flex:none;pointer-events:none}
+html body #root .lms-enterprise .request-modal-header>div:first-child{flex:1;min-width:0}
+html body #root .lms-enterprise .request-modal-header :is(h2,h3){min-width:0;overflow-wrap:anywhere}
+@media(max-width:900px){
+ .rq-request-detail-backdrop .rq-request-detail-modal{max-height:calc(100dvh - 36px)}
+ .rq-request-detail-modal .rq-request-detail-header{gap:12px}
+}
+@media(max-width:620px){.rq-request-detail-backdrop .rq-request-detail-modal{height:100dvh;max-height:100dvh}}

@@ -1,3 +1,4 @@
+import RequestCloseIcon from './RequestCloseIcon.jsx';
 import HelpTip from './HelpTip.jsx';
 import {displayTaipei,requestStatusClass} from './requestWorkspace.mjs';
 import {ReportCasePanel} from './ReportUi.jsx';
@@ -10,6 +11,7 @@ import useSystemTheme from './useSystemTheme.js';
 import { SignatureImage, LmsReviewSignatures } from './RequestSignatures.jsx';
 import RequestProgress from './RequestProgress.jsx';
 import './RequestApp.css';
+import './RequestInfoModal.css';
 
 export default function RequestInfoModal({ request: supplied, onClose, onEdit, account }) {
   const root=useRef(null),close=useRef(onClose);const {dark}=useSystemTheme();
@@ -32,7 +34,7 @@ export default function RequestInfoModal({ request: supplied, onClose, onEdit, a
     <section ref={root} tabIndex={-1} className="rq-request-detail-modal" role="dialog" aria-modal="true" aria-labelledby="rq-request-detail-title">
       <header className="rq-request-detail-header">
         <div><p className="rq-eyebrow">ELECTRONIC TEST REQUEST</p><div className="help-title-row"><h2 id="rq-request-detail-title">{selected.id}｜委託單資訊</h2><HelpTip>完整委託內容、試驗需求與簽核進度</HelpTip></div></div>
-        <button type="button" className="rq-close" onClick={() => onClose()} aria-label="關閉委託單資訊">×</button>
+        <button type="button" className="rq-close" onClick={() => onClose()} aria-label="關閉委託單資訊"><RequestCloseIcon/></button>
       </header>
       <div className="rq-request-detail-body"><ReportCasePanel request={selected} account={account}/>
         {selected.cancellation && <section className="rq-detail-section"><h3>委託取消紀錄</h3><div className="rq-detail-grid"><div><label>操作者</label><p>{selected.cancellation.actor}</p></div><div><label>取消時間</label><p>{displayTaipei(selected.cancellation.at)}</p></div><div><label>中止原因</label><p>{selected.cancellation.reason}</p></div></div></section>}
