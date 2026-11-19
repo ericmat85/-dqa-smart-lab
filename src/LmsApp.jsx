@@ -7,7 +7,7 @@ import {askE2Scheduling,e2ProviderUnavailableMessage} from './e2PreviewClient.mj
 import {canonicalE2,e2SampleEvidence,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import AdminCenterModule from './AdminCenterModule.jsx';
-import {ADMIN_MODULES} from './adminCenterData.mjs';
+import {ADMIN_MODULES,AI_ENGINE_PAGES} from './adminCenterData.mjs';
 import {canViewAdmin} from './adminCenterStore.mjs';
 import './AccountRolePolish.css';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
@@ -1847,6 +1847,9 @@ function DashboardPage({
   const requestedPage=path.split('/')[2]||'dashboard';
   const routePage=requestedPage==='accounts'?'settings':requestedPage;
   const settingsModule=requestedPage==='accounts'?'accounts':routePage==='settings'?(path.split('/')[3]||null):null;
+  const settingsEngine=settingsModule==='ai'?(path.split('/').slice(4).join('/')||null):null;
+  const enginePage=AI_ENGINE_PAGES.find(e=>e.code===settingsEngine);
+  useEffect(()=>{if(settingsEngine)document.querySelector('.lms-breadcrumbs [aria-current=page]')?.scrollIntoView({block:'nearest',inline:'end'});},[settingsEngine]);
   const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
   const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
   const [active, setActive] = useState(routePage);
@@ -1907,7 +1910,7 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span>{settingsEngine?<><button type="button" onClick={()=>appNavigate('/lms/settings/ai')}>AI 引擎管理</button><span aria-hidden="true">›</span><strong aria-current="page">{enginePage?`${enginePage.code} ${enginePage.name}`:'找不到 AI 引擎頁面'}</strong></>:<strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong>}</>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
@@ -1927,7 +1930,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts"><AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/></div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -1964,7 +1967,7 @@ export default function App({ path, navigate }) {
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
     const valid=['/lms/accounts',...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
-    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path);
+    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path)||/^\/lms\/settings\/ai\/[A-Za-z0-9_-]+$/.test(path);
     if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
     else if (validRoute && !currentUser) navigate('/lms/login', true);
     else if(path==='/lms/accounts'&&currentUser)navigate('/lms/settings/accounts',true);

@@ -1,3 +1,4 @@
+import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import {useId,useState} from 'react';
 import CompactDialog from './CompactDialog.jsx';
 import useTrialCatalog from './useTrialCatalog.js';
@@ -24,16 +25,16 @@ function Editor({value,revision,account,onClose}){
   {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" onClick={onClose}>取消</button><button type="submit" className="management-primary">儲存試驗項目</button></footer>
  </form></CompactDialog>;
 }
-export default function TrialCatalogManagement({account,equipment=[],schedules=[]}){
+export default function TrialCatalogManagement({account,equipment=[],schedules=[],equipmentAction}){
  const catalog=useTrialCatalog(),[search,setSearch]=useState(''),[editing,setEditing]=useState(null),editable=canEditAdmin(account),rows=catalog.rows.filter(r=>[r.name,r.version,r.specification].join(' ').toLowerCase().includes(search.toLowerCase()));
  const [tab,setTab]=useState('trials'),id=useId(),tabs=[['trials','共用試驗項目與方法',catalog.error?'—':catalog.rows.length],['equipment','設備可用空間與規格',equipment.length],['schedules','既有排程空間與保留時間',schedules.length]];
  function moveTab(event){const keys=['ArrowRight','ArrowLeft','Home','End'];if(!keys.includes(event.key))return;event.preventDefault();const index=tabs.findIndex(([key])=>key===tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setTab(tabs[next][0]);event.currentTarget.parentElement.querySelectorAll('[role=tab]')[next].focus();}
  return <section className="trial-catalog-management" aria-label="試驗項目與設備參數管理">
   <div className="trial-parameter-tabs" role="tablist" aria-label="試驗與設備參數分類">{tabs.map(([key,title,count])=><button type="button" role="tab" key={key} id={`${id}-tab-${key}`} aria-label={title} aria-selected={tab===key} aria-controls={`${id}-panel-${key}`} tabIndex={tab===key?0:-1} onClick={()=>setTab(key)} onKeyDown={moveTab}>{title}<span aria-hidden="true">{count}</span></button>)}</div>
   <div role="tabpanel" id={`${id}-panel-trials`} aria-labelledby={`${id}-tab-trials`} hidden={tab!=='trials'} tabIndex={0}>
-  <header className="trial-catalog-heading"><div><h3>共用試驗項目與方法</h3><p>新增或修改後，新委託單選單與 E4 查詢會讀取同一份目錄。點選試驗名稱展開內容。</p></div><button type="button" className="management-primary" disabled={!editable||!!catalog.error} onClick={()=>setEditing({...defaultTrialCatalog()[0],id:undefined,builtin:false,name:''})}>新增試驗項目</button></header>
+  <header className="trial-catalog-heading"><div><h3>共用試驗項目與方法</h3><p>新增或修改後，新委託單選單與 E4 查詢會讀取同一份目錄。點選試驗名稱展開內容。</p></div><div className="admin-actions">{equipmentAction}<button type="button" className="management-primary" disabled={!editable||!!catalog.error} onClick={()=>setEditing({...defaultTrialCatalog()[0],id:undefined,builtin:false,name:''})}>新增試驗項目</button></div></header>
   {!editable&&<p className="admin-note">目前帳號為唯讀，新增與編輯沿用現有管理權限。</p>}{catalog.error&&<p role="alert" className="management-error">{catalog.error}</p>}
-  <div className="trial-catalog-searchbar"><label className="trial-catalog-search">搜尋試驗<input type="search" aria-label="搜尋試驗項目與規範" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜尋試驗名稱、版本或規範文字…"/></label><p role="status">{catalog.error?'目錄無法讀取':`顯示 ${rows.length}／${catalog.rows.length} 項試驗`}{search&&<button type="button" className="template-btn" onClick={()=>setSearch('')}>清除搜尋</button>}</p></div>
+  <div className="trial-catalog-searchbar"><CatalogSearchToolbar kind="試驗" label="搜尋試驗項目與規範" placeholder="搜尋試驗名稱、版本或規範文字…" value={search} onChange={setSearch} onClear={()=>setSearch('')}/><p role="status">{catalog.error?'目錄無法讀取':`顯示 ${rows.length}／${catalog.rows.length} 項試驗`}</p></div>
   <div className="trial-catalog-list">{rows.map(row=><article key={row.id}><details><summary><span className="trial-catalog-chevron" aria-hidden="true">›</span><span><strong>{row.name}</strong><small>{row.version}・{row.durationHours} 小時</small></span></summary><dl><div><dt>適用設備</dt><dd>{row.equipment}</dd></div><div><dt>試驗規範／試驗手法</dt><dd className="trial-catalog-spec">{row.specification}</dd></div><div><dt>判定參考</dt><dd>{row.acceptance}</dd></div></dl></details><button type="button" className="template-btn trial-catalog-edit" disabled={!editable||!!catalog.error} aria-label={'編輯'+row.name} onClick={()=>setEditing(row)}>編輯</button></article>)}</div>{!rows.length&&!catalog.error&&<p>沒有符合條件的試驗項目。</p>}
   </div>
   <div role="tabpanel" id={`${id}-panel-equipment`} aria-labelledby={`${id}-tab-equipment`} hidden={tab!=='equipment'} tabIndex={0}>

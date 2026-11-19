@@ -19,7 +19,7 @@ async function seed(page,{theme='light',actor='DEMO-LEVEL2',paused=false}={}){
 }
 const management=page=>page.getByRole('region',{name:'AI 排程設定與運行監控'});
 async function go(page,name){await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
-async function goAI(page){await go(page,'系統管理');await page.getByRole('button',{name:'開啟AI 引擎管理',exact:true}).click();}
+async function goAI(page){await go(page,'系統管理');await page.getByRole('button',{name:'開啟AI 引擎管理',exact:true}).click();await page.getByRole('button',{name:'開啟AI 排程智慧化',exact:true}).click();}
 async function openSchedule(page){await go(page,'排程管理');await page.locator('tbody tr').filter({hasText:CASE}).getByRole('button',{name:'編輯排程',exact:true}).click();return page.getByRole('dialog',{name:new RegExp('編輯試驗排程.*'+CASE)});}
 
 for(const theme of ['light','dark'])test(`E2 management settings drive the original scheduler and monitor a verified Mock response ${theme}`,async({page,context})=>{
@@ -35,8 +35,8 @@ for(const theme of ['light','dark'])test(`E2 management settings drive the origi
   }
   if(url.pathname.startsWith('/api/preview/'))return route.abort();return route.continue();
  });
- await page.goto('/lms/settings/ai');const panel=management(page);await expect(panel).toContainText('尚無排程請求');await expect(page.locator('.admin-engine-grid')).not.toContainText('AI 排程智慧化Demo 模擬啟用');
- const observer=await context.newPage();await observer.addInitScript(()=>sessionStorage.setItem('dqa-lms-account-id','DEMO-LEVEL2'));await observer.goto('/lms/settings/ai');await page.getByRole('button',{name:'調整排程設定',exact:true}).click();const dialog=page.getByRole('dialog',{name:'調整 AI 排程設定'});
+ await page.goto('/lms/settings/ai/E2');const panel=management(page);await expect(panel).toContainText('尚無排程請求');await expect(page.locator('.lms-breadcrumbs [aria-current=page]')).toHaveText('E2 AI 排程智慧化');
+ const observer=await context.newPage();await observer.addInitScript(()=>sessionStorage.setItem('dqa-lms-account-id','DEMO-LEVEL2'));await observer.goto('/lms/settings/ai/E2');await page.getByRole('button',{name:'調整排程設定',exact:true}).click();const dialog=page.getByRole('dialog',{name:'調整 AI 排程設定'});
  await dialog.getByLabel('搜尋範圍上限（天）',{exact:true}).fill('7');await dialog.getByLabel('準備保留時間下限（分鐘）',{exact:true}).fill('30');await dialog.getByLabel('清理保留時間下限（分鐘）',{exact:true}).fill('15');
  await expect(dialog.getByLabel(/API Key|模型|預算/)).toHaveCount(0);await dialog.getByRole('button',{name:'儲存排程設定',exact:true}).click();await expect(management(observer).locator('.e2-setting-values')).toContainText('7 天');
  const editor=await openSchedule(page);await editor.getByLabel('開始日期',{exact:false}).fill(friday());const before=await page.evaluate(()=>localStorage.getItem('dqa-schedules-demo-v1'));
@@ -52,11 +52,11 @@ for(const theme of ['light','dark'])test(`E2 management settings drive the origi
  await page.reload();await expect(panel.locator('.e2-setting-values')).toContainText('30 分鐘');expect(apiCalls).toBe(1);expect(await page.pageErrors()).toEqual([]);
 });
 test('E2 management preserves the third-level read-only boundary and fits mobile',async({page,context})=>{
- await context.route('**/api/preview/**',route=>route.abort());await seed(page,{actor:'DEMO-LEVEL3',theme:'dark'});await page.setViewportSize({width:390,height:844});await page.goto('/lms/settings/ai');
+ await context.route('**/api/preview/**',route=>route.abort());await seed(page,{actor:'DEMO-LEVEL3',theme:'dark'});await page.setViewportSize({width:390,height:844});await page.goto('/lms/settings/ai/E2');
  const panel=management(page);await expect(panel.getByRole('button',{name:'調整排程設定'})).toBeDisabled();await expect(panel).toContainText('目前帳號為唯讀');await expect(panel.getByRole('button',{name:'還原排程預設值'})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('e2-management-mobile-readonly.png'),fullPage:true});expect(await page.pageErrors()).toEqual([]);
 });
 test('a paused scheduler sends no Session or AI requests and records the actual local block',async({page,context})=>{
- await seed(page,{paused:true});let calls=0;await context.route('**/api/preview/**',route=>{calls++;return route.abort();});await page.goto('/lms/settings/ai');const editor=await openSchedule(page);
+ await seed(page,{paused:true});let calls=0;await context.route('**/api/preview/**',route=>{calls++;return route.abort();});await page.goto('/lms/settings/ai/E2');const editor=await openSchedule(page);
  await editor.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議',exact:true})).toBeHidden();await expect(editor.locator('.schedule-arrangement-message')).toContainText('暫停');await editor.getByRole('button',{name:'關閉',exact:true}).click();await goAI(page);
  await expect(management(page).getByRole('region',{name:'E2 即時排程紀錄'})).toContainText('E2_CLIENT_PAUSED');expect(calls).toBe(0);
 });

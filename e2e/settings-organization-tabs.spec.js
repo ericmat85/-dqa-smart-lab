@@ -31,14 +31,14 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  await first.locator('summary').click();await expect(first.getByText('試驗規範／試驗手法',{exact:true})).toBeVisible();
  await first.locator('summary').focus();await page.keyboard.press('Enter');await expect(first.getByText('試驗規範／試驗手法',{exact:true})).toBeHidden();
  const search=trials.getByRole('searchbox',{name:'搜尋試驗項目與規範'}),bounds=await search.boundingBox(),panel=await trials.boundingBox();
- expect(bounds.width).toBeGreaterThan(panel.width-90);await search.fill('高溫高濕');await expect(cards).toHaveCount(1);
+ expect(bounds.width).toBeGreaterThan(panel.width-200);const toolbar=await trials.locator('.catalog-search-toolbar').boundingBox();expect(Math.abs(toolbar.x-panel.x)).toBeLessThan(2);expect(Math.abs(toolbar.width-panel.width)).toBeLessThan(2);await search.fill('高溫高濕');await expect(cards).toHaveCount(1);
  await cards.locator('summary').click();await expect(cards).toContainText('250 小時');
  await page.screenshot({path:test.info().outputPath(`parameters-${width}-${theme}.png`),fullPage:true});
  const equipmentTab=tabs.getByRole('tab',{name:'設備可用空間與規格',exact:true});await equipmentTab.click();
  const equipment=p.getByRole('tabpanel',{name:'設備可用空間與規格',exact:true});await expect(equipment).toBeVisible();await expect(equipment.getByRole('columnheader',{name:'可用空間 U',exact:true})).toBeVisible();await expect(equipment.locator('tbody tr')).toHaveCount(20);
  await equipmentTab.press('ArrowRight');await expect(p.getByRole('tabpanel',{name:'既有排程空間與保留時間'})).toBeVisible();
  await tabs.getByRole('tab',{name:'既有排程空間與保留時間'}).press('Home');await expect(search).toHaveValue('高溫高濕');await expect(search).toBeVisible();
- await trials.getByRole('button',{name:'清除搜尋',exact:true}).click();await expect(cards).toHaveCount(20);
+ await trials.getByRole('button',{name:'清除篩選',exact:true}).click();await expect(cards).toHaveCount(20);
  expect(await business(page)).toEqual(before);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  expect(calls).toEqual([]);expect(await page.pageErrors()).toEqual([]);
 });

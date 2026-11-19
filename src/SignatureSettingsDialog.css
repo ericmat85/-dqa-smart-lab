@@ -1,0 +1,14 @@
+.signature-settings-dialog{--signature-bg:var(--enterprise-card,var(--surface,#fff));--signature-text:var(--enterprise-text,var(--text,#142c49));--signature-muted:var(--enterprise-muted,var(--muted,#70849f));--signature-line:var(--enterprise-border,var(--line,#dce5f1));position:fixed;width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid var(--signature-line);border-radius:16px;background:var(--signature-bg);color:var(--signature-text);box-shadow:0 24px 80px #0d233d40;overflow:auto}
+.signature-settings-dialog.theme-dark{--signature-bg:#11293b;--signature-text:#edf4ff;--signature-muted:#a7b8cf;--signature-line:#30485f}
+.signature-settings-dialog::backdrop{background:#0d20384d}
+.signature-settings-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;border-bottom:1px solid var(--signature-line)}
+.signature-settings-dialog>header h3{margin:0;font-size:18px}
+.signature-settings-dialog>header button{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid var(--signature-line);border-radius:8px;background:var(--signature-bg);color:var(--signature-text);font-size:24px;cursor:pointer}
+.signature-settings-dialog .admin-edit-form{padding:24px}
+.signature-settings-dialog .admin-edit-form>p{font-size:12px;line-height:1.8;color:var(--signature-muted)}
+.signature-settings-dialog footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:22px}
+.signature-settings-dialog footer button{min-height:38px;padding:8px 14px;border:1px solid var(--signature-line);border-radius:8px;background:var(--signature-bg);color:var(--signature-text);font:inherit;font-size:13px;cursor:pointer}
+.signature-settings-dialog footer button.management-primary{background:#4057ef;border-color:#4057ef;color:#fff}
+.signature-settings-dialog button:disabled{opacity:.5;cursor:not-allowed}
+.signature-settings-dialog .rq-label,.signature-settings-dialog .rq-radio-row label{color:var(--signature-text)}
+@media(max-width:600px){.signature-settings-dialog>header,.signature-settings-dialog .admin-edit-form{padding:18px}}

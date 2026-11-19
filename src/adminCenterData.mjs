@@ -32,6 +32,7 @@ export const AI_ENGINES=[
  ['schedule','AI 排程智慧化','試驗資料與資源核對、可調整的規劃偏好，以及請求、用量與 Trace 監控。'],
  ['assistant','AI 智能助理','一般聊天與合成文件問答；狀態取自實際回應。'],
 ].map(([id,name,description])=>({id,name,description}));
+export const AI_ENGINE_PAGES=[['E1','request'],['E2','schedule'],['E3','report'],['E4','assistant']].map(([code,id])=>({code,...AI_ENGINES.find(e=>e.id===id)}));
 export const NOTICE_RULES=[['approval','委託單待簽核提醒'],['overdue','審查逾期提醒'],['schedule','試驗排程異動通知'],['completed','試驗完成通知'],['report','報告待審核提醒'],['calibration','設備校正到期提醒'],['ai','AI 審查異常提醒']];
 export const ADMIN_FIELDS={
  backup:[{key:'enabled',label:'開頁期間顯示備份提醒',type:'checkbox'},{key:'frequency',label:'備份頻率',options:[['daily','每日'],['weekly','每週一'],['manual','手動']]},{key:'time',label:'預定備份時間',type:'time'},{key:'retentionDays',label:'建議備份保留天數',type:'number',min:1,max:3650}],
