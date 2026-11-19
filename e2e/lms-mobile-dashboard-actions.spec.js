@@ -20,9 +20,10 @@ for(const [width,theme] of [[320,'light'],[390,'light'],[390,'dark'],[768,'dark'
   for(const button of await actions(page).all()){
    if(!await button.isVisible())continue;await expect(button.locator('>.lms-header-action-icon')).toBeVisible();await expect(button.locator('>.lms-header-action-label')).toHaveCSS('position','absolute');await expect(button.locator('>.lms-header-action-label')).toHaveCSS('clip-path','inset(50%)');const box=await button.boundingBox();expect(box.width).toBe(36);expect(box.height).toBe(36);expect((await button.innerText()).trim().length).toBeGreaterThan(0);
   }
+  for(const title of await page.locator('.dashboard-content .template-heading h2').all())if(await title.isVisible())await expect(title).toHaveCSS('text-align','left');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   if(route==='requests'){
-   const heading=page.locator('.lms-compact-requests .template-heading'),title=heading.getByRole('heading',{name:'試驗委託管理',exact:true});await expect(heading).toHaveCSS('display','grid');await expect(title).toHaveCSS('text-align','center');const area=await heading.locator('>div:first-child').boundingBox(),outer=await heading.boundingBox();expect(Math.abs(area.x+area.width/2-outer.x-outer.width/2)).toBeLessThanOrEqual(1);await expect(heading.getByRole('link',{name:'歷史委託',exact:true})).toBeVisible();await page.screenshot({path:test.info().outputPath(`requests-${width}-${theme}.png`)});
+   const heading=page.locator('.lms-compact-requests .template-heading'),title=heading.getByRole('heading',{name:'試驗委託管理',exact:true});await expect(heading).toHaveCSS('display','flex');await expect(title).toHaveCSS('text-align','left');const area=await title.boundingBox(),outer=await heading.boundingBox();expect(Math.abs(area.x-outer.x)).toBeLessThanOrEqual(1);await expect(heading.getByRole('link',{name:'歷史委託',exact:true})).toBeVisible();await page.screenshot({path:test.info().outputPath(`requests-${width}-${theme}.png`)});
   }
   if(route==='equipment')await page.screenshot({path:test.info().outputPath(`equipment-${width}-${theme}.png`)});
  }

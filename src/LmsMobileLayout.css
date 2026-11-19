@@ -13,11 +13,5 @@
  html body #root .dashboard-shell.lms-enterprise .template-heading>.management-export-menu{flex:0 0 36px;width:36px}
  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel>header{flex-wrap:nowrap;align-items:center;gap:8px}
  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel>header>div:first-child{flex:1;min-width:0}
- html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .template-heading{display:grid;grid-template-columns:36px minmax(0,1fr) 36px}
- html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .template-heading>div:first-child{grid-column:2;text-align:center}
- html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .template-heading .help-title-row{justify-content:center;text-align:center}
- html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .template-heading h2{justify-content:center;text-align:center;font-size:20px}
- html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .request-history-button{grid-column:3}
 }
 @media(max-width:380px){html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading) h2{font-size:20px}}
-@media(max-width:380px){html body #root .dashboard-shell.lms-enterprise .lms-compact-requests .template-heading h2{font-size:18px}}

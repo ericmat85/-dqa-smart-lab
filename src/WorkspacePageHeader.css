@@ -122,3 +122,9 @@
 /* Page titles reuse the exact sidebar SVG, inheriting the title theme color. */
 #root :is(.rq-enterprise,.lab-enterprise,.lms-enterprise) :is(h1,h2):has(>.lms-sidebar-icon){display:flex;align-items:center;gap:10px}
 #root :is(.rq-enterprise,.lab-enterprise,.lms-enterprise) :is(h1,h2)>.lms-sidebar-icon{width:22px;height:24px;flex:0 0 22px;color:currentColor}
+
+/* Mobile workspaces use the page heading instead of a breadcrumb trail. */
+@media(max-width:900px){
+ html body #root :is(.lms-enterprise .lms-breadcrumbs,.rq-enterprise .rq-breadcrumbs,.lab-enterprise .lab-breadcrumbs,.tour-breadcrumb){display:none}
+ html body #root :is(.dashboard-topbar,.rq-topbar,.lab-global-header)>.system-header-actions{margin-left:auto}
+}

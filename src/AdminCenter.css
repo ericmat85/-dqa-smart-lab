@@ -40,3 +40,10 @@ html body #root .lms-enterprise :is(.admin-module,.admin-account-workspace) .adm
 .admin-engine-title{display:flex;align-items:center;gap:9px}
 .admin-engine-title svg{flex:none;width:22px;height:22px}
 @media(max-width:600px){html body #root .lms-enterprise :is(.admin-module,.admin-account-workspace) .admin-module-nav>[role=tablist]{gap:14px}.personal-signature-setting{gap:12px}}
+
+/* The overview banner meets the top and side edges of its page frame. */
+html body #root .dashboard-shell.lms-enterprise .settings-management{padding:0}
+html body #root .lms-enterprise .settings-management>.template-page{max-width:none;margin:0}
+html body #root .lms-enterprise .settings-management .admin-workspace-hero{margin:0;border-radius:13px 13px 0 0}
+.admin-home-content{padding:18px;max-width:1600px;box-sizing:border-box;margin-inline:auto}
+html body #root .lms-enterprise .settings-management .admin-home-content>.management-heading{margin-bottom:12px;padding-bottom:0;gap:12px;align-items:center}

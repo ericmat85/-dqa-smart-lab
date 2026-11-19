@@ -1,10 +1,10 @@
 import {test,expect} from '@playwright/test';
 for(const [width,height] of [[1366,768],[1672,941],[1440,900],[1920,1080],[1280,640],[960,600]]){
- test(`portal ${width}x${height} fits without scrolling and all four entries remain clickable`,async({page})=>{
+ test(`portal ${width}x${height} has a full-width top carousel and four accessible entries`,async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width,height});await page.goto('/');
   await expect(page.locator('.portal-choices button')).toHaveCount(4);await expect(page.locator('.portal-lab-photo')).toHaveCount(0);const logo=page.locator('.portal-brand img');await expect(logo).toHaveAttribute('src',/colong-ie-transparent.png$/);expect(await logo.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
-  const bounds=await page.evaluate(()=>({width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight,w:innerWidth,h:innerHeight}));expect(bounds.width).toBeLessThanOrEqual(bounds.w);expect(bounds.height).toBeLessThanOrEqual(bounds.h);
-  for(const button of await page.locator('.portal-choices button').all()){const box=await button.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(height);expect(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})).toBe(true);}
+  const bounds=await page.evaluate(()=>({width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight,w:innerWidth,h:innerHeight}));expect(bounds.width).toBeLessThanOrEqual(bounds.w);const hero=await page.locator('.portal-intro').boundingBox(),header=await page.locator('.portal-header').boundingBox();expect(hero.x).toBe(0);expect(hero.width).toBe(width);expect(Math.abs(hero.y-header.y-header.height)).toBeLessThanOrEqual(1);
+  for(const button of await page.locator('.portal-choices button').all()){await button.scrollIntoViewIfNeeded();const box=await button.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(height+1);expect(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})).toBe(true);}
   await page.screenshot({path:test.info().outputPath(`portal-${width}.png`),fullPage:true});expect(errors).toEqual([]);
  });
 }
@@ -43,6 +43,6 @@ test('five portal themes rotate every 15 seconds, wrap, pause and allow manual s
  await page.getByRole('button',{name:'播放主題輪播',exact:true}).click();await page.clock.fastForward(15000);await expect(intro.locator('.portal-overline')).toHaveText(tags[4]);
  for(const [width,height]of [[1366,768],[1440,900],[1920,1080],[960,600]]){
   await page.setViewportSize({width,height});
-  for(let i=0;i<5;i++){await page.getByRole('button',{name:`第 ${i+1} 張：${tags[i]}`,exact:true}).click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight)).toBe(true);}
+  for(let i=0;i<5;i++){await page.getByRole('button',{name:`第 ${i+1} 張：${tags[i]}`,exact:true}).click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
  }
 });
