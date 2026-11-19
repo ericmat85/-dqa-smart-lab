@@ -5,7 +5,7 @@ import './Pagination.css';
 
 function Controls({data,onPage}) {
   if(data.total<=data.size)return null;
-  return <nav className="data-pagination" aria-label="列表分頁"><span>第 {data.offset+1}–{Math.min(data.offset+data.total)} 筆，共 {data.total} 筆</span><div><button type="button" aria-label="上一頁" disabled={data.page===1} onClick={()=>onPage(data.page-1)}>‹</button>{pageNumbers(data.page,data.pages).map((page,index)=>page==='…'?<span className="data-pagination-gap" key={`gap-${index}`}>…</span>:<button type="button" key={page} aria-label={`第 ${page} 頁`} aria-current={page===data.page?'page':undefined} onClick={()=>onPage(page)}>{page}</button>)}<button type="button" aria-label="下一頁" disabled={data.page===data.pages} onClick={()=>onPage(data.page+1)}>›</button></div></nav>;
+  return <nav className="data-pagination" aria-label="列表分頁"><span>第 {data.offset+1}–{Math.min(data.offset+data.size,data.total)} 筆，共 {data.total} 筆</span><div><button type="button" aria-label="上一頁" disabled={data.page===1} onClick={()=>onPage(data.page-1)}>‹</button>{pageNumbers(data.page,data.pages).map((page,index)=>page==='…'?<span className="data-pagination-gap" key={`gap-${index}`}>…</span>:<button type="button" key={page} aria-label={`第 ${page} 頁`} aria-current={page===data.page?'page':undefined} onClick={()=>onPage(page)}>{page}</button>)}<button type="button" aria-label="下一頁" disabled={data.page===data.pages} onClick={()=>onPage(data.page+1)}>›</button></div></nav>;
 }
 function ListPage({items,children,pageSize}) {
   const [page,setPage]=useState(1);
