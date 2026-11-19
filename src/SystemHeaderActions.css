@@ -20,3 +20,12 @@
 .system-header-dark .notification-item{background:var(--surface);border-color:var(--border);color:var(--text)}
 @media(max-width:900px){.dashboard-shell>.sidebar{position:fixed;inset:0 auto 0 0;z-index:1800;flex:none;width:216px;height:100dvh;min-height:100dvh;transform:translateX(-100%);transition:transform .18s}.dashboard-shell>.sidebar.sidebar-open{transform:translateX(0)}.dashboard-shell>.sidebar-overlay{display:block;position:fixed;inset:0;border:0;background:#10243d80;z-index:1700}.dashboard-shell>.dashboard-main{width:100%}}
 @media(max-width:620px){.system-header-actions{gap:8px}.system-header-actions .system-profile-name{display:none}.system-header-actions .theme-toggle{padding:8px;gap:6px}.system-header-actions .system-theme-label{display:none}.system-header-actions .popup-menu{position:fixed;top:70px;right:12px;max-width:calc(100vw - 24px)}.system-header-actions .profile-button{padding:4px}.shared-personal-settings{padding:18px}}
+
+html body .shared-personal-settings .personal-signature-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:9px 12px;border:1px solid #0866e8;border-radius:9px;background:#0866e8;color:#fff;font:inherit;font-size:12px;font-weight:600;line-height:1.4;box-shadow:0 3px 9px #0866e81c;cursor:pointer;white-space:nowrap}
+html body .shared-personal-settings .personal-signature-button svg{flex:none}
+html body .shared-personal-settings .personal-signature-button:hover{background:#0758c9;border-color:#0758c9}
+html body .shared-personal-settings .personal-signature-button:focus-visible{outline:3px solid #8bbcff;outline-offset:3px}
+.personal-signature-arrow{font-size:18px;margin-left:2px;line-height:1}
+html body .shared-personal-settings[data-system] .email-notification-switch.is-enabled{background:#0866e8!important;border-color:#0866e8!important}
+html body .shared-personal-settings[data-system] .email-notification-switch:focus-visible{outline-color:#8bbcff}
+@media(max-width:480px){html body .shared-personal-settings .personal-signature-button{width:100%}}
