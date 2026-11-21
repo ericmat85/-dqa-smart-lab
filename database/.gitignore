@@ -1,0 +1,7 @@
+*.dump
+*.sqlite
+*.env
+*.key
+*.pem
+__pycache__/
+local-state/
