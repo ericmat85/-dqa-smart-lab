@@ -23,7 +23,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  await seed(page,{theme});await page.setViewportSize({width,height:900});
  const calls=[];page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))calls.push(r.url());});
  await page.goto('/lms/settings/parameters');const before=await business(page),p=page.getByRole('region',{name:'試驗項目與設備參數管理'}),tabs=p.getByRole('tablist');
- await expect(tabs.getByRole('tab')).toHaveCount(3);
+ await expect(tabs.getByRole('tab')).toHaveCount(4);
  const trials=p.getByRole('tabpanel',{name:'共用試驗項目與方法',exact:true});await expect(trials).toBeVisible();
  await expect(p.getByRole('tabpanel')).toHaveCount(1);
  const cards=trials.locator('.trial-catalog-list article');await expect(cards).toHaveCount(20);
@@ -38,7 +38,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  const equipment=p.getByRole('tabpanel',{name:'設備可用空間與規格',exact:true});await expect(equipment).toBeVisible();await expect(equipment.getByRole('columnheader',{name:'可用空間 U',exact:true})).toBeVisible();await expect(equipment.locator('tbody tr')).toHaveCount(20);
  await equipmentTab.press('ArrowRight');await expect(p.getByRole('tabpanel',{name:'既有排程空間與保留時間'})).toBeVisible();
  await tabs.getByRole('tab',{name:'既有排程空間與保留時間'}).press('Home');await expect(search).toHaveValue('高溫高濕');await expect(search).toBeVisible();
- await trials.getByRole('button',{name:'清除篩選',exact:true}).click();await expect(cards).toHaveCount(20);
+ await trials.getByRole('button',{name:width<=900?'清除搜尋與篩選':'清除篩選',exact:true}).click();await expect(cards).toHaveCount(20);
  expect(await business(page)).toEqual(before);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  expect(calls).toEqual([]);expect(await page.pageErrors()).toEqual([]);
 });

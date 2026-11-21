@@ -1,4 +1,5 @@
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
+import EquipmentPortSettings from './EquipmentPortSettings.jsx';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import {useId,useState} from 'react';
 import CompactDialog from './CompactDialog.jsx';
@@ -28,10 +29,10 @@ function Editor({value,revision,account,onClose}){
 }
 export default function TrialCatalogManagement({account,equipment=[],schedules=[],equipmentAction}){
  const catalog=useTrialCatalog(),[search,setSearch]=useState(''),[editing,setEditing]=useState(null),editable=canEditAdmin(account),rows=catalog.rows.filter(r=>[r.name,r.version,r.specification].join(' ').toLowerCase().includes(search.toLowerCase()));
- const [tab,setTab]=useState('trials'),id=useId(),tabs=[['trials','共用試驗項目與方法',catalog.error?'—':catalog.rows.length],['equipment','設備可用空間與規格',equipment.length],['schedules','既有排程空間與保留時間',schedules.length]];
+ const [tab,setTab]=useState('trials'),id=useId(),tabs=[['trials','共用試驗項目與方法',catalog.error?'—':catalog.rows.length],['equipment','設備可用空間與規格',equipment.length],['schedules','既有排程空間與保留時間',schedules.length],['ports','設備端口設定',null]];
  function moveTab(event){const keys=['ArrowRight','ArrowLeft','Home','End'];if(!keys.includes(event.key))return;event.preventDefault();const index=tabs.findIndex(([key])=>key===tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;setTab(tabs[next][0]);event.currentTarget.parentElement.querySelectorAll('[role=tab]')[next].focus();}
  return <section className="trial-catalog-management" aria-label="試驗項目與設備參數管理">
-  <div className="trial-parameter-tabs" role="tablist" aria-label="試驗與設備參數分類">{tabs.map(([key,title,count])=><button type="button" role="tab" key={key} id={`${id}-tab-${key}`} aria-label={title} aria-selected={tab===key} aria-controls={`${id}-panel-${key}`} tabIndex={tab===key?0:-1} onClick={()=>setTab(key)} onKeyDown={moveTab}>{title}<span aria-hidden="true">{count}</span></button>)}</div>
+  <div className="trial-parameter-tabs" role="tablist" aria-label="試驗與設備參數分類">{tabs.map(([key,title,count])=><button type="button" role="tab" key={key} id={`${id}-tab-${key}`} aria-label={title} aria-selected={tab===key} aria-controls={`${id}-panel-${key}`} tabIndex={tab===key?0:-1} onClick={()=>setTab(key)} onKeyDown={moveTab}>{title}{count!==null&&<span aria-hidden="true">{count}</span>}</button>)}</div>
   <div role="tabpanel" id={`${id}-panel-trials`} aria-labelledby={`${id}-tab-trials`} hidden={tab!=='trials'} tabIndex={0}>
   <header className="trial-catalog-heading"><div><h3>共用試驗項目與方法</h3><p>新增或修改後，新委託單選單與 E4 查詢會讀取同一份目錄。點選試驗名稱展開內容。</p></div><div className="admin-actions">{equipmentAction}<button type="button" className="management-primary" disabled={!editable||!!catalog.error} onClick={()=>setEditing({...defaultTrialCatalog()[0],id:undefined,builtin:false,name:''})}><LmsHeaderActionLabel icon="add">新增試驗項目</LmsHeaderActionLabel></button></div></header>
   {!editable&&<p className="admin-note">目前帳號為唯讀，新增與編輯沿用現有管理權限。</p>}{catalog.error&&<p role="alert" className="management-error">{catalog.error}</p>}
@@ -44,6 +45,7 @@ export default function TrialCatalogManagement({account,equipment=[],schedules=[
   <div role="tabpanel" id={`${id}-panel-schedules`} aria-labelledby={`${id}-tab-schedules`} hidden={tab!=='schedules'} tabIndex={0}>
   <h3>既有排程空間與保留時間</h3><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>委託</th><th>每件樣品占用 U</th><th>準備（分鐘）</th><th>清理（分鐘）</th></tr></thead><tbody>{schedules.map(row=><tr key={row.id}><td>{row.requestId||row.id}</td><td>{row.sampleSpaceUnits??'未填寫'}</td><td>{row.preparationMinutes??0}</td><td>{row.cleanupMinutes??0}</td></tr>)}</tbody></table></div>
   </div>
+  <div role="tabpanel" id={`${id}-panel-ports`} aria-labelledby={`${id}-tab-ports`} hidden={tab!=='ports'} tabIndex={0}>{tab==='ports'&&<EquipmentPortSettings key={account.id} account={account} equipment={equipment}/>}</div>
   {editing&&editable&&<Editor value={editing} revision={catalog.revision} account={account} onClose={()=>setEditing(null)}/>}
  </section>;
 }
