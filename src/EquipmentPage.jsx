@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
 import {equipmentSpaceUnits,requireEquipmentSpaceUnits} from './equipmentSpace.mjs';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
@@ -18,7 +19,7 @@ const KEY = 'dqa-equipment-demo-v1';
 const statuses = ['使用中','待機中','維護中','校驗中','暫停中','借用'];
 function readEquipment() {
   try {
-    const stored=JSON.parse(window.localStorage.getItem(KEY) || 'null');
+    const stored=JSON.parse(appStorage().getItem(KEY) || 'null');
     return Array.isArray(stored) && stored.every(row => row?.id && row?.name) ? stored : DEMO_EQUIPMENT;
   } catch { return DEMO_EQUIPMENT; }
 }
@@ -38,14 +39,14 @@ export default function EquipmentPage({ currentUser, readOnly=false }) {
   const submitStatusChange=event=>{
     event.preventDefault();if(readOnly)return;
     try {
-      const raw=window.localStorage.getItem(KEY);
+      const raw=appStorage().getItem(KEY);
       const current=raw ? JSON.parse(raw) : equipment;
       if (!Array.isArray(current)) throw Error('設備資料無法讀取，請重新載入後再試。');
       setEquipment(current);
       const borrowed=current.find(m=>m.id===statusForm.id)?.status==='借用';
       if(borrowed&&statusForm.status!=='待機中')throw Error('借用設備請先確認歸還。');
       const next=borrowed?returnBorrowEquipment({equipmentId:statusForm.id,expectedBorrowId:statusForm.expectedBorrowId,actorId:currentUser?.id,comment:statusForm.reason}):changeEquipmentStatus(current,{...statusForm,expectedStatus:statusEquipment?.status,actor:currentUser?.name,actorId:currentUser?.id});
-      try {if(!borrowed)window.localStorage.setItem(KEY,JSON.stringify(next));}
+      try {if(!borrowed)appStorage().setItem(KEY,JSON.stringify(next));}
       catch {throw Error('無法儲存設備狀態，請確認瀏覽器空間或權限後再試。');}
       setEquipment(next);
       setNotice((next.find(row=>row.id===statusForm.id)?.name || statusForm.id)+' 已變更為'+statusForm.status+(statusForm.status==='待機中'?'，完成紀錄已儲存。':'，已記錄開始時間。'));
@@ -74,7 +75,7 @@ export default function EquipmentPage({ currentUser, readOnly=false }) {
     if (![form.id,form.name,form.location,form.owner].every(value=>String(value||'').trim())) {setFormError('請填寫設備編號、名稱、位置及負責人。');return;}
     const id=form.id.trim();
     let latest;
-    try { const raw=window.localStorage.getItem(KEY); latest=raw ? JSON.parse(raw) : equipment; if(!Array.isArray(latest)) throw Error('invalid'); } catch {setFormError('無法讀取設備資料，請重新載入後再試。');return;}
+    try { const raw=appStorage().getItem(KEY); latest=raw ? JSON.parse(raw) : equipment; if(!Array.isArray(latest)) throw Error('invalid'); } catch {setFormError('無法讀取設備資料，請重新載入後再試。');return;}
     const current=latest.find(row=>row.id===form.editingId);
     if(form.editingId && !current){setFormError('設備資料已更新，請重新開啟編輯。');return;}
     if (!form.editingId && latest.some(row=>row.id===id)) {setFormError('設備編號已存在，請使用獨立編號。');return;}
@@ -83,7 +84,7 @@ export default function EquipmentPage({ currentUser, readOnly=false }) {
     if (!Number.isFinite(next.dailyHours) || next.dailyHours<=0 || next.dailyHours>24) {setFormError('每日可用時數需大於 0 且不超過 24。');return;}
     delete next.editingId;
     const updated=form.editingId ? latest.map(row=>row.id===form.editingId ? next : row) : [...latest,next];
-    try {window.localStorage.setItem(KEY,JSON.stringify(updated));} catch {setFormError('無法儲存設備資料，請確認瀏覽器空間或權限後再試。');return;}
+    try {appStorage().setItem(KEY,JSON.stringify(updated));} catch {setFormError('無法儲存設備資料，請確認瀏覽器空間或權限後再試。');return;}
     setEquipment(updated);
     setForm(null);setSelectedId(id);
   };

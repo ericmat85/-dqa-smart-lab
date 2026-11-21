@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canControlTrial} from './trialPermissions.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
@@ -15,7 +16,7 @@ function actorFor(storage,id,system){
  if(!accessSystem(a,system,storage)||(system==='lms'&&customRole(a,storage)&&!customRole(a,storage).pages.includes('schedule')))throw Error('目前帳號沒有此操作權限。');
  return a;
 }
-export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storage=window.localStorage){
+export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storage=appStorage()){
  recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lms');if(!canControlTrial(actor,storage))throw Error('僅 lv1 一階主管可暫停或恢復試驗。');
  const schedules=read(storage,'dqa-schedules-demo-v1'),row=schedules.find(r=>r.id===scheduleId),lab=read(storage,'dqa_lab_demo_requests_v1'),receipt=lab.find(r=>r.scheduleId===scheduleId);
  if(!row||!receipt?.acceptedAt||receipt.reservationId!==row.reservationId||receipt.scheduledStart!==row.time||receipt.scheduledEnd!==row.end||row.reportInfo?.stage||read(storage,'dqa-lab-operations-v1').some(r=>r.requestId===row.requestId&&r.status==='待審核'))throw Error('案件未接收、已送報告或有待核准申請，無法暫停／恢復。');
@@ -34,7 +35,7 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
  const audit=[{id:crypto.randomUUID(),requestId:row.requestId,actor:actor.name,actorId,at,time:at,action,reason:'排程管理確認操作',signature:''},...read(storage,'dqa_lab_demo_audit_v1')];
  commitLifecycleTransaction(storage,{schedules:JSON.stringify(next),equipment:JSON.stringify(nextEquipment),labRequests:JSON.stringify(nextLab),labAudit:JSON.stringify(audit),requests:JSON.stringify(updateRequestExecution(read(storage,'dqa-request-demo-v2'),next,nextLab,now))});return updated;
 }
-function findAccelerationTarget({actorId,signature,requestId,now=Date.now()},storage=window.localStorage){
+function findAccelerationTarget({actorId,signature,requestId,now=Date.now()},storage=appStorage()){
  const actor=actorFor(storage,actorId,'lab');
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
  const sources=read(storage,'dqa-request-demo-v2');
@@ -65,10 +66,10 @@ function findAccelerationTarget({actorId,signature,requestId,now=Date.now()},sto
  const row=matchingSchedule(receipt);
  return {actor,schedules,lab,receipt,row,complete:false};
 }
-export function trialAcceleratorAvailability(options,storage=window.localStorage){
+export function trialAcceleratorAvailability(options,storage=appStorage()){
  try{const state=findAccelerationTarget(options,storage);return {enabled:true,id:state.receipt.id,nextPercent:state.complete?100:50,reason:''};}catch(error){return {enabled:false,reason:error.message};}
 }
-export function accelerateTrial({actorId,signature,requestId,now=Date.now()},storage=window.localStorage){
+export function accelerateTrial({actorId,signature,requestId,now=Date.now()},storage=appStorage()){
  recoverLifecycleTransaction(storage);const state=findAccelerationTarget({actorId,requestId,now},storage);
  const {actor,schedules,lab,receipt,row}=state;
  if(state.complete)return {id:receipt.id,stage:'completed',percent:100,row:completeLabTrial({requestId:receipt.id,actorId,signature,now},storage)};

@@ -1,3 +1,4 @@
+import {originalBusinessEnabled} from './originalBusiness.mjs';
 import {usesEquipment} from './scheduleResources.mjs';
 import {DEMO_SCHEDULES} from './demoSchedules.mjs';
 import {ALL_DEMO_REQUESTS} from './demoLmsRequests.mjs';
@@ -35,7 +36,7 @@ export function readLabSnapshot(storage,now=Date.now()) {
     result[source.id]=rows;
     const bytes=raw===null?0:new TextEncoder().encode(raw).length;
     const duplicates=rows.length-new Set(rows.map(row=>row.id)).size;
-    result.sources.push({id:source.id,label:source.label,key:source.key,count:rows.length,bytes,origin:error?'讀取異常':raw===null?'預設示範':'本機儲存',error});
+    result.sources.push({id:source.id,label:source.label,key:source.key,count:rows.length,bytes,origin:error?'讀取異常':originalBusinessEnabled()?'共用資料庫':raw===null?'預設示範':'本機儲存',error});
     if(error)result.issues.push({id:`source-${source.id}`,type:'資料讀取',detail:`${source.label}：${error}`,target:source.id});
     if(duplicates)result.issues.push({id:`duplicate-${source.id}`,type:'重複編號',detail:`${source.label}有 ${duplicates} 筆重複編號`,target:source.id});
   }

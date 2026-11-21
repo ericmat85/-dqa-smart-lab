@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canEditAdmin} from './adminCenterStore.mjs';
 import {e2InputIssues} from './e2Scheduling.mjs';
 export const E2_SETTINGS_KEY='dqa-e2-planning-settings-v1';
@@ -10,7 +11,7 @@ export function validateE2Settings(value){
  for(const [key,min,max] of [['searchDays',1,14],['preparationMinutes',0,120],['cleanupMinutes',0,120]])if(!Number.isInteger(value[key])||value[key]<min||value[key]>max)fail('E2_SETTINGS_INVALID',`${key==='searchDays'?'搜尋天數':'準備／清理保留時間'}須為 ${min}～${max} 的整數。`);
  return {...value};
 }
-export function readE2Settings(storage=globalThis.localStorage){
+export function readE2Settings(storage=appStorage()){
  try{
   const raw=storage?.getItem(E2_SETTINGS_KEY);if(raw===null||raw===undefined)return {version:1,revision:0,settings:{...E2_DEFAULTS},events:[]};
   const data=JSON.parse(raw);
@@ -26,19 +27,19 @@ function authorize(account,storage){
 function commit(previous,settings,actor,action,storage,now){
  const next={version:1,revision:previous.revision+1,settings,events:[{at:new Date(now).toISOString(),actorId:actor.id,action},...previous.events].slice(0,20)};
  storage.setItem(E2_SETTINGS_KEY,JSON.stringify(next));
- if(typeof window!=='undefined'&&storage===window.localStorage)window.dispatchEvent(new Event(E2_SETTINGS_EVENT));
+ if(typeof window!=='undefined'&&storage===appStorage())window.dispatchEvent(new Event(E2_SETTINGS_EVENT));
  return next;
 }
-export function saveE2Settings(value,account,{storage=globalThis.localStorage,expectedRevision,now=Date.now()}={}){
+export function saveE2Settings(value,account,{storage=appStorage(),expectedRevision,now=Date.now()}={}){
  const actor=authorize(account,storage),settings=validateE2Settings(value),previous=readE2Settings(storage);
  if(previous.revision!==expectedRevision)fail('E2_SETTINGS_CONFLICT','設定已在其他頁面更新；請重新開啟設定後再修改。');
  return commit(previous,settings,actor,'SAVE',storage,now);
 }
-export function resetE2Settings(account,{storage=globalThis.localStorage,now=Date.now()}={}){
+export function resetE2Settings(account,{storage=appStorage(),now=Date.now()}={}){
  const actor=authorize(account,storage);let previous;try{previous=readE2Settings(storage);}catch{previous={revision:0,events:[]};}
  return commit(previous,{...E2_DEFAULTS},actor,'RESET',storage,now);
 }
-export function requireE2Enabled(storage=globalThis.localStorage){
+export function requireE2Enabled(storage=appStorage()){
  const current=readE2Settings(storage);if(!current.settings.enabled)fail('E2_CLIENT_PAUSED','自動化排程的新請求已由管理設定暫停；既有排程未變更。');return current;
 }
 // Client planning preferences never change server authorization, budgets or trial requirements.

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import useUiPreferences from './useUiPreferences.js';
 import {faqQuestion,scopeReply} from './assistantLanguage.mjs';
 import {e4LabScope} from './e4LabScope.mjs';
@@ -97,7 +98,7 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
    const dynamic=faq&&['overview','pending','running','standby','stock'].includes(faq.id);
    let current={snapshot,metrics};
    if(scope.allowed&&(!faq||dynamic)){
-    let storage;try{storage=window.localStorage;}catch{storage={getItem(){throw Error('Storage unavailable');}};}
+    let storage;try{storage=appStorage();}catch{storage={getItem(){throw Error('Storage unavailable');}};}
     current=readE4CurrentData(snapshot,metrics,system,storage);
     if(!faq&&system==='lms'){try{const {allReports}=await import('./reportStore.mjs');current.snapshot={...current.snapshot,reports:await allReports()};}catch{current.snapshot={...current.snapshot,reports:undefined};}}
    }

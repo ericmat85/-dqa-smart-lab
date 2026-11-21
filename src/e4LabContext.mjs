@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {explicitHours,sourceConditions} from './trialSourceFacts.mjs';
 import schema from '../render-backend/gateway/lab_context_schema.json' with {type:'json'};
 import {readTrialCatalog} from './trialCatalogStore.mjs';
@@ -39,7 +40,7 @@ function labSources(snapshot,metrics,storage){
  else sources.aiObservations={coverage:'UNAVAILABLE',rows:[]};
  return sources;
 }
-export function makeE4LabContext(question,snapshot,metrics,system,now=Date.now(),storage=globalThis.localStorage,contextHint=[]){
+export function makeE4LabContext(question,snapshot,metrics,system,now=Date.now(),storage=appStorage(),contextHint=[]){
  if(system!=='lms'||!snapshot)return undefined;
  let catalogHint=false;try{catalogHint=readTrialCatalog(storage).rows.some(r=>[r.name,...r.aliases].some(name=>question.includes(name)));}catch{/* Coverage below records unavailable catalog. */}
  if(!catalogHint&&!/目前|現在|系統|委託|試驗|測試|設備|機台|排程|物料|庫存|報告|借用|中斷|操作|多少|幾|哪些|列出|規範|手法|條件|所有|全部|監控|用量|偏好|REQ-|EQ-|MAT-|SCH-|TRIAL-|current|how many|equipment|schedule|reports?|materials?/i.test(question))return undefined;

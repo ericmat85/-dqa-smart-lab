@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {canAccessLabPage} from './customRoles.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
@@ -5,7 +6,7 @@ import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {isGeneralTrialName} from './trialTemplateMatching.mjs';
 import {createReportTemplate} from './reportWorkbook.mjs';
 const rows=(storage,key,fallback=[])=>{const raw=storage.getItem(key);let value;try{value=raw===null?fallback:JSON.parse(raw);}catch{throw Error('案件來源資料無法讀取，已停止產生範本。');}if(!Array.isArray(value))throw Error('案件來源資料格式無效。');return value;};
-export function caseTrialMapping(request,storage=globalThis.localStorage){
+export function caseTrialMapping(request,storage=appStorage()){
  if(!Array.isArray(request?.testItems)||request.testItems.length!==1||typeof request.testItems[0]!=='string'||!request.testItems[0].trim())throw Error('本案須明確指定單一試驗項目；多項或缺漏時停止下載，請先確認本次排程的試驗項目。');
  const name=request.testItems[0];if(isGeneralTrialName(name))return {id:'GENERAL_PERFORMANCE',name:'一般性能試驗',version:'general-performance-v1'};
  const trial=findTrialDefinition(name,storage);if(!trial)throw Error(`找不到「${name}」對應的試驗範本；請至試驗與設備參數確認名稱，未改用通用範本。`);
@@ -28,7 +29,7 @@ function sourceFor({requestId,actorId},storage){
  const mapping=caseTrialMapping(source,storage),catalog=readTrialCatalog(storage);
  return {source:structuredClone(executionSource(source,storage)),trial:structuredClone(mapping),catalogRevision:catalog.revision};
 }
-export async function readCaseTrialTemplate(access,storage=globalThis.localStorage,{build=(source)=>createReportTemplate(source,false,{requireTrialMatch:true,storage}),signal,onStage=()=>{}}={}){
+export async function readCaseTrialTemplate(access,storage=appStorage(),{build=(source)=>createReportTemplate(source,false,{requireTrialMatch:true,storage}),signal,onStage=()=>{}}={}){
  const active=()=>{if(signal?.aborted)throw new DOMException('範本準備已取消','AbortError');};active();
  const first=sourceFor(access,storage);onStage('BUILDING',first.trial);
  const result=await build(first.source);active();onStage('VERIFYING',first.trial);

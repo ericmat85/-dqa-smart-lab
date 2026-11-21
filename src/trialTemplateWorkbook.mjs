@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {addRequestForm,addTrialReportForms,formAssets} from './labFormLayout.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {readTrialCatalog} from './trialCatalogStore.mjs';
@@ -10,7 +11,7 @@ function authorize({actorId,system,templateId,expectedRevision},storage){
  const actor=Array.isArray(accounts)&&accounts.find(a=>a.id===actorId);if(!canOpenReportArchive(actor,system,storage))throw Error('目前帳號沒有資料庫範本查閱權限。');
  const catalog=readTrialCatalog(storage),row=catalog.rows.find(r=>r.id===templateId);if(!row||expectedRevision!==undefined&&expectedRevision!==catalog.revision)throw Error('範本資料已更新，請重新開啟預覽或下載。');return {row,revision:catalog.revision};
 }
-export function assertTrialTemplateAccess(options,storage=globalThis.localStorage){return authorize(options,storage);}
+export function assertTrialTemplateAccess(options,storage=appStorage()){return authorize(options,storage);}
 export async function makeTrialTemplateWorkbook(row,{assets}={}){
  if(!row||row.synthetic!==true||!row.id||!row.name||!row.version||!Number.isFinite(row.durationHours))throw Error('範本來源無法核對。');
  if(!assets&&typeof window!=='undefined')assets=await formAssets();
@@ -27,7 +28,7 @@ export async function makeTrialTemplateWorkbook(row,{assets}={}){
  const formRow={...row};addRequestForm(book,{},formRow,assets);addTrialReportForms(book,formRow,{assets});
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
-export async function readTrialTemplateFile(options,storage=globalThis.localStorage,{build=makeTrialTemplateWorkbook}={}){
+export async function readTrialTemplateFile(options,storage=appStorage(),{build=makeTrialTemplateWorkbook}={}){
  const first=authorize(options,storage),bytes=await build(first.row),last=authorize({...options,expectedRevision:first.revision},storage);
  if(JSON.stringify(last.row)!==JSON.stringify(first.row))throw Error('範本資料已更新，請重新預覽或下載。');return {bytes,name:trialTemplateName(last.row),row:last.row,revision:last.revision};
 }

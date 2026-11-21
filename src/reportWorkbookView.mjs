@@ -1,10 +1,11 @@
+import {appStorage} from './originalBusiness.mjs';
 import {getReport} from './reportStore.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {canReadReport} from './reportRules.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {cellText,normalizeReportMerges,reportBounds} from './reportLayout.mjs';
-export async function readReportWorkbook({actorId,requestId,expectedRevision},storage=window.localStorage,repository={get:getReport}){
+export async function readReportWorkbook({actorId,requestId,expectedRevision},storage=appStorage(),repository={get:getReport}){
  const report=await repository.get(requestId);
  const accounts=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS)),requests=JSON.parse(storage.getItem('dqa-request-demo-v2')||'[]');
  if(!Array.isArray(accounts)||!Array.isArray(requests))throw Error('帳號或委託資料無法讀取，無法確認報告權限。');

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canEditAdmin} from './adminCenterStore.mjs';
 export const PORTS_KEY='dqa-equipment-port-drafts-v1',PORTS_EVENT='dqa:equipment-port-drafts';
 export const PORT_PROTOCOLS=[['modbus-tcp','Modbus TCP'],['modbus-rtu','Modbus RTU · RS-485／RS-232'],['http-json','HTTP／HTTPS JSON']];
@@ -25,8 +26,8 @@ export function normalizePort(p){
  const channels=p.channels.map(c=>{if(!c||!text(c.name,60)||!text(c.unit,20)||!text(c.pointer,300)||c.pointer&&!/^\/(?:[^~]|~[01])*$/.test(c.pointer)||c.address!==null&&!integer(c.address,0,65535)||!PORT_TYPES.some(([v])=>v===c.dataType)||!['high-first','low-first'].includes(c.wordOrder)||!Number.isFinite(c.scale)||!Number.isFinite(c.offset))throw Error('資料點名稱、位址、格式或換算值無效。');if(c.address===65535&&['uint32','int32','float32'].includes(c.dataType))throw Error('32-bit 資料需要兩個暫存器，起始位址不可超界。');return Object.fromEntries(['name','address','pointer','dataType','wordOrder','scale','offset','unit'].map(k=>[k,c[k]]));});
  return {...Object.fromEntries(['id','revision','equipmentId','protocol','host','port','scheme','path','serialPort','baudRate','parity','stopBits','unitId','functionCode','timeoutMs'].map(k=>[k,p[k]])),channels};
 }
-export function readPortDrafts(storage=localStorage){try{const raw=storage.getItem(PORTS_KEY);if(!raw)return [];const data=JSON.parse(raw);if(data.version!==1||!Array.isArray(data.ports)||data.ports.length>100)throw Error();const ports=data.ports.map(normalizePort);if(new Set(ports.map(p=>p.id)).size!==ports.length)throw Error();return ports;}catch{throw Error('設備端口草稿無法讀取；原資料未覆寫。');}}
-export function savePortDraft(p,account,equipment,storage=localStorage){
+export function readPortDrafts(storage=appStorage()){try{const raw=storage.getItem(PORTS_KEY);if(!raw)return [];const data=JSON.parse(raw);if(data.version!==1||!Array.isArray(data.ports)||data.ports.length>100)throw Error();const ports=data.ports.map(normalizePort);if(new Set(ports.map(p=>p.id)).size!==ports.length)throw Error();return ports;}catch{throw Error('設備端口草稿無法讀取；原資料未覆寫。');}}
+export function savePortDraft(p,account,equipment,storage=appStorage()){
  if(!canEditAdmin(account,storage))throw Error('目前帳號沒有端口設定權限。');const next=normalizePort(p),ports=readPortDrafts(storage),old=ports.find(v=>v.id===p.id);
  if(!equipment.some(e=>e.id===p.equipmentId))throw Error('請選擇目前設備台帳中的設備。');if((old?.revision??0)!==p.revision)throw Error('端口已在其他視窗更新，請重新開啟。');if(!old&&ports.length>=100)throw Error('最多保存 100 個端口草稿。');next.revision++;
  storage.setItem(PORTS_KEY,JSON.stringify({version:1,ports:old?ports.map(v=>v.id===next.id?next:v):[...ports,next]}));window.dispatchEvent(new Event(PORTS_EVENT));return next;

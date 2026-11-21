@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {readLabSnapshot} from './labData.mjs';
 import {readTrialCatalog} from './trialCatalogStore.mjs';
 import {canEditAdmin,readAdminSettings,validateAdminSection,ADMIN_KEY,ADMIN_EVENT} from './adminCenterStore.mjs';
@@ -17,13 +18,13 @@ function validateRow(kind,r){
  if(kind==='qualifications'&&(!r.personId||!r.equipmentId||!r.trialId||!r.training.trim()||!day(r.issued)||!day(r.expires)||r.expires<r.issued||!['ACTIVE','SUSPENDED'].includes(r.status)))fail('請補齊人員、設備、試驗、訓練及有效起訖日。');
  return {...r};
 }
-export function readOperations(storage=globalThis.localStorage){
+export function readOperations(storage=appStorage()){
  const raw=storage.getItem(OPERATIONS_KEY);if(raw===null)return operationsSeed();
  try{const d=JSON.parse(raw);if(d.version!==1||!Number.isSafeInteger(d.revision)||d.revision<0||Object.keys(d).sort().join()!=='events,qualifications,quality,revision,version'||!Array.isArray(d.events)||d.events.length>200)throw Error();for(const k of ['quality','qualifications']){if(!Array.isArray(d[k])||d[k].length>500||new Set(d[k].map(r=>r.id)).size!==d[k].length)throw Error();d[k]=d[k].map(r=>validateRow(k,r));}if(!d.events.every(e=>e&&text(e.action)&&text(e.actorId)&&Number.isFinite(Date.parse(e.at))&&text(e.id)))throw Error();return d;}catch{fail('管理紀錄無法讀取；原始資料保留，請先匯出來源資料排查。');}
 }
-export function freshAdmin(actor,storage=globalThis.localStorage){let rows;try{rows=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||'[]');}catch{fail('帳號資料無法核對。');}const fresh=Array.isArray(rows)&&rows.find(r=>r.id===actor?.id);if(!fresh||!canEditAdmin(fresh,storage))fail('目前帳號沒有管理寫入權限。');return fresh;}
-const emit=(storage,event)=>{if(typeof window!=='undefined'&&storage===window.localStorage)window.dispatchEvent(new Event(event));};
-export function saveOperation(kind,input,actor,{storage=globalThis.localStorage,expectedRevision,now=Date.now()}={}){
+export function freshAdmin(actor,storage=appStorage()){let rows;try{rows=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||'[]');}catch{fail('帳號資料無法核對。');}const fresh=Array.isArray(rows)&&rows.find(r=>r.id===actor?.id);if(!fresh||!canEditAdmin(fresh,storage))fail('目前帳號沒有管理寫入權限。');return fresh;}
+const emit=(storage,event)=>{if(typeof window!=='undefined'&&storage===appStorage())window.dispatchEvent(new Event(event));};
+export function saveOperation(kind,input,actor,{storage=appStorage(),expectedRevision,now=Date.now()}={}){
  const fresh=freshAdmin(actor,storage);if(!['quality','qualifications'].includes(kind))fail('不支援的管理紀錄。');const data=readOperations(storage);if(data.revision!==expectedRevision)fail('資料已在其他分頁更新，請重新開啟表單。');
  const row=validateRow(kind,{...input,id:input.id||'ADM-'+crypto.randomUUID(),updatedAt:new Date(now).toISOString(),updatedBy:fresh.id});
  // Resolve references against fresh business sources; no caller-provided labels grant authority.
@@ -39,7 +40,7 @@ export function saveOperation(kind,input,actor,{storage=globalThis.localStorage,
  storage.setItem(OPERATIONS_KEY,JSON.stringify(next));emit(storage,OPERATIONS_EVENT);return next;
 }
 export function qualificationStatus(row,now=Date.now()){const today=new Date(now+8*3600000).toISOString().slice(0,10);return row.status==='SUSPENDED'?'已暫停':row.issued>today?'尚未生效':row.expires<today?'已到期':Date.parse(row.expires+'T23:59:59+08:00')-now<30*86400000?'30 天內到期':'有效';}
-export async function settingsBackup(storage=globalThis.localStorage){
+export async function settingsBackup(storage=appStorage()){
  const current=readAdminSettings(storage).settings,settings=Object.fromEntries(BACKUP_SECTIONS.map(k=>[k,current[k]]));const payload={format:'DQA_ADMIN_SETTINGS',version:1,settings};
  const sha256=await digest(JSON.stringify(payload));return {...payload,sha256};
 }
@@ -50,7 +51,7 @@ export async function inspectSettingsBackup(raw){
  const settings=Object.fromEntries(BACKUP_SECTIONS.map(k=>[k,validateAdminSection(k,d.settings[k])]));
  if(JSON.stringify(settings)!==JSON.stringify(d.settings)||await digest(JSON.stringify({format:d.format,version:1,settings}))!==d.sha256)fail('設定檔完整性檢查失敗；未還原。');return {settings,sha256:d.sha256};
 }
-export function restoreSettingsBackup(checked,actor,{storage=globalThis.localStorage,expectedRaw}={}){
+export function restoreSettingsBackup(checked,actor,{storage=appStorage(),expectedRaw}={}){
  const fresh=freshAdmin(actor,storage);if(storage.getItem(ADMIN_KEY)!==expectedRaw)fail('設定已更新，請重新預覽還原差異。');
  // Exactly one key is replaced atomically. No cases, accounts, signatures, engine budgets or operations are imported.
  const settings=Object.fromEntries(BACKUP_SECTIONS.map(k=>[k,validateAdminSection(k,checked.settings[k])]));const old=readAdminSettings(storage);

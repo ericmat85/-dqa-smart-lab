@@ -1,3 +1,4 @@
+import {originalBusinessEnabled,appStorage} from './originalBusiness.mjs';
 import {matchTrialDefinition} from './trialTemplateMatching.mjs';
 import {explicitHours,sourceConditions} from './trialSourceFacts.mjs';
 import data from '../render-backend/gateway/trial_profiles.json' with {type:'json'};
@@ -10,7 +11,7 @@ const text=(value,max)=>typeof value==='string'&&value.trim().length>0&&value.le
 export function defaultTrialCatalog(){return defaults.map((name,index)=>{const ref=reference(name),p=data.profiles.find(p=>p.id===ref.profileId);return {id:'TRIAL-'+String(index+1).padStart(3,'0'),name,aliases:[],profileId:ref.profileId,specification:ref.specification,acceptance:ref.acceptance,equipment:ref.equipment,version:'DEMO-1',durationHours:p.hours,builtin:true,synthetic:true};});}
 function validate(row){
  const fields=['id','name','aliases','profileId','specification','acceptance','equipment','version','durationHours','builtin','synthetic'];
- if(!row||typeof row!=='object'||Object.keys(row).some(k=>!fields.includes(k))||!/^TRIAL-(?:\d{3}|[a-f0-9]{32})$/.test(row.id)||!text(row.name,80)||row.name==='其他'||/[、,，;]/.test(row.name)||!Array.isArray(row.aliases)||row.aliases.length>20||row.aliases.some(x=>!text(x,80))||!text(row.specification,6000)||!text(row.acceptance,2000)||!text(row.equipment,300)||!text(row.version,80)||row.synthetic!==true||typeof row.builtin!=='boolean')error('TRIAL_CATALOG_INVALID','試驗目錄欄位不完整或格式無效。');
+ if(!row||typeof row!=='object'||Object.keys(row).some(k=>!fields.includes(k))||!/^TRIAL-(?:\d{3}|[a-f0-9]{32})$/.test(row.id)||!text(row.name,80)||row.name==='其他'||/[、,，;]/.test(row.name)||!Array.isArray(row.aliases)||row.aliases.length>20||row.aliases.some(x=>!text(x,80))||!text(row.specification,6000)||!text(row.acceptance,2000)||!text(row.equipment,300)||!text(row.version,80)||(!originalBusinessEnabled()&&row.synthetic!==true)||typeof row.builtin!=='boolean')error('TRIAL_CATALOG_INVALID','試驗目錄欄位不完整或格式無效。');
  const profile=data.profiles.find(p=>p.id===row.profileId);
  if((!profile&&row.profileId!=='UNVERIFIED')||!Number.isFinite(row.durationHours)||row.durationHours<=0||row.durationHours>24000||profile?.fixed_duration&&row.durationHours!==profile.hours)error('TRIAL_CATALOG_INVALID','試驗類型或工時無效；固定試驗工時不得變更。');
  const hours=explicitHours({specification:row.specification});sourceConditions({specification:row.specification});if(hours===null||hours!==row.durationHours)error('TRIAL_CATALOG_INVALID','規範時長與試驗工時須一致。');
@@ -18,7 +19,7 @@ function validate(row){
 }
 const cachedDefaults={version:1,revision:0,rows:defaultTrialCatalog().map(row=>Object.freeze({...row,aliases:Object.freeze([])}))};Object.freeze(cachedDefaults.rows);
 const caches=new WeakMap();
-export function readTrialCatalog(storage=globalThis.localStorage){
+export function readTrialCatalog(storage=appStorage()){
  try{
   const raw=storage?.getItem(TRIAL_CATALOG_KEY);if(raw===null||raw===undefined)return {...cachedDefaults};
   if(storage&&caches.get(storage)?.raw===raw)return caches.get(storage).data;
@@ -29,8 +30,8 @@ export function readTrialCatalog(storage=globalThis.localStorage){
   const result=Object.freeze({version:1,revision:stored.revision,rows:Object.freeze(rows.map(row=>Object.freeze({...row,aliases:Object.freeze(row.aliases)})))});if(storage)caches.set(storage,{raw,data:result});return result;
  }catch{error('TRIAL_CATALOG_UNAVAILABLE','試驗目錄無法讀取；原資料未覆寫，請檢查試驗與設備參數。');}
 }
-export function findTrialDefinition(name,storage=globalThis.localStorage){return matchTrialDefinition(name,readTrialCatalog(storage).rows);}
-export function saveTrialDefinition(value,actor,{storage=globalThis.localStorage,expectedRevision}={}){
+export function findTrialDefinition(name,storage=appStorage()){return matchTrialDefinition(name,readTrialCatalog(storage).rows);}
+export function saveTrialDefinition(value,actor,{storage=appStorage(),expectedRevision}={}){
  let accounts;try{accounts=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||'[]');}catch{error('TRIAL_CATALOG_FORBIDDEN','帳號資料無法核對。');}
  const fresh=Array.isArray(accounts)&&accounts.find(a=>a.id===actor?.id);if(!fresh||!canEditAdmin(fresh,storage))error('TRIAL_CATALOG_FORBIDDEN','目前帳號沒有新增或編輯試驗目錄的權限。');
  const current=readTrialCatalog(storage);if(current.revision!==expectedRevision)error('TRIAL_CATALOG_CONFLICT','試驗目錄已更新，請重新開啟編輯。');
@@ -40,5 +41,5 @@ export function saveTrialDefinition(value,actor,{storage=globalThis.localStorage
  const row=validate({...value,id:old?.id||'TRIAL-'+crypto.randomUUID().replaceAll('-',''),aliases,builtin:!!old?.builtin,synthetic:true});
  if(current.rows.some(r=>r.id!==row.id&&[r.name,...r.aliases].some(name=>[row.name,...row.aliases].includes(name))))error('TRIAL_CATALOG_DUPLICATE','試驗名稱已存在，請使用獨立名稱。');
  const next={version:1,revision:current.revision+1,rows:old?current.rows.map(r=>r.id===old.id?row:r):[...current.rows,row]};
- storage.setItem(TRIAL_CATALOG_KEY,JSON.stringify(next));if(typeof window!=='undefined'&&storage===window.localStorage)window.dispatchEvent(new Event(TRIAL_CATALOG_EVENT));return row;
+ storage.setItem(TRIAL_CATALOG_KEY,JSON.stringify(next));if(typeof window!=='undefined'&&storage===appStorage())window.dispatchEvent(new Event(TRIAL_CATALOG_EVENT));return row;
 }

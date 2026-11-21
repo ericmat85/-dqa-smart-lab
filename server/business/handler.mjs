@@ -5,7 +5,7 @@ const RESOURCE={
  trials:['trial_definitions','id,legacy_id,name,aliases,specification,acceptance,equipment_reference,specification_version,duration_hours,source_kind,enabled,revision','name'],
  equipment:['equipment','id,legacy_id,name,category,model,space_units,daily_hours,operational_status,specification,next_calibration,next_maintenance,revision','name'],
  materials:['materials','id,legacy_id,name,category,unit,total_quantity,available_quantity,min_stock,status,revision','name'],
- requests:['requests','id,legacy_id,owner_member_id,trial_id,product_code,customer_name,purpose,quantity,requested_date,sample_space_units,specification,acceptance,status,revision,created_at,updated_at','legacy_id'],
+ requests:['requests','id,legacy_id,owner_member_id,supervisor_member_id,trial_id,product_code,customer_name,purpose,quantity,requested_date,sample_space_units,specification,acceptance,status,revision,created_at,updated_at,form_details','legacy_id'],
  schedules:['schedules','id,legacy_id,request_id,executor_member_id,starts_at,ends_at,status,preparation_minutes,cleanup_minutes,revision','legacy_id'],
  reports:['reports','id,request_id,status,revision,created_at,updated_at',null],
  documents:['artifacts','id,legacy_id,kind,name,request_id,trial_id,revision,updated_at','name'],
@@ -22,13 +22,13 @@ function anonymousKey(value){try{if(/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(v
 export function sealSession(session,key){const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',Buffer.from(key,'base64url'),iv);cipher.setAAD(Buffer.from(COOKIE));const bytes=Buffer.concat([cipher.update(JSON.stringify(session)),cipher.final()]);return Buffer.concat([iv,cipher.getAuthTag(),bytes]).toString('base64url');}
 export function openSession(value,key){try{if(!value||value.length>5500)throw Error();const b=Buffer.from(value,'base64url'),cipher=createDecipheriv('aes-256-gcm',Buffer.from(key,'base64url'),b.subarray(0,12));cipher.setAAD(Buffer.from(COOKIE));cipher.setAuthTag(b.subarray(12,28));const s=JSON.parse(Buffer.concat([cipher.update(b.subarray(28)),cipher.final()]));if(!UUID.test(s.id)||!UUID.test(s.tenant)||typeof s.nonce!=='string'||typeof s.access!=='string'||typeof s.refresh!=='string'||!Number.isSafeInteger(s.expires)||!Number.isSafeInteger(s.absolute)||s.absolute<=Date.now())throw Error();return s;}catch{throw new ApiError(401,'AUTHENTICATION_REQUIRED');}}
 function cookie(value,seconds=28800){return `${COOKIE}=${value}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=${seconds}`;}
-async function bodyOf(req){if(!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json'))throw new ApiError(415,'JSON_REQUIRED');let body=req.body;if(body===undefined){let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>24576)throw new ApiError(413,'PAYLOAD_TOO_LARGE');}body=raw;}if(typeof body==='string'){if(Buffer.byteLength(body)>24576)throw new ApiError(413,'PAYLOAD_TOO_LARGE');try{body=JSON.parse(body);}catch{throw new ApiError(400,'INVALID_JSON');}}if(!body||typeof body!=='object'||Array.isArray(body)||Buffer.byteLength(JSON.stringify(body))>24576)throw new ApiError(400,'INVALID_BODY');return body;}
+async function bodyOf(req,maxBytes=24576){if(!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json'))throw new ApiError(415,'JSON_REQUIRED');let body=req.body;if(body===undefined){let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>maxBytes)throw new ApiError(413,'PAYLOAD_TOO_LARGE');}body=raw;}if(typeof body==='string'){if(Buffer.byteLength(body)>maxBytes)throw new ApiError(413,'PAYLOAD_TOO_LARGE');try{body=JSON.parse(body);}catch{throw new ApiError(400,'INVALID_JSON');}}if(!body||typeof body!=='object'||Array.isArray(body)||Buffer.byteLength(JSON.stringify(body))>maxBytes)throw new ApiError(400,'INVALID_BODY');return body;}
 function fields(body,allowed){if(Object.keys(body).some(key=>!allowed.includes(key)))throw new ApiError(422,'UNKNOWN_FIELDS');}
 function businessRoute(req,origin){
  const raw=String(req.url||'');if(raw.length>4096||/[\\#\r\n]/.test(raw))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const rawPath=raw.split('?')[0].replace(/^https:\/\/[^/]+/,'');if(/%|\/\//.test(rawPath)||rawPath.split('/').some(x=>x==='.'||x==='..'))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const parsed=new URL(raw,origin);if(parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
- const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
+ const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
  const hint=value=>{const parts=Array.isArray(value)?value:typeof value==='string'?value.split('/'):[];if(!parts.length||parts.length>3||parts.some(x=>typeof x!=='string'||!x||!/^[A-Za-z0-9_-]+$/.test(x)))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');const path='/'+parts.join('/');if(!allowed(path))throw new ApiError(404,'ROUTE_NOT_FOUND');return path;};
  if(parsed.searchParams.getAll('path').length>1)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
  const hints=[parsed.searchParams.has('path')?parsed.searchParams.get('path'):undefined,req.query?.path,req.params?.path].filter(x=>x!==undefined).map(hint);
@@ -58,7 +58,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     let response;try{response=await fetchImpl(env.BUSINESS_SUPABASE_URL+path,{method,headers:{apikey:env.BUSINESS_SUPABASE_ANON_KEY,...(token?{Authorization:'Bearer '+token}:{}),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(profile?{'Accept-Profile':'dqa_business','Content-Profile':'dqa_business'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new ApiError(503,dispatchedWrite?'WRITE_OUTCOME_UNKNOWN':'UPSTREAM_UNAVAILABLE',{outcome_unknown:dispatchedWrite});}
     const text=await response.text();if(Buffer.byteLength(text)>2097152)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID');let data;try{data=text?JSON.parse(text):null;}catch{throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});}
     if(!response.ok){
-     const known=['REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','RULE_NOT_APPROVED'];const code=known.find(k=>data?.message===k);
+     const known=['REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','ORIGINAL_FORM_INVALID','DRAFT_SIGNATURE_INVALID','SNAPSHOT_PAGINATION_REQUIRED','RULE_NOT_APPROVED'];const code=known.find(k=>data?.message===k);
      if(code)throw new ApiError(code==='REVISION_CONFLICT'||code.startsWith('DRAFT_ID')?409:['RULE_NOT_APPROVED','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED'].includes(code)?403:422,code);
      throw new ApiError(response.status===401?401:response.status===429?429:response.status>=500?503:response.status===403?403:422,response.status===401?'AUTHENTICATION_REQUIRED':response.status===429?'RATE_LIMITED':'UPSTREAM_REQUEST_REJECTED');
     }
@@ -107,6 +107,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    if(path==='/me'&&req.method==='GET'){
     const context=await rpc('connection_context',{},session.access),member=context?.memberships?.find(m=>m.tenant_id===session.tenant);if(!member||context.user_id!==identity.id)throw new ApiError(401,'SESSION_REVOKED');return reply(200,{user:{id:identity.id,email:identity.email},member,expires_at:session.absolute,workflow_gate:'RULE_NOT_APPROVED'});
    }
+   if(path==='/snapshot'&&req.method==='GET')return reply(200,{data:await rpc('original_ui_snapshot',{p_tenant:session.tenant},session.access)});
    if(path==='/password'&&req.method==='POST'){
     const body=await bodyOf(req);fields(body,['password']);if(typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'PASSWORD_TOO_SHORT');await upstream('/auth/v1/user',{token:session.access,method:'PUT',body:{password:body.password}});return reply(200,{password_updated:true});
    }
@@ -117,11 +118,11 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     if([...parsed.searchParams.keys()].some(k=>!['page','limit','q'].includes(k)))throw new ApiError(422,'QUERY_INVALID');
     const page=Number(parsed.searchParams.get('page')||1),limit=Number(parsed.searchParams.get('limit')||25),q=parsed.searchParams.get('q')||'';
     if(!Number.isSafeInteger(page)||page<1||page>10000||!Number.isSafeInteger(limit)||limit<1||limit>100||q.length>80||q&&!/^[\p{L}\p{N} _.-]+$/u.test(q))throw new ApiError(422,'QUERY_INVALID');
-    const params=new URLSearchParams({select,tenant_id:'eq.'+session.tenant,order:resource==='trials'?'legacy_id.asc':'created_at.desc,id.asc',limit:String(limit),offset:String((page-1)*limit)});if(id)params.set('id','eq.'+id);if(q&&searchColumn)params.set(searchColumn,'ilike.*'+q.replaceAll('_','\\_')+'*');
+    const params=new URLSearchParams({select:resource==='requests'&&id?select+',draft_signature_data':select,tenant_id:'eq.'+session.tenant,order:resource==='trials'?'legacy_id.asc':'created_at.desc,id.asc',limit:String(limit),offset:String((page-1)*limit)});if(id)params.set('id','eq.'+id);if(q&&searchColumn)params.set(searchColumn,'ilike.*'+q.replaceAll('_','\\_')+'*');
     const {data,response}=await upstream('/rest/v1/'+table+'?'+params,{token:session.access,profile:true,headers:{Prefer:'count=exact'}});if(!Array.isArray(data))throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID');const range=response.headers.get('content-range'),total=range&&/\/(\d+)$/.test(range)?Number(range.split('/').pop()):null;return reply(200,{data,page,limit,total,source:'SUPABASE_BUSINESS'});
    }
    if(resource!=='requests'||!['POST','PATCH'].includes(req.method))throw new ApiError(403,'RULE_NOT_APPROVED');
-   const body=await bodyOf(req);fields(body,req.method==='POST'?['id','data']:['expected_revision','data']);
+   const body=await bodyOf(req,2097152);fields(body,req.method==='POST'?['id','data']:['expected_revision','data']);
    const requestId=req.method==='POST'?body.id:id;if(!UUID.test(requestId||'')||req.method==='POST'&&id||req.method==='PATCH'&&(!Number.isSafeInteger(body.expected_revision)||body.expected_revision<1))throw new ApiError(422,'DRAFT_FIELDS_INVALID');
    if(!body.data||typeof body.data!=='object'||Array.isArray(body.data))throw new ApiError(422,'DRAFT_FIELDS_INVALID');
    dispatchedWrite=true;const data=await rpc(req.method==='POST'?'create_request_draft':'update_request_draft',{p_tenant:session.tenant,p_id:requestId,...(req.method==='PATCH'?{p_expected_revision:body.expected_revision}:{}),p_data:body.data},session.access);return reply(req.method==='POST'?201:200,{data});

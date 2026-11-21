@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
 import InventorySummaryIcon from './InventorySummaryIcon.jsx';
@@ -27,12 +28,12 @@ export default function MaterialsPage({currentUser}) {
   const visible=rows.filter(row=>(status==='全部'||row.status===status)&&[row.id,row.name,row.category,row.model,row.serial,row.location,row.owner,row.status].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
   useEffect(()=>{if(!form&&!statusForm)return;const close=event=>{if(event.key==='Escape'){setForm(null);setStatusForm(null);}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[form,statusForm]);
   const latest=()=>{
-    const data=window.localStorage.getItem(MATERIAL_KEY);
+    const data=appStorage().getItem(MATERIAL_KEY);
     const current=data?JSON.parse(data):rows;
     if(!Array.isArray(current))throw Error('物料資料無法讀取，請重新載入。');
     return current;
   };
-  const persist=next=>{try{window.localStorage.setItem(MATERIAL_KEY,JSON.stringify(next));}catch{throw Error('儲存失敗，請確認瀏覽器儲存空間與權限後重試。');}refreshLabSnapshot();};
+  const persist=next=>{try{appStorage().setItem(MATERIAL_KEY,JSON.stringify(next));}catch{throw Error('儲存失敗，請確認瀏覽器儲存空間與權限後重試。');}refreshLabSnapshot();};
   const openEditor=row=>{setError('');setSelectedId(null);setStatusForm(null);setForm(row?{...row,editingId:row.id,stockSnapshot:{quantity:row.quantity,available:row.available,unit:row.unit}}:{id:'',name:'',category:'物料耗材',model:'',serial:'',manufacturer:'',quantity:1,available:1,minStock:0,unit:'件',location:'',owner:currentUser?.name||'',status:'可用',specification:'',notes:'',records:[]});};
   const openStatus=row=>{setError('');setSelectedId(null);setForm(null);setStatusForm({id:row?.id||'',status:MATERIAL_STATUSES.find(value=>value!==row?.status)||'可用',reason:''});};
   const save=event=>{

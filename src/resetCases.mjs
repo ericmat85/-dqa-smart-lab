@@ -1,8 +1,10 @@
+import {originalBusinessEnabled} from './originalBusiness.mjs';
+import {appStorage} from './originalBusiness.mjs';
 import {commitLifecycleTransaction,recoverLifecycleTransaction} from './scheduleLifecycle.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
 export const CASE_RESET_KEY='dqa-case-reset-version';
-export function caseResetVersion(storage=window.localStorage){return storage.getItem(CASE_RESET_KEY)||'';}
-export function caseResetActive(storage=window.localStorage){try{return JSON.parse(caseResetVersion(storage)||'{}').phase==='clearing';}catch{return false;}}
+export function caseResetVersion(storage=appStorage()){return storage.getItem(CASE_RESET_KEY)||'';}
+export function caseResetActive(storage=appStorage()){try{return JSON.parse(caseResetVersion(storage)||'{}').phase==='clearing';}catch{return false;}}
 async function clearReports(database){
  if(!database)return;
  await new Promise((resolve,reject)=>{
@@ -12,7 +14,8 @@ async function clearReports(database){
   open.onsuccess=()=>{const db=open.result;if(!db.objectStoreNames.contains('reports')){db.close();resolve();return;}const stores=['reports',...(db.objectStoreNames.contains('reportIndex')?['reportIndex']:[])];const transaction=db.transaction(stores,'readwrite');for(const name of stores)transaction.objectStore(name).clear();transaction.oncomplete=()=>{db.close();resolve();};transaction.onerror=transaction.onabort=()=>{db.close();reject(transaction.error||Error('報告資料清除失敗。'));};};
  });
 }
-export async function resetSystemCases(storage=window.localStorage,database=globalThis.indexedDB){
+export async function resetSystemCases(storage=appStorage(),database=globalThis.indexedDB){
+ if(originalBusinessEnabled())throw Error('共用資料庫不能由瀏覽器重設；原資料未變更。');
  recoverLifecycleTransaction(storage);
  const equipmentRaw=storage.getItem('dqa-equipment-demo-v1');
  const equipment=equipmentRaw===null?DEMO_EQUIPMENT:JSON.parse(equipmentRaw);if(!Array.isArray(equipment))throw Error('設備台帳無法讀取，尚未清除案件。');

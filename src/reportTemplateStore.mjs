@@ -1,10 +1,11 @@
+import {originalBusinessEnabled,appStorage} from './originalBusiness.mjs';
 import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {canOpenReportArchive} from './reportArchive.mjs';
 import {canEditAdmin} from './adminCenterStore.mjs';
 export const TEMPLATE_EVENT='dqa:report-templates-updated';
-export function assertTemplateAccess({actorId,system='lms'},storage=globalThis.localStorage,write=false){
+export function assertTemplateAccess({actorId,system='lms'},storage=appStorage(),write=false){
  let rows;try{rows=JSON.parse(storage?.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS));}catch{throw Error('帳號資料無法核對。');}
  const actor=Array.isArray(rows)&&rows.find(a=>a.id===actorId);
  if(!actor||!canOpenReportArchive(actor,system,storage)||write&&(system!=='lms'||!canEditAdmin(actor,storage)))throw Error(write?'目前帳號沒有上傳範本的管理權限。':'目前帳號沒有範本查閱權限。');return actor;
@@ -53,7 +54,7 @@ export async function validateUploadedTemplate(bytes,name){
  add(book.getWorksheet('1.1一般性能試驗-1')?.getCell('F9').text);
  return {sheets:book.worksheets.map(s=>s.name),cells,declaredTrials:[...new Set(declared)]};
 }
-export function assertUploadedTrialBinding(trialId,details,storage=globalThis.localStorage){
+export function assertUploadedTrialBinding(trialId,details,storage=appStorage()){
  if(trialId==='CUSTOM')return {status:'CUSTOM_ONLY'};
  if(trialId==='BLANK'){if(details.declaredTrials?.length)throw Error('這份範本含有指定試驗項目，不能標示為空白委託單。');return {status:'BLANK'};}
  const row=readTrialCatalog(storage).rows.find(r=>r.id===trialId);if(!row)throw Error('所選的對應試驗不存在，請重新選擇。');
@@ -64,15 +65,15 @@ export function assertUploadedTrialBinding(trialId,details,storage=globalThis.lo
 const guided=globalThis.__DQA_GUIDED_REPORT_DB__;const dbName=typeof guided==='string'&&/^dqa-tour-reports-[a-f0-9-]+$/.test(guided)?guided+'-templates':'dqa-report-template-library-v1';
 function openDb(){return new Promise((resolve,reject)=>{const q=indexedDB.open(dbName,1);q.onupgradeneeded=()=>q.result.createObjectStore('templates',{keyPath:'id'});q.onerror=()=>reject(q.error);q.onsuccess=()=>resolve(q.result);});}
 const repository={
- async list(){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readonly'),q=tx.objectStore('templates').getAll();tx.oncomplete=()=>{db.close();resolve(q.result);};tx.onerror=()=>{db.close();reject(tx.error);};});},
- async get(id){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readonly'),q=tx.objectStore('templates').get(id);tx.oncomplete=()=>{db.close();resolve(q.result);};tx.onerror=()=>{db.close();reject(tx.error);};});},
- async put(value,authorize){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readwrite'),store=tx.objectStore('templates'),q=store.getAll();let error;
+ async list(){if(originalBusinessEnabled())return [];const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readonly'),q=tx.objectStore('templates').getAll();tx.oncomplete=()=>{db.close();resolve(q.result);};tx.onerror=()=>{db.close();reject(tx.error);};});},
+ async get(id){if(originalBusinessEnabled())return null;const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readonly'),q=tx.objectStore('templates').get(id);tx.oncomplete=()=>{db.close();resolve(q.result);};tx.onerror=()=>{db.close();reject(tx.error);};});},
+ async put(value,authorize){if(originalBusinessEnabled())throw Error('雲端範本上傳尚未接通，檔案未儲存。');const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('templates','readwrite'),store=tx.objectStore('templates'),q=store.getAll();let error;
   q.onsuccess=()=>{try{authorize();if(q.result.length>=20||q.result.reduce((sum,r)=>sum+r.byteLength,0)+value.byteLength>100*1024*1024)throw Error('最多保存 20 份上傳範本，總容量上限 100 MB。');store.add(value);}catch(e){error=e;tx.abort();}};
   tx.oncomplete=()=>{db.close();resolve();};tx.onabort=tx.onerror=()=>{db.close();reject(error||tx.error||Error('範本儲存失敗，請確認瀏覽器容量。'));};});},
 };
 const meta=({bytes:_bytes,...value})=>value;
 const hash=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');
-export async function saveUploadedTemplate(file,{actorId,system='lms',syntheticConfirmed=false,trialId='CUSTOM',version='CUSTOM-1',signal}={},storage=globalThis.localStorage,repo=repository){
+export async function saveUploadedTemplate(file,{actorId,system='lms',syntheticConfirmed=false,trialId='CUSTOM',version='CUSTOM-1',signal}={},storage=appStorage(),repo=repository){
  const access={actorId,system};let details;const authorize=()=>{if(signal?.aborted)throw Error('範本上傳已取消。');const actor=assertTemplateAccess(access,storage,true);if(details)assertUploadedTrialBinding(trialId,details,storage);return actor;};authorize();
  if(!syntheticConfirmed)throw Error('請先確認範本只含合成資料，沒有真實客戶、機密或個人簽名。');
  if(!['CUSTOM','BLANK'].includes(trialId)&&!/^TRIAL-(?:\d{3}|[a-f0-9]{32})$/.test(trialId)||typeof version!=='string'||!version.trim()||version.length>80)throw Error('範本分類或版本無效。');
@@ -81,5 +82,5 @@ export async function saveUploadedTemplate(file,{actorId,system='lms',syntheticC
  const record={id:crypto.randomUUID(),name:file.name.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,160),version:version.trim(),trialId,synthetic:true,createdBy:actorId,createdAt:new Date().toISOString(),sha256:digest,byteLength:bytes.byteLength,sheets:details.sheets,trialBinding,bytes};
  await repo.put(record,authorize);globalThis.dispatchEvent?.(new Event(TEMPLATE_EVENT));return meta(record);
 }
-export async function listUploadedTemplates(access,storage=globalThis.localStorage,repo=repository){assertTemplateAccess(access,storage);const records=await repo.list();assertTemplateAccess(access,storage);return records.map(meta).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));}
-export async function readUploadedTemplate(id,access,storage=globalThis.localStorage,repo=repository){assertTemplateAccess(access,storage);const record=await repo.get(id);if(!record||record.synthetic!==true||await hash(record.bytes)!==record.sha256)throw Error('範本已不存在或完整性驗證失敗。');const details=await validateUploadedTemplate(record.bytes,record.name),trialBinding=assertUploadedTrialBinding(record.trialId,details,storage);assertTemplateAccess(access,storage);return {...record,trialBinding};}
+export async function listUploadedTemplates(access,storage=appStorage(),repo=repository){assertTemplateAccess(access,storage);const records=await repo.list();assertTemplateAccess(access,storage);return records.map(meta).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));}
+export async function readUploadedTemplate(id,access,storage=appStorage(),repo=repository){assertTemplateAccess(access,storage);const record=await repo.get(id);if(!record||record.synthetic!==true||await hash(record.bytes)!==record.sha256)throw Error('範本已不存在或完整性驗證失敗。');const details=await validateUploadedTemplate(record.bytes,record.name),trialBinding=assertUploadedTrialBinding(record.trialId,details,storage);assertTemplateAccess(access,storage);return {...record,trialBinding};}

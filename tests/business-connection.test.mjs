@@ -10,6 +10,7 @@ function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRev
  if(url.pathname==='/auth/v1/user')return options.method==='PUT'?json({id:U}):json({id:U,email:'synthetic@example.invalid',email_confirmed_at:new Date().toISOString()});
  if(url.pathname==='/auth/v1/logout')return new Response(null,{status:204});
  const rpc=url.pathname.split('/').pop();
+ if(rpc==='original_ui_snapshot'){assert.equal(body.p_tenant,A);return json({requests:[],members:[],trials:[]});}
  if(rpc==='connection_context')return json({user_id:U,memberships:[{id:'member',tenant_id:A,display_name:'Synthetic',tenant_name:'Synthetic Lab',permissions:[],is_admin:true}]});
  if(rpc==='open_browser_session'){sessions.set(body.p_id,{tenant:body.p_tenant,hash:body.p_nonce_sha256,revoked:false});return json({id:body.p_id,expires_at:new Date(Date.now()+28800000).toISOString()});}
  if(rpc==='check_browser_session'){const s=sessions.get(body.p_id);return json(s&&!s.revoked&&s.hash===body.p_nonce_sha256?s.tenant:null);}
@@ -39,3 +40,5 @@ test('privileged service role key cannot be used as application anonymous key',a
 
 test('Vercel catchall aliases resolve only validated matching route parameters',async()=>{const f=fixture();const r=await call(f.handler,'/unused',{url:'/api/business/[...path]?path=config',query:{path:['config']}});assert.equal(r.status,200);const bad=await call(f.handler,'/config',{query:{path:'logout'}});assert.equal(bad.status,422);assert.equal(f.calls.length,0);});
 test('catchall query data cannot change tenant and traversal is rejected',async()=>{const f=fixture(),c=await login(f);const r=await call(f.handler,'/unused',{url:'/api/business/[...path]?path=data/requests&limit=25',query:{path:['data','requests']},cookie:c});assert.equal(r.status,200);const bad=await call(f.handler,'/unused',{url:'/api/business/data/../config'});assert.equal(bad.status,404);});
+
+test('original UI snapshot is authenticated and server tenant scoped',async()=>{const f=fixture();assert.equal((await call(f.handler,'/snapshot')).status,401);const c=await login(f);const r=await call(f.handler,'/snapshot',{cookie:c});assert.equal(r.status,200);assert.deepEqual(r.body.data.requests,[]);const upstream=f.calls.find(c=>c.url.pathname.endsWith('/original_ui_snapshot'));assert.equal(upstream.options.headers.Authorization,'Bearer ACCESS_TOKEN');assert.equal(JSON.parse(upstream.options.body).p_tenant,A);});

@@ -1,9 +1,10 @@
+import {appStorage} from './originalBusiness.mjs';
 import {establishSession} from './previewAssistant.mjs';
 import {verifyE2Result} from './e2Scheduling.mjs';
 import {requireE2Enabled} from './e2PlanningSettings.mjs';
 import {beginE2Activity,stageE2Activity,contextE2Activity,finishE2Activity} from './e2Activity.mjs';
 
-export async function askE2Scheduling(context,{fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,preferenceStorage=globalThis.localStorage,signal,onStage=()=>{},idempotencyKey=crypto.randomUUID(),activityTicket=null}={}){
+export async function askE2Scheduling(context,{fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,preferenceStorage=appStorage(),signal,onStage=()=>{},idempotencyKey=crypto.randomUUID(),activityTicket=null}={}){
  const account=storage?.getItem('dqa-lms-account-id'),ticket=activityTicket||beginE2Activity(account);
  let response,packet;
  try{

@@ -1,3 +1,5 @@
+import {originalBusinessEnabled,originalBusinessAccount,loginOriginalBusiness,logoutOriginalBusiness,originalBusinessError,subscribeOriginalBusiness,loadOriginalDraft,hasOriginalDraftDetails,saveOriginalDraft} from './originalBusiness.mjs';
+import {appStorage} from './originalBusiness.mjs';
 import MobileSearchInput from './MobileSearchInput.jsx';
 import useTrialCatalog from './useTrialCatalog.js';
 import {buildSpecification,buildAcceptanceCriteria,getTestReference} from './requestTestCatalog.mjs';
@@ -60,23 +62,25 @@ const emptyForm = {
   sampleDescription: '', specification: '', judgementRequired: '需作判定',
   judgementCriteria: '', notes: ''
 };
-function readRequests() { try { const v = JSON.parse(localStorage.getItem(STORAGE_KEY)); return Array.isArray(v) ? v : initialRequests; } catch { return initialRequests; } }
+function readRequests() { try { const v = JSON.parse(appStorage().getItem(STORAGE_KEY)); return Array.isArray(v) ? v : initialRequests; } catch { return initialRequests; } }
 function getPath() { return (window.location.pathname.replace(/\/+$/, '') || '/')+window.location.search; }
 
 export default function RequestApp() {
+  const formalLoginPending=useRef(false);
   const trialCatalog=useTrialCatalog(),testOptions=trialCatalog.rows.map(row=>row.name);
   const {pageSize}=useUiPreferences();
   const [path, setPath] = useState(getPath());
   const {dark,toggleTheme}=useSystemTheme();
-  const [role, setRole] = useState(() => sessionStorage.getItem('dqa-request-role') || 'requester');
-  const [user, setUser] = useState(() => sessionStorage.getItem('dqa-request-user') || (sessionStorage.getItem('dqa-request-role') === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'));
-  const [password, setPassword] = useState('demo1234');
+  const [role, setRole] = useState(() => originalBusinessEnabled()?'requester':sessionStorage.getItem('dqa-request-role') || 'requester');
+  const [user, setUser] = useState(() => originalBusinessEnabled()?originalBusinessAccount('request')?.email||'':sessionStorage.getItem('dqa-request-user') || (sessionStorage.getItem('dqa-request-role') === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'));
+  const [password, setPassword] = useState(originalBusinessEnabled()?'':'demo1234');
 
   const [loginError, setLoginError] = useState('');
-  const [accountId, setAccountId] = useState(() => sessionStorage.getItem('dqa-request-account-id') || '');
+  const [accountId, setAccountId] = useState(() => originalBusinessEnabled()?originalBusinessAccount('request')?.id||'':sessionStorage.getItem('dqa-request-account-id') || '');
   const [requests, setRequests] = useState(readRequests);
 
   const [sharedAccounts, setSharedAccounts] = useState(readDemoAccounts);
+  useEffect(()=>originalBusinessEnabled()?subscribeOriginalBusiness(()=>{setSharedAccounts(readDemoAccounts());setRequests(readRequests());}):undefined,[]);
   useEffect(() => {
     const refresh=()=>setSharedAccounts(readDemoAccounts());
     window.addEventListener('focus',refresh); window.addEventListener('storage',refresh);
@@ -108,7 +112,7 @@ export default function RequestApp() {
   const testReference=getTestReference(testCandidate);
   const [form, setForm] = useState(emptyForm);
   const [editingDraftId, setEditingDraftId] = useState(null);
-  const editingSnapshot=useRef(null);
+  const editingSnapshot=useRef(null),draftOperation=useRef(null),draftSaving=useRef(false);
   const [search, setSearch] = useState(()=>route.query.get('q')||'');
   const [reviewTab, setReviewTab] = useState(()=>route.query.get('tab')==='read'?'read':'approval');
   const [searchField, setSearchField] = useState(()=>route.query.get('field')||'all');
@@ -126,6 +130,7 @@ export default function RequestApp() {
   const [toast, setToast] = useState('');
   const [approvalNote, setApprovalNote] = useState('');
   const [requestSignature, setRequestSignature] = useState('');
+  const draftEditorCurrent=useRef(null);draftEditorCurrent.current={form,signature:requestSignature};
   const [signatureMode, setSignatureMode] = useState('draw');
   const [approvalSignature, setApprovalSignature] = useState('');
   const [approvalMode, setApprovalMode] = useState('draw');
@@ -141,8 +146,8 @@ export default function RequestApp() {
   useEffect(()=>{window.history.replaceState({...window.history.state,dqaRequestIndex:historyPosition.current},'',getPath());const pop=event=>{if(historyRestore.current){historyRestore.current=false;return;}const index=Number(event.state?.dqaRequestIndex)||0;
    if(dirtyRef.current){event.stopImmediatePropagation();const target=getPath(),delta=index-historyPosition.current;pendingHistory.current={target,delta};setLeaveTarget(target);if(delta){historyRestore.current=true;window.history.go(-delta);}else window.history.replaceState({...window.history.state},'',acceptedUrl.current);}
    else{historyPosition.current=index;acceptedUrl.current=getPath();applyLocation();}};window.addEventListener('popstate',pop);return()=>window.removeEventListener('popstate',pop);},[]);
-  const [readError,setReadError]=useState(()=>{try{const raw=localStorage.getItem(STORAGE_KEY);if(raw&&!Array.isArray(JSON.parse(raw)))throw Error();return '';}catch{return '無法讀取本機案件資料。原始資料未清除，請確認瀏覽器儲存設定後重試。';}});
-  const requestStorage={error:readError,retry:()=>{try{const raw=localStorage.getItem(STORAGE_KEY);if(raw&&!Array.isArray(JSON.parse(raw)))throw Error();setRequests(readRequests());setReadError('');}catch{setReadError('資料仍無法讀取，請勿重設；原始資料保持不變。');}}};
+  const [readError,setReadError]=useState(()=>{try{const raw=appStorage().getItem(STORAGE_KEY);if(raw&&!Array.isArray(JSON.parse(raw)))throw Error();return '';}catch{return '無法讀取本機案件資料。原始資料未清除，請確認瀏覽器儲存設定後重試。';}});
+  const requestStorage={error:readError,retry:()=>{try{const raw=appStorage().getItem(STORAGE_KEY);if(raw&&!Array.isArray(JSON.parse(raw)))throw Error();setRequests(readRequests());setReadError('');}catch{setReadError('資料仍無法讀取，請勿重設；原始資料保持不變。');}}};
   const go=(next,force=false)=>{if(dirtyRef.current&&!force){setLeaveTarget(next);return false;}pendingHistory.current=null;historyPosition.current+=1;window.history.pushState({dqaRequestIndex:historyPosition.current},'',next);acceptedUrl.current=next;setPath(getPath());setMenuOpen(false);if(!['new','edit'].includes(next.split('/')[2]))setFormOpen(false);window.dispatchEvent(new Event('dqa:navigate'));window.scrollTo(0,0);return true;};
   const finishLeave=target=>{const pending=pendingHistory.current;pendingHistory.current=null;if(pending?.target===target&&pending.delta){dirtyRef.current=false;setFormOpen(false);window.history.go(pending.delta);}else{if(go(target,true)&&target==='/request/requests?collection=draft')applyLocation();}};
   useEffect(()=>{const main=document.querySelector('#rq-main');if(main){main.tabIndex=-1;main.focus({preventScroll:true});}},[path]);
@@ -170,20 +175,22 @@ export default function RequestApp() {
     if(formOpen&&(route.id||null)===editingDraftId)return;
     const record=route.id?readRequests().find(r=>r.id===route.id):null;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Surface access failure when an external URL addresses an uneditable case.
+    if(originalBusinessEnabled()&&route.id&&!hasOriginalDraftDetails(route.id)){loadOriginalDraft(route.id).then(()=>setRequests(readRequests())).catch(error=>setFormErrors({access:originalBusinessError(error)}));return;}
     if(route.id){try{assertEditableRequest(signedAccount,record);}catch{setFormOpen(false);setFormErrors({access:'案件不存在、不可編輯或沒有權限。'});return;}}
+    if(!record)draftOperation.current=null;
     const value={...emptyForm,...(record||{}),requester:signedAccount.name,department:signedAccount.department};
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate an explicitly addressed editor from browser history.
     setForm(value);setEditingDraftId(record?.id||null);editingSnapshot.current=record?JSON.stringify(record):null;setRequestSignature(record?.draftSignature||'');setSignatureMode(record?.draftSignature?'upload':'draw');setFormErrors({});setEditorSaved(JSON.stringify({form:value,signature:record?.draftSignature||''}));setFormOpen(true);
    }else{setFormOpen(false);if(route.page==='detail'){const record=readRequests().find(r=>r.id===route.id);const allowed=record&&(canOpenReview?record.supervisorId===signedAccount.id:ownsRequest(signedAccount,record));setSelected(allowed?record:null);}}
-  },[path,accountId,formOpen,isLoggedIn,signedAccount,canOpenReview,route.page,route.id,editingDraftId]);
-  const beginEdit=r=>{try{assertEditableRequest(signedAccount,r);}catch(error){notify(error.message);return;}const value={...emptyForm,...r};setEditorSaved(JSON.stringify({form:value,signature:r.draftSignature||''}));setForm(value);setFormErrors({});setEditingDraftId(r.id);editingSnapshot.current=JSON.stringify(r);setRequestSignature(r.draftSignature||'');setSignatureMode(r.draftSignature?'upload':'draw');setFormOpen(true);setSelected(null);go(`/request/edit/${encodeURIComponent(r.id)}`,true);};
+  },[path,accountId,formOpen,isLoggedIn,signedAccount,canOpenReview,route.page,route.id,editingDraftId,requests]);
+  const beginEdit=async r=>{if(originalBusinessEnabled()){try{r=await loadOriginalDraft(r.id);}catch(error){notify(originalBusinessError(error));return;}}try{assertEditableRequest(signedAccount,r);}catch(error){notify(error.message);return;}const value={...emptyForm,...r};setEditorSaved(JSON.stringify({form:value,signature:r.draftSignature||''}));setForm(value);setFormErrors({});setEditingDraftId(r.id);editingSnapshot.current=JSON.stringify(r);setRequestSignature(r.draftSignature||'');setSignatureMode(r.draftSignature?'upload':'draw');setFormOpen(true);setSelected(null);go(`/request/edit/${encodeURIComponent(r.id)}`,true);};
   const openCase=r=>{setSelected(r);setApprovalMode('draw');setApprovalSignature('');setApprovalNote(r.approvalNote||'');setApprovalInputVersion(v=>v+1);go(`/request/cases/${encodeURIComponent(r.id)}`);};
   useEffect(()=>{const last=Math.max(1,Math.ceil((myTab==='borrows'?visibleBorrows.length:visibleRequests.length)/20));if(listPage>last){
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Clamp an externally shared page number after filtering.
     setListPage(last);}},[visibleRequests.length,visibleBorrows.length,myTab,listPage]);
   const notify = (s) => { setToast(s); };
-  const login = () => { const normalized=user.trim().toLowerCase(); const candidates=sharedAccounts.filter(a=>accessSystem(a,'request') && (String(a.email||'').toLowerCase()===normalized || a.name===user.trim())); const a=candidates.length===1?candidates[0]:null; if (!a || password!=='demo1234' || (role==='supervisor' ? a.role!=='委託者主管' : a.role!=='委託者')) { setLoginError('帳號、角色或密碼不正確；請使用啟用中的共用帳號。'); return; } try{startSession('request',a.id);sessionStorage.setItem('dqa-request-role',role);sessionStorage.setItem('dqa-request-user',a.name);}catch{try{endSession('request');}catch{/* Storage remains unavailable. */}setLoginError('無法保存登入狀態，請確認瀏覽器儲存權限。');return;}setLoginError('');setUser(a.name);setAccountId(a.id); go(path.startsWith('/request/')&&!['/request/login','/request/dashboard'].includes(path.split('?')[0])?path:'/request/dashboard',true); };
-  const completeLogout = () => { setUser(role === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'); setPassword('demo1234'); endSession('request'); setAccountId(''); sessionStorage.removeItem('dqa-request-role'); sessionStorage.removeItem('dqa-request-user'); dirtyRef.current=false;setFormOpen(false);go('/request/login',true); };
+  const login = async () => {if(originalBusinessEnabled()){if(formalLoginPending.current)return;formalLoginPending.current=true;try{await loginOriginalBusiness(user.trim(),password);const a=originalBusinessAccount('request');setSharedAccounts(readDemoAccounts());setRequests(readRequests());startSession('request',a.id);setRole('requester');setAccountId(a.id);setLoginError('');go('/request/dashboard',true);}catch(error){setLoginError(originalBusinessError(error));}finally{formalLoginPending.current=false;}return;} const normalized=user.trim().toLowerCase(); const candidates=sharedAccounts.filter(a=>accessSystem(a,'request') && (String(a.email||'').toLowerCase()===normalized || a.name===user.trim())); const a=candidates.length===1?candidates[0]:null; if (!a || password!=='demo1234' || (role==='supervisor' ? a.role!=='委託者主管' : a.role!=='委託者')) { setLoginError('帳號、角色或密碼不正確；請使用啟用中的共用帳號。'); return; } try{startSession('request',a.id);sessionStorage.setItem('dqa-request-role',role);sessionStorage.setItem('dqa-request-user',a.name);}catch{try{endSession('request');}catch{/* Storage remains unavailable. */}setLoginError('無法保存登入狀態，請確認瀏覽器儲存權限。');return;}setLoginError('');setUser(a.name);setAccountId(a.id); go(path.startsWith('/request/')&&!['/request/login','/request/dashboard'].includes(path.split('?')[0])?path:'/request/dashboard',true); };
+  const completeLogout = async () => {if(originalBusinessEnabled()){try{await logoutOriginalBusiness();}catch(error){notify(originalBusinessError(error));}} setUser(originalBusinessEnabled()?'':role === 'supervisor' ? 'supervisor@example.com' : 'requester@example.com'); setPassword(originalBusinessEnabled()?'':'demo1234'); endSession('request'); setAccountId(''); sessionStorage.removeItem('dqa-request-role'); sessionStorage.removeItem('dqa-request-user'); dirtyRef.current=false;setFormOpen(false);go('/request/login',true); };
   const logout=()=>{if(dirtyRef.current){setLeaveTarget('logout');return;}completeLogout();};
   const resetEditor = () => {
     if(dirtyRef.current&&!window.confirm('重設會放棄本次尚未儲存的修改，確定重設？'))return;
@@ -230,10 +237,27 @@ export default function RequestApp() {
     if (Array.isArray(val)) return val.length > 0;
     return String(val ?? '').trim() !== '';
   });
-  const submitRequest = (asDraft,leaveAfter='') => {
+  const submitRequest = async (asDraft,leaveAfter='') => {
+    if(originalBusinessEnabled()){
+      if(!asDraft){notify('正式送簽尚未啟用；可以先儲存委託草稿。');return false;}
+      if(draftSaving.current)return false;
+      if(!hasAnyFormData(form)&&!requestSignature){notify('請至少填寫一項委託資訊，再儲存草稿。');return false;}
+      draftSaving.current=true;
+      if(!draftOperation.current)draftOperation.current=crypto.randomUUID();
+      try{
+        const submitted=JSON.stringify({form,signature:requestSignature});
+        const source=editingSnapshot.current?JSON.parse(editingSnapshot.current):null;
+        const row=await saveOriginalDraft({id:draftOperation.current,form,signature:requestSignature,existingId:editingDraftId,expectedRevision:source?.sourceRevision});
+        if(JSON.stringify(draftEditorCurrent.current)!==submitted){setRequests(readRequests());editingSnapshot.current=JSON.stringify(row);setEditingDraftId(row.id);setEditorSaved(submitted);go('/request/edit/'+encodeURIComponent(row.id),true);notify('前一版草稿已儲存；儲存期間的新修改仍保留在表單，請再次儲存。');return false;}
+        setRequests(readRequests());setEditorSaved(submitted);dirtyRef.current=false;setFormOpen(false);setEditingDraftId(null);draftOperation.current=null;setSearch('');setStatusFilter('全部狀態');setMyTab('requests');
+        if(leaveAfter)finishLeave(leaveAfter);else go('/request/requests',true);
+        notify(`草稿 ${row.id} 已儲存`);return true;
+      }catch(error){notify(originalBusinessError(error));return false;}finally{draftSaving.current=false;}
+    }
+
     if(readError){notify('本機資料讀取失敗，請先排除錯誤再儲存。');return false;}
     const errors={};if(!asDraft){if(!(form.productCode||form.product||'').trim())errors.productCode='請填寫產品代碼';if(!form.customer.trim())errors.customer='請填寫客戶名稱';if(!Number.isSafeInteger(Number(form.quantity))||Number(form.quantity)<1)errors.quantity='請輸入正整數';if(!form.purpose.length)errors.purpose='請選擇試驗目的';if(!form.testItems.length)errors.testItems='請選擇試驗項目';if(!form.specification.trim())errors.specification='請填寫試驗規範';if(!requestSignature)errors.signature='送簽前請完成簽名';if(!form.supervisorId)errors.supervisorId='請選擇直屬主管';if(form.purpose.some(t=>t.startsWith('其他'))&&!form.purposeOther.trim())errors.purposeOther='請補充其他試驗目的';}setFormErrors(errors);if(Object.keys(errors).length){notify('請修正標示的欄位後再送出。');requestAnimationFrame(()=>document.querySelector('[aria-invalid=true]')?.focus());return false;}
-    const saveRows=next=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(next));setRequests(next);window.dispatchEvent(new Event('dqa:request-updated'));setEditorSaved(JSON.stringify({form,signature:requestSignature}));dirtyRef.current=false;return true;}catch{notify('儲存失敗：瀏覽器空間不足或禁止儲存。內容仍保留在此頁，請重試。');return false;}};
+    const saveRows=next=>{try{appStorage().setItem(STORAGE_KEY,JSON.stringify(next));setRequests(next);window.dispatchEvent(new Event('dqa:request-updated'));setEditorSaved(JSON.stringify({form,signature:requestSignature}));dirtyRef.current=false;return true;}catch{notify('儲存失敗：瀏覽器空間不足或禁止儲存。內容仍保留在此頁，請重試。');return false;}};
     if(signedAccount?.role!=='委託者'){notify('僅委託者可建立或編輯委託單。');return;}
     if(editingDraftId){
       try { const latest=readRequests().find(row=>row.id===editingDraftId);assertEditableRequest(signedAccount,latest);if(editingSnapshot.current!==JSON.stringify(latest))throw Error('草稿已在其他頁面更新，請重新開啟後編輯。'); }
@@ -304,7 +328,7 @@ export default function RequestApp() {
   const confirmDeleteDraft = () => {
     if (!deleteTarget?.id) return;
     const id = deleteTarget.id;
-    try { const updated=deleteDraft(readRequests(),id,signedAccount);localStorage.setItem(STORAGE_KEY,JSON.stringify(updated));setRequests(updated); }
+    try { const updated=deleteDraft(readRequests(),id,signedAccount);appStorage().setItem(STORAGE_KEY,JSON.stringify(updated));setRequests(updated); }
     catch(error){notify(error.message);return;}
     if (editingDraftId === id) {
       setFormOpen(false);
@@ -333,7 +357,7 @@ export default function RequestApp() {
       const displayed=requests.find(row=>row.id===id);
       if(JSON.stringify(target)!==JSON.stringify(displayed))throw Error('案件已更新，請重新開啟後簽核。');
       const next=reviewRequesterDecision(target,signedAccount,{status,signature:approvalSignature,comment:approvalNote});
-      const updated=latest.map(row=>row.id===id?next:row);localStorage.setItem(STORAGE_KEY,JSON.stringify(updated));setRequests(updated);window.dispatchEvent(new Event('dqa:request-updated'));
+      const updated=latest.map(row=>row.id===id?next:row);appStorage().setItem(STORAGE_KEY,JSON.stringify(updated));setRequests(updated);window.dispatchEvent(new Event('dqa:request-updated'));
       setSelected(null);setApprovalNote('');setApprovalSignature('');setPage('review');
       notify(status==='已核准'?'簽核完成，委託單已進入 LMS 待審查':'已退回委託單，委託者可依意見修正');
     }catch(error){notify(error.message);}
@@ -426,7 +450,7 @@ export default function RequestApp() {
       }}>確認選擇</button></div></footer>
     </div></RequestFormDialog>}
   {deleteTarget&&<RequestFormDialog label="確認刪除草稿" dark={dark} onClose={()=>setDeleteTarget(null)}><div className="rq-confirm-body"><h2>確認刪除草稿？</h2><p>即將永久刪除委託單 {deleteTarget.id}。刪除後無法復原。</p><button className="rq-btn" onClick={()=>setDeleteTarget(null)}>取消</button><button className="rq-btn rq-btn-danger" onClick={confirmDeleteDraft}>確認刪除</button></div></RequestFormDialog>}
-  {leaveTarget&&<RequestFormDialog label="尚未儲存的變更" dark={dark} onClose={()=>setLeaveTarget(null)}><header className="rq-form-header"><h2>尚未儲存的變更</h2></header><div className="rq-confirm-body"><p>離開後會失去尚未儲存的表單內容與簽名。你可以繼續編輯，或先儲存草稿。</p>{toast&&/失敗|無法|請至少|重新開啟|未設定|不正確/.test(toast)&&<p role="alert" className="rq-field-error">{toast}</p>}<button className="rq-btn" onClick={()=>setLeaveTarget(null)}>繼續編輯</button><button className="rq-btn rq-btn-danger" onClick={()=>{const target=leaveTarget;dirtyRef.current=false;setLeaveTarget(null);setFormOpen(false);if(target==='logout')completeLogout();else finishLeave(target);}}>放棄變更</button><button className="rq-btn rq-btn-primary" onClick={()=>{if(submitRequest(true,leaveTarget==='logout'?'/request/login':leaveTarget)){if(leaveTarget==='logout')completeLogout();setLeaveTarget(null);}}}>儲存草稿後離開</button></div></RequestFormDialog>}
+  {leaveTarget&&<RequestFormDialog label="尚未儲存的變更" dark={dark} onClose={()=>setLeaveTarget(null)}><header className="rq-form-header"><h2>尚未儲存的變更</h2></header><div className="rq-confirm-body"><p>離開後會失去尚未儲存的表單內容與簽名。你可以繼續編輯，或先儲存草稿。</p>{toast&&/失敗|無法|請至少|重新開啟|未設定|不正確/.test(toast)&&<p role="alert" className="rq-field-error">{toast}</p>}<button className="rq-btn" onClick={()=>setLeaveTarget(null)}>繼續編輯</button><button className="rq-btn rq-btn-danger" onClick={()=>{const target=leaveTarget;dirtyRef.current=false;setLeaveTarget(null);setFormOpen(false);if(target==='logout')completeLogout();else finishLeave(target);}}>放棄變更</button><button className="rq-btn rq-btn-primary" onClick={async()=>{if(await submitRequest(true,leaveTarget==='logout'?'/request/login':leaveTarget)){if(leaveTarget==='logout')completeLogout();setLeaveTarget(null);}}}>儲存草稿後離開</button></div></RequestFormDialog>}
 
 
   </div>;

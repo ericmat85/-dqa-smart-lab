@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {equipmentSpaceUnits} from './equipmentSpace.mjs';
 import {trialProfile,profileEquipmentMatches,trialExecution,sequentialAllocations,operationBuffersAllowed} from './trialProfiles.mjs';
 import {explicitHours} from './trialSourceFacts.mjs';
@@ -7,7 +8,7 @@ import {getRequestDate,isCalendarDate} from './requestDate.mjs';
 
 export const EQUIPMENT_KEY='dqa-equipment-demo-v1';
 export const SCHEDULE_KEY='dqa-schedules-demo-v1';
-export function readScheduleEquipment(storage=window.localStorage) {
+export function readScheduleEquipment(storage=appStorage()) {
   const raw=storage.getItem(EQUIPMENT_KEY);
   if(raw===null)return DEMO_EQUIPMENT;
   const rows=JSON.parse(raw);

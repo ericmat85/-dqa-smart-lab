@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canControlTrial,isActiveTrial} from './trialPermissions.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {usesEquipment,resourceBusy} from './scheduleResources.mjs';
@@ -15,11 +16,11 @@ export function applyCancelledRequests(rows,cancellations) {
     return {...row,status:'取消',cancellation,history:(row.history||[]).includes(message)?row.history:[...(row.history||[]),message]};
   });
 }
-export function readCancellationOverrides(rows,storage=window.localStorage) {
+export function readCancellationOverrides(rows,storage=appStorage()) {
   const cancellations=JSON.parse(storage.getItem(CANCELLATION_KEY)||'{}');
   return applyCancelledRequests(rows,cancellations);
 }
-export function stopRequestSchedules({scheduleId,requestId,actor,actorId,reason,now=Date.now()},storage=window.localStorage) {
+export function stopRequestSchedules({scheduleId,requestId,actor,actorId,reason,now=Date.now()},storage=appStorage()) {
   if(!actor||!actorId)throw Error('請重新登入後再操作。');
   recoverLifecycleTransaction(storage);
   const schedules=JSON.parse(storage.getItem(SCHEDULE_KEY)||'[]');

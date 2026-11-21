@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canEditAdmin} from './adminCenterStore.mjs';
 export const ENGINE_PREFERENCES_EVENT='dqa:engine-preferences';
 export const ENGINE_DEFAULTS=Object.freeze({
@@ -13,15 +14,15 @@ export function validateEnginePreferences(engine,value){
  if(engine==='E4'&&(!Number.isInteger(value.speed)||value.speed<15||value.speed>80||typeof value.punctuation!=='boolean'||typeof value.showFaq!=='boolean'))failure('ENGINE_PREFERENCES_INVALID','助理偏好超過安全範圍。');
  return {...value};
 }
-export function readEnginePreferences(engine,storage=globalThis.localStorage){
+export function readEnginePreferences(engine,storage=appStorage()){
  const key=enginePreferenceKey(engine);
  try{const raw=storage?.getItem(key);if(raw===null||raw===undefined)return {version:1,revision:0,settings:{...ENGINE_DEFAULTS[engine]}};const data=JSON.parse(raw);if(data.version!==1||!Number.isSafeInteger(data.revision)||data.revision<0||Object.keys(data).some(k=>!['version','revision','settings'].includes(k)))throw Error();return {version:1,revision:data.revision,settings:validateEnginePreferences(engine,data.settings)};}
  catch{failure('ENGINE_PREFERENCES_UNAVAILABLE','引擎偏好無法讀取，已停止新請求；原設定未重置。');}
 }
-export function saveEnginePreferences(engine,settings,account,{storage=globalThis.localStorage,expectedRevision}={}){
+export function saveEnginePreferences(engine,settings,account,{storage=appStorage(),expectedRevision}={}){
  const value=validateEnginePreferences(engine,settings);let people;try{people=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||'[]');}catch{failure('ENGINE_PREFERENCES_FORBIDDEN','帳號資料無法核對。');}
  const actor=Array.isArray(people)&&people.find(a=>a.id===account?.id);if(!actor||!canEditAdmin(actor,storage))failure('ENGINE_PREFERENCES_FORBIDDEN','目前帳號沒有修改引擎偏好的權限。');
  const previous=readEnginePreferences(engine,storage);if(previous.revision!==expectedRevision)failure('ENGINE_PREFERENCES_CONFLICT','偏好已在其他分頁更新，請重新開啟設定。');
- const next={version:1,revision:previous.revision+1,settings:value};storage.setItem(enginePreferenceKey(engine),JSON.stringify(next));if(typeof window!=='undefined'&&storage===window.localStorage)window.dispatchEvent(new Event(ENGINE_PREFERENCES_EVENT));return next;
+ const next={version:1,revision:previous.revision+1,settings:value};storage.setItem(enginePreferenceKey(engine),JSON.stringify(next));if(typeof window!=='undefined'&&storage===appStorage())window.dispatchEvent(new Event(ENGINE_PREFERENCES_EVENT));return next;
 }
-export function requireEngineEnabled(engine,storage=globalThis.localStorage){const result=readEnginePreferences(engine,storage);if(!result.settings.enabled)failure('ENGINE_CLIENT_PAUSED',engine==='E3'?'新的報告草稿已暫停；一般 PDF／Excel 匯出保持原樣。':'新的助理請求已暫停；可使用清除對話或登出。');return result;}
+export function requireEngineEnabled(engine,storage=appStorage()){const result=readEnginePreferences(engine,storage);if(!result.settings.enabled)failure('ENGINE_CLIENT_PAUSED',engine==='E3'?'新的報告草稿已暫停；一般 PDF／Excel 匯出保持原樣。':'新的助理請求已暫停；可使用清除對話或登出。');return result;}

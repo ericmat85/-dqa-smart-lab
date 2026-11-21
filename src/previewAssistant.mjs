@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {readUiPreferences} from './uiPreferences.mjs';
 import {assistantLanguage} from './assistantLanguage.mjs';
 import {clearE2Activity} from './e2Activity.mjs';
@@ -48,7 +49,7 @@ export async function askPreviewAssistant(question,system,{snapshot,metrics,fetc
  if(!accountId)throw Error('請先使用 Demo 帳號登入，再使用 AI 助理。');
  const cursorKey=system+':'+accountId,cursor=labCursors.get(cursorKey);
  const retrievalQuestion=/^下一頁[！!。？?\s]*$/.test(question.trim())&&cursor?`從第${cursor.offset+1}筆查詢${cursor.kind}`:question;
- const context=selected.mode==='GENERAL_CHAT'&&!selected.question.startsWith('/')?makeE4ReadonlyContext(retrievalQuestion,snapshot,metrics,system,Date.now(),globalThis.localStorage,contextHint):undefined;
+ const context=selected.mode==='GENERAL_CHAT'&&!selected.question.startsWith('/')?makeE4ReadonlyContext(retrievalQuestion,snapshot,metrics,system,Date.now(),appStorage(),contextHint):undefined;
  // This password is the existing public synthetic Demo credential, never a backend secret.
  const ticket=beginE4Activity({system,accountId,mode:selected.mode,control:selected.question==='/clear'});
  let response,packet,errorCode;

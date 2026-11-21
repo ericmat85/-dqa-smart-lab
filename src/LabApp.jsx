@@ -1,3 +1,5 @@
+import {originalBusinessEnabled,originalBusinessAccount,loginOriginalBusiness,logoutOriginalBusiness,originalBusinessError} from './originalBusiness.mjs';
+import {appStorage} from './originalBusiness.mjs';
 import TrialEquipmentDialog from './TrialEquipmentDialog.jsx';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import {canAccessLabPage} from './customRoles.mjs';
@@ -63,7 +65,7 @@ const AUDIT_KEY = "dqa_lab_demo_audit_v1";
 
 function readStorage(key, fallback) {
   try {
-    const value = JSON.parse(window.localStorage.getItem(key) || "null");
+    const value = JSON.parse(appStorage().getItem(key) || "null");
     return Array.isArray(value) ? value : fallback;
   } catch {
     return fallback;
@@ -74,14 +76,16 @@ const now = () => new Date().toLocaleString("zh-TW", { hour12: false });
 
 
 export default function LabApp({ path, navigate }) {
+  const formalLoginPending=useRef(false);
   const lifecycleError=useScheduleLifecycle();
   useReportSnapshot();
   const {snapshot:sharedSnapshot,metrics:labMetrics,now:labNow}=useLabView();
-  const [username, setUsername] = useState(() => { try { const id=window.sessionStorage.getItem("dqa-lab-account-id"), a=readDemoAccounts(); const selected=a.find(x=>x.id===id&&accessSystem(x,'lab'))||a.find(x=>x.role==='實驗室工程師'&&accessSystem(x,'lab'))||a.find(x=>accessSystem(x,'lab')); return selected?.email || selected?.name || ""; } catch { return ""; } });
-  const [password, setPassword] = useState("demo1234");
+  const [username, setUsername] = useState(() => { if(originalBusinessEnabled())return originalBusinessAccount('lab')?.email||''; try { const id=window.sessionStorage.getItem("dqa-lab-account-id"), a=readDemoAccounts(); const selected=a.find(x=>x.id===id&&accessSystem(x,'lab'))||a.find(x=>x.role==='實驗室工程師'&&accessSystem(x,'lab'))||a.find(x=>accessSystem(x,'lab')); return selected?.email || selected?.name || ""; } catch { return ""; } });
+  const [password, setPassword] = useState(originalBusinessEnabled()?"":"demo1234");
   const [loginError, setLoginError] = useState("");
 
   const [account, setAccount] = useState(() => {
+    if(originalBusinessEnabled())return originalBusinessAccount('lab');
     try { const id=window.sessionStorage.getItem("dqa-lab-account-id"); const accounts=readDemoAccounts(); const found=Array.isArray(accounts) ? accounts.find(a=>a.id===id) : null; return accessSystem(found,"lab") ? found : null; } catch { return null; }
   });
   const loggedIn=Boolean(account&&sharedSnapshot.accounts.some(row=>row.id===account.id&&accessSystem(row,'lab')));
@@ -96,10 +100,11 @@ export default function LabApp({ path, navigate }) {
     }
   }, [path, loggedIn, navigate]);
 
-  const login = () => {
+  const login = async () => {
+    if(originalBusinessEnabled()){if(formalLoginPending.current)return;formalLoginPending.current=true;try{await loginOriginalBusiness(username.trim(),password);const a=originalBusinessAccount('lab');startSession('lab',a.id);setAccount(a);setLoginError('');navigate('/lab/dashboard');}catch(error){setLoginError(originalBusinessError(error));}finally{formalLoginPending.current=false;}return;}
     try { const all=readDemoAccounts(); const key=username.trim().toLowerCase(); const matches=Array.isArray(all)?all.filter(a=>accessSystem(a,"lab") && (String(a.email||"").toLowerCase()===key || a.name===username.trim())):[]; const found=matches.length===1?matches[0]:null; if(!found || password!=="demo1234"){setLoginError("帳號沒有實驗室權限，或密碼不正確。");return;} startSession('lab',found.id);setAccount(found);setUsername(found.name);setLoginError("");navigate("/lab/dashboard"); } catch { setLoginError("無法讀取帳號資料。"); }
   };
-  const logout = () => { endSession('lab'); setAccount(null); navigate("/lab/login", true); };
+  const logout = async () => {if(originalBusinessEnabled()){try{await logoutOriginalBusiness();}catch(error){setNotice(originalBusinessError(error));}} endSession('lab'); setAccount(null); navigate("/lab/login", true); };
   const [requests, setRequests] = useState(() => readStorage(STORAGE_KEY, DEMO_REQUESTS).filter(row=>!LEGACY_DEMO_IDS.has(row.id)));
   useEffect(()=>{
     // Synchronize persisted lab work items with the shared browser schedule source.
@@ -142,7 +147,7 @@ export default function LabApp({ path, navigate }) {
   useEffect(() => {
     if(!downloadJob)return;
     const controller=new AbortController();setDownloadProgress(10);setDownloadError('');setDownloadTrial('');
-    readCaseTrialTemplate({requestId:downloadJob.id,actorId:account?.id},window.localStorage,{signal:controller.signal,onStage:(stage,trial)=>{if(!controller.signal.aborted){setDownloadProgress(stage==='BUILDING'?35:80);setDownloadTrial(trial.name);}}})
+    readCaseTrialTemplate({requestId:downloadJob.id,actorId:account?.id},appStorage(),{signal:controller.signal,onStage:(stage,trial)=>{if(!controller.signal.aborted){setDownloadProgress(stage==='BUILDING'?35:80);setDownloadTrial(trial.name);}}})
       .then(file=>{if(controller.signal.aborted)return;const url=URL.createObjectURL(new Blob([file.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);setDownloadProgress(100);})
       .catch(error=>{if(!controller.signal.aborted){setDownloadError(error.message);setDownloadProgress(0);}});
     return()=>controller.abort();
@@ -203,7 +208,7 @@ export default function LabApp({ path, navigate }) {
   async function downloadCaseTemplate(id,demo=false){
     setPreparingReport(true);setModalError('');setReportCheck(null);
     try{
-    const result=await readCaseTrialTemplate({requestId:id,actorId:account.id},window.localStorage,demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
+    const result=await readCaseTrialTemplate({requestId:id,actorId:account.id},appStorage(),demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
     if(demo){
       setReportFile(new File([result.bytes],result.fileName,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       setSignatureMode('upload');setLabSignature(createDemoApprovalSignature(`${account.name}（DEMO）`));setReportCheck(result.check);return;

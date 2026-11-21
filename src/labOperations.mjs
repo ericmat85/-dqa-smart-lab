@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {usesEquipment,resourceBusy} from './scheduleResources.mjs';
 import {returnLabCancellations} from './labCancellationReturn.mjs';
 import {DEMO_SCHEDULES} from './demoSchedules.mjs';
@@ -9,7 +10,7 @@ export const LAB_OPERATIONS_KEY='dqa-lab-operations-v1';
 const LAB_KEY='dqa_lab_demo_requests_v1',AUDIT_KEY='dqa_lab_demo_audit_v1',SCHEDULE_KEY='dqa-schedules-demo-v1',EQUIPMENT_KEY='dqa-equipment-demo-v1';
 const list=(storage,key,fallback=[])=>{const rows=JSON.parse(storage.getItem(key)||JSON.stringify(fallback));if(!Array.isArray(rows))throw Error('無法讀取申請資料，請重新整理後重試。');return rows;};
 function actorFor(storage,id){return list(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS).find(row=>row.id===id);}
-export function submitLabOperation({requestId,action,reason,signature='',actorId},storage=window.localStorage){
+export function submitLabOperation({requestId,action,reason,signature='',actorId},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const actor=actorFor(storage,actorId);if(!accessSystem(actor,'lab',storage))throw Error('此帳號無實驗室操作權限。');
  if(!['cancel','interrupt'].includes(action)||!reason?.trim())throw Error('請填寫申請原因。');
@@ -36,7 +37,7 @@ export function applyLabOperationResults(rows,operations){
  if(row.pendingOperationId===pendingOperationId&&row.lastOperationId===latest.id&&row.lastOperationStatus===latest.status)return row;
  return {...row,status,pendingOperationId,lastOperationId:latest.id,lastOperationStatus:latest.status};});
 }
-export function decideLabOperation({id,actorId,approve,comment='',signature=''},storage=window.localStorage){
+export function decideLabOperation({id,actorId,approve,comment='',signature=''},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const operations=list(storage,LAB_OPERATIONS_KEY),operation=operations.find(row=>row.id===id);if(!operation||operation.status!=='待審核')throw Error('此申請已處理，請重新整理清單。');
  const actor=actorFor(storage,actorId);if(!canApproveOperationalRequest(actor,operation.actorId,storage))throw Error('僅未參與申請的一階主管或系統管理員可核准。');

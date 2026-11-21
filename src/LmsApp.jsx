@@ -1,3 +1,5 @@
+import {originalBusinessEnabled,originalBusinessAccount,loginOriginalBusiness,logoutOriginalBusiness,originalBusinessError} from './originalBusiness.mjs';
+import {appStorage} from './originalBusiness.mjs';
 import RequestCloseIcon from './RequestCloseIcon.jsx';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
 import {AdminModuleNav} from './AdminCenterCards.jsx';
@@ -397,17 +399,18 @@ export function LoginPage({
 
 }) {
 
-  const [email, setEmail] = useState(() => system.id === "lms" ? "level1@example.com" : "");
+  const [email, setEmail] = useState(() => originalBusinessEnabled()?"":system.id === "lms" ? "level1@example.com" : "");
 
-  const [password, setPassword] = useState(() => system.id === "lms" ? DEMO_PASSWORD : "");
+  const [password, setPassword] = useState(() => originalBusinessEnabled()?"":system.id === "lms" ? DEMO_PASSWORD : "");
 
   const [error, setError] = useState("");
+  const loginPending=useRef(false);
 
 
 
 
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
 
     event.preventDefault();
 
@@ -429,7 +432,7 @@ export function LoginPage({
 
 
 
-    onLogin(email.trim().toLowerCase(), password, setError);
+    if(loginPending.current)return;loginPending.current=true;try{await onLogin(email.trim().toLowerCase(), password, setError);}finally{loginPending.current=false;}
 
   }
 
@@ -1540,7 +1543,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  });
  useEffect(() => {
    const refresh = () => setRequests(old => {
-     return mergeImportedRequests(readCancellationOverrides(old), readApprovedRequestsForLms());
+     return originalBusinessEnabled()?readStoredRequests([]):mergeImportedRequests(readCancellationOverrides(old), readApprovedRequestsForLms());
    });
    window.addEventListener("focus", refresh);
    window.addEventListener("storage", refresh);
@@ -1549,7 +1552,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  }, []);
  const [storageError, setStorageError] = useState("");
  useEffect(() => {
-   if(requestResetEpoch.current!==caseResetVersion())return;
+   if(originalBusinessEnabled()||requestResetEpoch.current!==caseResetVersion())return;
    // Report the result of synchronizing with browser storage.
    // eslint-disable-next-line react-hooks/set-state-in-effect
    setStorageError(writeStoredRequests(requests) ? "" : "簽核資料尚未儲存：瀏覽器空間不足或禁止儲存，請勿關閉此頁並先釋出空間。");
@@ -1644,7 +1647,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
 }
 
 function readSavedSchedules(fallback){
- try{const data=JSON.parse(window.localStorage.getItem(SCHEDULE_KEY)||'null');return Array.isArray(data)&&data.every(row=>row?.id&&row?.requestId)?data:fallback;}catch{return fallback;}
+ try{const data=JSON.parse(appStorage().getItem(SCHEDULE_KEY)||'null');return Array.isArray(data)&&data.every(row=>row?.id&&row?.requestId)?data:fallback;}catch{return fallback;}
 }
 function SchedulePage({ currentUser, accounts = [], initialFilter = null, onScheduleCountsChange = () => {},subPage=null,onExit }){
  const [scheduleFilter,setScheduleFilter]=useState(initialFilter || "未排程");
@@ -1653,7 +1656,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const [requestInfo, setRequestInfo] = useState(null);
  const openRequestInfo = row => {
    try {
-     const stored = JSON.parse(window.localStorage.getItem('dqa-request-demo-v2') || '[]');
+     const stored = JSON.parse(appStorage().getItem('dqa-request-demo-v2') || '[]');
      setRequestInfo(resolveScheduleRequest(row, Array.isArray(stored) ? stored : []));
    } catch { setRequestInfo(resolveScheduleRequest(row)); }
  };
@@ -1694,8 +1697,8 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const displayScheduleRows=scheduleRows.map(row=>({...row,status:effectiveScheduleStatus(row,scheduleNow)}));
  const activeScheduleRows=displayScheduleRows.filter(row=>!['已完成','已結案'].includes(row.status));
  useEffect(()=>{
-   const refresh=()=>{try{const raw=window.localStorage.getItem(SCHEDULE_KEY);if(raw){const rows=JSON.parse(raw);if(Array.isArray(rows))setScheduleRows(old=>JSON.stringify(old)===raw?old:rows);}}catch{setScheduleMessage('無法讀取最新排程資料。');}};
-   try{if(window.localStorage.getItem(SCHEDULE_KEY)===null)window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(scheduleRows));}catch{setScheduleMessage('排程初始化儲存失敗，請確認瀏覽器權限與空間。');}
+   const refresh=()=>{try{const raw=appStorage().getItem(SCHEDULE_KEY);if(raw){const rows=JSON.parse(raw);if(Array.isArray(rows))setScheduleRows(old=>JSON.stringify(old)===raw?old:rows);}}catch{setScheduleMessage('無法讀取最新排程資料。');}};
+   try{if(appStorage().getItem(SCHEDULE_KEY)===null)appStorage().setItem(SCHEDULE_KEY,JSON.stringify(scheduleRows));}catch{setScheduleMessage('排程初始化儲存失敗，請確認瀏覽器權限與空間。');}
    const storage=event=>{if(event.key===SCHEDULE_KEY||event.key===null)refresh();};
    window.addEventListener('dqa:schedules-updated',refresh);window.addEventListener('storage',storage);
    return()=>{window.removeEventListener('dqa:schedules-updated',refresh);window.removeEventListener('storage',storage);};
@@ -1719,7 +1722,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
   time:r.time, end:r.end, status:r.status
  }));
  function latestSchedules(){
-   const raw=window.localStorage.getItem(SCHEDULE_KEY);
+   const raw=appStorage().getItem(SCHEDULE_KEY);
    const rows=raw?JSON.parse(raw):scheduleRows;
    if(!Array.isArray(rows))throw Error('排程資料無法讀取，請重新載入。');
    return rows;
@@ -1739,7 +1742,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    try{setSchedulingForm(prepareManualTrialForm({editing:row,form:initial}));}catch(error){setSchedulingForm(initial);setScheduleMessage(error.message);}
  }
  function currentTrialRequest(requestId=editing?.requestId){
-   for(const key of ['dqa-lms-reviews-v1','dqa-request-demo-v2']){const raw=window.localStorage.getItem(key);if(raw!==null){let rows;try{rows=JSON.parse(raw);}catch{throw new Error('委託資料無法讀取，未以合成範例覆蓋。');}if(!Array.isArray(rows)||!rows.every(row=>row&&typeof row.id==='string'&&(key!=='dqa-lms-reviews-v1'||Array.isArray(row.history))))throw new Error('委託資料格式不完整，請先確認原始資料。');}}
+   for(const key of ['dqa-lms-reviews-v1','dqa-request-demo-v2']){const raw=appStorage().getItem(key);if(raw!==null){let rows;try{rows=JSON.parse(raw);}catch{throw new Error('委託資料無法讀取，未以合成範例覆蓋。');}if(!Array.isArray(rows)||!rows.every(row=>row&&typeof row.id==='string'&&(key!=='dqa-lms-reviews-v1'||Array.isArray(row.history))))throw new Error('委託資料格式不完整，請先確認原始資料。');}}
    const list=mergeImportedRequests(readStoredRequests(ALL_DEMO_REQUESTS),readApprovedRequestsForLms());
    return list.find(row=>row.id===requestId)||null;
  }
@@ -1764,7 +1767,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    }
    const preferences=requireE2Enabled();
    const resolved=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
-   const equipment=readScheduleEquipment(),roster=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+   const equipment=readScheduleEquipment(),roster=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
    const sourceForm=applyE2Settings({editing,form:resolved.form,settings:preferences.settings}),coverageIssues=[],context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
    setSchedulingForm(sourceForm);
    const data=await askE2Scheduling(context,{signal,onStage,idempotencyKey:operation,activityTicket});
@@ -1779,7 +1782,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    if(canonicalE2(editFormRef.current)!==canonicalE2(sourceForm))throw Object.assign(Error('編輯內容已變更，請重新分析。'),{code:'STALE_INPUT'});
    const fresh=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
    if(fresh.signature!==resolved.signature)throw new Error('試驗資料已更新，請重新分析。');
-   const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+   const liveAccounts=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
    const approved=makeE2Draft({editing,form:sourceForm,equipment:readScheduleEquipment(),accounts:liveAccounts,rows:latestSchedules(),context,candidate});
    draftE2Activity(activityTicket,'APPLIED');
    setSchedulingForm(approved.form);setE2Applied({...approved,activityTicket,trace:data.trace_id,mode:data.execution_mode,trialSourceForm:originalForm,trialInputSignature:resolved.signature,trialInputProvenance:resolved.provenance});
@@ -1799,13 +1802,13 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
      const rows=latestSchedules(),current=rows.find(row=>row.id===editing.id);
      if(current&&['已完成','已結案'].includes(effectiveScheduleStatus(current,Date.now())))throw Error('試驗已結束，不可儲存排程。');
      if(!current||JSON.stringify(current)!==JSON.stringify(editing))throw Error('此案件排程已更新，請重新開啟編輯。');
-     const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+     const liveAccounts=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
      if(isActiveTrial({...current,status:effectiveScheduleStatus(current,Date.now())})&&!canControlTrial(liveAccounts.find(a=>a.id===currentUser?.id)))throw Error('僅 lv1 一階主管可儲存進行中試驗的排程。');
      if(e2Applied&&prepareScheduleTrialForm({editing,form:e2Applied.trialSourceForm,request:currentTrialRequest()}).signature!==e2Applied.trialInputSignature)throw new Error('試驗資料已更新，請重新分析。');
      const proposal=e2Applied?validateE2Applied({editing,form:editForm,equipment,accounts:liveAccounts,rows,approved:e2Applied}):validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows,today:getRequestDate()});
      if(e2Applied)proposal.e2Review={trace:e2Applied.trace,mode:e2Applied.mode,candidateId:e2Applied.candidate.id,source:'SYNTHETIC_DIMENSION_DOCUMENTS',confirmation:'USER_SAVED_FORM',trialInputProvenance:e2Applied.trialInputProvenance};
      const updated=rows.map(row=>row.id===editing.id?proposal:row);
-     try{window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
+     try{appStorage().setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
      if(e2Applied)draftE2Activity(e2Applied.activityTicket,'SAVED');
      setScheduleRows(updated);window.dispatchEvent(new Event('dqa:schedules-updated'));setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
      setEditing(null);setSchedulingForm(null);
@@ -1958,13 +1961,15 @@ export default function App({ path, navigate }) {
 
   const [accounts, setAccounts] = useState(() => {
     const saved = readDemoAccounts();
-    const stored = !window.localStorage.getItem("dqa-report-level3-migration-v1")&&!saved.some(row=>row.role==="三階主管")?[...saved,{id:"DEMO-LEVEL3",name:"示範三階主管",email:"level3@example.com",role:"三階主管",department:"DQA 實驗室",status:"啟用中",lastLogin:"尚未登入"}]:saved;
-    return window.localStorage.getItem("dqa-admin-huang-migration-v1") ? stored : stored.map(a => a.id === "U001" && a.email === "huangxm@example.com" && a.name === "黃小明" ? { ...a, role: "系統管理員" } : a);
+    if(originalBusinessEnabled())return saved;
+    const stored = !appStorage().getItem("dqa-report-level3-migration-v1")&&!saved.some(row=>row.role==="三階主管")?[...saved,{id:"DEMO-LEVEL3",name:"示範三階主管",email:"level3@example.com",role:"三階主管",department:"DQA 實驗室",status:"啟用中",lastLogin:"尚未登入"}]:saved;
+    return appStorage().getItem("dqa-admin-huang-migration-v1") ? stored : stored.map(a => a.id === "U001" && a.email === "huangxm@example.com" && a.name === "黃小明" ? { ...a, role: "系統管理員" } : a);
   });
-  useEffect(() => { window.localStorage.setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); window.localStorage.setItem("dqa-admin-huang-migration-v1", "1"); window.localStorage.setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
+  useEffect(() => { if(originalBusinessEnabled())return;appStorage().setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); appStorage().setItem("dqa-admin-huang-migration-v1", "1"); appStorage().setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
 
-  const [,refreshRoles]=useState(0);useEffect(()=>{const refresh=event=>{if(event.type==='storage'&&event.key==='dqa-shared-demo-accounts-v1')setAccounts(readDemoAccounts());refreshRoles(value=>value+1);};window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
+  const [,refreshRoles]=useState(0);useEffect(()=>{const refresh=event=>{if(originalBusinessEnabled()||event.type==='storage'&&event.key==='dqa-shared-demo-accounts-v1')setAccounts(readDemoAccounts());refreshRoles(value=>value+1);};window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
   const [currentUserId, setCurrentUserId] = useState(() => {
+    if(originalBusinessEnabled())return originalBusinessAccount('lms')?.id||'';
     try { return window.sessionStorage.getItem('dqa-lms-account-id') || ''; } catch { return ''; }
   });
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
@@ -2055,7 +2060,8 @@ export default function App({ path, navigate }) {
 
 
 
-  function handleLogin(email, password, setError) {
+  async function handleLogin(email, password, setError) {
+    if(originalBusinessEnabled()){try{await loginOriginalBusiness(email,password);const account=originalBusinessAccount('lms');setAccounts(readDemoAccounts());startSession('lms',account.id);setCurrentUserId(account.id);navigate('/lms/dashboard');}catch(error){setError(originalBusinessError(error));}return;}
 
     const account = accounts.find(
 
@@ -2114,7 +2120,8 @@ export default function App({ path, navigate }) {
 
 
 
-  function logout() {
+  async function logout() {
+    if(originalBusinessEnabled()){try{await logoutOriginalBusiness();}catch(error){window.alert(originalBusinessError(error));}}
 
     try { endSession('lms'); } catch { /* State still clears in this tab. */ }
     setCurrentUserId('');

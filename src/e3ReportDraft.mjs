@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {buildManagementExport} from './managementExport.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
@@ -6,7 +7,7 @@ import {accessSystem} from './demoPermissions.mjs';
 export function e3SourceStamp({columns,rows,scope=''}){
  try{if(!Array.isArray(columns)||columns.length>24||!Array.isArray(rows)||rows.length>5000)return null;return JSON.stringify({columns:columns.map(c=>({key:c.key,label:c.label})),rows:rows.map(r=>Object.fromEntries(columns.map(c=>[c.key,r[c.key]??'']))),scope});}catch{return null;}
 }
-export function authorizeE3Export(storage=globalThis.localStorage,session=globalThis.sessionStorage){
+export function authorizeE3Export(storage=appStorage(),session=globalThis.sessionStorage){
  let accounts;try{accounts=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS));}catch{throw Error('無法核對報表存取權限。');}const actor=Array.isArray(accounts)&&accounts.find(a=>a.id===session.getItem('dqa-lms-account-id'));if(!accessSystem(actor,'lms',storage)||!canAccessLmsPage(actor,'reports',storage))throw Error('目前帳號沒有報表匯出權限。');return actor.id;
 }
 export function makeE3Draft({title,purpose='',kind='MANAGEMENT',columns,rows,scope='',sectionTitles=[],now=Date.now()}){

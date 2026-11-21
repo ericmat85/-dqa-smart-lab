@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {scheduleProgress} from './scheduleProgress.mjs';
@@ -5,7 +6,7 @@ import {recoverLifecycleTransaction,commitLifecycleTransaction,reconcileSchedule
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
 import {updateRequestExecution} from './requestExecution.mjs';
 const list=(storage,key,fallback=[])=>{const rows=JSON.parse(storage.getItem(key)||JSON.stringify(fallback));if(!Array.isArray(rows))throw Error('接收資料無法讀取。');return rows;};
-export function confirmLabReceipt({requestId,actorId,expected,now=Date.now()},storage=window.localStorage){
+export function confirmLabReceipt({requestId,actorId,expected,now=Date.now()},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const actor=list(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS).find(row=>row.id===actorId);if(!accessSystem(actor,'lab',storage))throw Error('此帳號無實驗室接收權限。');
  const rows=list(storage,'dqa_lab_demo_requests_v1'),row=rows.find(item=>item.id===requestId),schedules=list(storage,'dqa-schedules-demo-v1');
@@ -19,7 +20,7 @@ export function confirmLabReceipt({requestId,actorId,expected,now=Date.now()},st
  const audit=list(storage,'dqa_lab_demo_audit_v1');audit.unshift({id:crypto.randomUUID(),requestId,actorId,actor:actor.name,at,time:at,action:'確認接收',reason:'確認接收，等待排程開始',signature:''});
  commitLifecycleTransaction(storage,{labRequests:JSON.stringify(rows.map(item=>item.id===requestId?receipt:item)),labAudit:JSON.stringify(audit)});return receipt;
 }
-export function completeLabTrial({requestId,actorId,signature,now=Date.now()},storage=window.localStorage){
+export function completeLabTrial({requestId,actorId,signature,now=Date.now()},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const actor=list(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS).find(row=>row.id===actorId);if(!accessSystem(actor,'lab',storage)||!signature)throw Error('請以啟用中的實驗室帳號完成簽名。');
  const lab=list(storage,'dqa_lab_demo_requests_v1'),row=lab.find(item=>item.id===requestId),schedules=list(storage,'dqa-schedules-demo-v1');

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {getSignatureHistory} from './signatureHistory.mjs';
 import {getReport} from './reportStore.mjs';
 import {readReportWorkbook} from './reportWorkbookView.mjs';
@@ -19,7 +20,7 @@ export function reviewE1Request(request,{report=null}={}){
  if(report){check('REPORT','報告與委託關聯',report.requestId===request.id,'核對委託編號。');for(const c of report.check?.checks||[])check('REPORT',c.label,typeof c.ok==='boolean'?c.ok:null,c.detail||'已保存的檔案檢查摘要。');}
  const issues=checks.filter(c=>c.status!=='PASS');return {engine:'E1',mode:'RULE_BASED_ONLY',real_ai:false,provider:'NONE',provider_status:'E1_PROVIDER_NOT_ENABLED',trace_id:'I-'+crypto.randomUUID().replaceAll('-',''),requestId:request.id,createdAt:new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei'}),checks,checkedFields:checks.length,findings:issues.map(c=>({level:c.status==='ISSUE'?'error':'warning',title:c.title,detail:c.detail,scope:c.scope})),summary:`已查核 ${checks.length} 項來源欄位，${issues.length} 項需確認；未呼叫 AI 模型。`,writes:'NONE',signature_authenticity:'NOT_VERIFIED'};
 }
-export async function reviewE1Report({actorId,requestId,expectedRevision},storage=globalThis.localStorage,repository={get:getReport}){
+export async function reviewE1Report({actorId,requestId,expectedRevision},storage=appStorage(),repository={get:getReport}){
  const report=await repository.get(requestId),file=await readReportWorkbook({actorId,requestId,expectedRevision},storage,repository);
  const inspection=await inspectReport(file.bytes,requestId,file.fileName,file.request),result=reviewE1Request(file.request,{report:{...report,check:inspection}});
  // File parsing can be asynchronous; recheck the latest source and permission before returning findings.

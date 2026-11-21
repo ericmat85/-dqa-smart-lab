@@ -1,10 +1,11 @@
+import {appStorage} from './originalBusiness.mjs';
 import SignatureSettingsDialog from './SignatureSettingsDialog.jsx';
 import {LoginSystemIcon} from './EnterpriseLoginLayout.jsx';
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import './SystemHeaderActions.css';
 
-function preferences(key){try{return JSON.parse(localStorage.getItem(key)||'{}');}catch{return {};}}
+function preferences(key){try{return JSON.parse(appStorage().getItem(key)||'{}');}catch{return {};}}
 export default function SystemHeaderActions({dark,onToggle,account,onLogout,notifications=[],compactTheme=false}){
  const [open,setOpen]=useState(''),[settings,setSettings]=useState(false),[signatureOpen,setSignatureOpen]=useState(false),[photo,setPhoto]=useState(''),[emailEnabled,setEmailEnabled]=useState(false),[error,setError]=useState('');
  const root=useRef(null),dialog=useRef(null),reader=useRef(null),fileInput=useRef(null),profileTrigger=useRef(null);
@@ -14,7 +15,7 @@ export default function SystemHeaderActions({dark,onToggle,account,onLogout,noti
  useEffect(()=>{function load(){const saved=preferences(key);setPhoto(saved.photo||'');setEmailEnabled(Boolean(saved.emailEnabled));}load();const sync=event=>{if(!event.key||event.key===key)load();};window.addEventListener('storage',sync);window.addEventListener('dqa:personal-settings',load);return()=>{window.removeEventListener('storage',sync);window.removeEventListener('dqa:personal-settings',load);};},[key]);
  useEffect(()=>{if(!open)return;const close=event=>{if(event.type==='keydown'){if(event.key==='Escape')setOpen('');}else if(!root.current?.contains(event.target))setOpen('');};document.addEventListener('pointerdown',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',close);};},[open]);
  useEffect(()=>{if(settings){const element=dialog.current,returnFocus=profileTrigger.current;element?.showModal();element?.focus({preventScroll:true});return()=>{reader.current?.abort();element?.close();returnFocus?.focus();};}},[settings]);
- function save(){try{localStorage.setItem(key,JSON.stringify({photo,emailEnabled}));window.dispatchEvent(new Event('dqa:personal-settings'));setSettings(false);}catch{setError('設定尚未儲存，請確認瀏覽器儲存空間。');}}
+ function save(){try{appStorage().setItem(key,JSON.stringify({photo,emailEnabled}));window.dispatchEvent(new Event('dqa:personal-settings'));setSettings(false);}catch{setError('設定尚未儲存，請確認瀏覽器儲存空間。');}}
  function closeSettings(){setSignatureOpen(false);reader.current?.abort();const saved=preferences(key);setPhoto(saved.photo||'');setEmailEnabled(Boolean(saved.emailEnabled));setSettings(false);}
  function upload(event){const file=event.target.files?.[0];if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1024*1024){setError('請選擇 1 MB 以內的 PNG、JPG 或 WebP 圖片。');return;}reader.current?.abort();const next=new FileReader();reader.current=next;next.onload=()=>{setPhoto(String(next.result));setError('');};next.onerror=()=>setError('照片無法讀取，請重新選擇。');next.readAsDataURL(file);}
  return <div ref={root} data-system={system} className={`topbar-actions system-header-actions ${dark?'system-header-dark':''}`}>

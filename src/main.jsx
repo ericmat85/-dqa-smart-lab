@@ -22,5 +22,6 @@ function bootError(error){
 if(window.parent!==window&&/^dqa-guided-tour-[a-f0-9-]+$/.test(window.name)){
  import('./guidedTourRuntime.mjs').then(({startGuidedWorkspace})=>startGuidedWorkspace(mount)).catch(bootError);
 }else{
- import('./PreferenceRoot.jsx').then(({default:Component})=>mount(Component)).catch(bootError);
+ const ready=import.meta.env.VITE_ORIGINAL_BUSINESS==='true'?import('./originalBusiness.mjs').then(m=>m.initializeOriginalBusiness()):Promise.resolve();
+ ready.then(()=>import('./PreferenceRoot.jsx')).then(({default:Component})=>mount(Component)).catch(bootError);
 }

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {getReport,allReports,saveReport} from './reportStore.mjs';
 import {inspectReport,stampReport} from './reportWorkbook.mjs';
 import {REPORT_STATUS,DEFAULT_SIGNATURE_CELLS,canReviewReport,canConfirmReport,reportMetadata} from './reportRules.mjs';
@@ -11,7 +12,7 @@ const actor=(storage,id)=>read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACC
 const request=(storage,id)=>read(storage,'dqa-request-demo-v2').find(row=>row.id===id);
 const ensureEpoch=(storage,epoch)=>{if(caseResetActive(storage)||caseResetVersion(storage)!==epoch)throw Error('系統資料已清除或重設，已停止此操作。');};
 const buffer=bytes=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);
-export function projectReportState(report,storage=window.localStorage){
+export function projectReportState(report,storage=appStorage()){
  if(caseResetActive(storage))return false;
  const meta=reportMetadata(report);if(!meta)return false;
  const requests=read(storage,'dqa-request-demo-v2'),original=requests.find(row=>row.id===report.requestId);if(!original||original.status==='取消')return false;
@@ -21,7 +22,7 @@ export function projectReportState(report,storage=window.localStorage){
  const schedules=read(storage,'dqa-schedules-demo-v1').map(row=>row.requestId===report.requestId?{...row,status:report.stage==='archived'?'已結案':row.status,reportInfo:meta}:row);
  commitLifecycleTransaction(storage,{requests:JSON.stringify(requests.map(row=>row.id===report.requestId?{...row,status,reportInfo:meta,execution:row.execution?{...row.execution,reportSubmitted:report.stage!=='returned'}:row.execution}:row)),labRequests:JSON.stringify(lab),schedules:JSON.stringify(schedules)});return true;
 }
-export async function submitReportWorkflow({requestId,file,signature,actorId,onProgress=()=>{},minimumMs=1000},storage=window.localStorage,repository=repo){
+export async function submitReportWorkflow({requestId,file,signature,actorId,onProgress=()=>{},minimumMs=1000},storage=appStorage(),repository=repo){
  const epoch=caseResetVersion(storage),started=Date.now(),account=actor(storage,actorId),source=request(storage,requestId),lab=read(storage,'dqa_lab_demo_requests_v1').find(row=>row.id===requestId);
  if(!accessSystem(account,'lab',storage)||!source||!lab||lab.status!=='已完成')throw Error('案件尚未完成、已提交或此帳號無提交權限。');
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('請先完成電子簽名。');if(!file)throw Error('請選擇 Excel 檔案。');
@@ -39,7 +40,7 @@ export async function submitReportWorkflow({requestId,file,signature,actorId,onP
  const report={requestId,revision:crypto.randomUUID(),stage:'level2',fileName:file.name,original:buffer(bytes),signedExcel:buffer(issued),sheetName:check.sheetName,profileId:check.profileId,cells,submitterId:account.id,submitter:account.name,submitterSignature:signature,submittedAt:at,approvals:[],revisionNumber:(existing?.revisionNumber||0)+1,documentKind:(source.testItems||[]).includes('一般性能試驗')?'一般性能試驗報告':'通常試驗報告',priorApprovals:[...(existing?.priorApprovals||[]),...(existing?.approvals||[])],check,history:[...(existing?.history||[]),{id:crypto.randomUUID(),at,actor:account.name,action:'提交報告並通過 Demo 防呆檢查'}]};
  await repository.save(report,existing?.revision??null,epoch);ensureEpoch(storage,epoch);projectReportState(report,storage);onProgress(100,'已提交 LMS 二階主管審核');return reportMetadata(report);
 }
-export async function approveReportWorkflow({requestId,actorId,signature,expectedRevision},storage=window.localStorage,repository=repo){
+export async function approveReportWorkflow({requestId,actorId,signature,expectedRevision},storage=appStorage(),repository=repo){
  const epoch=caseResetVersion(storage),report=await repository.get(requestId),source=request(storage,requestId),account=actor(storage,actorId);if(!report||report.revision!==expectedRevision)throw Error('報告已更新，請重新開啟審核視窗。');
  if(!canReviewReport(account,report,source,storage))throw Error('本階段僅限對應的二／三階主管簽核，且不得重複或自行簽核。');
  const level=report.stage==='level2'?2:3,at=new Date().toISOString();const stamped=await stampReport(report.signedExcel,{sheetName:report.sheetName,cells:report.cells,level,signature,actor:account.name,at});ensureEpoch(storage,epoch);
@@ -47,7 +48,7 @@ export async function approveReportWorkflow({requestId,actorId,signature,expecte
  const next={...report,revision:crypto.randomUUID(),signedExcel:buffer(stamped),stage:level===2?'level3':'view',approvals:[...report.approvals,{level,actorId,actor:account.name,at,signature}],history:[...report.history,{id:crypto.randomUUID(),at,actor:account.name,action:`第${level}階主管核准並轉印簽名至 ${report.cells[`level${level}`]}`}]};
  await repository.save(next,report.revision,epoch);ensureEpoch(storage,epoch);projectReportState(next,storage);return reportMetadata(next);
 }
-export async function confirmReportViewed({requestId,actorId,expectedRevision,fontBytes},storage=window.localStorage,repository=repo){
+export async function confirmReportViewed({requestId,actorId,expectedRevision,fontBytes},storage=appStorage(),repository=repo){
  const epoch=caseResetVersion(storage),report=await repository.get(requestId),source=request(storage,requestId),account=actor(storage,actorId);
  if(!report||report.revision!==expectedRevision)throw Error('報告已更新，請重新開啟。');if(!canConfirmReport(account,report,source))throw Error('僅指定委託者主管可確認查閱，且須先完成二、三階審核。');
  const {reportToPdf}=await import('./reportPdf.mjs');
@@ -59,7 +60,7 @@ export async function confirmReportViewed({requestId,actorId,expectedRevision,fo
  await repository.save(next,report.revision,epoch);ensureEpoch(storage,epoch);projectReportState(next,storage);return reportMetadata(next);
 }
 
-export async function returnReportWorkflow({requestId,actorId,comment,expectedRevision},storage=window.localStorage,repository=repo){
+export async function returnReportWorkflow({requestId,actorId,comment,expectedRevision},storage=appStorage(),repository=repo){
  const epoch=caseResetVersion(storage),report=await repository.get(requestId),source=request(storage,requestId),account=actor(storage,actorId);
  if(!report||report.revision!==expectedRevision)throw Error('報告已更新，請重新開啟審核視窗。');
  if(!canReviewReport(account,report,source,storage))throw Error('此帳號無權退回目前階段的報告。');
@@ -70,7 +71,7 @@ export async function returnReportWorkflow({requestId,actorId,comment,expectedRe
 }
 
 // Requester-manager readback return: resubmit through the existing report review chain.
-export async function returnViewedReport({requestId,actorId,comment,expectedRevision},storage=window.localStorage,repository=repo){
+export async function returnViewedReport({requestId,actorId,comment,expectedRevision},storage=appStorage(),repository=repo){
  const epoch=caseResetVersion(storage),report=await repository.get(requestId),source=request(storage,requestId),account=actor(storage,actorId);
  if(!report||report.revision!==expectedRevision)throw Error('報告已更新，請重新開啟。');
  if(!canConfirmReport(account,report,source))throw Error('僅指定委託者主管可退回待查閱報告。');

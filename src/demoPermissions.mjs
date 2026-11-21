@@ -1,9 +1,11 @@
+import {originalBusinessEnabled,businessIdentity} from './originalBusiness.mjs';
 import {customRole} from './customRoles.mjs';
 // Client-side competition demonstration rules; not an authorization boundary.
 export const ROLE = Object.freeze({ REQUESTER:'委託者', REQUEST_MANAGER:'委託者主管', LAB:'實驗室工程師', LAB_ASSISTANT:'實驗室副工程師', LEVEL1:'一階主管', LEVEL2:'二階主管', LEVEL3:'三階主管', ADMIN:'系統管理員', VIEWER:'檢視者' });
 const LEVELS = new Map([[ROLE.LEVEL1,1],[ROLE.LEVEL2,2],[ROLE.LEVEL3,3]]);
 export function accessSystem(account, system, storage) {
  if (!account?.id || account.status !== '啟用中') return false;
+ if(originalBusinessEnabled()&&account.id===businessIdentity()?.member.id)return ['lms','request','lab'].includes(system);
  const custom=customRole(account,storage);
  if(custom)return custom.builtin?custom.systems.includes(system):system==='lms';
  if (system === 'request') return [ROLE.REQUESTER,ROLE.REQUEST_MANAGER].includes(account.role);

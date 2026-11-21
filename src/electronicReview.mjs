@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import { canReview } from './demoPermissions.mjs';
 import { appendSignature, getSignatureHistory } from './signatureHistory.mjs';
 
@@ -6,7 +7,7 @@ export function reviewRevision(request) {
   return JSON.stringify([request.status, request.requesterSignatureAt, request.supervisorSignatureAt, request.updatedAt, request.lmsReview]);
 }
 
-export function reviewElectronicRequest({ id, accountId, expectedRevision, returnIt, signature, comment, now=Date.now() }, storage = window.localStorage) {
+export function reviewElectronicRequest({ id, accountId, expectedRevision, returnIt, signature, comment, now=Date.now() }, storage = appStorage()) {
   const requests = JSON.parse(storage.getItem(REQUEST_KEY) || 'null');
   if (!Array.isArray(requests)) throw Error('無法讀取電子委託資料，尚未提交審查。');
   const request = requests.find(r => r.id === id);
@@ -42,7 +43,7 @@ export function reviewElectronicRequest({ id, accountId, expectedRevision, retur
   return next;
 }
 
-export function readElectronicRequestsForLms(storage = window.localStorage) {
+export function readElectronicRequestsForLms(storage = appStorage()) {
  try {
   const data = JSON.parse(storage.getItem("dqa-request-demo-v2") || "[]");
   if (!Array.isArray(data)) return [];

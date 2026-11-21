@@ -1,10 +1,11 @@
+import {appStorage} from './originalBusiness.mjs';
 import {buildNineStageSeed,NINE_SEED_KEY,SEED_KEYS} from './nineStageSeed.mjs';
 import {CASE_RESET_KEY,caseResetActive} from './resetCases.mjs';
 import {recoverLifecycleTransaction,commitLifecycleTransaction} from './scheduleLifecycle.mjs';
 import {allReports,getReport,replaceReportSet} from './reportStore.mjs';
 const fields={requests:'dqa-request-demo-v2',reviews:'dqa-lms-reviews-v1',schedules:'dqa-schedules-demo-v1',labRequests:'dqa_lab_demo_requests_v1',labAudit:'dqa_lab_demo_audit_v1',labOperations:'dqa-lab-operations-v1',borrows:'dqa-borrow-requests-v1',cancellations:'dqa-cancelled-requests-v1',equipment:'dqa-equipment-demo-v1',materials:'dqa-materials-demo-v1',accounts:'dqa-shared-demo-accounts-v1',demoFlowMarker:'dqa-completed-flow-provisioned-v1'};
 const repository={list:allReports,get:getReport,replace:replaceReportSet};
-export async function installNineStageSeed(options,storage=window.localStorage,reports=repository){
+export async function installNineStageSeed(options,storage=appStorage(),reports=repository){
  if(caseResetActive(storage))throw Error('另一個分頁正在重設，請稍後再試。');
  recoverLifecycleTransaction(storage);
  const keys=[...SEED_KEYS,CASE_RESET_KEY,NINE_SEED_KEY],before=new Map(keys.map(key=>[key,storage.getItem(key)]));
@@ -27,6 +28,6 @@ export async function installNineStageSeed(options,storage=window.localStorage,r
   if(replaced)await reports.replace(previousReports.filter(Boolean));
   throw error;
  }
- if(typeof window!=='undefined'&&storage===window.localStorage)for(const name of ['dqa:cases-reset','dqa:request-updated','dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));
+ if(typeof window!=='undefined'&&storage===appStorage())for(const name of ['dqa:cases-reset','dqa:request-updated','dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));
  return {ids:JSON.parse(storage.getItem(NINE_SEED_KEY)).ids,counts:bundle.counts};
 }
