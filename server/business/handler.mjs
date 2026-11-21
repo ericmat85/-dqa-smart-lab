@@ -24,6 +24,21 @@ export function openSession(value,key){try{if(!value||value.length>5500)throw Er
 function cookie(value,seconds=28800){return `${COOKIE}=${value}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=${seconds}`;}
 async function bodyOf(req){if(!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json'))throw new ApiError(415,'JSON_REQUIRED');let body=req.body;if(body===undefined){let raw='';for await(const chunk of req){raw+=chunk;if(Buffer.byteLength(raw)>24576)throw new ApiError(413,'PAYLOAD_TOO_LARGE');}body=raw;}if(typeof body==='string'){if(Buffer.byteLength(body)>24576)throw new ApiError(413,'PAYLOAD_TOO_LARGE');try{body=JSON.parse(body);}catch{throw new ApiError(400,'INVALID_JSON');}}if(!body||typeof body!=='object'||Array.isArray(body)||Buffer.byteLength(JSON.stringify(body))>24576)throw new ApiError(400,'INVALID_BODY');return body;}
 function fields(body,allowed){if(Object.keys(body).some(key=>!allowed.includes(key)))throw new ApiError(422,'UNKNOWN_FIELDS');}
+function businessRoute(req,origin){
+ const raw=String(req.url||'');if(raw.length>4096||/[\\#\r\n]/.test(raw))throw new ApiError(404,'ROUTE_NOT_FOUND');
+ const rawPath=raw.split('?')[0].replace(/^https:\/\/[^/]+/,'');if(/%|\/\//.test(rawPath)||rawPath.split('/').some(x=>x==='.'||x==='..'))throw new ApiError(404,'ROUTE_NOT_FOUND');
+ const parsed=new URL(raw,origin);if(parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
+ const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
+ const hint=value=>{const parts=Array.isArray(value)?value:typeof value==='string'?value.split('/'):[];if(!parts.length||parts.length>3||parts.some(x=>typeof x!=='string'||!x||!/^[A-Za-z0-9_-]+$/.test(x)))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');const path='/'+parts.join('/');if(!allowed(path))throw new ApiError(404,'ROUTE_NOT_FOUND');return path;};
+ if(parsed.searchParams.getAll('path').length>1)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
+ const hints=[parsed.searchParams.has('path')?parsed.searchParams.get('path'):undefined,req.query?.path,req.params?.path].filter(x=>x!==undefined).map(hint);
+ if(hints.some(x=>x!==hints[0]))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
+ const pathname=parsed.pathname.replace(/\/$/,'');let path=pathname.startsWith('/api/business/')?pathname.slice('/api/business'.length):null;
+ if(allowed(path)){if(hints.length&&hints[0]!==path)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');}
+ else if(['/api/business','/api/business/[...path]','/api/business/[...path].js'].includes(pathname)&&hints.length)path=hints[0];
+ else throw new ApiError(404,'ROUTE_NOT_FOUND');
+ parsed.searchParams.delete('path');return {parsed,path};
+}
 export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetch,now=()=>Date.now()}={}){
  return async(req,res)=>{
   const trace='I-'+randomUUID().replaceAll('-','');let dispatchedWrite=false;
@@ -37,8 +52,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    if(!['GET','POST','PATCH'].includes(req.method))throw new ApiError(405,'METHOD_DENIED');
    if(req.method!=='GET'&&req.headers.origin!==origin)throw new ApiError(403,'ORIGIN_REQUIRED');
    if(env.BUSINESS_SUPABASE_URL!==`https://${REF}.supabase.co`||!anonymousKey(env.BUSINESS_SUPABASE_ANON_KEY)||!/^[A-Za-z0-9_-]{43}$/.test(env.BUSINESS_COOKIE_KEY||''))throw new ApiError(503,'CONFIGURATION_REQUIRED');
-   const parsed=new URL(req.url,origin),path=parsed.pathname.replace(/^\/api\/business/,'');
-   if(!parsed.pathname.startsWith('/api/business/')||parsed.pathname.includes('%')||parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
+   const {parsed,path}=businessRoute(req,origin);
    if(path==='/config'&&req.method==='GET')return reply(200,{enabled:true,auth:'supabase',workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_REQUEST_DRAFT_ONLY'});
    async function upstream(path,{token,method='GET',body,profile=false,headers={}}={}){
     let response;try{response=await fetchImpl(env.BUSINESS_SUPABASE_URL+path,{method,headers:{apikey:env.BUSINESS_SUPABASE_ANON_KEY,...(token?{Authorization:'Bearer '+token}:{}),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(profile?{'Accept-Profile':'dqa_business','Content-Profile':'dqa_business'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new ApiError(503,dispatchedWrite?'WRITE_OUTCOME_UNKNOWN':'UPSTREAM_UNAVAILABLE',{outcome_unknown:dispatchedWrite});}
