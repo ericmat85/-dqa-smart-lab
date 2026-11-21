@@ -30,6 +30,7 @@ export function scheduleProgress(row,now) {
 }
 
 export function effectiveScheduleStatus(row,now) {
+  if(row.readOnly)return row.status;
   if(!['已排程','試驗中','進行中'].includes(row.status))return row.status;
   const progress=scheduleProgress(row,now);
   if(progress.phase==='unscheduled'||progress.phase==='invalid')return '未排程';

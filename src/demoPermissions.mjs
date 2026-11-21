@@ -22,6 +22,7 @@ export function canApproveRequestManager(account, request) {
  return account?.status === '啟用中' && account.role === ROLE.REQUEST_MANAGER && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
 }
 export function canReview(account, request, storage) {
+ if(request?.readOnly)return false;
  const custom=customRole(account,storage);
  const level=custom?custom.level:LEVELS.get(account?.role);
  if (!accessSystem(account,'lms',storage) || !level || (custom&&!custom.pages.includes('requests')) || request?.status !== '待審查') return false;

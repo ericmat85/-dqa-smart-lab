@@ -1,4 +1,4 @@
-import {originalBusinessEnabled} from './originalBusiness.mjs';
+import {originalBusinessEnabled,originalImportNotice} from './originalBusiness.mjs';
 import {appStorage} from './originalBusiness.mjs';
 import {useEffect,useState,useSyncExternalStore} from 'react';
 import {subscribeScheduleClock,scheduleClockSnapshot,scheduleServerSnapshot} from './scheduleClock.mjs';
@@ -22,5 +22,5 @@ export default function useScheduleLifecycle() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(message);
   },[now]);
-  return error;
+  return originalBusinessEnabled()?originalImportNotice():error;
 }

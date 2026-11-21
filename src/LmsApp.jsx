@@ -1728,6 +1728,7 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    return rows;
  }
  function openEditor(row){
+   if(row.readOnly){setNotice('這筆是舊站匯入的唯讀排程；原狀態已保留，尚未啟用正式排程修改。');return;}
    setE2Applied(null);
    const latest=scheduleRows.find(item=>item.id===row.id)||row;
    if(["已完成","已結案"].includes(effectiveScheduleStatus(latest,Date.now()))){setNotice("試驗已結束，不可編輯排程。");return;}

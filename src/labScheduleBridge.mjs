@@ -10,6 +10,7 @@ export function acceptedLabStatus(schedule,now=Date.now()){
 export function mergeLabSchedules(existing,schedules,now=Date.now()){
  const next=existing.filter(row=>row.status!=='已退回LMS');
  for(const schedule of schedules){
+  if(schedule.readOnly)continue;
   if((schedule.receiptReturn||schedule.labCancellationReturn)&&schedule.status==='未排程'){
     const index=next.findIndex(row=>row.id===schedule.requestId);
     if(index>=0)next.splice(index,1);
