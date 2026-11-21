@@ -1,3 +1,4 @@
+import MobileSearchInput from './MobileSearchInput.jsx';
 import useTrialCatalog from './useTrialCatalog.js';
 import {buildSpecification,buildAcceptanceCriteria,getTestReference} from './requestTestCatalog.mjs';
 import WorkspaceMenuToggle from './WorkspaceMenuToggle.jsx';
@@ -406,7 +407,7 @@ export default function RequestApp() {
     {testPickerOpen && <RequestFormDialog label="搜尋試驗項目" dark={dark} onClose={()=>setTestPickerOpen(false)}><div className="rq-test-picker-modal">
       <header className="rq-test-picker-header"><div><p className="rq-eyebrow">TEST CATALOG</p><div className="help-title-row"><h2>選擇試驗項目</h2><HelpTip>請選擇一個試驗項目，右側會顯示參考規格；確認後帶入表單，內容仍可修改。</HelpTip></div></div><button type="button" className="rq-close" onClick={()=>setTestPickerOpen(false)} aria-label="關閉">×</button></header>
       <div className="rq-test-picker-content rq-test-picker-columns"><section className="rq-test-picker-list" aria-label="試驗項目清單">
-        <div className="rq-test-search-wrap"><span>⌕</span><input autoFocus className="rq-input" value={testSearch} onChange={e=>setTestSearch(e.target.value)} placeholder="搜尋試驗名稱，例如：高溫、振動、IPX6…"/><button type="button" className="rq-btn rq-btn-light" onClick={()=>setTestSearch('')}>清除</button></div>
+        <div className="rq-test-search-wrap"><span>⌕</span><MobileSearchInput onClear={()=>setTestSearch('')} autoFocus className="rq-input" value={testSearch} onChange={e=>setTestSearch(e.target.value)} placeholder="搜尋試驗名稱，例如：高溫、振動、IPX6…"/><button type="button" className="rq-btn rq-btn-light mobile-search-legacy-clear" onClick={()=>setTestSearch('')}>清除</button></div>
         {trialCatalog.error&&<p role="alert" className="rq-field-error">{trialCatalog.error}</p>}<div className="rq-test-picker-meta"><span>試驗項目清單（單選）</span><b>共 {testOptions.length} 項</b></div>
         <div className="rq-test-results"><PaginatedList items={testOptions.filter(t=>t.toLowerCase().includes(testSearch.trim().toLowerCase()))} resetKey={testSearch}>{page=>page.map(t=><label key={t} className={testCandidate===t?'selected':''}><input type="radio" name="requestTestItem" aria-label={t} checked={testCandidate===t} onChange={()=>setTestCandidate(t)}/><span><b>{t}</b><small>試驗條件與設備參考</small></span><i>{testCandidate===t?'✓':''}</i></label>)}</PaginatedList>{testOptions.filter(t=>t.toLowerCase().includes(testSearch.trim().toLowerCase())).length===0 && <div className="rq-test-no-results">找不到符合的試驗名稱，請更換關鍵字。</div>}</div>
       </section><aside className="rq-test-reference" aria-label="試驗規格參考" aria-live="polite">{testReference?<>

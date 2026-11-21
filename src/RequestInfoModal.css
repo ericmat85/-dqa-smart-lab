@@ -1,12 +1,31 @@
-/* Reserve close controls before wrapping long request identifiers and titles. */
+/* Request exit presentation changes are limited to mobile viewports. */
+html body .request-close-icon{display:none;flex:none;pointer-events:none}
+.request-close-desktop{display:inline}
+@media(max-width:900px){
 .rq-request-detail-header>div:first-child{flex:1;min-width:0}
 .rq-request-detail-header h2{min-width:0;overflow-wrap:anywhere}
 .rq-request-detail-header>.rq-close{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;min-width:36px;height:36px;padding:0;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:8px;color:inherit;background:var(--enterprise-card,#fff)}
-.request-close-icon{display:block;flex:none;pointer-events:none}
 html body #root .lms-enterprise .request-modal-header>div:first-child{flex:1;min-width:0}
 html body #root .lms-enterprise .request-modal-header :is(h2,h3){min-width:0;overflow-wrap:anywhere}
-@media(max-width:900px){
+ html body .request-close-icon{display:block}
+ .request-close-desktop{display:none}
  .rq-request-detail-backdrop .rq-request-detail-modal{max-height:calc(100dvh - 36px)}
  .rq-request-detail-modal .rq-request-detail-header{gap:12px}
 }
 @media(max-width:620px){.rq-request-detail-backdrop .rq-request-detail-modal{height:100dvh;max-height:100dvh}}
+
+/* A mobile detail always has a dedicated corner exit and a persistent return row. */
+html body #root .lms-enterprise :is(.request-detail-mobile-close,.request-info-mobile-footer){display:none}
+@media(max-width:900px){
+ html body #root .lms-enterprise .request-info-detail-modal{max-height:calc(100dvh - 16px)}
+ html body #root .lms-enterprise .request-info-detail-modal>.request-modal-header{position:relative;display:block;padding:14px 58px 14px 16px}
+ html body #root .lms-enterprise .request-info-detail-modal .request-modal-header-actions{justify-content:flex-start;margin-top:8px;flex-wrap:wrap}
+ html body #root .lms-enterprise .request-info-detail-modal .request-modal-header-actions>.request-modal-close{display:none!important}
+ html body #root .lms-enterprise .request-info-detail-modal .request-modal-header-actions:has(>.request-modal-close:only-child){display:none}
+ html body #root .lms-enterprise .request-info-detail-modal .request-detail-mobile-close{position:absolute;right:12px;top:12px;display:inline-flex;z-index:2}
+ html body #root .lms-enterprise .request-info-mobile-footer{display:flex;align-items:center;justify-content:flex-end;flex:0 0 auto;gap:10px;padding:10px 14px;border-top:1px solid var(--enterprise-border,#dfe7f2);background:var(--enterprise-card,#fff)}
+ html body #root .lms-enterprise .request-info-mobile-footer button{display:inline-flex;align-items:center;gap:8px;min-height:38px}
+ .rq-request-detail-modal .rq-request-detail-header{position:relative;padding-right:64px}
+ .rq-request-detail-modal .rq-request-detail-header>.rq-close{position:absolute;right:16px;top:16px}
+ .rq-request-detail-modal .rq-request-detail-footer{position:sticky;bottom:0;z-index:2}
+}
