@@ -8,6 +8,7 @@ export const ADMIN_MODULES=[
  ['backup','系統備份設定','archive',1,'設定備份','下載、完整性檢查及還原管理設定。'],
  ['security','資訊安全設定','review',1,'稽核紀錄','檢視既有安全邊界、管理與實驗室操作紀錄。'],
  ['monitoring','系統監控','equipment',1,'服務檢查','來源健康、儲存狀態與受保護的後端健康檢查。'],
+ ['data-maintenance','資料維護與 Demo 工具','archive',1,'資料庫回收區','集中委託清理、資料還原與 Demo 資料維護。'],
  ['interface','介面設定','settings',1,'已實作','調整字體、語言與列表每頁顯示筆數。'],
  ['ai','AI 引擎管理','ai',2,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
  ['notifications','通知與提醒設定','notifications',2,'資料連動','依現有案件與設備資料整理站內提醒。'],

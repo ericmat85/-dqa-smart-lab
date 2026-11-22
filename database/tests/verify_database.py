@@ -68,7 +68,9 @@ class DatabaseTests(unittest.TestCase):
     def test_read_only_acl(self):
         self.ok("SELECT count(*) FROM information_schema.role_table_grants WHERE table_schema='dqa_business' AND grantee IN ('anon','authenticated','PUBLIC') AND privilege_type<>'SELECT'", '0')
         self.ok("SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='dqa_private' AND has_function_privilege('anon',p.oid,'EXECUTE')", '0')
-        self.ok("SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='dqa_private' AND has_function_privilege('authenticated',p.oid,'EXECUTE')", '5')
+        self.ok("SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='dqa_private' AND has_function_privilege('authenticated',p.oid,'EXECUTE')", str(6 if ARGS.migration_count>=7 else 5))
+        if ARGS.migration_count>=7:
+            self.ok("SELECT count(*) FROM pg_policies WHERE schemaname='dqa_business' AND policyname='active_case_only' AND permissive='RESTRICTIVE' AND cmd='SELECT'", '12')
 
     def test_requester_request_and_file_scope(self):
         user = '10000000-0000-0000-0000-000000000002'

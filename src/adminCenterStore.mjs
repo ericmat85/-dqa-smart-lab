@@ -6,6 +6,7 @@ export const ADMIN_KEY='dqa-lms-admin-center-v1';
 export const ADMIN_EVENT='dqa:admin-settings-updated';
 export function canViewAdmin(account,module,storage=appStorage()){
  if(!accessSystem(account,'lms',storage))return false;
+ if(module==='data-maintenance')return canManageAccounts(account,storage);
  if(module==='accounts')return canManageAccounts(account,storage);
  const role=customRole(account,storage);if(role&&!role.pages.includes('settings'))return false;
  if(!module)return true;

@@ -28,7 +28,7 @@ function businessRoute(req,origin){
  const raw=String(req.url||'');if(raw.length>4096||/[\\#\r\n]/.test(raw))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const rawPath=raw.split('?')[0].replace(/^https:\/\/[^/]+/,'');if(/%|\/\//.test(rawPath)||rawPath.split('/').some(x=>x==='.'||x==='..'))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const parsed=new URL(raw,origin);if(parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
- const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
+ const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|maintenance(?:\/(?:preview|execute|restore|result\/[a-f0-9-]{36}))?|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
  const hint=value=>{const parts=Array.isArray(value)?value:typeof value==='string'?value.split('/'):[];if(!parts.length||parts.length>3||parts.some(x=>typeof x!=='string'||!x||!/^[A-Za-z0-9_-]+$/.test(x)))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');const path='/'+parts.join('/');if(!allowed(path))throw new ApiError(404,'ROUTE_NOT_FOUND');return path;};
  if(parsed.searchParams.getAll('path').length>1)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
  const hints=[parsed.searchParams.has('path')?parsed.searchParams.get('path'):undefined,req.query?.path,req.params?.path].filter(x=>x!==undefined).map(hint);
@@ -56,10 +56,10 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    if(path==='/config'&&req.method==='GET')return reply(200,{enabled:true,auth:'supabase',workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_REQUEST_DRAFT_ONLY'});
    async function upstream(path,{token,method='GET',body,profile=false,headers={}}={}){
     let response;try{response=await fetchImpl(env.BUSINESS_SUPABASE_URL+path,{method,headers:{apikey:env.BUSINESS_SUPABASE_ANON_KEY,...(token?{Authorization:'Bearer '+token}:{}),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(profile?{'Accept-Profile':'dqa_business','Content-Profile':'dqa_business'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new ApiError(503,dispatchedWrite?'WRITE_OUTCOME_UNKNOWN':'UPSTREAM_UNAVAILABLE',{outcome_unknown:dispatchedWrite});}
-    const text=await response.text();if(Buffer.byteLength(text)>2097152)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID');let data;try{data=text?JSON.parse(text):null;}catch{throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});}
+    const text=await response.text();if(Buffer.byteLength(text)>2097152)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});let data;try{data=text?JSON.parse(text):null;}catch{throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});}
     if(!response.ok){
-     const known=['REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','ORIGINAL_FORM_INVALID','DRAFT_SIGNATURE_INVALID','SNAPSHOT_PAGINATION_REQUIRED','RULE_NOT_APPROVED'];const code=known.find(k=>data?.message===k);
-     if(code)throw new ApiError(code==='REVISION_CONFLICT'||code.startsWith('DRAFT_ID')?409:['RULE_NOT_APPROVED','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED'].includes(code)?403:422,code);
+     const known=['REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','ORIGINAL_FORM_INVALID','DRAFT_SIGNATURE_INVALID','SNAPSHOT_PAGINATION_REQUIRED','RULE_NOT_APPROVED','MAINTENANCE_ADMIN_REQUIRED','MAINTENANCE_SELECTION_INVALID','MAINTENANCE_CONFIRMATION_INVALID','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY','MAINTENANCE_RUN_NOT_FOUND','MAINTENANCE_BATCH_TOO_LARGE','MAINTENANCE_RATE_LIMITED'];const code=known.find(k=>data?.message===k);
+     if(code){const status=code==='MAINTENANCE_ADMIN_REQUIRED'?403:code==='MAINTENANCE_RATE_LIMITED'?429:['REVISION_CONFLICT','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY'].includes(code)||code.startsWith('DRAFT_ID')?409:['RULE_NOT_APPROVED','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED'].includes(code)?403:422;throw new ApiError(status,code);}
      throw new ApiError(response.status===401?401:response.status===429?429:response.status>=500?503:response.status===403?403:422,response.status===401?'AUTHENTICATION_REQUIRED':response.status===429?'RATE_LIMITED':'UPSTREAM_REQUEST_REJECTED');
     }
     return {data,response};
@@ -106,6 +106,23 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    const identity=await valid(session);
    if(path==='/me'&&req.method==='GET'){
     const context=await rpc('connection_context',{},session.access),member=context?.memberships?.find(m=>m.tenant_id===session.tenant);if(!member||context.user_id!==identity.id)throw new ApiError(401,'SESSION_REVOKED');return reply(200,{user:{id:identity.id,email:identity.email},member,expires_at:session.absolute,workflow_gate:'RULE_NOT_APPROVED'});
+   }
+   if(path==='/maintenance'||path.startsWith('/maintenance/')){
+    if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
+    if(path==='/maintenance'&&req.method==='GET')return reply(200,{data:await rpc('maintenance_overview',{p_tenant:session.tenant},session.access)});
+    const receipt=path.match(/^\/maintenance\/result\/([a-f0-9-]{36})$/);
+    if(receipt&&req.method==='GET'&&UUID.test(receipt[1]))return reply(200,{data:await rpc('case_cleanup_result',{p_tenant:session.tenant,p_run:receipt[1]},session.access)});
+    if(req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);
+    let name,args;
+    if(path==='/maintenance/preview'){
+     fields(body,['selection']);if(body.selection!==null&&(!Array.isArray(body.selection)||body.selection.length<1||body.selection.length>200||body.selection.some(k=>typeof k!=='string'||!/^(request|legacy):[a-f0-9-]{36}$/.test(k))))throw new ApiError(422,'MAINTENANCE_SELECTION_INVALID');
+     name='preview_case_cleanup';args={p_selection:body.selection};
+    }else if(path==='/maintenance/execute'){
+     fields(body,['plan_id','fingerprint','confirmation']);if(!UUID.test(body.plan_id||'')||!/^[a-f0-9]{64}$/.test(body.fingerprint||'')||body.confirmation!=='移至回收區')throw new ApiError(422,'MAINTENANCE_CONFIRMATION_INVALID');name='execute_case_cleanup';args={p_plan:body.plan_id,p_fingerprint:body.fingerprint,p_confirmation:body.confirmation};
+    }else if(path==='/maintenance/restore'){
+     fields(body,['run_id','confirmation']);if(!UUID.test(body.run_id||'')||body.confirmation!=='還原委託資料')throw new ApiError(422,'MAINTENANCE_CONFIRMATION_INVALID');name='restore_case_cleanup';args={p_run:body.run_id,p_confirmation:body.confirmation};
+    }else throw new ApiError(404,'ROUTE_NOT_FOUND');
+    dispatchedWrite=true;return reply(200,{data:await rpc(name,{p_tenant:session.tenant,...args},session.access)});
    }
    if(path==='/snapshot'&&req.method==='GET')return reply(200,{data:await rpc('original_ui_snapshot',{p_tenant:session.tenant},session.access)});
    if(path==='/password'&&req.method==='POST'){

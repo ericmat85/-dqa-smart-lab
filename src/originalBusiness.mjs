@@ -9,7 +9,7 @@ const collections={electronic:'dqa-request-demo-v2',reviews:'dqa-lms-reviews-v1'
 const currentSystem=()=>typeof location==='undefined'?'lms':location.pathname.split('/')[1];
 export const originalBusinessEnabled=()=>enabled;
 export const businessIdentity=()=>me;
-export const originalImportNotice=()=>me?.member.is_admin&&raw.legacy_import?'已載入舊站資料；委託、排程及操作紀錄以唯讀方式保留原狀態，正式簽核與試驗執行尚未啟用。':'';
+export const originalImportNotice=()=>me?.member.is_admin&&raw.legacy_import&&['reviews','schedules','labAudit'].some(k=>raw.legacy_import[k]?.length)?'已載入舊站資料；委託、排程及操作紀錄以唯讀方式保留原狀態，正式簽核與試驗執行尚未啟用。':'';
 export function originalBusinessAccount(system=currentSystem()){
  if(!me)return null;
  const own=(raw.members||[]).find(r=>r.id===me.member.id),dept=(raw.departments||[]).find(r=>r.id===own?.department_id);

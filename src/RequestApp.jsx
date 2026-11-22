@@ -29,12 +29,11 @@ import RequestFormDialog from './RequestFormDialog.jsx';
 import './ScheduleViews.css';
 import ReportArchive from './ReportArchive.jsx';
 import {canOpenReportArchive} from './reportArchive.mjs';
-import {ownsRequest,assertEditableRequest,deleteDraft,reviewRequesterDecision} from './requestWorkflow.mjs';
+import {ownsRequest,assertEditableRequest,reviewRequesterDecision} from './requestWorkflow.mjs';
 import CompanyBrandLogo from './CompanyBrandLogo.jsx';
 import useSystemTheme from './useSystemTheme.js';
 import SystemHeaderActions from './SystemHeaderActions.jsx';
 import useReportSnapshot,{useReportSnapshotError,refreshReportSnapshot} from './useReportSnapshot.js';
-import ClearCasesButton from './ClearCasesButton.jsx';
 import useLabSnapshot,{refreshLabSnapshot} from './useLabSnapshot.js';
 import {submitBorrowRequest} from './borrowApprovals.mjs';
 import {INITIAL_ELECTRONIC_REQUESTS as initialRequests} from './demoElectronicRequests.mjs';
@@ -126,7 +125,6 @@ export default function RequestApp() {
     window.addEventListener('dqa:review-updated',refresh);
     return () => { window.removeEventListener('focus',refresh); window.removeEventListener('storage',storage); window.removeEventListener('dqa:review-updated',refresh); };
   }, []);
-  const [deleteTarget, setDeleteTarget] = useState(null);
   const [toast, setToast] = useState('');
   const [approvalNote, setApprovalNote] = useState('');
   const [requestSignature, setRequestSignature] = useState('');
@@ -321,28 +319,6 @@ export default function RequestApp() {
     setEditingDraftId(null);
     notify(asDraft ? `已儲存草稿 ${id}，可在「我的委託/借用」中繼續編輯` : `委託單 ${id} 已送出，等待主管簽核`);return true;
   };
-  const askDeleteDraft = (draft) => {
-    if (!draft || draft.status !== '草稿') return;
-    setDeleteTarget({ id: draft.id, source: 'list' });
-  };
-  const confirmDeleteDraft = () => {
-    if (!deleteTarget?.id) return;
-    const id = deleteTarget.id;
-    try { const updated=deleteDraft(readRequests(),id,signedAccount);appStorage().setItem(STORAGE_KEY,JSON.stringify(updated));setRequests(updated); }
-    catch(error){notify(error.message);return;}
-    if (editingDraftId === id) {
-      setFormOpen(false);
-      setEditingDraftId(null);
-      setForm(emptyForm);
-    }
-    if (selected?.id === id) {
-      setSelected(null);
-
-    }
-    setDeleteTarget(null);
-    setPage('requests');setMyTab('requests');
-    notify(`草稿 ${id} 已刪除`);
-  };
   const fillDemoApproval = () => {
     if ((approvalSignature || approvalNote.trim()) && !window.confirm('DEMO 填寫會覆蓋目前的主管簽名與簽核意見，確定繼續？')) return;
     setApprovalInputVersion(version => version + 1);
@@ -370,7 +346,7 @@ export default function RequestApp() {
   const pending = requests.filter(r => r.status === '待主管簽核' && canOpenReview && canAccessSupervisorRequest(r));
   const myRequests = requests.filter(r=>r.status!=='已結案').filter(r => canOpenReview ? canAccessSupervisorRequest(r) : ownsRequest(signedAccount,r));
   const renderBorrowTable=items=><><div className="rq-result-count">共 {items.length} 筆借用 · 每頁最多 {pageSize} 筆</div><div className="rq-table-wrap"><PaginatedTable currentPage={listPage} onPageChange={setListPage} resetKey={`${page}:${myTab}:${search}`} className="rq-table"><thead><tr><th>申請單號</th><th>借用項目／數量</th><th>借用期間</th><th>申請人</th><th>狀態</th></tr></thead><tbody>{items.length?items.map(r=><tr key={r.id}><td><b>{r.id}</b></td><td>{r.resourceType==='material'?(borrowSnapshot.materials.find(m=>m.id===r.materialId)?.name||r.material):(borrowSnapshot.equipment.find(m=>m.id===r.equipmentId)?.name||r.equipment)}<small>{r.resourceType==='material'?`${r.materialId} · ${r.quantity} ${r.unit||''}`:(r.equipmentId||'舊版未綁定設備')}</small></td><td>{r.borrowDate} 至 {r.returnDate}</td><td>{r.requester}</td><td><span className="rq-status pending">{r.status==='待確認'?'待核准':r.status==='已核准'?'借用':r.status}</span>{r.reviewComment&&<small>{r.reviewComment}</small>}</td></tr>):<tr><td colSpan="5" className="rq-empty">尚無符合條件的借用申請紀錄</td></tr>}</tbody></PaginatedTable></div></>;
-  const renderTable = (items) => <><div className="rq-result-count">共 {items.length} 筆 · 每頁最多 {pageSize} 筆 · 需求日期與流程狀態分開顯示</div><div className="rq-table-wrap"><PaginatedTable currentPage={listPage} onPageChange={setListPage} resetKey={`${page}:${role}:${reviewTab}:${searchField}:${search}:${statusFilter}`} className="rq-table"><thead><tr><th>委託單號</th><th>產品／專案</th><th>試驗項目</th><th>委託人</th><th>需求日期</th><th>狀態</th><th>操作</th></tr></thead><tbody>{items.length ? items.map(r => <tr key={r.id}><td><button className="rq-link" onClick={()=>openCase(r)}>{r.id}</button></td><td><b>{r.productCode||r.product}</b><small>{r.project || '—'}</small></td><td>{(r.testItems || []).join('、')}</td><td>{r.requester}</td><td><DueLabel request={r}/></td><td><span className={`rq-status ${requestStatusClass(r.status)}`}>{r.status === '待主管簽核' ? '待簽核' : r.status === '已核准' ? '待審查' : r.status}</span></td><td><div className="rq-table-actions">{r.status === '草稿' ? (signedAccount.role === '委託者' && ownsRequest(signedAccount,r) ? <><button className="rq-btn rq-btn-small" onClick={()=>beginEdit(r)}>編輯草稿</button><button type="button" className="rq-btn rq-btn-small rq-btn-danger" onClick={() => askDeleteDraft(r)}>刪除</button></> : <span className="rq-muted">—</span>) : <>{signedAccount.role==='委託者'&&ownsRequest(signedAccount,r)&&['退件','補件中'].includes(r.status)&&<button type="button" className="rq-btn rq-btn-small" onClick={()=>beginEdit(r)}>編輯並重新送出</button>}<button className="rq-btn rq-btn-small" onClick={()=>openCase(r)}>{canOpenReview && r.status === '待主管簽核' ? '簽核' : '查看'}</button></>}</div></td></tr>) : <tr><td colSpan="7" className="rq-empty">{search||dateFrom||dateTo||statusFilter!=='全部狀態'||collection!=='all'?'沒有符合搜尋／篩選條件的案件。':page==='review'?reviewTab==='read'?'目前沒有待查閱案件。':'目前沒有待簽核案件。':ownedRows.length?'此清單目前沒有案件。':'尚未建立任何委託單。'}<button type="button" className="rq-btn" onClick={clearFilters}>清除篩選</button></td></tr>}</tbody></PaginatedTable></div></>;
+  const renderTable = (items) => <><div className="rq-result-count">共 {items.length} 筆 · 每頁最多 {pageSize} 筆 · 需求日期與流程狀態分開顯示</div><div className="rq-table-wrap"><PaginatedTable currentPage={listPage} onPageChange={setListPage} resetKey={`${page}:${role}:${reviewTab}:${searchField}:${search}:${statusFilter}`} className="rq-table"><thead><tr><th>委託單號</th><th>產品／專案</th><th>試驗項目</th><th>委託人</th><th>需求日期</th><th>狀態</th><th>操作</th></tr></thead><tbody>{items.length ? items.map(r => <tr key={r.id}><td><button className="rq-link" onClick={()=>openCase(r)}>{r.id}</button></td><td><b>{r.productCode||r.product}</b><small>{r.project || '—'}</small></td><td>{(r.testItems || []).join('、')}</td><td>{r.requester}</td><td><DueLabel request={r}/></td><td><span className={`rq-status ${requestStatusClass(r.status)}`}>{r.status === '待主管簽核' ? '待簽核' : r.status === '已核准' ? '待審查' : r.status}</span></td><td><div className="rq-table-actions">{r.status === '草稿' ? (signedAccount.role === '委託者' && ownsRequest(signedAccount,r) ? <><button className="rq-btn rq-btn-small" onClick={()=>beginEdit(r)}>編輯草稿</button></> : <span className="rq-muted">—</span>) : <>{signedAccount.role==='委託者'&&ownsRequest(signedAccount,r)&&['退件','補件中'].includes(r.status)&&<button type="button" className="rq-btn rq-btn-small" onClick={()=>beginEdit(r)}>編輯並重新送出</button>}<button className="rq-btn rq-btn-small" onClick={()=>openCase(r)}>{canOpenReview && r.status === '待主管簽核' ? '簽核' : '查看'}</button></>}</div></td></tr>) : <tr><td colSpan="7" className="rq-empty">{search||dateFrom||dateTo||statusFilter!=='全部狀態'||collection!=='all'?'沒有符合搜尋／篩選條件的案件。':page==='review'?reviewTab==='read'?'目前沒有待查閱案件。':'目前沒有待簽核案件。':ownedRows.length?'此清單目前沒有案件。':'尚未建立任何委託單。'}<button type="button" className="rq-btn" onClick={clearFilters}>清除篩選</button></td></tr>}</tbody></PaginatedTable></div></>;
 
   return <div className={`rq-app rq-enterprise ${sidebarCollapsed?'rq-sidebar-collapsed':''} ${dark ? "rq-theme-dark" : "rq-theme-light"}`}><header className="rq-topbar"><WorkspaceMenuToggle className="rq-mobile-menu rq-btn" label="切換功能選單" controls="request-navigation" expanded={sidebarMobile?menuOpen:!sidebarCollapsed} onClick={()=>sidebarMobile?setMenuOpen(v=>!v):setSidebarCollapsed(v=>!v)}/><CompanyBrandLogo dark={dark}/><RequestBreadcrumbs title={page==='new'?(editingDraftId?'編輯委託單草稿':'新增試驗委託單'):page==='detail'?'委託單詳情':collection==='draft'&&page==='requests'?'草稿管理':titleMap[page]||'總覽'} onHome={()=>go('/')} onOverview={()=>setPage('overview')}/><SystemHeaderActions compactTheme dark={dark} onToggle={toggleTheme} account={signedAccount} onLogout={logout} notifications={[{title:'待主管簽核委託',detail:'等待主管簽核委託內容',count:pending.length,icon:'✓',onClick:()=>setPage(canOpenReview?'review':'requests')}]}/></header><div className="rq-layout"><aside id="request-navigation" className={`rq-sidebar ${menuOpen?'rq-menu-open':''}`} aria-label="電子委託功能"><WorkspaceSidebarBrand/>{nav.map(([key,label]) => <button key={key} className={`rq-nav ${page===key ? 'active' : ''}`} onClick={() => { if (key === 'new') openForm(); else if(key==='drafts'){if(go('/request/requests?collection=draft')){clearFilters();setCollection('draft');setMyTab('requests');setSelected(null);}} else { if(go(requestPath(key))){clearFilters();setSelected(null);} } }}><LmsSidebarIcon name={({overview:'dashboard',drafts:'requests'})[key]||key}/>{label}{key === 'review' && pending.length + myRequests.filter(r=>r.status==='待查閱').length > 0 && <i>{pending.length + myRequests.filter(r=>r.status==='待查閱').length}</i>}</button>)}<details className="workspace-sidebar-note"><summary>Demo 使用說明</summary><p>僅使用假資料；資料儲存在此瀏覽器，不連接正式系統。</p></details><button type="button" className="rq-nav workspace-sidebar-home" onClick={()=>go('/')}><LmsSidebarIcon name="dashboard"/>回到首頁</button></aside><main className="rq-main" id="rq-main">{toast&&<div className={`rq-feedback ${/失敗|無法|不正確|請.*(填|完成|選擇|修正)|未設定/.test(toast)?'rq-feedback-error':''}`} role="status">{toast}<button className="rq-btn rq-btn-small" onClick={()=>setToast('')} aria-label="關閉操作訊息">×</button></div>}{reportReadError&&<div className="rq-feedback rq-feedback-error" role="alert">{reportReadError}<button className="rq-btn" onClick={refreshReportSnapshot}>重試讀取報告</button></div>}{requestStorage.error && <div role="alert">{requestStorage.error}<button onClick={requestStorage.retry}>重試儲存</button></div>}{page==='forbidden'||(page==='new'&&signedAccount.role!=='委託者')?<div role="alert" className="rq-panel rq-empty">你沒有此頁的操作權限。<button className="rq-btn" onClick={()=>setPage('overview')}>返回總覽</button></div>:null}{formErrors.access&&<p role="alert">{formErrors.access}</p>}
   {!['new','detail','forbidden'].includes(page)&&<div className="rq-workspace-heading"><h1><LmsSidebarIcon name={({overview:'dashboard',drafts:'requests'})[page]||page}/>{page==='overview'?'工作總覽':page==='requests'&&collection==='draft'?'草稿管理':titleMap[page]}</h1><p>{canOpenReview?'主管工作區 · 僅列出指定你處理的案件':'委託者工作區 · 僅列出你的委託與借用'}</p>{page==='requests'&&signedAccount.role==='委託者'&&<button type="button" className="rq-btn rq-btn-primary rq-new-request" onClick={openForm}>＋ 新增試驗委託單</button>}</div>}
@@ -424,8 +400,8 @@ export default function RequestApp() {
     <div className="rq-signature-box"><b>指定直屬主管</b><label>主管帳號（送簽必填）<select className="rq-input" data-field="supervisorId" aria-invalid={Boolean(formErrors.supervisorId)} value={form.supervisorId || ''} onChange={e=>setForm({...form,supervisorId:e.target.value})}><option value="">請選擇直屬主管</option>{supervisors.filter(a => { const matches=sharedAccounts.filter(x=>x.status==='啟用中' && x.role==='委託者' && (x.name===user || String(x.email||'').toLowerCase()===user.trim().toLowerCase())); return matches.length===1 && matches[0].supervisorId===a.id; }).map(a=><option key={a.id} value={a.id}>{a.name}（{a.email}）</option>)}</select></label><small>可選擇帳號管理中設定的直屬委託者主管，由該主管登入後簽核。</small></div>
   </div>
   <div className="rq-process-note"><b>簽核流程</b><p>委託者建立並確認 → 主管簽核 → LMS 建立試驗案件 → 排程與試驗執行 → 試驗報告。</p></div>
-</section></div><footer className="rq-form-footer">{editingDraftId ? <button type="button" className="rq-btn rq-btn-danger" onClick={() => setDeleteTarget({ id: editingDraftId, source: 'editor' })}>刪除此草稿</button> : <button type="button" className="rq-btn rq-btn-light" onClick={()=>go('/request/requests')}>取消</button>}<div>{editingDraftId && <button type="button" className="rq-btn rq-btn-light" onClick={()=>go('/request/requests')}>取消</button>}<button type="button" className="rq-btn rq-btn-primary" onClick={()=>submitRequest(false)}>送出主管簽核 →</button></div></footer></RequestEditorPage>}
-  <ClearCasesButton inline/><footer className="rq-footer">電子化委託 · 二階簽核與案件追蹤 · Demo UI v2.0（示範資料）</footer></main></div>
+</section></div><footer className="rq-form-footer">{!editingDraftId&&<button type="button" className="rq-btn rq-btn-light" onClick={()=>go('/request/requests')}>取消</button>}<div>{editingDraftId && <button type="button" className="rq-btn rq-btn-light" onClick={()=>go('/request/requests')}>取消</button>}<button type="button" className="rq-btn rq-btn-primary" onClick={()=>submitRequest(false)}>送出主管簽核 →</button></div></footer></RequestEditorPage>}
+  <footer className="rq-footer">電子化委託 · 二階簽核與案件追蹤 · Demo UI v2.0（示範資料）</footer></main></div>
 
 
     {testPickerOpen && <RequestFormDialog label="搜尋試驗項目" dark={dark} onClose={()=>setTestPickerOpen(false)}><div className="rq-test-picker-modal">
@@ -449,7 +425,6 @@ export default function RequestApp() {
         setTestPickerOpen(false);
       }}>確認選擇</button></div></footer>
     </div></RequestFormDialog>}
-  {deleteTarget&&<RequestFormDialog label="確認刪除草稿" dark={dark} onClose={()=>setDeleteTarget(null)}><div className="rq-confirm-body"><h2>確認刪除草稿？</h2><p>即將永久刪除委託單 {deleteTarget.id}。刪除後無法復原。</p><button className="rq-btn" onClick={()=>setDeleteTarget(null)}>取消</button><button className="rq-btn rq-btn-danger" onClick={confirmDeleteDraft}>確認刪除</button></div></RequestFormDialog>}
   {leaveTarget&&<RequestFormDialog label="尚未儲存的變更" dark={dark} onClose={()=>setLeaveTarget(null)}><header className="rq-form-header"><h2>尚未儲存的變更</h2></header><div className="rq-confirm-body"><p>離開後會失去尚未儲存的表單內容與簽名。你可以繼續編輯，或先儲存草稿。</p>{toast&&/失敗|無法|請至少|重新開啟|未設定|不正確/.test(toast)&&<p role="alert" className="rq-field-error">{toast}</p>}<button className="rq-btn" onClick={()=>setLeaveTarget(null)}>繼續編輯</button><button className="rq-btn rq-btn-danger" onClick={()=>{const target=leaveTarget;dirtyRef.current=false;setLeaveTarget(null);setFormOpen(false);if(target==='logout')completeLogout();else finishLeave(target);}}>放棄變更</button><button className="rq-btn rq-btn-primary" onClick={async()=>{if(await submitRequest(true,leaveTarget==='logout'?'/request/login':leaveTarget)){if(leaveTarget==='logout')completeLogout();setLeaveTarget(null);}}}>儲存草稿後離開</button></div></RequestFormDialog>}
 
 
