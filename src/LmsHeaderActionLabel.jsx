@@ -2,6 +2,7 @@ import AssistantIcon from './AssistantIcon.jsx';
 import './LmsMobileLayout.css';
 
 const paths={
+ 'stock-adjust':'M4 4h16v16H4zM8 8h8M8 12h4M8 16h3M17 12v6M14 15h6',
  add:'M12 5v14M5 12h14',
  'equipment-add':'M12 21H3V3h14v8M6 7h8M6 11h3M6 15h3M18 14v8M14 18h8',
  'material-add':'m12 2 9 5-9 5-9-5 9-5zm0 10v10M3 7v10l9 5M21 7v4M18 14v8M14 18h8',

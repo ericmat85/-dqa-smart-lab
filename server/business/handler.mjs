@@ -1,3 +1,4 @@
+import {explicitHours,sourceConditions} from '../../src/trialSourceFacts.mjs';
 import {createCipheriv,createDecipheriv,createHash,randomBytes,randomUUID} from 'node:crypto';
 export const COOKIE='__Host-dqa_business';
 const REF='mmazbwzdiizabikmiily',UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
@@ -14,6 +15,7 @@ const RESOURCE={
  quality:['quality_records','id,title,owner_member_id,request_id,equipment_id,trial_id,status,severity,cause,action,resolution,due_on,revision','title'],
  sites:['sites','id,legacy_id,name,location,revision','name'],
  departments:['departments','id,legacy_id,name,parent_id,revision','name'],
+ resourceevents:['resource_events','id,kind,resource_id,actor_label,action,reason,detail,created_at',null],
  audit:['audit_events','id,table_name,record_id,operation,changed_columns,created_at','table_name'],
 };
 class ApiError extends Error{constructor(status,code,extra={}){super(code);this.status=status;this.code=code;this.extra=extra;}}
@@ -28,7 +30,7 @@ function businessRoute(req,origin){
  const raw=String(req.url||'');if(raw.length>4096||/[\\#\r\n]/.test(raw))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const rawPath=raw.split('?')[0].replace(/^https:\/\/[^/]+/,'');if(/%|\/\//.test(rawPath)||rawPath.split('/').some(x=>x==='.'||x==='..'))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const parsed=new URL(raw,origin);if(parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
- const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|activate|access(?:\/(?:save|result\/[a-f0-9-]{36}))?|maintenance(?:\/(?:preview|execute|restore|result\/[a-f0-9-]{36}))?|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
+ const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|activate|resources\/(?:prepare|execute|result\/[a-f0-9-]{36})|access(?:\/(?:save|result\/[a-f0-9-]{36}))?|maintenance(?:\/(?:preview|execute|restore|result\/[a-f0-9-]{36}))?|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
  const hint=value=>{const parts=Array.isArray(value)?value:typeof value==='string'?value.split('/'):[];if(!parts.length||parts.length>3||parts.some(x=>typeof x!=='string'||!x||!/^[A-Za-z0-9_-]+$/.test(x)))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');const path='/'+parts.join('/');if(!allowed(path))throw new ApiError(404,'ROUTE_NOT_FOUND');return path;};
  if(parsed.searchParams.getAll('path').length>1)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
  const hints=[parsed.searchParams.has('path')?parsed.searchParams.get('path'):undefined,req.query?.path,req.params?.path].filter(x=>x!==undefined).map(hint);
@@ -53,13 +55,13 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    if(req.method!=='GET'&&req.headers.origin!==origin)throw new ApiError(403,'ORIGIN_REQUIRED');
    if(env.BUSINESS_SUPABASE_URL!==`https://${REF}.supabase.co`||!anonymousKey(env.BUSINESS_SUPABASE_ANON_KEY)||!/^[A-Za-z0-9_-]{43}$/.test(env.BUSINESS_COOKIE_KEY||''))throw new ApiError(503,'CONFIGURATION_REQUIRED');
    const {parsed,path}=businessRoute(req,origin);
-   if(path==='/config'&&req.method==='GET')return reply(200,{enabled:true,auth:'supabase',workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_DRAFT_AND_ADMIN_MAINTENANCE_AND_ACCESS'});
+   if(path==='/config'&&req.method==='GET')return reply(200,{enabled:true,auth:'supabase',workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_DRAFT_AND_CONTROLLED_ADMIN_RESOURCES_AND_ACCESS'});
    async function upstream(path,{token,method='GET',body,profile=false,headers={}}={}){
     let response;try{response=await fetchImpl(env.BUSINESS_SUPABASE_URL+path,{method,headers:{apikey:env.BUSINESS_SUPABASE_ANON_KEY,...(token?{Authorization:'Bearer '+token}:{}),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(profile?{'Accept-Profile':'dqa_business','Content-Profile':'dqa_business'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new ApiError(503,dispatchedWrite?'WRITE_OUTCOME_UNKNOWN':'UPSTREAM_UNAVAILABLE',{outcome_unknown:dispatchedWrite});}
     const text=await response.text();if(Buffer.byteLength(text)>2097152)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});let data;try{data=text?JSON.parse(text):null;}catch{throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});}
     if(!response.ok){
-     const known=['ACCESS_ADMIN_REQUIRED', 'ACCESS_FIELDS_INVALID', 'ACCESS_MEMBER_UNAVAILABLE', 'ACCESS_ROLE_UNAVAILABLE', 'ACCESS_SELF_LOCKOUT', 'ACCESS_EMAIL_IMMUTABLE', 'ACCESS_EMAIL_EXISTS', 'ACCESS_SUPERVISOR_INVALID', 'ACCESS_SUPERVISOR_IN_USE', 'ACCESS_ROLE_EXISTS', 'ACCESS_LAST_ADMIN', 'ACCESS_OPERATION_CONFLICT', 'ACCESS_RATE_LIMITED', 'ACCESS_DIRECTORY_LIMIT','REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','ORIGINAL_FORM_INVALID','DRAFT_SIGNATURE_INVALID','SNAPSHOT_PAGINATION_REQUIRED','RULE_NOT_APPROVED','MAINTENANCE_ADMIN_REQUIRED','MAINTENANCE_SELECTION_INVALID','MAINTENANCE_CONFIRMATION_INVALID','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY','MAINTENANCE_RUN_NOT_FOUND','MAINTENANCE_BATCH_TOO_LARGE','MAINTENANCE_RATE_LIMITED'];const code=known.find(k=>data?.message===k);
-     if(code){const status=['MAINTENANCE_ADMIN_REQUIRED','ACCESS_ADMIN_REQUIRED'].includes(code)?403:['MAINTENANCE_RATE_LIMITED','ACCESS_RATE_LIMITED'].includes(code)?429:['REVISION_CONFLICT','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY'].includes(code)||code.startsWith('DRAFT_ID')?409:['RULE_NOT_APPROVED','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED'].includes(code)?403:422;throw new ApiError(status,code);}
+     const known=['RESOURCE_WRITE_DENIED', 'RESOURCE_FIELDS_INVALID', 'RESOURCE_OPERATION_CONFLICT', 'RESOURCE_OPERATION_EXPIRED', 'RESOURCE_RATE_LIMITED', 'RESOURCE_REASON_REQUIRED', 'RESOURCE_RESERVED', 'RESOURCE_SPACE_REQUIRED', 'RESOURCE_ID_IMMUTABLE', 'RESOURCE_STATUS_INVALID', 'RESOURCE_LIMIT', 'RESOURCE_DUPLICATE', 'TRIAL_DURATION_INVALID', 'TRIAL_PROFILE_INVALID', 'TRIAL_FIXED_DURATION', 'TRIAL_PROFILE_IMMUTABLE', 'TRIAL_NAME_EXISTS', 'STOCK_INSUFFICIENT', 'STOCK_INVALID', 'STOCK_UNIT_IMMUTABLE','ACCESS_ADMIN_REQUIRED', 'ACCESS_FIELDS_INVALID', 'ACCESS_MEMBER_UNAVAILABLE', 'ACCESS_ROLE_UNAVAILABLE', 'ACCESS_SELF_LOCKOUT', 'ACCESS_EMAIL_IMMUTABLE', 'ACCESS_EMAIL_EXISTS', 'ACCESS_SUPERVISOR_INVALID', 'ACCESS_SUPERVISOR_IN_USE', 'ACCESS_ROLE_EXISTS', 'ACCESS_LAST_ADMIN', 'ACCESS_OPERATION_CONFLICT', 'ACCESS_RATE_LIMITED', 'ACCESS_DIRECTORY_LIMIT','REVISION_CONFLICT','DRAFT_ID_ALREADY_EXISTS_READ_BEFORE_RETRY','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED','TRIAL_NOT_AVAILABLE','DRAFT_FIELDS_INVALID','DRAFT_FIELDS_TOO_LONG','ORIGINAL_FORM_INVALID','DRAFT_SIGNATURE_INVALID','SNAPSHOT_PAGINATION_REQUIRED','RULE_NOT_APPROVED','MAINTENANCE_ADMIN_REQUIRED','MAINTENANCE_SELECTION_INVALID','MAINTENANCE_CONFIRMATION_INVALID','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY','MAINTENANCE_RUN_NOT_FOUND','MAINTENANCE_BATCH_TOO_LARGE','MAINTENANCE_RATE_LIMITED'];const code=known.find(k=>data?.message===k);
+     if(code){const status=['MAINTENANCE_ADMIN_REQUIRED','ACCESS_ADMIN_REQUIRED','RESOURCE_WRITE_DENIED'].includes(code)?403:['MAINTENANCE_RATE_LIMITED','ACCESS_RATE_LIMITED','RESOURCE_RATE_LIMITED'].includes(code)?429:['RESOURCE_OPERATION_CONFLICT','RESOURCE_OPERATION_EXPIRED','RESOURCE_RESERVED','RESOURCE_DUPLICATE','TRIAL_NAME_EXISTS','STOCK_INSUFFICIENT','REVISION_CONFLICT','MAINTENANCE_PLAN_EXPIRED','MAINTENANCE_PREVIEW_STALE','MAINTENANCE_ACTIVE_RESERVATIONS','MAINTENANCE_EMPTY'].includes(code)||code.startsWith('DRAFT_ID')?409:['RULE_NOT_APPROVED','DRAFT_NOT_AVAILABLE','DRAFT_WRITE_DENIED','MEMBERSHIP_REQUIRED'].includes(code)?403:422;throw new ApiError(status,code);}
      if(dispatchedWrite&&response.status>=500)throw new ApiError(503,'WRITE_OUTCOME_UNKNOWN',{outcome_unknown:true});
      throw new ApiError(response.status===401?401:response.status===429?429:response.status>=500?503:response.status===403?403:422,response.status===401?'AUTHENTICATION_REQUIRED':response.status===429?'RATE_LIMITED':'UPSTREAM_REQUEST_REJECTED');
     }
@@ -113,6 +115,15 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    const identity=await valid(session);
    if(path==='/me'&&req.method==='GET'){
     const context=await rpc('connection_context',{},session.access),member=context?.memberships?.find(m=>m.tenant_id===session.tenant);if(!member||context.user_id!==identity.id)throw new ApiError(401,'SESSION_REVOKED');return reply(200,{user:{id:identity.id,email:identity.email},member,expires_at:session.absolute,workflow_gate:'RULE_NOT_APPROVED'});
+   }
+   if(path.startsWith('/resources/')){
+    if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');const match=path.match(/^\/resources\/result\/([a-f0-9-]{36})$/);
+    if(match&&req.method==='GET'&&UUID.test(match[1]))return reply(200,{data:await rpc('resource_operation_result',{p_tenant:session.tenant,p_operation:match[1]},session.access)});
+    if(!['/resources/prepare','/resources/execute'].includes(path)||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');
+    const body=await bodyOf(req,49152);fields(body,['operation_id','command']);const c=body.command;if(c&&typeof c==='object'&&!Array.isArray(c))fields(c,['kind','action','id','expected_revision','data']);
+    if(!UUID.test(body.operation_id||'')||!c||typeof c!=='object'||Array.isArray(c)||!['trial','equipment','material'].includes(c.kind)||!['save','status','stock'].includes(c.action)||!UUID.test(c.id||'')||!Number.isSafeInteger(c.expected_revision)||c.expected_revision<0||!c.data||typeof c.data!=='object'||Array.isArray(c.data))throw new ApiError(422,'RESOURCE_FIELDS_INVALID');
+    if(c.kind==='trial'){try{if(explicitHours({specification:c.data.specification})!==c.data.duration_hours)throw Error();sourceConditions({specification:c.data.specification});}catch{throw new ApiError(422,'TRIAL_DURATION_INVALID');}}
+    dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_resource_operation':'execute_resource_operation',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path==='/access'||path.startsWith('/access/')){
     if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
