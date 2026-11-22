@@ -162,8 +162,16 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_resource_operation':'execute_resource_operation',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path==='/access'||path.startsWith('/access/')){
+    if(path==='/access'&&req.method==='GET'){
+     // This fixed directory read has no query inputs. Ignore non-routing metadata
+     // attached to the URL, without forwarding it to RPCs or using it as identity.
+     // Route hints were already checked above; identity-shaped and polluted keys
+     // still fail closed. Mutation and outcome routes keep their strict query rule.
+     const forbidden=/^(?:path|__proto__|constructor|prototype|tenant|tenant_id|p_tenant|user|user_id|actor|actor_id|role|role_id|permissions?|status)(?:$|\.|\[)/i;
+     if([...parsed.searchParams.keys()].some(k=>[...k].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)||forbidden.test(k)))throw new ApiError(422,'QUERY_INVALID');
+     return reply(200,{data:await rpc('access_directory',{p_tenant:session.tenant},session.access)});
+    }
     if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
-    if(path==='/access'&&req.method==='GET')return reply(200,{data:await rpc('access_directory',{p_tenant:session.tenant},session.access)});
     const match=path.match(/^\/access\/result\/([a-f0-9-]{36})$/);
     if(match&&req.method==='GET'&&UUID.test(match[1]))return reply(200,{data:await rpc('access_operation_result',{p_tenant:session.tenant,p_operation:match[1]},session.access)});
     if(path!=='/access/save'||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);fields(body,['operation_id','kind','id','expected_revision','data']);
