@@ -162,20 +162,20 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_resource_operation':'execute_resource_operation',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path==='/access'||path.startsWith('/access/')){
-    if(path==='/access'&&req.method==='GET'){
-     // This fixed directory read has no query inputs. Ignore non-routing metadata
-     // attached to the URL, without forwarding it to RPCs or using it as identity.
-     // Route hints were already checked above; identity-shaped and polluted keys
-     // still fail closed. Mutation and outcome routes keep their strict query rule.
-     const forbidden=/^(?:path|__proto__|constructor|prototype|tenant|tenant_id|p_tenant|user|user_id|actor|actor_id|role|role_id|permissions?|status)(?:$|\.|\[)/i;
-     if([...parsed.searchParams.keys()].some(k=>[...k].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)||forbidden.test(k)))throw new ApiError(422,'QUERY_INVALID');
-     return reply(200,{data:await rpc('access_directory',{p_tenant:session.tenant},session.access)});
+    // Account routing/query metadata never enters identity, command data or RPC URLs.
+    const forbidden=/^(?:path|__proto__|constructor|prototype|tenant|tenant_id|p_tenant|user|user_id|actor|actor_id|role|role_id|permissions?|status)(?:$|\.|\[)/i;
+    if([...parsed.searchParams.keys()].some(k=>[...k].some(c=>c.charCodeAt(0)<32||c.charCodeAt(0)===127)||forbidden.test(k)))throw new ApiError(422,'QUERY_INVALID');
+    const receipt=path.match(/^\/access\/result\/([a-f0-9-]{36})$/);
+    const ids=parsed.searchParams.getAll('operation_id');
+    if(ids.length>1||ids.length&&(!UUID.test(ids[0])||path!=='/access'||req.method!=='GET'))throw new ApiError(422,'QUERY_INVALID');
+    if(path==='/access'&&req.method==='GET')return reply(200,{data:await rpc(ids.length?'access_operation_result':'access_directory',{p_tenant:session.tenant,...(ids.length?{p_operation:ids[0]}:{})},session.access)});
+    if(receipt&&req.method==='GET'&&UUID.test(receipt[1]))return reply(200,{data:await rpc('access_operation_result',{p_tenant:session.tenant,p_operation:receipt[1]},session.access)});
+    if(!['/access','/access/save'].includes(path)||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);
+    if(path==='/access'&&body.action==='resolve'){
+     fields(body,['action','operation_id']);if(!UUID.test(body.operation_id||''))throw new ApiError(422,'ACCESS_FIELDS_INVALID');dispatchedWrite=true;return reply(200,{data:await rpc('resolve_access_operation',{p_tenant:session.tenant,p_operation:body.operation_id},session.access)});
     }
-    if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
-    const match=path.match(/^\/access\/result\/([a-f0-9-]{36})$/);
-    if(match&&req.method==='GET'&&UUID.test(match[1]))return reply(200,{data:await rpc('access_operation_result',{p_tenant:session.tenant,p_operation:match[1]},session.access)});
-    if(path!=='/access/save'||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);fields(body,['operation_id','kind','id','expected_revision','data']);
-    if(!UUID.test(body.operation_id||'')||!UUID.test(body.id||'')||!['member','role'].includes(body.kind)||!Number.isSafeInteger(body.expected_revision)||body.expected_revision<0||!body.data||typeof body.data!=='object'||Array.isArray(body.data))throw new ApiError(422,'ACCESS_FIELDS_INVALID');
+    fields(body,path==='/access'?['action','operation_id','kind','id','expected_revision','data']:['operation_id','kind','id','expected_revision','data']);
+    if(path==='/access'&&body.action!=='save'||!UUID.test(body.operation_id||'')||!UUID.test(body.id||'')||!['member','role'].includes(body.kind)||!Number.isSafeInteger(body.expected_revision)||body.expected_revision<0||!body.data||typeof body.data!=='object'||Array.isArray(body.data))throw new ApiError(422,'ACCESS_FIELDS_INVALID');
     dispatchedWrite=true;return reply(200,{data:await rpc('save_workspace_access',{p_tenant:session.tenant,p_operation:body.operation_id,p_kind:body.kind,p_id:body.id,p_expected_revision:body.expected_revision,p_data:body.data},session.access)});
    }
    if(path==='/maintenance'||path.startsWith('/maintenance/')){

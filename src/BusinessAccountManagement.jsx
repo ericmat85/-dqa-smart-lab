@@ -1,3 +1,4 @@
+import {readPendingAccount,rememberPendingAccount,clearPendingAccount} from './accountOperationState.mjs';
 import {humanAccountReadiness} from './humanRolePresets.mjs';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {businessClient,businessErrorMessage} from './businessClient.mjs';
@@ -12,22 +13,41 @@ import './RoleSettings.css';
 const newMember=()=>({id:crypto.randomUUID(),name:'',email:'',role_id:'',department:'',supervisor_id:null,enabled:true,revision:0,activation:'PENDING'});
 const newRole=()=>({id:crypto.randomUUID(),name:'',enabled:true,is_tenant_admin:false,permissions:['catalog.read','requests.draft'],systems:['request'],pages:['dashboard','requests'],review_level:0,revision:0});
 export default function BusinessAccountManagement({onBack,backLabel='返回系統管理'}){
- const [data,setData]=useState(null),[directoryState,setDirectoryState]=useState('loading'),[tab,setTab]=useState('members'),[search,setSearch]=useState(''),[filter,setFilter]=useState('全部'),[roleFilter,setRoleFilter]=useState(''),[editor,setEditor]=useState(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[pending,setPending]=useState(null);const alive=useRef(true),working=useRef(false),directoryRef=useRef(null);const admin=businessIdentity()?.member.is_admin===true;
+ const [data,setData]=useState(null),[directoryState,setDirectoryState]=useState('loading'),[tab,setTab]=useState('members'),[search,setSearch]=useState(''),[filter,setFilter]=useState('全部'),[roleFilter,setRoleFilter]=useState(''),[editor,setEditor]=useState(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[pending,setPending]=useState(readPendingAccount),[lookupMissing,setLookupMissing]=useState(false);const alive=useRef(true),working=useRef(false),directoryRef=useRef(null);const admin=businessIdentity()?.member.is_admin===true;
  const reload=useCallback(async()=>{
   try{const packet=await businessClient.request('/access');if(!Array.isArray(packet.data?.members)||!Array.isArray(packet.data?.roles)||!Array.isArray(packet.data?.departments))throw Object.assign(Error('ACCESS_DIRECTORY_INVALID'),{code:'ACCESS_DIRECTORY_INVALID'});if(alive.current){directoryRef.current=packet.data;setData(packet.data);setDirectoryState('loaded');}return true;}
   catch(e){if(alive.current){setDirectoryState('error');setError(`帳號與角色讀取失敗${e.code?`（${e.status?'HTTP '+e.status+'；':''}${e.code}）`:''}。${directoryRef.current?'保留上次成功讀取的資料。':'尚未取得帳號數量，請重新讀取。'}${e.trace?' Trace '+e.trace:''}`);}return false;}
  },[]);
  useEffect(()=>{alive.current=true;if(admin)void reload();return()=>{alive.current=false;};},[admin,reload]);
  async function act(fn){if(working.current)return;working.current=true;setBusy(true);setError('');setNotice('');try{await fn();}catch(e){setError(businessErrorMessage(e));}finally{working.current=false;if(alive.current)setBusy(false);}}
- async function acknowledged(message){setEditor(null);setPending(null);setNotice(message);try{await refreshOriginalBusiness();await reload();}catch(e){setError('資料庫已確認儲存；畫面重新讀取未完成。'+businessErrorMessage(e));}}
- async function save(e){e.preventDefault();await act(async()=>{const operation_id=crypto.randomUUID(),{kind,draft}=editor;try{await businessClient.request('/access/save',{method:'POST',body:{operation_id,kind,id:draft.id,expected_revision:draft.revision,data:kind==='member'?memberData(draft):roleData(draft)}});await acknowledged(kind==='member'?'帳號資料已儲存；未啟用的使用者請於登入頁完成電子郵件驗證。':'角色權限已儲存；受影響的既有登入會撤銷，需重新登入。');}catch(e){if(e.outcomeUnknown)setPending({id:operation_id});throw e;}});}
- async function lookup(){await act(async()=>{const packet=await businessClient.request('/access/result/'+pending.id);if(packet.data.state==='SAVED')await acknowledged('資料庫已確認儲存完成。');else setNotice('尚未查到這次操作的完成紀錄，請稍後再次查詢；不會自動重送。');});}
+ function clearPending(){clearPendingAccount();setPending(null);setLookupMissing(false);}
+ async function acknowledged(message){setEditor(null);clearPending();setNotice(message);try{await refreshOriginalBusiness();await reload();}catch(e){setError('資料庫已確認儲存；畫面重新讀取未完成。'+businessErrorMessage(e));}}
+ async function save(e){e.preventDefault();await act(async()=>{
+  const operation_id=crypto.randomUUID(),{kind,draft}=editor;rememberPendingAccount(operation_id);setPending({id:operation_id});setLookupMissing(false);
+  try{const packet=await businessClient.request('/access',{method:'POST',body:{action:'save',operation_id,kind,id:draft.id,expected_revision:draft.revision,data:kind==='member'?memberData(draft):roleData(draft)}});
+   if(packet.data?.state!=='SAVED'||packet.data?.operation_id!==operation_id)throw Object.assign(Error('ACCESS_ACK_INVALID'),{code:'ACCESS_ACK_INVALID',outcomeUnknown:true});
+   await acknowledged(kind==='member'?'帳號資料已儲存；未啟用的使用者請於登入頁完成電子郵件驗證。':'角色權限已儲存；受影響的既有登入會撤銷，需重新登入。');
+  }catch(e){if(!e.outcomeUnknown)clearPending();throw e;}
+ });}
+ async function lookup(){await act(async()=>{
+  const packet=await businessClient.request('/access?operation_id='+pending.id);
+  if(packet.data?.state==='SAVED')await acknowledged('資料庫已確認儲存完成。');
+  else if(packet.data?.state==='CANCELLED_NO_WRITE'){clearPending();setNotice('已確認原操作未儲存，可以重新編輯後儲存。');}
+  else if(packet.data?.state==='NOT_COMMITTED_OR_NOT_FOUND'){setLookupMissing(true);setNotice('目前未查到儲存紀錄。可確認結束這筆操作後恢復編輯，不會自動重送。');}
+  else throw Object.assign(Error('ACCESS_ACK_INVALID'),{code:'ACCESS_ACK_INVALID'});
+ });}
+ async function resolvePending(){await act(async()=>{
+  const packet=await businessClient.request('/access',{method:'POST',body:{action:'resolve',operation_id:pending.id}});
+  if(packet.data?.state==='SAVED')await acknowledged('資料庫已確認先前操作已儲存完成。');
+  else if(packet.data?.state==='CANCELLED_NO_WRITE'){clearPending();setNotice('已確認原操作未儲存，可以重新編輯後儲存。');}
+  else throw Object.assign(Error('ACCESS_ACK_INVALID'),{code:'ACCESS_ACK_INVALID'});
+ });}
  function edit(kind,draft){setError('');setNotice('');setEditor({kind,draft:structuredClone(draft)});}
  function field(key,value){setEditor(v=>({...v,draft:{...v.draft,[key]:value}}));}
  function checkList(key,id,checked){field(key,checked?[...new Set([...editor.draft[key],id])]:editor.draft[key].filter(v=>v!==id));}
  if(!admin)return <p role="alert">只有工作區管理者可以管理帳號與角色。</p>;
  const roles=data?.roles||[],members=data?.members||[],draft=editor?.draft,rows=members.filter(m=>(!search||[m.name,m.email,m.department].some(v=>String(v||'').toLowerCase().includes(search.toLowerCase())))&&(filter==='全部'||(filter==='啟用中'?m.enabled:!m.enabled))&&(!roleFilter||m.role_id===roleFilter));
- const messages=<>{error&&<p role="alert" className="form-error">{error}</p>}{notice&&<p role="status" className="account-notice">{notice}</p>}{pending&&<button type="button" className="template-btn" disabled={busy} onClick={lookup}>查詢儲存結果</button>}</>;
+ const messages=<>{error&&<p role="alert" className="form-error">{error}</p>}{notice&&<p role="status" className="account-notice">{notice}</p>}{pending&&<><p className="account-notice">有一筆尚未確認的儲存操作，請先查詢結果。</p><button type="button" className="template-btn" disabled={busy} onClick={lookup}>查詢儲存結果</button>{lookupMissing&&<button type="button" className="template-btn" disabled={busy} onClick={resolvePending}>確認未儲存並恢復編輯</button>}</>}</>;
  return <section className="panel account-management"><div className="account-page-heading"><div className="help-title-row"><h2><LmsSidebarIcon name="accounts"/>帳號與權限管理</h2></div><div className="account-heading-actions">{onBack&&<button className="template-btn account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button className="primary-button" disabled={busy||!!pending||!data} onClick={()=>edit('member',newMember())}><LmsHeaderActionLabel icon="add">新增帳號</LmsHeaderActionLabel></button><button className="template-btn" disabled={busy} onClick={()=>act(reload)}><LmsHeaderActionLabel icon="refresh">重新讀取</LmsHeaderActionLabel></button></div></div>
  <details className="template-info"><summary>真人流程準備狀態</summary><p>先完成電子郵件驗證及角色／主管指派；申請人不得自簽，LMS 兩階及報告二／三階須由不同對應主管審查。</p><dl>{humanAccountReadiness(data||{}).map(([label,count])=><div key={label}><dt>{label}</dt><dd>{data?count+' 位':'—'}</dd></div>)}</dl></details><div className="account-summary">{[['帳號總數',members.length],['啟用中',members.filter(m=>m.enabled).length],['停用帳號',members.filter(m=>!m.enabled).length]].map(([name,n])=><div className="account-summary-card" key={name}><i className="workspace-summary-icon"><LmsSidebarIcon name="accounts"/></i><span>{name}</span><strong>{data?n:'—'}</strong></div>)}</div>
  <div role="tablist" className="schedule-view-tabs account-access-tabs" aria-label="帳號與權限管理">{[['members','帳號清單',members.length],['roles','角色與權限',roles.length]].map(([id,name,n])=><button type="button" role="tab" aria-selected={tab===id} key={id} onClick={()=>setTab(id)}><strong>{name}</strong><span>{data?n:'—'}</span></button>)}</div>{!editor&&messages}

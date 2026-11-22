@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {readPendingAccount,rememberPendingAccount,clearPendingAccount} from '../src/accountOperationState.mjs';
+const id='a0000000-0000-4000-8000-000000000001',identity={user:{id:'synthetic-auth'},member:{id:'synthetic-member'}},map=new Map(),storage={getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+test('pending operation stores only its ID and cannot cross authenticated identities',()=>{rememberPendingAccount(id,{identity,storage});assert.deepEqual(readPendingAccount({identity,storage}),{id});assert.equal(readPendingAccount({identity:{...identity,user:{id:'other'}},storage}),null);assert.equal([...map.values()][0],JSON.stringify({id}));clearPendingAccount({identity,storage});assert.equal(readPendingAccount({identity,storage}),null);});
+test('unavailable storage prevents dispatch preparation rather than losing an unknown write',()=>{assert.throws(()=>rememberPendingAccount(id,{identity,storage:{setItem(){throw Error('blocked');}}}),/ACCESS_PENDING_STORAGE_REQUIRED/);assert.equal(readPendingAccount({identity,storage:{getItem(){throw Error();}}}),null);});
