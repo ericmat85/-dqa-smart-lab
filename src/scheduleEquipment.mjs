@@ -40,7 +40,7 @@ export function validateConditions(machine,conditions={}) {
   }
 }
 export function enabledExecutors(accounts) {
-  return accounts.filter(row=>row.status==='啟用中'&&['實驗室工程師','實驗室副工程師'].includes(row.role));
+  return accounts.filter(row=>row.status==='啟用中'&&(row.businessIdentity?row.businessCanExecuteLab===true:['實驗室工程師','實驗室副工程師'].includes(row.role)));
 }
 export function findScheduleConflict(rows,proposal) {
  const period=reservationWindow(proposal);if(!period)return undefined;

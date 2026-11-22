@@ -13,7 +13,7 @@ function showCompletion(signal){
     const timer=setTimeout(done,360);signal.addEventListener('abort',done,{once:true});
   });
 }
-export default function AiScheduleButton({onRecommend}) {
+export default function AiScheduleButton({onRecommend,disabled=false,disabledReason}) {
   const {dark}=useSystemTheme();
   const [running,setRunning]=useState(false);
   const [stage,setStage]=useState(0);
@@ -56,7 +56,7 @@ export default function AiScheduleButton({onRecommend}) {
   };
   const active=stage;
   const progressText=completed?'建議已帶入表單':`步驟 ${active+1}／3 · 已等待 ${elapsed.toFixed(1)} 秒`;
-  return <><button ref={buttonRef} type="button" className="schedule-ai-button" disabled={running} onClick={start}><span className="schedule-ai-button-icon" aria-hidden="true"><AssistantIcon size={22}/></span><span><strong>AI 自動化排程</strong><small>推薦設備與可用時段</small></span><span className="schedule-ai-button-arrow" aria-hidden="true">↗</span></button>
+  return <><button ref={buttonRef} type="button" className="schedule-ai-button" disabled={running||disabled} title={disabledReason} onClick={start}><span className="schedule-ai-button-icon" aria-hidden="true"><AssistantIcon size={22}/></span><span><strong>AI 自動化排程</strong><small>推薦設備與可用時段</small></span><span className="schedule-ai-button-arrow" aria-hidden="true">↗</span></button>
     {running&&createPortal(<div className={`schedule-ai-overlay lms-enterprise ${dark?'theme-dark':'theme-light'}`} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();cancel();}if(event.key==='Tab'){event.preventDefault();cancelRef.current?.focus();}}}><section className="schedule-ai-dialog" data-workflow="schedule" data-phase={completed?'complete':active+1} role="dialog" aria-modal="true" aria-labelledby="schedule-ai-title" aria-describedby="schedule-ai-description" aria-busy={!completed}>
       <header><div className="schedule-ai-brand"><span className="schedule-ai-symbol" aria-hidden="true"><AssistantIcon size={22}/></span><span className="schedule-ai-brand-name">SMART SCHEDULER</span></div><h3 id="schedule-ai-title">正在準備排程建議</h3><p id="schedule-ai-description">分析設備狀態與試驗需求，尋找設備和人員皆可用的時段。</p></header>
       <div className="schedule-ai-progress-heading"><span>排程分析</span><strong>{progressText}</strong></div><div className="schedule-ai-progress" role="progressbar" aria-label="排程分析進度" aria-valuetext={completed?progressText:steps[active]} {...(completed?{'aria-valuenow':100,'aria-valuemin':0,'aria-valuemax':100}:{})}>

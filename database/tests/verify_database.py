@@ -62,7 +62,7 @@ class DatabaseTests(unittest.TestCase):
 
     def test_schema_and_migrations(self):
         self.ok("SELECT count(*) FROM dqa_business.schema_migrations", str(ARGS.migration_count))
-        self.ok("SELECT count(*) FROM pg_tables WHERE schemaname='dqa_business' AND tablename<>'schema_migrations'", str(31 if ARGS.migration_count>=10 else 29 if ARGS.migration_count>=9 else 28))
+        self.ok("SELECT count(*) FROM pg_tables WHERE schemaname='dqa_business' AND tablename<>'schema_migrations'", str(32 if ARGS.migration_count>=11 else 31 if ARGS.migration_count>=10 else 29 if ARGS.migration_count>=9 else 28))
         self.ok("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='dqa_business' AND c.relkind='r' AND c.relname<>'schema_migrations' AND NOT c.relrowsecurity", '0')
 
     def test_read_only_acl(self):

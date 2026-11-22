@@ -1,3 +1,4 @@
+import {scheduleDraftRows} from './sharedScheduleDrafts.mjs';
 // The existing UI reads a synchronous, in-memory projection of authenticated server data.
 // Native business storage is preserved; mutations must use explicit server commands.
 import {businessClient,businessErrorMessage} from './businessClient.mjs';
@@ -11,6 +12,7 @@ export const originalBusinessEnabled=()=>enabled;
 export const businessIdentity=()=>me;
 export const requestWorkflowEnabled=()=>raw.request_workflow_enabled===true;
 export const resourceReference=(kind,id)=>structuredClone((raw[({trial:'trials',equipment:'equipment',material:'materials'})[kind]]||[]).find(r=>r.legacy_id===id)||null);
+export const scheduleDraftReferences=()=>structuredClone({equipment:(raw.equipment||[]).map(({id,legacy_id,revision})=>({id,legacy_id,revision})),executors:raw.schedule_executors||[]});
 export const resourceCan=permission=>me?.member.is_admin===true||me?.member.permissions?.includes(permission)===true;
 export function originalBusinessAccount(system=currentSystem()){
  if(!me)return null;
@@ -18,7 +20,7 @@ export function originalBusinessAccount(system=currentSystem()){
  const role=system==='request'?(me.member.permissions?.includes('requests.review_manager')?'委託者主管':'委託者'):me.member.is_admin?'系統管理員':me.member.role_name;
  return {id:me.member.id,name:me.member.display_name,email:me.user.email,role,department:dept?.name||'',supervisorId:own?.supervisor_member_id||'',status:'啟用中',businessIdentity:true,businessAdmin:me.member.is_admin,businessPermissions:me.member.permissions,businessSystems:me.member.systems||['lms','lab','request'],businessPages:me.member.pages,businessReviewLevel:me.member.review_level||0,lastLogin:'已登入'};
 }
-function accounts(){const system=currentSystem(),members=[...(raw.members||[]).map(m=>({...m,...(raw.request_supervisors||[]).find(s=>s.id===m.id)})),...(raw.request_supervisors||[]).filter(s=>!(raw.members||[]).some(m=>m.id===s.id))];return members.map(m=>{if(m.id===me?.member.id)return originalBusinessAccount(system);const role=(raw.roles||[]).find(r=>r.id===m.role_id);const manager=m.has_request_manager||role?.is_tenant_admin||role?.permissions?.includes('requests.review_manager');return {id:m.id,name:m.display_name,email:m.login_email||'',supervisorId:m.supervisor_member_id||'',role:system==='request'&&manager?'委託者主管':role?.name||'檢視者',department:(raw.departments||[]).find(d=>d.id===m.department_id)?.name||'',status:m.enabled?'啟用中':'已停用',businessIdentity:true,businessCanReviewManager:!!manager};});}
+function accounts(){const system=currentSystem(),members=[...(raw.members||[]).map(m=>({...m,...(raw.request_supervisors||[]).find(s=>s.id===m.id)})),...(raw.request_supervisors||[]).filter(s=>!(raw.members||[]).some(m=>m.id===s.id))];for(const e of raw.schedule_executors||[]){if(!members.some(m=>m.id===e.id))members.push({...e,enabled:true});}return members.map(m=>{const executor=(raw.schedule_executors||[]).some(e=>e.id===m.id);if(m.id===me?.member.id)return {...originalBusinessAccount(system),businessCanExecuteLab:executor};const role=(raw.roles||[]).find(r=>r.id===m.role_id);const manager=m.has_request_manager||role?.is_tenant_admin||role?.permissions?.includes('requests.review_manager');return {id:m.id,name:m.display_name,email:m.login_email||'',supervisorId:m.supervisor_member_id||'',role:system==='request'&&manager?'委託者主管':role?.name||(executor?'實驗室執行人':'檢視者'),department:(raw.departments||[]).find(d=>d.id===m.department_id)?.name||'',status:m.enabled?'啟用中':'已停用',businessIdentity:true,businessCanReviewManager:!!manager,businessCanExecuteLab:executor};});}
 
 const nativeStorage=()=>native||globalThis.localStorage;
 const blocked=()=>{throw Object.assign(Error('此操作尚未開放共用後端寫入；原資料未變更。'),{code:'RULE_NOT_APPROVED'});};
@@ -57,7 +59,7 @@ function project(){
  const ref=(kind,id)=>(raw[kind]||[]).find(row=>row.id===id)?.legacy_id||'';
  const member=id=>(raw.members||[]).find(row=>row.id===id)?.display_name||'';
  const schedules=(raw.schedules||[]).map(r=>{const request=rows.find(q=>q.databaseId===r.request_id),allocations=(raw.allocations||[]).filter(a=>a.schedule_id===r.id&&!a.released_at);return {id:r.legacy_id,databaseId:r.id,requestId:request?.id||'',test:request?.testItems.join('、')||'',project:request?.productCode||'',quantity:request?.quantity||'',owner:member(r.executor_member_id),executorId:r.executor_member_id,time:r.starts_at||'',end:r.ends_at||'',equipmentId:ref('equipment',allocations[0]?.equipment_id),equipment:equipment.find(e=>e.databaseId===allocations[0]?.equipment_id)?.name||'',equipmentIds:allocations.map(a=>ref('equipment',a.equipment_id)),sampleSpaceUnits:request?.sampleSpaceUnits??'',equipmentAllocations:allocations.map(a=>({equipmentId:ref('equipment',a.equipment_id),sampleQuantity:a.sample_quantity,spaceUnits:a.allocated_units})),preparationMinutes:r.preparation_minutes,cleanupMinutes:r.cleanup_minutes,status:({DRAFT:'未排程',BOOKED:'已排程',RUNNING:'試驗中',COMPLETED:'已完成',CANCELLED:'取消',PAUSED:'暫停中'})[r.status]||r.status};});
- cache.set(collections.schedules,JSON.stringify(merge(schedules,archive.schedules)));
+ cache.set(collections.schedules,JSON.stringify(merge([...schedules,...scheduleDraftRows(raw,rows,equipment)],archive.schedules)));
  cache.set(collections.borrows,JSON.stringify((raw.borrows||[]).map(b=>({id:b.legacy_id,databaseId:b.id,actorId:b.borrower_member_id,requester:member(b.borrower_member_id),resourceType:b.equipment_id?'equipment':'material',equipmentId:ref('equipment',b.equipment_id),materialId:ref('materials',b.material_id),quantity:b.quantity,purpose:b.purpose,borrowDate:b.starts_at,returnDate:b.due_at,status:({DRAFT:'草稿',REQUESTED:'待核准',APPROVED:'已核准',REJECTED:'退件',RETURNED:'已歸還',CANCELLED:'取消'})[b.status]||b.status}))));
  const operations=(raw.operations||[]).map(o=>({id:o.id,requestId:ref('requests',o.request_id),actorId:o.actor_member_id,actor:member(o.actor_member_id),action:o.action,reason:o.reason,status:o.status,createdAt:o.created_at}));
  cache.set(collections.labOperations,JSON.stringify(operations));cache.set(collections.labAudit,JSON.stringify(merge(operations,archive.labAudit)));
