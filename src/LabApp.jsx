@@ -248,7 +248,6 @@ export default function LabApp({ path, navigate }) {
         {loginError && <p role="alert" className="lab-login-error">{loginError}</p>}
         <button className="lab-primary lab-login-submit" type="submit" disabled={!username.trim()}>登入系統 <span>→</span></button>
 
-        {originalBusinessEnabled()&&<a className="lab-login-return" href="/account/activate">啟用帳號</a>}
         <button className="lab-login-return" type="button" onClick={navigateHome}>← 返回系統首頁</button>
       </form></EnterpriseLoginLayout>
     </div>
