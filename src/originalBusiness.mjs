@@ -9,14 +9,13 @@ const collections={electronic:'dqa-request-demo-v2',reviews:'dqa-lms-reviews-v1'
 const currentSystem=()=>typeof location==='undefined'?'lms':location.pathname.split('/')[1];
 export const originalBusinessEnabled=()=>enabled;
 export const businessIdentity=()=>me;
-export const originalImportNotice=()=>me?.member.is_admin&&raw.legacy_import&&['reviews','schedules','labAudit'].some(k=>raw.legacy_import[k]?.length)?'已載入舊站資料；委託、排程及操作紀錄以唯讀方式保留原狀態，正式簽核與試驗執行尚未啟用。':'';
 export function originalBusinessAccount(system=currentSystem()){
  if(!me)return null;
  const own=(raw.members||[]).find(r=>r.id===me.member.id),dept=(raw.departments||[]).find(r=>r.id===own?.department_id);
  const role=system==='request'?'委託者':me.member.is_admin?'系統管理員':me.member.role_name;
- return {id:me.member.id,name:me.member.display_name,email:me.user.email,role,department:dept?.name||'',status:'啟用中',businessIdentity:true,businessAdmin:me.member.is_admin,businessPermissions:me.member.permissions,lastLogin:'已登入'};
+ return {id:me.member.id,name:me.member.display_name,email:me.user.email,role,department:dept?.name||'',supervisorId:own?.supervisor_member_id||'',status:'啟用中',businessIdentity:true,businessAdmin:me.member.is_admin,businessPermissions:me.member.permissions,businessSystems:me.member.systems||['lms','lab','request'],businessPages:me.member.pages,businessReviewLevel:me.member.review_level||0,lastLogin:'已登入'};
 }
-function accounts(){const system=currentSystem();return (raw.members||[]).map(m=>{if(m.id===me?.member.id)return originalBusinessAccount(system);const role=(raw.roles||[]).find(r=>r.id===m.role_id);return {id:m.id,name:m.display_name,email:'',role:role?.name||'檢視者',department:(raw.departments||[]).find(d=>d.id===m.department_id)?.name||'',status:m.enabled?'啟用中':'已停用'};});}
+function accounts(){const system=currentSystem();return (raw.members||[]).map(m=>{if(m.id===me?.member.id)return originalBusinessAccount(system);const role=(raw.roles||[]).find(r=>r.id===m.role_id);return {id:m.id,name:m.display_name,email:m.login_email||'',supervisorId:m.supervisor_member_id||'',role:role?.name||'檢視者',department:(raw.departments||[]).find(d=>d.id===m.department_id)?.name||'',status:m.enabled?'啟用中':'已停用'};});}
 const nativeStorage=()=>native||globalThis.localStorage;
 const blocked=()=>{throw Object.assign(Error('此操作尚未開放共用後端寫入；原資料未變更。'),{code:'RULE_NOT_APPROVED'});};
 const facade={
@@ -59,10 +58,10 @@ export function configureOriginalBusiness({identity=null,snapshot={},storage=glo
 export async function refreshOriginalBusiness(){
  if(!enabled||!me)return;
  if(loading?.identity===me)return loading.promise;
- const identity=me,task={identity};task.promise=businessClient.request('/snapshot').then(packet=>{if(me!==identity)return;raw=packet.data;project();emit();}).finally(()=>{if(loading===task)loading=null;});loading=task;return task.promise;
+ const identity=me,task={identity};task.promise=businessClient.request('/me').then(current=>{if(me!==identity)return;return businessClient.request('/snapshot').then(packet=>{if(me!==identity)return;me=current;raw=packet.data;project();emit();});}).catch(error=>{if(me===identity&&error.status===401)clearOriginalIdentity();throw error;}).finally(()=>{if(loading===task)loading=null;});loading=task;return task.promise;
 }
 export async function initializeOriginalBusiness(){configureOriginalBusiness();try{me=await businessClient.request('/me');await refreshOriginalBusiness();}catch(error){if(error.status!==401)throw error;clearOriginalIdentity();}}
-export async function loginOriginalBusiness(email,password){await businessClient.request('/login',{method:'POST',body:{email,password}});me=await businessClient.request('/me');await refreshOriginalBusiness();emit();return originalBusinessAccount();}
+export async function loginOriginalBusiness(email,password){await businessClient.request('/login',{method:'POST',body:{email,password}});me=await businessClient.request('/me');await refreshOriginalBusiness();emit();if(!me.member.systems?.includes(currentSystem())&&me.member.systems)throw Object.assign(Error('SYSTEM_ACCESS_DENIED'),{code:'SYSTEM_ACCESS_DENIED'});return originalBusinessAccount();}
 export function clearOriginalIdentity(){me=null;raw={};signatureDetails.clear();detailLoads.clear();project();emit();}
 export async function logoutOriginalBusiness(){const result=businessClient.request('/logout',{method:'POST',body:{}});clearOriginalIdentity();return result;}
 export function startOriginalBusinessSync(){if(!enabled)return()=>{};let stopped=false;const update=()=>{if(stopped||!me||globalThis.document?.visibilityState==='hidden')return;refreshOriginalBusiness().catch(error=>{if(error.status===401)clearOriginalIdentity();});};const timer=setInterval(update,15000);globalThis.addEventListener?.('focus',update);return()=>{stopped=true;clearInterval(timer);globalThis.removeEventListener?.('focus',update);};}

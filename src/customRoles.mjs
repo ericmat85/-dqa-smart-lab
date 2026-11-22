@@ -15,7 +15,7 @@ export function saveCustomRole(roles,draft,storage=appStorage()){
  storage.setItem(ROLE_KEY,JSON.stringify(next));return next;
 }
 export function customRole(account,storage=appStorage()){const custom=readCustomRoles(storage).find(role=>role.name===account?.role);if(custom)return custom;try{const saved=JSON.parse(storage?.getItem(BUILTIN_ROLE_KEY)||'[]');if(Array.isArray(saved)&&saved.some(row=>row.name===account?.role))return readBuiltinRoles(storage).find(role=>role.name===account.role);}catch{/* Ignore invalid overrides. */}return undefined;}
-export function canAccessLmsPage(account,page){if(account?.status!=='啟用中')return false;const role=customRole(account);return role?page==='accounts'?role.manageAccounts:role.pages.includes(page):true;}
+export function canAccessLmsPage(account,page){if(account?.status!=='啟用中')return false;if(account.businessIdentity)return (account.businessSystems||['lms']).includes('lms')&&(page==='accounts'?account.businessAdmin===true:(account.businessPages||ROLE_PAGES.map(([id])=>id)).includes(page));const role=customRole(account);return role?page==='accounts'?role.manageAccounts:role.pages.includes(page):true;}
 
 export const BUILTIN_ROLE_KEY='dqa-builtin-role-overrides-v1';
 const builtinSystems=name=>['實驗室工程師','實驗室副工程師'].includes(name)?['lab']:['委託者','委託者主管'].includes(name)?['request']:['一階主管','二階主管','三階主管'].includes(name)?['lms','lab']:name==='系統管理員'?['lms']:[];
@@ -32,4 +32,4 @@ export function saveBuiltinRole(draft,storage=appStorage()){
  const next=readBuiltinRoles(storage).map(row=>row.name===role.name?role:row);storage.setItem(BUILTIN_ROLE_KEY,JSON.stringify(next));return next;
 }
 
-export function canAccessLabPage(account,page,storage){if(account?.status!=='啟用中')return false;const role=customRole(account,storage);return !role||role.pages.includes(({materials:'maintenance',audit:'requests'})[page]||page);}
+export function canAccessLabPage(account,page,storage){if(account?.status!=='啟用中')return false;if(account.businessIdentity)return (account.businessPages||ROLE_PAGES.map(([id])=>id)).includes(({materials:'maintenance',audit:'requests'})[page]||page);const role=customRole(account,storage);return !role||role.pages.includes(({materials:'maintenance',audit:'requests'})[page]||page);}

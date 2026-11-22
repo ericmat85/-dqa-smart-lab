@@ -1,4 +1,5 @@
 import {originalBusinessEnabled,businessIdentity,startOriginalBusinessSync} from './originalBusiness.mjs';
+import BusinessAccountActivation from './BusinessAccountActivation.jsx';
 import ProductTour from './ProductTour.jsx';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
 import useIdleSessions from './useIdleSessions.js';
@@ -44,7 +45,8 @@ export default function App() {
 
   const idle=useIdleSessions(path,navigate);
   let content;
-  if(path==='/tour')content=<ProductTour navigate={navigate}/>;
+  if(path==='/account/activate'&&originalBusinessEnabled())content=<BusinessAccountActivation navigate={navigate}/>;
+  else if(path==='/tour')content=<ProductTour navigate={navigate}/>;
   else if(path.startsWith('/request/')||path==='/request')content=<RequestApp key={`request-${idle.version}-${businessVersion}`}/>;
   else if(path==='/lms'||path.startsWith('/lms/'))content=<LmsApp key={`lms-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;
   else if(path.startsWith('/lab/')||path==='/lab')content=<LabApp key={`lab-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;

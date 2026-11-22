@@ -55,6 +55,7 @@ import useLabSnapshot from './useLabSnapshot.js';
 import {requestInformation} from './labData.mjs';
 import IntelligentAssistant from './IntelligentAssistant.jsx';
 import RoleSettings from './RoleSettings.jsx';
+import BusinessAccountManagement from './BusinessAccountManagement.jsx';
 import {BUILTIN_ROLES,readCustomRoles,canAccessLmsPage} from './customRoles.mjs';
 import './ManagementPages.css';
 import LiveDashboard from './LiveDashboard.jsx';
@@ -480,6 +481,7 @@ export function LoginPage({
 
 
 
+        {originalBusinessEnabled()&&!preview&&<a className="back-button" href="/account/activate">啟用帳號</a>}
         <button type="button" className="back-button" onClick={onBack}>
 
           ← 返回系統首頁
@@ -1937,7 +1939,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts"><AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/></div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts">{originalBusinessEnabled()?<BusinessAccountManagement onBack={()=>navigate('settings')}/>:<AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/>}</div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
