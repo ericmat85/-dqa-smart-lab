@@ -1,0 +1,27 @@
+/* Shared action sizing across all systems and both viewport sizes. Navigation
+   cards, timeline cells and the assistant launcher keep their structural size. */
+:root{--action-height:40px;--action-font-size:13px;--action-font-weight:500}
+html body #root button:not(:is(.portal-card,.portal-system-card,.system-card,.card-main,.trial-equipment-card,.lab-stat-card,.report-domain-card,.role-list-item,.schedule-ai-button,.intelligent-launcher,.ai-assistant-toggle,.entry-role-card,.rq-role-choice>button,.live-metric,.schedule-day-cell,[role=switch])),
+html body #root :is(a.template-btn,a.rq-btn,.personal-photo-upload-button){box-sizing:border-box;height:var(--action-height)!important;min-height:var(--action-height)!important;max-height:var(--action-height)!important;padding-top:0!important;padding-bottom:0!important;font-family:var(--app-font)!important;font-size:var(--action-font-size)!important;font-weight:var(--action-font-weight)!important;line-height:1.4!important}
+html body #root :is(button,a.template-btn,a.rq-btn):focus-visible{outline:2px solid var(--tab-accent,#2765e7);outline-offset:3px}
+html body #root :is(.request-modal-close,.rq-close,.eq-profile-close,.personal-settings-close,.compact-management-dialog>header>button,.login-password-eye){width:var(--action-height)!important;min-width:var(--action-height)!important;padding:0!important;flex-shrink:0}
+html body #root .compact-management-dialog.account-editor-dialog{width:min(720px,calc(100vw - 24px));border-radius:14px}
+html body #root .account-editor-dialog>header{padding:14px 20px;align-items:center}
+html body #root .account-editor-dialog .account-form{border:0;padding:20px;background:var(--enterprise-card,#fff)}
+html body #root .account-editor-dialog .account-form-grid{gap:16px}
+html body #root .account-enable-card{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid var(--enterprise-border,#d9e3f2);border-radius:10px;padding:14px 16px;background:var(--soft,#f4f7ff)}
+html body #root .account-enable-card label{font-size:13px;font-weight:600;margin:0}
+html body #root .account-enable-card p{font-size:12px;line-height:1.7;margin:5px 0 0;color:var(--muted,#63738e)}
+html body #root button.account-enable-switch{display:inline-flex;align-items:center;justify-content:center;flex:none;width:52px;height:40px;min-height:40px;min-width:52px;padding:0;border:0;background:transparent;cursor:pointer}
+html body #root .account-switch-track{display:flex;align-items:center;width:46px;height:26px;padding:3px;box-sizing:border-box;border-radius:20px;background:#8a97ac;transition:background .18s}
+html body #root .account-switch-track>span{display:block;width:20px;height:20px;background:white;border-radius:50%;box-shadow:0 1px 3px #10244030;transition:transform .18s}
+html body #root .account-enable-switch[aria-checked=true] .account-switch-track{background:#2563eb}
+html body #root .account-enable-switch[aria-checked=true] .account-switch-track>span{transform:translateX(20px)}
+html body #root .account-enable-switch:disabled{cursor:not-allowed;opacity:.5}
+.account-state-badge,.account-verification-badge{display:inline-flex;align-items:center;padding:3px 7px;border-radius:5px;font-size:12px;white-space:nowrap}
+.account-state-badge.enabled,.account-verification-badge.verified{color:#087450;background:#e6f7ef}
+.account-state-badge.disabled{color:#627187;background:#eef1f6}.account-verification-badge.pending{color:#805514;background:#fff4d9}
+.account-mail-status{display:block;max-width:180px;margin-top:5px;color:var(--muted,#63738e);font-size:11px;line-height:1.6}
+html body #root .account-row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:650px){html body #root .account-editor-dialog .account-form{padding:16px}html body #root .account-enable-card{padding:12px;gap:12px}html body #root .account-form-actions{flex-wrap:wrap}html body #root .account-form-actions>button{flex:1;white-space:nowrap}}
+@media(prefers-reduced-motion:reduce){html body #root .account-switch-track,html body #root .account-switch-track>span{transition:none}}

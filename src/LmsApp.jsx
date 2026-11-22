@@ -1005,7 +1005,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
 
 
-        <div className="account-heading-actions">{onBack&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button
+        <div className="account-heading-actions">{onBack&&backLabel!=='返回系統管理'&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button
 
           type="button"
 

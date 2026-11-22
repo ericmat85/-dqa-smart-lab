@@ -5,6 +5,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/account/:path*",
+      "destination": "/index.html"
+    },
+    {
       "source": "/lms/:path*",
       "destination": "/index.html"
     },

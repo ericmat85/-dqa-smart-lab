@@ -1,3 +1,4 @@
+import {deliverAccountInvitation} from './accountInvitations.mjs';
 import {fileAttestation,safeObject,validateHumanFile,readStorageBytes} from './humanReports.mjs';
 import {explicitHours,sourceConditions} from '../../src/trialSourceFacts.mjs';
 import {createCipheriv,createDecipheriv,createHash,randomBytes,randomUUID} from 'node:crypto';
@@ -168,15 +169,20 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     const receipt=path.match(/^\/access\/result\/([a-f0-9-]{36})$/);
     const ids=parsed.searchParams.getAll('operation_id');
     if(ids.length>1||ids.length&&(!UUID.test(ids[0])||path!=='/access'||req.method!=='GET'))throw new ApiError(422,'QUERY_INVALID');
-    if(path==='/access'&&req.method==='GET')return reply(200,{data:await rpc(ids.length?'access_operation_result':'access_directory',{p_tenant:session.tenant,...(ids.length?{p_operation:ids[0]}:{})},session.access)});
-    if(receipt&&req.method==='GET'&&UUID.test(receipt[1]))return reply(200,{data:await rpc('access_operation_result',{p_tenant:session.tenant,p_operation:receipt[1]},session.access)});
+    if(path==='/access'&&req.method==='GET')return reply(200,{data:await rpc(ids.length?'access_result_with_invitation':'access_directory_with_invitations',{p_tenant:session.tenant,...(ids.length?{p_operation:ids[0]}:{})},session.access)});
+    if(receipt&&req.method==='GET'&&UUID.test(receipt[1]))return reply(200,{data:await rpc('access_result_with_invitation',{p_tenant:session.tenant,p_operation:receipt[1]},session.access)});
     if(!['/access','/access/save'].includes(path)||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);
     if(path==='/access'&&body.action==='resolve'){
      fields(body,['action','operation_id']);if(!UUID.test(body.operation_id||''))throw new ApiError(422,'ACCESS_FIELDS_INVALID');dispatchedWrite=true;return reply(200,{data:await rpc('resolve_access_operation',{p_tenant:session.tenant,p_operation:body.operation_id},session.access)});
     }
+    if(path==='/access'&&body.action==='invite'){
+     fields(body,['action','operation_id','id','expected_revision']);if(!UUID.test(body.operation_id||'')||!UUID.test(body.id||'')||!Number.isSafeInteger(body.expected_revision)||body.expected_revision<1)throw new ApiError(422,'ACCESS_FIELDS_INVALID');
+     dispatchedWrite=true;const result=await rpc('request_account_invitation',{p_tenant:session.tenant,p_member:body.id,p_expected_revision:body.expected_revision,p_operation:body.operation_id},session.access);
+     return reply(200,{data:await deliverAccountInvitation({env,fetchImpl,origin,tenant:session.tenant,actor:identity.id,result})});
+    }
     fields(body,path==='/access'?['action','operation_id','kind','id','expected_revision','data']:['operation_id','kind','id','expected_revision','data']);
     if(path==='/access'&&body.action!=='save'||!UUID.test(body.operation_id||'')||!UUID.test(body.id||'')||!['member','role'].includes(body.kind)||!Number.isSafeInteger(body.expected_revision)||body.expected_revision<0||!body.data||typeof body.data!=='object'||Array.isArray(body.data))throw new ApiError(422,'ACCESS_FIELDS_INVALID');
-    dispatchedWrite=true;return reply(200,{data:await rpc('save_workspace_access',{p_tenant:session.tenant,p_operation:body.operation_id,p_kind:body.kind,p_id:body.id,p_expected_revision:body.expected_revision,p_data:body.data},session.access)});
+    dispatchedWrite=true;const result=await rpc('save_access_with_invitation',{p_tenant:session.tenant,p_operation:body.operation_id,p_kind:body.kind,p_id:body.id,p_expected_revision:body.expected_revision,p_data:body.data},session.access);return reply(200,{data:await deliverAccountInvitation({env,fetchImpl,origin,tenant:session.tenant,actor:identity.id,result})});
    }
    if(path==='/maintenance'||path.startsWith('/maintenance/')){
     if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
@@ -197,7 +203,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    }
    if(path==='/snapshot'&&req.method==='GET'){const [core,planning,human]=await Promise.all([rpc('original_ui_snapshot',{p_tenant:session.tenant},session.access),rpc('schedule_draft_snapshot',{p_tenant:session.tenant},session.access),rpc('human_workflow_snapshot',{p_tenant:session.tenant},session.access)]);return reply(200,{data:{...core,...planning,...human}});}
    if(path==='/password'&&req.method==='POST'){
-    const body=await bodyOf(req);fields(body,['password']);if(typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'PASSWORD_TOO_SHORT');await upstream('/auth/v1/user',{token:session.access,method:'PUT',body:{password:body.password}});return reply(200,{password_updated:true});
+    const body=await bodyOf(req);fields(body,['password']);if(typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'PASSWORD_TOO_SHORT');dispatchedWrite=true;await upstream('/auth/v1/user',{token:session.access,method:'PUT',body:{password:body.password}});return reply(200,{password_updated:true});
    }
    const match=path.match(/^\/data\/([a-z]+)(?:\/([a-f0-9-]{36}))?$/),resource=match?.[1],id=match?.[2];
    if(!match||!Object.hasOwn(RESOURCE,resource)||id&&!UUID.test(id))throw new ApiError(404,'ROUTE_NOT_FOUND');
