@@ -1,13 +1,13 @@
 import {reportToPdf} from './reportPdf.mjs';
 import {requestWorkbookBytes} from './requestDocumentWorkbook.mjs';
-export async function requestToPdf(request,{fontBytes}={}) {
- return reportToPdf(await requestWorkbookBytes(request),{fontBytes,requestId:request.id});
+export async function requestToPdf(request,{fontBytes,fontSubset=false}={}) {
+ return reportToPdf(await requestWorkbookBytes(request),{fontBytes,fontSubset,requestId:request.id});
 }
-export async function buildCasePdf({request,reportBytes,fontBytes}) {
+export async function buildCasePdf({request,reportBytes,fontBytes,fontSubset=false}) {
  if(!request?.id)throw Error('缺少委託單，無法合併結案 PDF。');
  if(request.attachments?.length)throw Error('此 Demo 尚未支援附件轉換與合併；不得略過附件結案。');
  const {PDFDocument}=await import('pdf-lib');
- const requestBytes=await requestToPdf(request,{fontBytes});
+ const requestBytes=await requestToPdf(request,{fontBytes,fontSubset});
  const output=await PDFDocument.create(),sections=[];
  for(const [kind,bytes] of [['request',requestBytes],['report',reportBytes]]){
   const source=await PDFDocument.load(bytes);const firstPage=output.getPageCount()+1;

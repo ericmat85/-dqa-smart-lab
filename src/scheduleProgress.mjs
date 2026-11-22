@@ -26,11 +26,13 @@ export function scheduleProgress(row,now) {
   const fraction=plan?executionFraction(plan,clock):Math.max(0,Math.min(1,(clock-start)/(frozenEnd-start)));
   if(row.status==='已完成'){const actual=timestamp(row.completedAt);return {phase:'elapsed',label:'已完成',fraction:1,start,end:actual!==null&&actual>=start&&actual<=end?actual:end};}
   if(paused)return {phase:"paused",label:"暫停中（結束時間順延）",fraction,start,end};
+  if(row.businessDatabase&&row.status==='已排程')return {phase:'waiting',label:now<start?'等待開始時間':'已到開始時間，待執行人開始',fraction:0,start,end};
+  if(row.businessDatabase&&now>=end)return {phase:'elapsed',label:'時程已到，待執行人確認完成',fraction:1,start,end};
   return {phase:now<start?'waiting':now>=end?'elapsed':'running',label:now<start?'尚未開始':now>=end?'已完成':'試驗時程進行中',fraction,start,end};
 }
 
 export function effectiveScheduleStatus(row,now) {
-  if(row.readOnly)return row.status;
+  if(row.readOnly||row.businessDatabase)return row.status;
   if(!['已排程','試驗中','進行中'].includes(row.status))return row.status;
   const progress=scheduleProgress(row,now);
   if(progress.phase==='unscheduled'||progress.phase==='invalid')return '未排程';
