@@ -19,12 +19,13 @@ export function canApproveOperationalRequest(account,applicantId,storage){
  return account.role===ROLE.ADMIN||canReview(account,{status:'待審查',approval:0,participantIds:[applicantId]},storage);
 }
 export function canApproveRequestManager(account, request) {
- return account?.status === '啟用中' && account.role === ROLE.REQUEST_MANAGER && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
+ return account?.status === '啟用中' && (account.businessIdentity?(account.businessAdmin||account.businessPermissions?.includes('requests.review_manager')):account.role === ROLE.REQUEST_MANAGER) && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
 }
 export function canReview(account, request, storage) {
  if(request?.readOnly)return false;
  const custom=customRole(account,storage);
- const level=custom?custom.level:LEVELS.get(account?.role);
+ const level=account?.businessIdentity?account.businessReviewLevel:custom?custom.level:LEVELS.get(account?.role);
+ if(account?.businessIdentity&&!account.businessAdmin&&!account.businessPermissions?.includes('requests.review_lms'))return false;
  if (!accessSystem(account,'lms',storage) || !level || (custom&&!custom.pages.includes('requests')) || request?.status !== '待審查') return false;
  if (level !== (request.approval ?? 0) + 1 || reviewedAtOtherLevel(account.id,level,request)) return false;
  const id=account.id;

@@ -1,15 +1,16 @@
+import WorkflowSignatureImage from './WorkflowSignatureImage.jsx';
 import {displayTaipei} from './requestWorkspace.mjs';
 import {PaginatedList} from './Pagination.jsx';
 import { getSignatureHistory } from './signatureHistory.mjs';
 
 export function LmsReviewSignatures({ request }) {
-  const records = getSignatureHistory(request).filter(record => typeof record.stage === 'number');
+  const records = getSignatureHistory(request).filter(record => typeof record.stage === 'number'&&(!request.businessDatabase||record.documentVersionId===request.documentVersionId));
   if (!records.length) return null;
   return <section className="rq-detail-section"><h3>LMS 主管簽核</h3><div className="rq-detail-grid">
     <PaginatedList items={records}>{page=>page.map((record, index) => <div key={record.id || `${displayTaipei(record.at)}-${index}`}>
       <label>第 {record.stage} 階主管 · {record.decision}</label>
       <p>{record.actor || record.actorId} · {displayTaipei(record.at)}</p>
-      {/^data:image\/(png|jpeg);base64,/i.test(record.signature || '') && <img src={record.signature} alt={`第${record.stage}階主管簽名`} style={{display:'block',width:'100%',maxWidth:240,height:64,objectFit:'contain',objectPosition:'left center',background:'#fff'}} />}
+      {record.signatureId?<WorkflowSignatureImage record={record} index={index} alt={`第${record.stage}階主管簽名`} style={{display:'block',width:'100%',maxWidth:240,height:64,objectFit:'contain',objectPosition:'left center',background:'#fff'}}/>:/^data:image\/(png|jpeg);base64,/i.test(record.signature || '') ? <img src={record.signature} alt={`第${record.stage}階主管簽名`} style={{display:'block',width:'100%',maxWidth:240,height:64,objectFit:'contain',objectPosition:'left center',background:'#fff'}} />:null}
       {record.comment && <p>{record.comment}</p>}
     </div>)}</PaginatedList>
   </div></section>;
@@ -18,7 +19,9 @@ export function LmsReviewSignatures({ request }) {
 export function SignatureImage({ request, supervisor = false }) {
   const field = supervisor ? 'supervisorSignature' : 'requesterSignature';
   const stage = supervisor ? '直屬主管簽核' : '委託送出';
-  const signature = request[field] ?? getSignatureHistory(request).filter(record => record.stage === stage).at(-1)?.signature;
+  const record=getSignatureHistory(request).filter(record => record.stage===stage&&(!request.businessDatabase||record.documentVersionId===request.documentVersionId)).at(-1);
+  if(record?.signatureId)return <div><WorkflowSignatureImage record={record} alt={supervisor?'主管簽名':'委託者簽名'} style={{display:'block',width:'100%',maxWidth:300,height:80,objectFit:'contain',objectPosition:'left center',background:'#fff',borderRadius:4}}/><small>第 {record.documentVersion} 版</small></div>;
+  const signature = request[field] ?? record?.signature;
   return /^data:image\/(png|jpeg);base64,/i.test(signature || '')
     ? <img src={signature} alt={supervisor ? '主管簽名' : '委託者簽名'} style={{ display: 'block', width: '100%', maxWidth: 300, height: 80, objectFit: 'contain', objectPosition: 'left center', background: '#fff', borderRadius: 4 }} />
     : <span>—</span>;

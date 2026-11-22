@@ -5,7 +5,7 @@ export function ownsRequest(actor,request) {
  return request.ownerId?request.ownerId===actor.id:request.ownerUser===actor.name||request.requester===actor.name;
 }
 export function assertEditableRequest(actor,request) {
- if(actor?.role!==ROLE.REQUESTER||!request||!ownsRequest(actor,request)||!['草稿','退件','補件中'].includes(request.status))throw Error('此委託單已更新或無編輯權限，請重新開啟。');
+ if((actor?.businessIdentity?!(actor.businessAdmin||actor.businessPermissions?.includes('requests.draft')):actor?.role!==ROLE.REQUESTER)||!request||!ownsRequest(actor,request)||!['草稿','退件','補件中'].includes(request.status))throw Error('此委託單已更新或無編輯權限，請重新開啟。');
 }
 export function deleteDraft(requests,id,actor) {
  const request=requests.find(row=>row.id===id);
