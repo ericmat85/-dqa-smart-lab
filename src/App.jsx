@@ -1,3 +1,5 @@
+import PageLoadingIndicator from './PageLoadingIndicator.jsx';
+import BusinessPasswordRecovery from './BusinessPasswordRecovery.jsx';
 import {originalBusinessEnabled,businessIdentity,startOriginalBusinessSync} from './originalBusiness.mjs';
 import BusinessAccountActivation from './BusinessAccountActivation.jsx';
 import ProductTour from './ProductTour.jsx';
@@ -45,14 +47,15 @@ export default function App() {
 
   const idle=useIdleSessions(path,navigate);
   let content;
-  if(path==='/account/activate'&&originalBusinessEnabled())content=<BusinessAccountActivation navigate={navigate}/>;
+  if(path==='/account/forgot-password'&&originalBusinessEnabled())content=<BusinessPasswordRecovery navigate={navigate}/>;
+  else if((path==='/account/activate'||path==='/account/reset-password')&&originalBusinessEnabled())content=<BusinessAccountActivation navigate={navigate}/>;
   else if(path==='/tour')content=<ProductTour navigate={navigate}/>;
   else if(path.startsWith('/request/')||path==='/request')content=<RequestApp key={`request-${idle.version}-${businessVersion}`}/>;
   else if(path==='/lms'||path.startsWith('/lms/'))content=<LmsApp key={`lms-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;
   else if(path.startsWith('/lab/')||path==='/lab')content=<LabApp key={`lab-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;
   else if(path.startsWith('/validation/')||path==='/validation')content=<ValidationLogin onBack={()=>navigate('/')}/>;
   else content=<PortalHome navigate={navigate}/>;
-  return <>{content}{idle.notice.length>0&&<SessionTimeoutDialog systems={idle.notice} onClose={idle.dismiss}/>}</>;
+  return <><PageLoadingIndicator/>{content}{idle.notice.length>0&&<SessionTimeoutDialog systems={idle.notice} onClose={idle.dismiss}/>}</>;
 
 }
 

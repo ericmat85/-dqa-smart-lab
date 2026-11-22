@@ -1,8 +1,9 @@
+import {requestPasswordRecovery} from './passwordRecovery.mjs';
 import {accountDeletionServiceKey,verifyAdministratorPassword} from './accountDeletion.mjs';
 import {deliverAccountInvitation} from './accountInvitations.mjs';
 import {fileAttestation,safeObject,validateHumanFile,readStorageBytes} from './humanReports.mjs';
 import {explicitHours,sourceConditions} from '../../src/trialSourceFacts.mjs';
-import {createCipheriv,createDecipheriv,createHash,randomBytes,randomUUID} from 'node:crypto';
+import {createCipheriv,createDecipheriv,createHash,createHmac,randomBytes,randomUUID} from 'node:crypto';
 export const COOKIE='__Host-dqa_business';
 const REF='mmazbwzdiizabikmiily',UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const RESOURCE={
@@ -33,7 +34,7 @@ function businessRoute(req,origin){
  const raw=String(req.url||'');if(raw.length>4096||/[\\#\r\n]/.test(raw))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const rawPath=raw.split('?')[0].replace(/^https:\/\/[^/]+/,'');if(/%|\/\//.test(rawPath)||rawPath.split('/').some(x=>x==='.'||x==='..'))throw new ApiError(404,'ROUTE_NOT_FOUND');
  const parsed=new URL(raw,origin);if(parsed.origin!==origin)throw new ApiError(404,'ROUTE_NOT_FOUND');
- const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|activate|execution\/(?:prepare|execute|upload|(?:result|file|signature)\/[a-f0-9-]{36})|planning\/(?:prepare|execute|result\/[a-f0-9-]{36})|workflow\/(?:prepare|execute|(?:result|signature|document)\/[a-f0-9-]{36})|resources\/(?:prepare|execute|result\/[a-f0-9-]{36})|access(?:\/(?:save|result\/[a-f0-9-]{36}))?|maintenance(?:\/(?:preview|execute|restore|result\/[a-f0-9-]{36}))?|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
+ const allowed=path=>/^\/(?:config|login|claim|refresh|logout|me|password|snapshot|activate|recover|execution\/(?:prepare|execute|upload|(?:result|file|signature)\/[a-f0-9-]{36})|planning\/(?:prepare|execute|result\/[a-f0-9-]{36})|workflow\/(?:prepare|execute|(?:result|signature|document)\/[a-f0-9-]{36})|resources\/(?:prepare|execute|result\/[a-f0-9-]{36})|access(?:\/(?:save|result\/[a-f0-9-]{36}))?|maintenance(?:\/(?:preview|execute|restore|result\/[a-f0-9-]{36}))?|data\/[a-z]+(?:\/[a-f0-9-]{36})?)$/.test(path);
  const hint=value=>{const parts=Array.isArray(value)?value:typeof value==='string'?value.split('/'):[];if(!parts.length||parts.length>3||parts.some(x=>typeof x!=='string'||!x||!/^[A-Za-z0-9_-]+$/.test(x)))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');const path='/'+parts.join('/');if(!allowed(path))throw new ApiError(404,'ROUTE_NOT_FOUND');return path;};
  if(parsed.searchParams.getAll('path').length>1)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
  const hints=[parsed.searchParams.has('path')?parsed.searchParams.get('path'):undefined,req.query?.path,req.params?.path].filter(x=>x!==undefined).map(hint);
@@ -58,7 +59,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    if(req.method!=='GET'&&req.headers.origin!==origin)throw new ApiError(403,'ORIGIN_REQUIRED');
    if(env.BUSINESS_SUPABASE_URL!==`https://${REF}.supabase.co`||!anonymousKey(env.BUSINESS_SUPABASE_ANON_KEY)||!/^[A-Za-z0-9_-]{43}$/.test(env.BUSINESS_COOKIE_KEY||''))throw new ApiError(503,'CONFIGURATION_REQUIRED');
    const {parsed,path}=businessRoute(req,origin);
-   if(path==='/config'&&req.method==='GET')return reply(200,{enabled:true,auth:'supabase',workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_DRAFT_RESOURCES_ACCESS_AND_TENANT_MANUAL_REQUESTS'});
+
    async function upstream(path,{token,method='GET',body,profile=false,headers={}}={}){
     let response;try{response=await fetchImpl(env.BUSINESS_SUPABASE_URL+path,{method,headers:{apikey:env.BUSINESS_SUPABASE_ANON_KEY,...(token?{Authorization:'Bearer '+token}:{}),...(body!==undefined?{'Content-Type':'application/json'}:{}),...(profile?{'Accept-Profile':'dqa_business','Content-Profile':'dqa_business'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});}catch{throw new ApiError(503,dispatchedWrite?'WRITE_OUTCOME_UNKNOWN':'UPSTREAM_UNAVAILABLE',{outcome_unknown:dispatchedWrite});}
     const text=await response.text();if(Buffer.byteLength(text)>2097152)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});let data;try{data=text?JSON.parse(text):null;}catch{throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID',{outcome_unknown:dispatchedWrite});}
@@ -71,14 +72,24 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     return {data,response};
    }
    const rpc=async(name,args,token)=>(await upstream('/rest/v1/rpc/'+name,{token,method:'POST',body:args,profile:true})).data;
+   if(path==='/config'&&req.method==='GET'){const status=await entryStatus();if(typeof status?.activation_available!=='boolean')throw new ApiError(503,'CONFIGURATION_REQUIRED');return reply(200,{enabled:true,auth:'supabase',activation_available:status.activation_available,workflow_gate:'RULE_NOT_APPROVED',write_scope:'OWN_DRAFT_RESOURCES_ACCESS_AND_TENANT_MANUAL_REQUESTS'});}
+   async function entryStatus(){const key=accountDeletionServiceKey(env);if(!key)throw new ApiError(503,'CONFIGURATION_REQUIRED');return (await upstream('/rest/v1/rpc/public_account_entry_status',{method:'POST',profile:true,headers:{apikey:key,Authorization:'Bearer '+key},body:{}})).data;}
    const rawCookie=String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);
    const read=()=>openSession(rawCookie,env.BUSINESS_COOKIE_KEY);
    async function user(token){const {data}=await upstream('/auth/v1/user',{token});if(!UUID.test(data?.id)||!data.email_confirmed_at)throw new ApiError(401,'AUTHENTICATION_REQUIRED');return data;}
    async function valid(s){const identity=await user(s.access),tenant=await rpc('check_browser_session',{p_id:s.id,p_nonce_sha256:sha(s.nonce)},s.access);if(tenant!==s.tenant)throw new ApiError(401,'SESSION_REVOKED');return identity;}
    async function refreshTokens(s){const {data}=await upstream('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:s.refresh}});if(!data?.access_token||!data?.refresh_token||!Number.isSafeInteger(data.expires_in)||data.expires_in<=0)throw new ApiError(502,'UPSTREAM_RESPONSE_INVALID');return {...s,access:data.access_token,refresh:data.refresh_token,expires:now()+data.expires_in*1000};}
    function save(s){const encrypted=sealSession(s,env.BUSINESS_COOKIE_KEY);if(encrypted.length>3800)throw new ApiError(503,'SESSION_COOKIE_TOO_LARGE');res.setHeader('Set-Cookie',cookie(encrypted,Math.max(0,Math.floor((s.absolute-now())/1000))));}
+   if(path==='/recover'){
+    if(req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);fields(body,['operation_id','email']);
+    if(!UUID.test(body.operation_id||'')||typeof body.email!=='string'||!/^\S+@\S+\.\S+$/.test(body.email.trim())||body.email.length>254)throw new ApiError(422,'RECOVERY_FIELDS_INVALID');
+    if(!accountDeletionServiceKey(env))throw new ApiError(503,'CONFIGURATION_REQUIRED');
+    const address=String(req.headers['x-vercel-forwarded-for']||req.socket?.remoteAddress||'unavailable').slice(0,256),clientHash=createHmac('sha256',env.BUSINESS_COOKIE_KEY).update(address).digest('hex');
+    await requestPasswordRecovery({env,fetchImpl,origin,operation:body.operation_id,email:body.email.trim().toLowerCase(),clientHash});return reply(202,{accepted:true});
+   }
    if(path==='/activate'){
     if(req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req);fields(body,['email','password']);
+    const entry=await entryStatus();if(entry?.activation_available!==true)throw new ApiError(403,'ACCOUNT_ACTIVATION_CLOSED');
     if(typeof body.email!=='string'||!/^\S+@\S+\.\S+$/.test(body.email)||body.email.length>254||typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'ACTIVATION_FIELDS_INVALID');
     dispatchedWrite=true;await upstream('/auth/v1/signup?redirect_to='+encodeURIComponent(origin+'/account/activate'),{method:'POST',body:{email:body.email.trim().toLowerCase(),password:body.password}});
     return reply(200,{confirmation_required:true});
@@ -215,7 +226,10 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
    }
    if(path==='/snapshot'&&req.method==='GET'){const [core,planning,human]=await Promise.all([rpc('original_ui_snapshot',{p_tenant:session.tenant},session.access),rpc('schedule_draft_snapshot',{p_tenant:session.tenant},session.access),rpc('human_workflow_snapshot',{p_tenant:session.tenant},session.access)]);return reply(200,{data:{...core,...planning,...human}});}
    if(path==='/password'&&req.method==='POST'){
-    const body=await bodyOf(req);fields(body,['password']);if(typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'PASSWORD_TOO_SHORT');dispatchedWrite=true;await upstream('/auth/v1/user',{token:session.access,method:'PUT',body:{password:body.password}});return reply(200,{password_updated:true});
+    const body=await bodyOf(req);fields(body,['password','reset_sessions']);if(body.reset_sessions!==undefined&&typeof body.reset_sessions!=='boolean')throw new ApiError(422,'UNKNOWN_FIELDS');if(typeof body.password!=='string'||body.password.length<12||body.password.length>128)throw new ApiError(422,'PASSWORD_TOO_SHORT');dispatchedWrite=true;if(body.reset_sessions)await rpc('revoke_other_own_browser_sessions',{p_keep:session.id},session.access);
+    await upstream('/auth/v1/user',{token:session.access,method:'PUT',body:{password:body.password}});
+    if(body.reset_sessions){const revoked=await rpc('revoke_browser_session',{p_id:session.id,p_nonce_sha256:sha(session.nonce)},session.access);res.setHeader('Set-Cookie',cookie('',0));if(!revoked)throw new ApiError(503,'SESSION_REVOCATION_UNCONFIRMED',{outcome_unknown:true});try{await upstream('/auth/v1/logout?scope=global',{token:session.access,method:'POST'});}catch{/* Durable application sessions have already been revoked. */}res.setHeader('Set-Cookie',cookie('',0));}
+    return reply(200,{password_updated:true,signed_out:!!body.reset_sessions});
    }
    const match=path.match(/^\/data\/([a-z]+)(?:\/([a-f0-9-]{36}))?$/),resource=match?.[1],id=match?.[2];
    if(!match||!Object.hasOwn(RESOURCE,resource)||id&&!UUID.test(id))throw new ApiError(404,'ROUTE_NOT_FOUND');

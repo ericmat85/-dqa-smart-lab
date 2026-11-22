@@ -1,3 +1,4 @@
+import {originalBusinessEnabled} from './originalBusiness.mjs';
 import {useEffect,useState} from 'react';
 import {readRememberedLogin,saveRememberedLogin} from './rememberedLogin.mjs';
 
@@ -29,5 +30,5 @@ export default function LoginCredentials({accountId,passwordId,account,password,
 }
 export function LoginHelp({disabled=false}){
  const [notice,setNotice]=useState('');
- return <div className="login-help"><button type="button" className="login-help-button" disabled={disabled} onClick={()=>setNotice('請聯絡 DQA 管理員協助重設密碼；本展示環境不會寄送重設郵件。')}>忘記密碼？</button>{notice&&<p className="login-help-notice" role="status">{notice}</p>}</div>;
+ return <div className="login-help"><button type="button" className="login-help-button" disabled={disabled} onClick={()=>{if(originalBusinessEnabled()){history.pushState({},'', '/account/forgot-password');window.dispatchEvent(new Event('dqa:navigate'));}else setNotice('請聯絡 DQA 管理員協助重設密碼；本展示環境不會寄送重設郵件。');}}>忘記密碼？</button>{notice&&<p className="login-help-notice" role="status">{notice}</p>}</div>;
 }

@@ -1,0 +1,9 @@
+import {useRef,useState} from 'react';
+import {businessClient,businessErrorMessage} from './businessClient.mjs';
+import EnterpriseLoginLayout from './EnterpriseLoginLayout.jsx';
+import useSystemTheme from './useSystemTheme.js';
+export default function BusinessPasswordRecovery({navigate}){
+ const {dark,toggleTheme}=useSystemTheme(),[email,setEmail]=useState(''),[busy,setBusy]=useState(false),[sent,setSent]=useState(false),[error,setError]=useState(''),[unknown,setUnknown]=useState(false);const working=useRef(false);
+ async function submit(event){event.preventDefault();if(working.current||sent||unknown)return;working.current=true;setBusy(true);setError('');try{const result=await businessClient.request('/recover',{method:'POST',body:{operation_id:crypto.randomUUID(),email:email.trim().toLowerCase()}});if(result.accepted!==true)throw Error('RECOVERY_ACK_INVALID');setSent(true);}catch(e){setError(e.outcomeUnknown?'寄送結果尚未確認，請先查看信箱，勿重複送出。':businessErrorMessage(e));if(e.outcomeUnknown)setUnknown(true);}finally{working.current=false;setBusy(false);}}
+ return <EnterpriseLoginLayout system="lms" dark={dark} onToggle={toggleTheme}><div className="login-card unified-login-form"><h1>忘記密碼</h1>{sent?<div role="status"><p>若此信箱對應可使用的帳號，將收到重設密碼郵件。</p><p>請查看收件匣與垃圾郵件，使用信中的連結設定新密碼。</p></div>:<form onSubmit={submit}><label htmlFor="password-recovery-email">登入帳號（電子郵件）</label><input id="password-recovery-email" type="email" autoComplete="username" required maxLength={254} disabled={busy||unknown} value={email} onChange={event=>setEmail(event.target.value)}/><p>輸入你的帳號信箱，我們會寄送重設密碼連結。</p><button type="submit" className="login-submit" disabled={busy||unknown}>{busy?'寄送中…':'寄送重設密碼郵件'}</button></form>}{error&&<p role="alert" className="form-error">{error}</p>}<button className="back-button" type="button" disabled={busy} onClick={()=>navigate('/lms/login')}>返回登入</button></div></EnterpriseLoginLayout>;
+}

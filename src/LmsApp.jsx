@@ -1,3 +1,4 @@
+import BusinessAccountEntry from './BusinessAccountEntry.jsx';
 import {BusinessBookButton,BusinessHumanPending} from './BusinessHumanControls.jsx';
 import {originalHumanSource} from './originalBusiness.mjs';
 import {scheduleDraftCommand,prepareSharedDraftForm} from './sharedScheduleDrafts.mjs';
@@ -488,7 +489,7 @@ export function LoginPage({
 
 
 
-        {originalBusinessEnabled()&&!preview&&<a className="back-button" href="/account/activate">啟用帳號</a>}
+        {originalBusinessEnabled()&&!preview&&<BusinessAccountEntry/>}
         <button type="button" className="back-button" onClick={onBack}>
 
           ← 返回系統首頁
