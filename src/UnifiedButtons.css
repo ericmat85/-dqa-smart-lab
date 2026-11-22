@@ -25,3 +25,15 @@ html body #root .account-enable-switch:disabled{cursor:not-allowed;opacity:.5}
 html body #root .account-row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media(max-width:650px){html body #root .account-editor-dialog .account-form{padding:16px}html body #root .account-enable-card{padding:12px;gap:12px}html body #root .account-form-actions{flex-wrap:wrap}html body #root .account-form-actions>button{flex:1;white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){html body #root .account-switch-track,html body #root .account-switch-track>span{transition:none}}
+
+html body #root .account-form-actions>.account-delete-button[type=button]{margin-right:auto}
+html body #root .lms-enterprise .account-editor-dialog .account-form .account-form-actions .account-delete-button{color:#bf2439!important;background:var(--enterprise-card,#fff)!important;border:1px solid #e4a2ab!important}
+html body #root .lms-enterprise .account-editor-dialog .account-form .account-form-actions .account-delete-button:not(:disabled):hover{background:#fff0f2!important;border-color:#bf2439!important}
+html body #root .account-delete-confirmation{display:grid;gap:14px}
+html body #root .account-delete-confirmation p{margin:0;font-size:13px;line-height:1.8}
+html body #root .account-delete-target{display:flex;flex-direction:column;gap:6px;border:1px solid #efd0d5;border-radius:8px;background:var(--soft,#fff6f7);padding:14px;overflow-wrap:anywhere}
+html body #root .account-delete-target strong{font-size:15px}.account-delete-target span,.account-delete-confirmation small{font-size:12px;color:var(--muted,#63738e)}
+html body #root .account-delete-administrator{font-weight:400;overflow-wrap:anywhere}
+html body #root .account-delete-confirmation input{box-sizing:border-box;width:100%;min-height:40px;border:1px solid var(--enterprise-border,#d9e3f2);border-radius:7px;padding:8px 12px;background:var(--enterprise-bg,#f4f7fb);color:inherit}
+html body #root .account-delete-confirmation~.account-form-actions{justify-content:flex-end}
+@media(max-width:650px){html body #root .account-form-actions>.account-delete-button{margin-right:0}}
