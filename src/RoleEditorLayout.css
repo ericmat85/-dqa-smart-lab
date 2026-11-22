@@ -1,0 +1,29 @@
+/* Wide role workspace with independently scrolling contents and visible exits. */
+html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog[open]{display:flex;flex-direction:column;width:min(1160px,calc(100vw - 32px));max-width:none;height:min(720px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);padding:0;overflow:hidden;border-radius:14px}
+html body #root .lms-enterprise .role-editor-dialog>header{flex:none;gap:16px;padding:12px 20px;min-height:64px;box-sizing:border-box}
+html body #root .lms-enterprise .role-editor-dialog>header>button{position:relative;font-size:0!important;background:var(--enterprise-card);border-radius:8px;color:var(--enterprise-text)}
+html body #root .lms-enterprise .role-editor-dialog>header>button::before,html body #root .lms-enterprise .role-editor-dialog>header>button::after{content:"";position:absolute;top:50%;left:50%;width:18px;height:2px;border-radius:2px;background:currentColor;transform:translate(-50%,-50%) rotate(45deg)}
+html body #root .lms-enterprise .role-editor-dialog>header>button::after{transform:translate(-50%,-50%) rotate(-45deg)}
+html body #root .lms-enterprise .role-editor-dialog>header>button:hover{background:var(--soft);color:#2563eb}
+html body #root .lms-enterprise .role-editor-dialog form.role-editor{display:flex;flex-direction:column;flex:1;min-height:0;height:0;padding:0;margin:0;overflow:hidden;background:var(--enterprise-card)}
+html body #root .lms-enterprise .role-editor-dialog form.role-editor>.role-editor-body{flex:1;min-height:0;margin:0;padding:16px 20px!important;overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;scrollbar-gutter:stable}
+html body #root .lms-enterprise .role-editor-dialog .role-editor-fields{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px;margin-bottom:14px}
+html body #root .lms-enterprise .role-editor-dialog .role-access-layout{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,2fr);gap:16px;align-items:start}
+html body #root .lms-enterprise .role-editor-dialog .role-navigation-panel{display:grid;gap:12px;min-width:0}
+html body #root .lms-enterprise .role-editor-dialog form.role-editor .role-access-group{min-width:0;margin:0;padding:8px;border:1px solid var(--enterprise-border);border-radius:10px}
+html body #root .lms-enterprise .role-editor-dialog .role-access-group>legend{padding:0 6px;font-size:12px;font-weight:600;color:var(--enterprise-text)}
+html body #root .lms-enterprise .role-editor-dialog .role-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+html body #root .lms-enterprise .role-editor-dialog :is(.role-checks label,.role-admin-check){display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:7px;min-height:32px;margin:0;padding:5px 7px;box-sizing:border-box;border:1px solid transparent;border-radius:6px;font-size:12px;font-weight:400;line-height:1.45;cursor:pointer}
+html body #root .lms-enterprise .role-editor-dialog :is(.role-checks label,.role-admin-check)>span{min-width:0;overflow-wrap:anywhere}
+html body #root .lms-enterprise .role-editor-dialog :is(.role-checks label,.role-admin-check):hover{background:var(--soft)}
+html body #root .lms-enterprise .role-editor-dialog :is(.role-checks label,.role-admin-check):has(input:checked){background:var(--soft);border-color:var(--enterprise-border)}
+html body #root .lms-enterprise .role-editor-dialog input[type=checkbox]{appearance:auto;flex:none;width:16px!important;min-width:16px!important;max-width:16px!important;height:16px!important;min-height:16px!important;max-height:16px!important;margin:0!important;padding:0!important;accent-color:#2563eb;cursor:pointer}
+html body #root .lms-enterprise .role-editor-dialog label:has(input:disabled){cursor:default;opacity:.65}
+html body #root .lms-enterprise .role-editor-dialog .role-options{display:grid;gap:4px}
+html body #root .lms-enterprise .role-editor-dialog .role-editor-body>.account-inline-help{font-size:12px;line-height:1.5;margin:12px 0 0}
+html body #root .lms-enterprise .role-editor-dialog form.role-editor>.account-form-actions{flex:none;display:flex;align-items:center;gap:8px;margin:0;padding:12px 20px;background:var(--enterprise-card);border-top:1px solid var(--enterprise-border)}
+html body #root .lms-enterprise .role-editor-dialog form.role-editor>:is(.form-error,.account-notice){flex:none;margin:8px 20px}
+html body #root .lms-enterprise .role-editor-dialog :focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+@media(min-width:1100px){html body #root .lms-enterprise .role-editor-dialog .role-permissions-panel .role-checks{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog[open]{width:calc(100vw - 20px);height:calc(100dvh - 20px);max-height:calc(100dvh - 20px)}html body #root .lms-enterprise .role-editor-dialog .role-access-layout{grid-template-columns:minmax(0,1fr);gap:12px}html body #root .lms-enterprise .role-editor-dialog form.role-editor>.role-editor-body{padding:12px!important}html body #root .lms-enterprise .role-editor-dialog>header,html body #root .lms-enterprise .role-editor-dialog form.role-editor>.account-form-actions{padding:10px 12px}html body #root .lms-enterprise .role-editor-dialog :is(.role-checks label,.role-admin-check){min-height:40px;padding:5px}}
+@media(max-width:480px){html body #root .lms-enterprise .role-editor-dialog .role-editor-fields{grid-template-columns:minmax(0,1fr);gap:10px}}

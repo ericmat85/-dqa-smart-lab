@@ -82,3 +82,21 @@ test('wrong administrator password clears field and keeps account unchanged',asy
 test('delete confirmation cancellation clears password and preserves unsaved edits',async({page})=>{const s=await setup(page),d=await deletionEditor(page,s);await d.getByLabel('姓名',{exact:true}).fill('尚未儲存的姓名');await d.getByRole('button',{name:'刪除',exact:true}).click();const c=page.getByRole('dialog',{name:'確認刪除帳號'});await expect(c.getByText('刪除 合成待刪帳號',{exact:true})).toBeVisible();await c.getByLabel('管理者登入密碼').fill('Synthetic-admin-password12');await c.getByRole('button',{name:'取消刪除'}).click();await expect(page.getByRole('dialog',{name:'編輯帳號'}).getByLabel('姓名',{exact:true})).toHaveValue('尚未儲存的姓名');expect(s.deleteWrites).toHaveLength(0);});
 test('current administrator cannot delete own account',async({page})=>{const s=await setup(page);await open(page);await page.getByRole('button',{name:'編輯',exact:true}).click();const d=page.getByRole('dialog',{name:'編輯帳號'});await expect(d.getByRole('button',{name:'刪除',exact:true})).toBeDisabled();await expect(d.getByText('不能刪除目前登入的管理者帳號。')).toBeVisible();expect(s.deleteWrites).toHaveLength(0);});
 test('unknown deletion is recovered by receipt lookup without resending',async({page})=>{const s=await setup(page),d=await deletionEditor(page,s);s.unknownDelete=true;await d.getByRole('button',{name:'刪除',exact:true}).click();const c=page.getByRole('dialog',{name:'確認刪除帳號'});await c.getByLabel('管理者登入密碼').fill('Synthetic-admin-password12');await c.getByRole('button',{name:'確認刪除',exact:true}).click();await expect(c.getByRole('button',{name:'確認刪除',exact:true})).toBeDisabled();await page.reload();await page.getByRole('button',{name:'查詢操作結果',exact:true}).click();await expect(page.getByRole('status')).toContainText('已確認帳號刪除完成');expect(s.deleteWrites).toHaveLength(1);expect(await page.evaluate(()=>JSON.stringify(sessionStorage))).not.toContain('Synthetic-admin-password12');expect(s.errors).toEqual([]);});
+
+test('role create and edit use a compact horizontal workspace with a visible exit',async({page,isMobile},info)=>{
+ const s=await setup(page);await open(page);await page.getByRole('tab',{name:/角色與權限/}).click();
+ await page.getByRole('button',{name:'建立新角色'}).click();let d=page.getByRole('dialog',{name:'建立角色'});
+ await expect(d.getByLabel('角色名稱',{exact:true})).toBeVisible();await expect(d.getByRole('checkbox')).toHaveCount(38);
+ const bounds=await d.boundingBox();if(!isMobile){expect(bounds.width).toBeGreaterThan(1000);expect(bounds.width).toBeGreaterThan(bounds.height);}
+ await d.getByLabel('查看設備',{exact:true}).check();await expect(d.getByLabel('查看設備',{exact:true})).toBeChecked();
+ await page.screenshot({path:info.outputPath('create-role-wide.png'),fullPage:true});
+ await d.getByLabel('物料庫存入庫／出庫及盤點',{exact:true}).scrollIntoViewIfNeeded();
+ await expect(d.getByRole('button',{name:'關閉建立角色',exact:true})).toBeInViewport();await expect(d.getByRole('button',{name:'儲存',exact:true})).toBeInViewport();
+ await d.getByRole('button',{name:'關閉建立角色',exact:true}).click();await expect(d).toHaveCount(0);expect(s.writes).toHaveLength(0);
+ await page.getByRole('button',{name:'編輯角色工作區管理者',exact:true}).click();d=page.getByRole('dialog',{name:'編輯角色'});
+ await expect(d.getByLabel('角色名稱',{exact:true})).toHaveValue('工作區管理者');await d.getByLabel('角色名稱',{exact:true}).fill('未儲存的角色名稱');
+ await page.screenshot({path:info.outputPath('edit-role-wide.png'),fullPage:true});
+ await d.getByLabel('物料庫存入庫／出庫及盤點',{exact:true}).scrollIntoViewIfNeeded();await expect(d.getByRole('button',{name:'關閉編輯角色',exact:true})).toBeInViewport();
+ const overflow=await d.evaluate(e=>e.scrollWidth-e.clientWidth);expect(overflow).toBeLessThanOrEqual(1);await d.getByRole('button',{name:'關閉編輯角色',exact:true}).click();
+ await expect(page.getByRole('cell',{name:'工作區管理者',exact:true})).toBeVisible();expect(s.writes).toHaveLength(0);if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(s.errors).toEqual([]);
+});
