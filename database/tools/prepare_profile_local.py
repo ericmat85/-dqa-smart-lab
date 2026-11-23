@@ -13,5 +13,6 @@ sql('CREATE ROLE service_role; ALTER TABLE auth.users ADD COLUMN banned_until ti
 for f in sorted((root/'migrations').glob('*.sql')):
  if 4<=int(f.name[:3])<=33:
   sql('BEGIN;'+f.read_text()+'\nCOMMIT;');print(f.name)
+sql("UPDATE dqa_business.memberships SET login_email='local-'||replace(auth_user_id::text,'-','')||'@example.invalid' WHERE coalesce(login_email,'')='';")
 sql('UPDATE auth.users u SET email=m.login_email,email_confirmed_at=clock_timestamp() FROM dqa_business.memberships m WHERE m.auth_user_id=u.id;')
 print('LOCAL_ONLY_READY')
