@@ -43,14 +43,15 @@ export function trialExecution(profile,start,allocations,hours=profile?.hours){
    if(a.quantity>a.capacity)throw Error('BATCH_CAPACITY_EXCEEDED');
    segments.push({equipment_id:id,quantity:a.quantity,start_ms:profileMidnight(start),end_ms:profileMidnight(start)+hours*HOUR});dates.add(start);continue;
   }
-  if(hours>profile.daily_hours)throw Error('OPERATION_EXCEEDS_DAILY_HOURS');
+  const dailyHours=Math.min(profile.daily_hours,a.daily_hours??profile.daily_hours);
+  if(!Number.isFinite(dailyHours)||dailyHours<=0||hours>dailyHours)throw Error('OPERATION_EXCEEDS_DAILY_HOURS');
   const capacity=profile.id==='VIBRATION_DURABILITY'?1:a.capacity;
   let remaining=a.quantity,offset=0;
   while(remaining>0){
    if(offset>2048||segments.length>4000)throw Error('TRIAL_PLANNING_LIMIT');
    const date=taipeiDay(profileMidnight(start)+offset*DAY);offset++;
    if(profile.calendar==='weekdays'&&!operationDay(date))continue;
-   for(let used=0;remaining>0&&used+hours<=profile.daily_hours;used+=hours){
+   for(let used=0;remaining>0&&used+hours<=dailyHours;used+=hours){
     const quantity=Math.min(capacity,remaining),begin=profileMidnight(date)+used*HOUR;
     segments.push({equipment_id:id,quantity,start_ms:begin,end_ms:begin+hours*HOUR});remaining-=quantity;dates.add(date);
    }

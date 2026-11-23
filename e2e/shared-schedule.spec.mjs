@@ -8,7 +8,13 @@ async function install(page,s,{admin=true}={}){
  await page.route('**/api/**',async route=>{const q=route.request(),p=new URL(q.url()).pathname,b=q.postDataJSON(),send=(v,status=200)=>route.fulfill({status,json:{...v,trace_id:'I-SYNTHETIC'}}),bad=(code,status=403)=>send({error:{code}},status);
  if(!p.startsWith('/api/business'))return bad('LIVE_PROVIDER_DISABLED');const path=p.slice('/api/business'.length);
  if(path==='/me')return send({user:{id:id(1),email:'synthetic@example.invalid'},member:{id:id(1),display_name:'合成管理者',role_name:admin?'系統管理員':'檢視者',is_admin:admin,permissions:admin?[]:['requests.read_all','equipment.read','catalog.read','schedules.read_all'],systems:['lms','lab','request'],pages:['dashboard','requests','schedule','equipment','maintenance','reports','settings','archive']}});
- if(path==='/snapshot')return send({data:{requests:[s.request],trials:defaultTrialCatalog().map((t,i)=>({...s.trial,id:t.profileId==='HIGH_HUMIDITY'?s.trial.id:id(100+i),legacy_id:t.id,name:t.name,aliases:t.aliases,profile_code:t.profileId,specification:t.specification,acceptance:t.acceptance,equipment_reference:t.equipment,specification_version:t.version,duration_hours:t.durationHours})),members:[{id:id(1),display_name:'合成管理者',enabled:true},{id:id(2),display_name:'合成執行人',enabled:true}],roles:[],sites:[],departments:[],equipment:[{id:id(12),legacy_id:'EQ-SYNTHETIC',name:'恆溫恆濕機 合成',category:'溫濕度',space_units:6,daily_hours:24,operational_status:'IDLE',revision:2,specification:'-40~150°C；10~98%RH'}],materials:[],schedules:[],allocations:[],borrows:[],operations:[],reports:[],quality:[],qualifications:[],resource_events:[],workflow_versions:[{id:id(20),request_id:id(11),version:1,document_sha256:'a'.repeat(64)}],workflow_events:[],workflow_signatures:[],schedule_drafts:s.drafts,schedule_executors:[{id:id(2),display_name:'合成執行人',revision:3}],formal_booking_enabled:false}});
+ if(path==='/snapshot')return send({data:{requests:[s.request],trials:defaultTrialCatalog().map((t,i)=>({...s.trial,id:t.profileId===s.trial.profile_code?s.trial.id:id(100+i),legacy_id:t.id,name:t.name,aliases:t.aliases,profile_code:t.profileId,specification:t.specification,acceptance:t.acceptance,equipment_reference:t.equipment,specification_version:t.version,duration_hours:t.durationHours})),members:[{id:id(1),display_name:'合成管理者',enabled:true},{id:id(2),display_name:'合成執行人',enabled:true}],roles:[],sites:[],departments:[],equipment:[{id:id(12),legacy_id:'EQ-SYNTHETIC',name:s.equipmentName||'恆溫恆濕機 合成',category:s.category||'溫濕度',space_units:s.capacity??6,daily_hours:24,operational_status:'IDLE',revision:2,specification:'-40~150°C；10~98%RH'}],materials:[],schedules:[],allocations:[],borrows:[],operations:[],reports:[],quality:[],qualifications:[],resource_events:[],workflow_versions:[{id:id(20),request_id:id(11),version:1,document_sha256:'a'.repeat(64)}],workflow_events:[],workflow_signatures:[],schedule_drafts:s.drafts,schedule_executors:[{id:id(2),display_name:'合成執行人',revision:3}],formal_booking_enabled:false,human_workflow_enabled:s.human===true}});
+ if(path==='/planning/preview'){
+  (s.previews??=[]).push(b);if(s.previewError)return bad('PLANNING_RESOURCE_CONFLICT',409);
+  const c=b.command,date=s.dayCase?(c.data.sample_space_units===2?day(start+3*86400000):START):s.previewEnd||END;if(s.previewDelay)await new Promise(resolve=>{s.releasePreview=resolve;});
+  return send({data:{scheduling_unit:'DAY',scheduling_days:s.dayCase?(c.data.sample_space_units===2?2:1):11,calendar_days:s.dayCase?(c.data.sample_space_units===2?4:1):11,calendar:s.dayCase?'weekdays':'continuous',scope:'DRAFT_ONLY',reserved:false,start_date:c.data.start_date,end_date:date,sample_space_units:c.data.sample_space_units,hours_per_batch:s.dayCase?1:250}});
+ }
+ if(path.startsWith('/execution/')){(s.executions??=[]).push(b);return bad('HUMAN_ACCESS_DENIED');}
  if(path==='/planning/prepare'){if(!admin)return bad('PLANNING_ACCESS_DENIED');return send({data:{state:'PLANNED',id:b.operation_id}});}
  if(path==='/planning/execute'){
   if(!admin)return bad('PLANNING_ACCESS_DENIED');s.writes.push(b);const c=b.command;if(c.expected_request_revision!==s.request.revision)return bad('REVISION_CONFLICT',409);if(s.conflict)return bad('PLANNING_RESOURCE_CONFLICT',409);
@@ -27,3 +33,47 @@ test('stale request revision remains captured after background sync',async({page
 test('lost acknowledgement survives reload and uses lookup without another execute',async({page})=>{const s=state();s.unknown=true;await install(page,s);const d=await editor(page);await fill(d);await d.getByRole('button',{name:'儲存排程草稿'}).click();await expect(d.getByRole('button',{name:'查詢處理結果'})).toBeVisible();await expect(d.getByRole('button',{name:'儲存排程草稿'})).toBeDisabled();await page.reload();await page.getByRole('button',{name:'查詢處理結果'}).click();await expect(page.getByText('資料庫已確認儲存完成。')).toBeVisible();expect(s.writes).toHaveLength(1);});
 test('read-only role cannot edit a shared schedule draft',async({page})=>{const s=state();await install(page,s,{admin:false});await page.goto('/lms/schedule');await expect(page.getByRole('button',{name:'編輯排程',exact:true})).toBeDisabled();expect(s.writes).toHaveLength(0);});
 test('waiting execute prevents duplicate submission and trial controls stay disabled',async({page})=>{const s=state();s.delay=true;await install(page,s);const d=await editor(page);await fill(d);await expect(d.getByRole('button',{name:'中止排程'})).toBeDisabled();await d.getByRole('button',{name:'儲存排程草稿'}).click();await expect.poll(()=>typeof s.release).toBe('function');await expect(d.getByRole('button',{name:'儲存排程草稿'})).toBeDisabled();await expect(d.getByRole('button',{name:'關閉',exact:true})).toBeDisabled();s.release();await expect(d).toHaveCount(0);expect(s.writes).toHaveLength(1);expect(s.errors).toEqual([]);});
+
+
+test('completion date is backend-controlled and an old date is never sent to save',async({page},info)=>{
+ const s=state();s.previewEnd=day(start+11*86400000);await install(page,s);const d=await editor(page);
+ await d.getByLabel('設備選擇').selectOption('EQ-SYNTHETIC');await d.getByLabel(/^執行人/).selectOption(id(2));await d.getByLabel(/每件樣品使用空間/).fill('2');await d.getByLabel(/^開始日期/).fill(START);
+ await expect(d.getByLabel(/^預計完成日期/)).toHaveJSProperty('readOnly',true);await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);
+ await page.screenshot({path:info.outputPath('authoritative-completion.png'),fullPage:true});await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);
+ expect(s.writes[0].command.data.end_date).toBe(s.previewEnd);expect(s.previews[0].command.data.end_date).toBe(START);expect(s.errors).toEqual([]);
+});
+
+test('editing sample space rechecks completion and blocks save while calculation waits',async({page})=>{
+ const s=state();await install(page,s);const d=await editor(page);await fill(d);s.previewDelay=true;s.previewEnd=day(start+11*86400000);
+ await d.getByLabel(/每件樣品使用空間/).fill('1');await expect.poll(()=>typeof s.releasePreview).toBe('function');await expect(d.getByRole('button',{name:'儲存排程草稿',exact:true})).toBeDisabled();await expect(d.getByLabel(/^預計完成日期/)).toHaveValue('');
+ s.releasePreview();await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);await expect(d.getByRole('button',{name:'儲存排程草稿',exact:true})).toBeEnabled();expect(s.previews.at(-1).command.data.sample_space_units).toBe(1);expect(s.writes).toHaveLength(0);
+});
+
+test('preview resource conflict preserves inputs without creating a draft',async({page})=>{
+ const s=state();await install(page,s);const d=await editor(page);await fill(d);s.previewError=true;
+ await d.getByLabel(/每件樣品使用空間/).fill('1');await expect(d.getByRole('alert')).toContainText('正式占用');await expect(d.getByLabel(/^開始日期/)).toHaveValue(START);await expect(d.getByLabel(/每件樣品使用空間/)).toHaveValue('1');await expect(d.getByRole('button',{name:'儲存排程草稿',exact:true})).toBeDisabled();expect(s.writes).toHaveLength(0);expect(s.errors).toEqual([]);
+});
+
+
+test('a late calculation cannot overwrite a newer form result',async({page})=>{
+ const s=state();await install(page,s);const d=await editor(page);await fill(d);s.previewDelay=true;
+ await d.getByLabel(/每件樣品使用空間/).fill('1');await expect.poll(()=>typeof s.releasePreview).toBe('function');const releaseOld=s.releasePreview;
+ s.previewDelay=false;s.previewEnd=day(start+11*86400000);await d.getByLabel(/^樣品編號/).fill('SMP-NEWER');await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);
+ releaseOld();await page.waitForTimeout(500);await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);expect(s.writes[0].command.data.end_date).toBe(s.previewEnd);expect(s.writes[0].command.data.sample_code).toBe('SMP-NEWER');expect(s.errors).toEqual([]);
+});
+
+
+test('formal booking requires saving a changed sample-space value even if the finish date stays the same',async({page})=>{
+ const s=state();s.human=true;await install(page,s);let d=await editor(page);await fill(d);await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);
+ await page.getByRole('button',{name:'編輯排程',exact:true}).click();d=page.getByRole('dialog',{name:'編輯試驗排程｜REQ-SHARED-SYNTHETIC'});await d.getByLabel(/每件樣品使用空間/).fill('1');await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(END);await expect(d.getByRole('button',{name:'確認正式預約',exact:true})).toBeEnabled();
+ page.on('dialog',dialog=>dialog.accept());await d.getByRole('button',{name:'確認正式預約',exact:true}).click();await expect(d.getByRole('alert')).toContainText('表單尚有變更');expect(s.executions||[]).toHaveLength(0);expect(s.writes).toHaveLength(1);expect(s.errors).toEqual([]);
+});
+
+
+test('one-hour test shows whole-day planning; a second batch moves to the next working day',async({page},info)=>{
+ const s=state(),trial=defaultTrialCatalog().find(t=>t.profileId==='WATER_INGRESS');s.trial={...s.trial,name:trial.name,aliases:trial.aliases,profile_code:trial.profileId,duration_hours:1};s.request={...s.request,quantity:2,specification:'試驗時間：1 小時。',form_details:{testItems:[trial.name],purpose:['合成驗證']}};s.equipmentName='防水試驗機 合成';s.category='防水';s.capacity=2;s.dayCase=true;
+ await install(page,s);const d=await editor(page);await d.getByLabel('設備選擇').selectOption('EQ-SYNTHETIC');await d.getByLabel(/^執行人/).selectOption(id(2));await d.getByLabel(/每件樣品使用空間/).fill('1');await d.getByLabel(/^開始日期/).fill(START);
+ await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(START);await expect(d.getByText('預計需 1 作業日；設備與執行人整天保留。',{exact:true})).toBeVisible();await page.screenshot({path:info.outputPath('one-hour-one-day.png'),fullPage:true});
+ await d.getByLabel(/每件樣品使用空間/).fill('2');await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(day(start+3*86400000));await expect(d.getByText('預計需 2 作業日；設備與執行人整天保留。',{exact:true})).toBeVisible();await page.screenshot({path:info.outputPath('one-hour-two-batches.png'),fullPage:true});
+ await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);expect(s.writes[0].command.data.end_date).toBe(day(start+3*86400000));expect(s.writes[0].command.data.sample_space_units).toBe(2);expect(s.request.quantity).toBe(2);expect(s.errors).toEqual([]);
+});

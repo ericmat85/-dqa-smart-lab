@@ -1,4 +1,5 @@
-import {trialProfile,trialExecution,sequentialAllocations} from './trialProfiles.mjs';
+import {dayBasedTrialExecution} from './dayBasedTrialExecution.mjs';
+import {trialProfile,sequentialAllocations} from './trialProfiles.mjs';
 import {explicitHours} from './trialSourceFacts.mjs';
 // Shared drafts do not reserve equipment, change request state or activate AI.
 const idPattern=/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
@@ -25,7 +26,7 @@ export function prepareSharedDraftForm({editing,form,equipment,updateEnd=false})
   const quantity=Number(editing.quantity),units=Number(form.sampleSpaceUnits);if(!Number.isSafeInteger(units)||units<1||units>100000)throw Error('請填寫每件樣品使用空間 U（1～100000 的整數）。');let remaining=quantity;
   const allocations=profile.mode==='serial'?sequentialAllocations(ids,quantity,id=>Math.floor(Number(equipment.find(e=>e.id===id)?.spaceUnits)/units)):ids.map((id,i)=>{const capacity=Math.floor(Number(equipment.find(e=>e.id===id)?.spaceUnits)/units),quantity=Math.min(capacity,remaining-(ids.length-i-1));remaining-=quantity;return {equipment_id:id,quantity,capacity};});
   if(remaining>0&&profile.mode!=='serial')throw Error('設備可用空間 U 不足。');
-  result.end=trialExecution(profile,form.time,allocations,hours).end_date;
+  result.end=dayBasedTrialExecution(profile,form.time,allocations.map(a=>({...a,daily_hours:Number(equipment.find(e=>e.id===a.equipment_id)?.dailyHours??profile.daily_hours)})),hours).end_date;
  }
  return result;
 }
