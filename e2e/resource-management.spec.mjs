@@ -9,7 +9,7 @@ async function setup(page,{admin=true}={}){
  if(path==='/me')return send({member:{...member,is_admin:admin,role_name:admin?'工作區管理者':'檢視者'},user:{id:uid(9),email:'synthetic@example.invalid'}});
  if(path==='/snapshot')return send({data:{members:[{id:member.id,display_name:member.display_name,enabled:true}],requests:[],schedules:[],sites:[],departments:[],borrows:[],operations:[],allocations:[],roles:[],quality:[],qualifications:[],reports:[],trials:s.trials,equipment:s.equipment,materials:s.materials,resource_events:s.events}});
  if(path==='/resources/prepare'){s.plans.push(b);return send({data:{id:b.operation_id,state:'PLANNED'}});}
- if(path==='/resources/execute'){s.writes.push(b);if(s.conflict)return fail('REVISION_CONFLICT');const c=b.command,k={trial:'trials',equipment:'equipment',material:'materials'}[c.kind],old=s[k].find(v=>v.id===c.id);let row={...old,...c.data,id:c.id,revision:(old?.revision||0)+1};
+ if(path==='/resources/execute'){s.writes.push(b);if(s.conflict)return fail('REVISION_CONFLICT');if(s.reserved&&b.command.kind==='equipment'&&b.command.action==='status')return fail('RESOURCE_RESERVED');const c=b.command,k={trial:'trials',equipment:'equipment',material:'materials'}[c.kind],old=s[k].find(v=>v.id===c.id);let row={...old,...c.data,id:c.id,revision:(old?.revision||0)+1};
  if(c.action==='stock'){const delta=c.data.quantity*(c.data.mode==='ISSUE'?-1:1);if(old.available_quantity+delta<0)return fail('STOCK_INSUFFICIENT');row={...old,revision:old.revision+1,total_quantity:old.total_quantity+delta,available_quantity:old.available_quantity+delta};}
  else if(c.action==='status')row={...old,revision:old.revision+1,...(c.kind==='equipment'?{operational_status:c.data.status,service_started_at:c.data.status==='IDLE'?null:'2026-11-22T00:00:00Z'}:{status:c.data.status})};
  else if(!old)row={...row,...(c.kind==='trial'?{legacy_id:'TRIAL-'+c.id.replaceAll('-',''),source_kind:'MANUAL',enabled:true}:c.kind==='equipment'?{operational_status:'IDLE'}:{status:'AVAILABLE'})};
@@ -29,3 +29,27 @@ test('over-issue and stale revision show errors without a second dispatch',async
 test('unknown stock result survives reload and is queried without reissuing',async({page})=>{const s=await setup(page);s.unknown=true;const d=await stockForm(page);await d.getByRole('button',{name:'確認庫存異動'}).click();await expect(d.getByRole('button',{name:'查詢處理結果'})).toBeVisible();await expect(d.getByRole('button',{name:'確認庫存異動'})).toBeDisabled();await page.reload();await page.getByRole('button',{name:'查詢處理結果'}).click();await expect(page.getByText('資料庫已確認儲存完成。')).toBeVisible();expect(s.writes).toHaveLength(1);expect(s.materials[0].available_quantity).toBe(7);});
 test('double click while operation waits sends exactly one execute',async({page})=>{const s=await setup(page);s.delay=true;const d=await stockForm(page);await d.getByRole('button',{name:'確認庫存異動'}).click();await expect.poll(()=>typeof s.release).toBe('function');await expect(d.getByRole('button',{name:'確認庫存異動'})).toBeDisabled();await page.keyboard.press('Escape');await expect(d).toBeVisible();s.release();await expect(d).toHaveCount(0);expect(s.writes).toHaveLength(1);});
 test('read-only role cannot use catalog, equipment or stock write controls',async({page})=>{const s=await setup(page,{admin:false});await page.goto('/lms/equipment');await expect(page.getByRole('button',{name:/新增設備/})).toHaveCount(0);await page.goto('/lms/maintenance');await expect(page.getByRole('button',{name:/新增物料/})).toBeDisabled();await expect(page.getByRole('button',{name:'庫存異動',exact:true})).toHaveCount(0);expect(s.writes).toHaveLength(0);expect(s.errors).toEqual([]);});
+
+
+test('unallocated usage release defaults to idle and persists without offering maintenance',async({page,isMobile},info)=>{
+ const s=await setup(page);s.equipment[0].operational_status='IN_USE';
+ await page.goto('/lms/equipment');await page.getByRole('button',{name:/狀態變更/}).first().click();
+ const d=page.getByRole('dialog',{name:'設備狀態變更'});await d.getByRole('combobox').first().selectOption('EQ-SYNTHETIC');
+ await expect(d.getByLabel(/變更為/)).toHaveValue('待機中');await expect(d.getByLabel(/變更為/).locator('option')).toHaveText(['待機中']);
+ await expect(d.getByRole('note')).toContainText('檢查排程與借用');await expect(d.getByRole('button',{name:'確認變更',exact:true})).toBeDisabled();
+ await d.getByLabel(/變更原因/).fill('確認設備已無占用，解除遺留使用狀態');await page.screenshot({path:info.outputPath('unallocated-release.png'),fullPage:true});
+ await d.getByRole('button',{name:'確認變更',exact:true}).click();await expect(d).toHaveCount(0);
+ expect(s.writes).toHaveLength(1);expect(s.writes[0].command.data).toEqual({status:'IDLE',reason:'確認設備已無占用，解除遺留使用狀態'});expect(s.writes[0].command.expected_revision).toBe(1);
+ expect(s.equipment[0].operational_status).toBe('IDLE');expect(s.events[0].detail).toEqual({before_status:'IN_USE',after_status:'IDLE'});
+ await page.reload();await page.getByRole('button',{name:/^待機中/}).click();await expect(page.getByRole('button',{name:'EQ-SYNTHETIC',exact:true})).toBeVisible();expect(s.errors).toEqual([]);
+ if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});
+
+test('occupied equipment keeps its usage status and dialog on server denial',async({page},info)=>{
+ const s=await setup(page);s.equipment[0].operational_status='IN_USE';s.reserved=true;
+ await page.goto('/lms/equipment');await page.getByRole('button',{name:/狀態變更/}).first().click();const d=page.getByRole('dialog',{name:'設備狀態變更'});
+ await d.getByRole('combobox').first().selectOption('EQ-SYNTHETIC');await d.getByLabel(/變更原因/).fill('確認是否可解除');await d.getByRole('button',{name:'確認變更',exact:true}).click();
+ await expect(d.getByRole('alert')).toContainText('設備或物料仍在使用、借用或預約中');await expect(d.getByLabel(/變更原因/)).toHaveValue('確認是否可解除');
+ expect(s.equipment[0].operational_status).toBe('IN_USE');expect(s.events).toHaveLength(0);expect(s.writes).toHaveLength(1);expect(s.errors).toEqual([]);
+ await page.screenshot({path:info.outputPath('occupied-blocked.png'),fullPage:true});
+});

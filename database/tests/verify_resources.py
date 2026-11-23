@@ -40,7 +40,34 @@ class Tests(unittest.TestCase):
  def test_unknown_actor_cannot_read_another_operation(self):self.ok(auth()+prepare(command())+auth('10000000-0000-0000-0000-000000000002')+f"SELECT dqa_business.resource_operation_result('{T}','{OP}')->>'state'",'NOT_FOUND')
  def test_equipment_revision_conflict(self):self.deny(auth()+save()+save(command(revision=7),OP2),'REVISION_CONFLICT')
  def test_equipment_maintenance_start_and_finish_are_durable(self):self.ok(auth()+save()+save(command(action='status',revision=1,data={'status':'MAINTENANCE','reason':'合成維護開始'}),OP2)+save(command(action='status',revision=2,data={'status':'IDLE','reason':'合成維護完成'}),'ec000000-0000-4000-8000-000000000012')+f"SELECT operational_status,service_started_at IS NULL,display_details ? 'lastMaintenance' FROM dqa_business.equipment WHERE id='{E}'",'IDLE|t|t')
- def test_active_equipment_is_not_manually_released(self):self.deny(auth()+save()+"RESET ROLE;UPDATE dqa_business.equipment SET operational_status='IN_USE';SET LOCAL ROLE authenticated;"+save(command(action='status',revision=2,data={'status':'IDLE','reason':'不應釋放'}),OP2),'RESOURCE_RESERVED')
+ def usage(self,state='IN_USE'):
+  return auth()+save()+f"RESET ROLE;UPDATE dqa_business.equipment SET operational_status='{state}' WHERE id='{E}';"
+ def release(self,status='IDLE',reason='確認無占用，解除遺留使用狀態',revision=2):
+  return auth()+save(command(action='status',revision=revision,data={'status':status,'reason':reason}),OP2)
+ def allocation(self,released=False):
+  return f"INSERT INTO dqa_business.schedule_equipment(tenant_id,schedule_id,equipment_id,reserve_from,reserve_until,allocated_units,sample_quantity,released_at) SELECT tenant_id,schedule_id,'{E}',reserve_from,reserve_until,1,1,"+('clock_timestamp()' if released else 'NULL')+f" FROM dqa_business.schedule_equipment WHERE tenant_id='{T}' LIMIT 1;"
+ def borrow(self,status):
+  # Seed the unsupported borrowing workflow as owner, then restore its gate before the tested command.
+  return f"ALTER TABLE dqa_business.borrows DISABLE TRIGGER workflow_gate;INSERT INTO dqa_business.borrows(tenant_id,legacy_id,borrower_member_id,equipment_id,quantity,status) SELECT tenant_id,'BORROW-RELEASE-TEST',id,'{E}',1,'{status}' FROM dqa_business.memberships WHERE tenant_id='{T}' AND auth_user_id='{U}';ALTER TABLE dqa_business.borrows ENABLE TRIGGER workflow_gate;"
+ def test_unallocated_usage_can_return_to_idle_with_audit(self):
+  self.ok(self.usage()+self.release()+f"SELECT e.operational_status,e.service_started_at IS NULL,NOT(e.display_details ? 'lastMaintenance'),NOT(e.display_details ? 'lastCalibration'),v.detail->>'before_status',v.detail->>'after_status',v.reason,v.actor_member_id IS NOT NULL FROM dqa_business.equipment e JOIN dqa_business.resource_events v ON v.resource_id=e.id AND v.action='STATUS' WHERE e.id='{E}'",'IDLE|t|t|t|IN_USE|IDLE|確認無占用，解除遺留使用狀態|t')
+ def test_unreleased_allocation_still_blocks_even_for_admin(self):
+  self.deny(self.usage()+self.allocation()+self.release(),'RESOURCE_RESERVED')
+ def test_active_borrow_blocks_even_when_usage_label_is_stale(self):
+  for state in ['PENDING','APPROVED','ON_LOAN']:self.deny(self.usage()+self.borrow(state)+self.release(),'RESOURCE_RESERVED')
+ def test_released_allocation_and_returned_borrow_allow_reset(self):
+  self.ok(self.usage()+self.allocation(True)+self.borrow('RETURNED')+self.release()+f"SELECT operational_status FROM dqa_business.equipment WHERE id='{E}'",'IDLE')
+ def test_usage_cannot_jump_directly_to_service(self):
+  for target in ['MAINTENANCE','CALIBRATION']:self.deny(self.usage()+self.release(target),'RESOURCE_RESERVED')
+ def test_loan_pause_and_retirement_are_not_bypassed(self):
+  for state in ['ON_LOAN','PAUSED','RETIRED']:self.deny(self.usage(state)+self.release(),'RESOURCE_RESERVED')
+ def test_unallocated_usage_release_still_needs_permission(self):
+  self.deny(self.usage()+auth('10000000-0000-0000-0000-000000000002')+save(command(action='status',revision=2,data={'status':'IDLE','reason':'不應釋放'}),OP2),'RESOURCE_WRITE_DENIED')
+ def test_usage_release_requires_reason_and_current_revision(self):
+  self.deny(self.usage()+self.release(reason=''),'RESOURCE_REASON_REQUIRED')
+  self.deny(self.usage()+self.release(revision=1),'REVISION_CONFLICT')
+ def test_usage_release_replay_records_only_one_status_event(self):
+  self.ok(self.usage()+self.release()+execute(OP2)+f"SELECT count(*) FROM dqa_business.resource_events WHERE resource_id='{E}' AND action='STATUS'",'1')
  def test_reserved_capacity_cannot_be_changed(self):
   e='a4000000-0000-0000-0000-000000000001';data=equipment(legacy_id='EQ-TEST',space_units=1);self.deny(auth()+save(command(id=e,revision=1,data=data)),'RESOURCE_RESERVED')
  def test_status_cannot_fake_equipment_workflow(self):self.deny(auth()+save()+save(command(action='status',revision=1,data={'status':'IN_USE','reason':'不應繞過排程'}),OP2),'RESOURCE_FIELDS_INVALID')
