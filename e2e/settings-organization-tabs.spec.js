@@ -44,7 +44,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
 });
 test('home diagnostics move to the relevant modules and keep live source navigation',async({page})=>{
  await seed(page);await page.goto('/lms/settings');const before=await business(page),home=page.locator('.settings-management');
- await expect(home.locator('.management-fold')).toHaveCount(0);await expect(home.locator('.admin-module-card')).toHaveCount(13);
+ await expect(home.locator('.management-fold')).toHaveCount(0);await expect(home.locator('.admin-module-card')).toHaveCount(14);
  for(const title of ['資料來源健檢','待處理工作提醒','系統規則與資料說明'])await expect(home.getByText(title,{exact:true})).toHaveCount(0);
  await home.getByRole('button',{name:'開啟系統監控',exact:true}).click();const health=page.getByRole('region',{name:'資料來源健檢',exact:true});await expect(health).toBeVisible();await expect(health.getByRole('columnheader',{name:'資料大小'})).toBeVisible();await expect(health.locator('tbody tr')).toHaveCount(10);await expect(health.locator('tbody')).toContainText('KB');await health.getByText('資料來源與計算方式',{exact:false}).click();await expect(health).toContainText('重疊時段不重複計算');
  await page.goto('/lms/settings/notifications');const reminders=page.getByRole('region',{name:'待處理工作提醒清單',exact:true});const row=reminders.getByRole('row').filter({hasText:'校驗到期'}).filter({hasText:'EQ-001'});await expect(row).toBeVisible();await row.getByRole('button',{name:'前往處理',exact:true}).click();await expect(page).toHaveURL(/\/lms\/equipment/);

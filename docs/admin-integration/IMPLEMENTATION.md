@@ -10,7 +10,7 @@
 
 ## 實作及資料契約
 
-- 同一個 `dqa_business.settings`、module `workspace_profile_v1` 保存顯示名稱、顯示日期／時區與實驗室資訊，未另建組織表。原瀏覽器組織名稱編輯／摘要入口移除，部門、成員與設備據點仍沿用原來源。
+- 同一個 `dqa_business.settings`、module `workspace_profile_v1` 保存顯示名稱、顯示日期／時區與實驗室資訊，未另建組織表。Cloud 模式移除瀏覽器組織名稱編輯／摘要入口；Demo 模式保留原有本機名稱編輯流程，明確不作為 Cloud 共用資料。部門、成員與設備據點仍沿用原來源。
 - 未設定時讀取既有 tenants.name 作為工作區顯示名稱預設，日期 YYYY/MM/DD、Asia/Taipei，其他欄位空白；讀取不插入資料。不改 tenants.name/時區或工作區 ID，顯示名稱是可選顯示覆寫，不能改變工作區身分。
 - GET `/api/business/access?section=profile`；POST `/api/business/access` 的 action `save_profile`、configuration、expected_revision。租戶取自加密 Session，不接受 browser tenant/actor/role。沿用 cookie、same-origin、session validation、refresh 與 user JWT RPC，無 service-role。
 - RPC 先驗證既有成員，寫入再驗證管理員；鎖定同租戶設定、檢查修訂號，避免併發覆寫。固定 schema、字數、日期格式、時區與聯絡資料檢查同時存在 server 與 SQL。主管欄不影響授權。設定表原觸發器提供修訂號與最小欄位稽核，不寫設定內容至 log。
