@@ -23,7 +23,9 @@ class ControlledTests(unittest.TestCase):
   from gateway.budget_expiry_renewal import NEW_EXPIRY,original_policy,canonical
   from datetime import datetime
   p=json.loads(controlled.POLICY_PATH.read_bytes())
-  if p['expires_at']==NEW_EXPIRY:p=original_policy(p,'E4')
+  if p['expires_at']==controlled.DEC_EXPIRY:p=controlled.december_original(p,'E4')
+  elif p['expires_at']==controlled.E4_NEW_EXPIRY:p=controlled.e4_original_policy(p)
+  elif p['expires_at']==NEW_EXPIRY:p=original_policy(p,'E4')
   fixture=self.root/'original-e4-policy.json';fixture.write_bytes(canonical(p))
   self.policy_mapping=patch.object(controlled,'POLICY_PATH',fixture);self.policy_mapping.start()
   self.p,self.digest=controlled.load_policy();self.now=[datetime.fromisoformat('2026-11-13T00:00:00+08:00').timestamp()];self.calls=[];self.states=[]

@@ -1,17 +1,19 @@
 import {assertReportFileSize,reportDownloadURL,readReportResponseBytes} from './reportFilePolicy.mjs';
 import {businessClient,businessErrorMessage} from './businessClient.mjs';
-import {businessIdentity,originalHumanSource,originalReportIndex,appStorage,refreshOriginalBusiness} from './originalBusiness.mjs';
+import {businessIdentity,businessSessionVersion,originalHumanSource,originalReportIndex,appStorage,refreshOriginalBusiness} from './originalBusiness.mjs';
 const working=new Set();
 export function humanPendingKey(){const me=businessIdentity();return me?'dqa-human-pending-v1:'+me.user.id+':'+me.member.id:null;}
 export function pendingHumanOperation(){try{const key=humanPendingKey(),p=key?JSON.parse(sessionStorage.getItem(key)||'null'):null;return /^[a-f0-9-]{36}$/.test(p?.operation_id||'')?p:null;}catch{return null;}}
-function pending(value){const key=humanPendingKey();if(!key)throw Error('請先登入。');if(value)sessionStorage.setItem(key,JSON.stringify(value));else sessionStorage.removeItem(key);window.dispatchEvent(new Event('dqa:human-pending'));}
+function pending(value,key=humanPendingKey()){if(!key)throw Error('請先登入。');if(value)sessionStorage.setItem(key,JSON.stringify(value));else sessionStorage.removeItem(key);window.dispatchEvent(new Event('dqa:human-pending'));}
 export function humanCommand(action,requestId,{signature='',comment='',uploadId=null,source=originalHumanSource(requestId)}={}){if(!source?.request)throw Error('委託資料已變動，請重新開啟。');return {action,request_id:source.request.id,expected_request_revision:source.request.revision,expected_schedule_revision:source.schedule?.revision||0,expected_report_revision:source.report?.revision||0,expected_draft_revision:source.draft?.revision||0,signature_data:signature,comment,upload_id:uploadId};}
+function assertSession(version){if(businessSessionVersion()!==version)throw Object.assign(Error('SESSION_REVOKED'),{code:'SESSION_REVOKED'});}
+const refreshFailure=()=>Object.assign(Error('SAVED_REFRESH_REQUIRED'),{code:'SAVED_REFRESH_REQUIRED'});
 export async function executeHuman(command){
- const key=humanPendingKey();if(!key||working.has(key)||pendingHumanOperation())throw Error('請先完成上一筆操作的結果查詢。');working.add(key);const operation_id=crypto.randomUUID();let dispatched=false;
- try{await businessClient.request('/execution/prepare',{method:'POST',body:{operation_id,command}});pending({operation_id});dispatched=true;const result=await businessClient.request('/execution/execute',{method:'POST',body:{operation_id,command}});pending(null);await refreshOriginalBusiness({afterWrite:true});return result.data;}
- catch(e){if(dispatched&&!e.outcomeUnknown)pending(null);throw e;}finally{working.delete(key);}
+ const key=humanPendingKey(),version=businessSessionVersion();if(!key||working.has(key)||pendingHumanOperation())throw Error('請先完成上一筆操作的結果查詢。');working.add(key);const operation_id=crypto.randomUUID();let dispatched=false,confirmed=false;
+ try{await businessClient.request('/execution/prepare',{method:'POST',body:{operation_id,command}});assertSession(version);pending({operation_id},key);dispatched=true;const result=await businessClient.request('/execution/execute',{method:'POST',body:{operation_id,command}});confirmed=true;assertSession(version);try{await refreshOriginalBusiness({afterWrite:true});}catch{assertSession(version);throw refreshFailure();}assertSession(version);pending(null,key);return result.data;}
+ catch(e){if(dispatched&&!confirmed&&!e.outcomeUnknown&&businessSessionVersion()===version)pending(null,key);throw e;}finally{working.delete(key);}
 }
-export async function lookupHuman(){const p=pendingHumanOperation();if(!p)return null;const {data}=await businessClient.request('/execution/result/'+p.operation_id);if(['SAVED','EXPIRED'].includes(data.state)){pending(null);await refreshOriginalBusiness({afterWrite:true});}return data.state;}
+export async function lookupHuman(){const p=pendingHumanOperation();if(!p)return null;const key=humanPendingKey(),version=businessSessionVersion();const {data}=await businessClient.request('/execution/result/'+p.operation_id);assertSession(version);if(['SAVED','EXPIRED'].includes(data.state)){try{await refreshOriginalBusiness({afterWrite:true});}catch(e){assertSession(version);throw data.state==='SAVED'?refreshFailure():e;}assertSession(version);pending(null,key);}return data.state;}
 export const humanMessage=e=>{const code=e.code||(/^HUMAN_[A-Z_]+$/.test(e.message||'')?e.message:null);return code?businessErrorMessage({...e,code}):e.message;};
 export async function humanFile(id,expectedHash){
  const {data}=await businessClient.request('/execution/download/'+id);

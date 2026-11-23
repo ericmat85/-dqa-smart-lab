@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ROLE, canReview, accessSystem } from '../src/demoPermissions.mjs';
 import { readStoredRequests, writeStoredRequests, mergeImportedRequests } from '../src/requestStorage.mjs';
@@ -28,7 +28,9 @@ test('refreshing imported requests preserves local approvals', () => {
   assert.deepEqual(mergeImportedRequests([local,{id:'old',source:'electronic-request'}],[{id:'new',source:'electronic-request'}]),[{id:'new',source:'electronic-request'},local]);
 });
 test('fresh entry points have demo accounts and preserve existing accounts', () => {
-  globalThis.window={localStorage:{getItem:()=>null}};
+  const previousWindow=globalThis.window,previousStorage=globalThis.localStorage;
+  globalThis.window={localStorage:{getItem:()=>null}};globalThis.localStorage=window.localStorage;
+  try {
   const defaults=readDemoAccounts();
   assert.ok(defaults.some(a=>a.email==='requester@example.com'));
   assert.ok(defaults.some(a=>a.email==='chen@example.com'));
@@ -40,5 +42,5 @@ test('fresh entry points have demo accounts and preserve existing accounts', () 
   assert.deepEqual(readDemoAccounts(),existing);
   window.localStorage.getItem=()=> '[]';
   assert.deepEqual(readDemoAccounts(),[]);
-  delete globalThis.window;
+  } finally {if(previousWindow===undefined)delete globalThis.window;else globalThis.window=previousWindow;if(previousStorage===undefined)delete globalThis.localStorage;else globalThis.localStorage=previousStorage;}
 });
