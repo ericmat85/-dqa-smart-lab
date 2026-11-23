@@ -1,3 +1,3 @@
-import {isVirtualRequest,executionKindLabel} from './requestExecutionKind.mjs';
+import {isVirtualRequest} from './requestExecutionKind.mjs';
 import './ExecutionKindBadge.css';
-export default function ExecutionKindBadge({request}){return <span className={`execution-kind-badge ${isVirtualRequest(request)?'is-virtual':'is-real'}`}>{executionKindLabel(request)}</span>;}
+export default function ExecutionKindBadge({request}){return isVirtualRequest(request)?<span className="execution-kind-badge is-virtual">虛擬委託</span>:null;}

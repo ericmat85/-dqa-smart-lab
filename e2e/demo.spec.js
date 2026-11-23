@@ -1,3 +1,4 @@
+import {fillVirtualRequest} from './requestDemoCommand.mjs';
 import {advanceDemo,expectDemoDisabled} from './assistantAccelerator.mjs';
 import {seedAcceptedTrial} from './acceptedTrialFixture.mjs';
 import {installMockE4Transport} from './mockE4Transport.mjs';
@@ -35,7 +36,7 @@ async function requestLogin(page,supervisor=false){
 async function demoRequest(page){
  await page.getByRole('button',{name:/新增委託單/}).click();
  await page.evaluate(()=>{Math.random=()=>0;});
- page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Demo填入',exact:true}).click();
+ await fillVirtualRequest(page);
  // Keep the whole flow deterministic while using the actual form and signature UI.
  await page.getByLabel('產品代碼',{exact:false}).fill('MVP-DEMO-001');
  await page.getByLabel('測試數量',{exact:false}).fill('2');

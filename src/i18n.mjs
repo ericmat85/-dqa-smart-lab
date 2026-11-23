@@ -1,5 +1,10 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+電子委託 · 虛擬測試填入|Electronic Requests · Virtual test data
+您好！可以詢問委託流程；在空白新增委託單頁面輸入 /demo start，填入虛擬測試資料。|Hello! Ask about request workflows, or enter /demo start on a blank New Request page to fill in virtual test data.
+輸入問題或 /demo start…|Ask a question or enter /demo start…
+Enter 送出 · /demo start 填入虛擬委託 · /clear 清除對話|Enter to send · /demo start fills a virtual request · /clear clears chat
+
 整合試驗・排程・設備・報告|Connect testing, scheduling, equipment and reports
 打造智慧實驗室|Build a smarter laboratory
 流程標準化|Standardized workflows

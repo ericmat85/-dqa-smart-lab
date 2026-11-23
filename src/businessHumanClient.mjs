@@ -1,3 +1,4 @@
+import {assertReportFileSize,reportDownloadURL,readReportResponseBytes} from './reportFilePolicy.mjs';
 import {businessClient,businessErrorMessage} from './businessClient.mjs';
 import {businessIdentity,originalHumanSource,originalReportIndex,appStorage,refreshOriginalBusiness} from './originalBusiness.mjs';
 const working=new Set();
@@ -12,7 +13,14 @@ export async function executeHuman(command){
 }
 export async function lookupHuman(){const p=pendingHumanOperation();if(!p)return null;const {data}=await businessClient.request('/execution/result/'+p.operation_id);if(['SAVED','EXPIRED'].includes(data.state)){pending(null);await refreshOriginalBusiness({afterWrite:true});}return data.state;}
 export const humanMessage=e=>e.code?businessErrorMessage(e):e.message;
-export async function humanFile(id,expectedHash){const response=await fetch('/api/business/execution/file/'+id,{credentials:'same-origin',cache:'no-store'});if(!response.ok){let p;try{p=await response.json();}catch{}throw Error(p?.error?.code||'報告檔案讀取失敗，請重新登入後確認權限。');}const bytes=new Uint8Array(await response.arrayBuffer()),hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(v=>v.toString(16).padStart(2,'0')).join('');if(hash!==(expectedHash||response.headers.get('x-content-sha256')))throw Error('報告檔案雜湊不一致，已停止讀取。');return bytes;}
+export async function humanFile(id,expectedHash){
+ const {data}=await businessClient.request('/execution/download/'+id);
+ if(!/^[a-f0-9]{64}$/.test(data?.sha256||'')||expectedHash&&expectedHash!==data.sha256)throw Error('報告檔案雜湊不一致，已停止讀取。');
+ assertReportFileSize(data.byte_size);
+ const response=await fetch(reportDownloadURL(data.url),{credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(60000)});
+ const bytes=await readReportResponseBytes(response,data.byte_size),hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(v=>v.toString(16).padStart(2,'0')).join('');
+ if(hash!==data.sha256)throw Error('報告檔案雜湊不一致，已停止讀取。');return bytes;
+}
 export async function getBusinessReport(requestId){
  const meta=originalReportIndex().find(r=>r.requestId===requestId);if(!meta)return null;
  const original=await humanFile(meta.fileId,meta.fileSha256),request=JSON.parse(appStorage().getItem('dqa-request-demo-v2')||'[]').find(r=>r.id===requestId);
@@ -21,12 +29,12 @@ export async function getBusinessReport(requestId){
  return {...meta,original,signedExcel,check,sheetName:check.sheetName,cells:check.cells,pdf:meta.archiveFileId?await humanFile(meta.archiveFileId):undefined};
 }
 async function uploadHuman(kind,requestId,bytes,name,source){
- if(bytes.byteLength>3145728)throw Error('共用報告檔案上限為 3 MB；請先縮小照片。');const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join(''),id=crypto.randomUUID();
+ assertReportFileSize(bytes.byteLength);const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join(''),id=crypto.randomUUID();
  const {data}=await businessClient.request('/execution/upload',{method:'POST',body:{id,request_id:source.request.id,kind,file_name:name,byte_size:bytes.byteLength,sha256:sha,request_revision:source.request.revision,report_revision:source.report?.revision||0}});
  const response=await fetch(data.url,{method:'PUT',headers:{'Content-Type':data.mime_type,'x-upsert':'false'},body:bytes,redirect:'error'});if(!response.ok)throw Error('檔案尚未成功上傳，未提交報告。');return id;
 }
 export async function submitBusinessReport({requestId,file,signature,onProgress=()=>{},source:expectedSource}){
- if(!signature)throw Error('請先完成執行人簽名。');if(pendingHumanOperation())throw Error('請先查詢上一筆操作。');const source=expectedSource||originalHumanSource(requestId);onProgress(10,'核對已完成試驗與報告');const bytes=new Uint8Array(await file.arrayBuffer());const {inspectReport}=await import('./reportWorkbook.mjs'),request=JSON.parse(appStorage().getItem('dqa-request-demo-v2')||'[]').find(r=>r.id===requestId),check=await inspectReport(bytes,requestId,file.name,request);if(!check.ok)throw Object.assign(Error('報告欄位尚未完成，未送簽。'),{check});onProgress(40,'上傳不可覆寫的報告版本');const uploadId=await uploadHuman('REPORT',requestId,bytes,file.name,source);onProgress(70,'後端驗證檔案與委託關聯');await executeHuman(humanCommand('REPORT_SUBMIT',requestId,{signature,uploadId,source}));onProgress(100,'報告已送交二階主管審查');return originalReportIndex().find(r=>r.requestId===requestId);}
+ if(!signature)throw Error('請先完成執行人簽名。');assertReportFileSize(file.size);if(pendingHumanOperation())throw Error('請先查詢上一筆操作。');const source=expectedSource||originalHumanSource(requestId);onProgress(10,'核對已完成試驗與報告');const bytes=new Uint8Array(await file.arrayBuffer());const {inspectReport}=await import('./reportWorkbook.mjs'),request=JSON.parse(appStorage().getItem('dqa-request-demo-v2')||'[]').find(r=>r.id===requestId),check=await inspectReport(bytes,requestId,file.name,request);if(!check.ok)throw Object.assign(Error('報告欄位尚未完成，未送簽。'),{check});onProgress(40,'上傳不可覆寫的報告版本');const uploadId=await uploadHuman('REPORT',requestId,bytes,file.name,source);onProgress(70,'後端驗證檔案與委託關聯');await executeHuman(humanCommand('REPORT_SUBMIT',requestId,{signature,uploadId,source}));onProgress(100,'報告已送交二階主管審查');return originalReportIndex().find(r=>r.requestId===requestId);}
 export async function reviewBusinessReport({requestId,signature='',comment='',expectedRevision},action){const source=originalHumanSource(requestId);if(source.report?.revision!==expectedRevision)throw Error('報告版本已變更，請重新開啟審查。');await executeHuman(humanCommand(action,requestId,{signature,comment,source}));return originalReportIndex().find(r=>r.requestId===requestId);}
 export async function archiveBusinessReport({requestId,expectedRevision,fontBytes}){
  const source=originalHumanSource(requestId);if(source.report?.revision!==expectedRevision)throw Error('報告版本已變更，請重新開啟。');const report=await getBusinessReport(requestId),request=JSON.parse(appStorage().getItem('dqa-request-demo-v2')||'[]').find(r=>r.id===requestId);

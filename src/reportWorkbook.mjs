@@ -1,3 +1,4 @@
+import {assertReportFileSize} from './reportFilePolicy.mjs';
 import {markVirtualWorkbook,validateWorkbookPurpose,VIRTUAL_SHEET} from './virtualDocuments.mjs';
 import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {addTrialReportForms,labTemplateProfile,formAssets} from './labFormLayout.mjs';
@@ -43,7 +44,7 @@ async function buildReportTemplate(request={},demo=false,options={}){
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 export async function inspectReport(bytes,requestId,fileName,request){
- const checks=[];if(!/\.xlsx$/i.test(fileName))throw Error('請使用 .xlsx 檔案；舊 .xls 請先另存為 .xlsx。');if(bytes.byteLength>10*1024*1024)throw Error('檔案上限為 10 MB。');
+ const checks=[];if(!/\.xlsx$/i.test(fileName))throw Error('請使用 .xlsx 檔案；舊 .xls 請先另存為 .xlsx。');assertReportFileSize(bytes.byteLength);
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('無法讀取 Excel，檔案可能損壞、加密或格式不正確。');}
  const sheet=book.worksheets.find(row=>row.state==='visible'||!row.state);if(!sheet)throw Error('報告沒有可讀取的工作表。');
  if(/篩檢條件|生成來源|上傳作業說明/.test(fileName))throw Error('這是規則／篩檢條件參考表，並非已填寫的試驗報告。請使用「下載本案 Excel 範本」填寫後上傳。');

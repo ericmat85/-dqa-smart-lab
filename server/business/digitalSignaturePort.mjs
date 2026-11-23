@@ -1,3 +1,4 @@
+import {REPORT_FILE_MAX_BYTES} from '../../src/reportFilePolicy.mjs';
 import https from 'node:https';
 import {lookup as dnsLookup} from 'node:dns/promises';
 import {isIP} from 'node:net';
@@ -80,7 +81,7 @@ export async function verifySignaturePort(raw,env,target,{lookup=dnsLookup,reque
  if(env.SIGNATURE_PORT_ALLOW_VERIFICATION!=='true')throw fail('SIGNATURE_PORT_VERIFICATION_NOT_APPROVED');
  const plan=await preparePortConnection(raw,env,lookup);
  if(plan.config.auth_mode!=='BEARER_TOKEN')throw fail('SIGNATURE_PORT_CREDENTIAL_NOT_CONFIGURED');
- if(!Buffer.isBuffer(target.bytes)||target.bytes.length<5||target.bytes.length>3145728||target.bytes.subarray(0,5).toString('ascii')!=='%PDF-'||createHash('sha256').update(target.bytes).digest('hex')!==target.sha256)throw fail('SIGNATURE_PORT_DOCUMENT_INVALID');
+ if(!Buffer.isBuffer(target.bytes)||target.bytes.length<5||target.bytes.length>REPORT_FILE_MAX_BYTES||target.bytes.subarray(0,5).toString('ascii')!=='%PDF-'||createHash('sha256').update(target.bytes).digest('hex')!==target.sha256)throw fail('SIGNATURE_PORT_DOCUMENT_INVALID');
  const response=await request(plan,'/v1/verify',{protocol:PORT_PROTOCOL,document:{sha256:target.sha256,mime_type:'application/pdf',pdf_base64:target.bytes.toString('base64')},validation:{require_trust_chain:true,require_revocation_check:true,require_timestamp:plan.config.timestamp_mode==='PROVIDER_MANAGED'}});
  if(response?.protocol!==PORT_PROTOCOL||response.document_sha256!==target.sha256||!Number.isInteger(response.signature_count)||response.signature_count<0||response.signature_count>32||!Array.isArray(response.signatures)||response.signatures.length!==response.signature_count)throw fail('SIGNATURE_PORT_RESPONSE_INVALID');
  const signatures=response.signatures.map(item=>{

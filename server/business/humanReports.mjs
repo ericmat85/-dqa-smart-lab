@@ -1,8 +1,9 @@
+import {REPORT_FILE_MAX_BYTES} from '../../src/reportFilePolicy.mjs';
 import {validateWorkbookPurpose,validatePdfPurpose} from '../../src/virtualDocuments.mjs';
 import {generalProfile,inspectGeneralReport} from '../../src/reportProfiles.mjs';
 import {inflateRawSync} from 'node:zlib';
 import {createHash,createHmac} from 'node:crypto';
-const LIMIT=3145728,BUCKET='dqa-business-reports';
+const LIMIT=REPORT_FILE_MAX_BYTES,BUCKET='dqa-business-reports';
 export const attestationKey=key=>createHmac('sha256',Buffer.from(key,'base64url')).update('dqa-human-report-attestation-v1').digest();
 export const fileAttestation=(key,intent)=>createHmac('sha256',attestationKey(key)).update(`${intent.id}:${intent.sha256}:${intent.byte_size}:${intent.mime_type}`).digest('hex');
 export function safeObject(intent){if(intent?.bucket!==BUCKET||!new RegExp('^[a-f0-9-]{36}/[a-f0-9-]{36}/[a-f0-9-]{36}\\.(xlsx|pdf)$').test(intent.object_key||''))throw Error('HUMAN_FILE_INVALID');return BUCKET+'/'+intent.object_key;}
