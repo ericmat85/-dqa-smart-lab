@@ -1,5 +1,7 @@
 # PR #47 本機整合檢查
 
+> 歷史快照：此報告針對 a8537 基線。交付前 PR47 更新為 c5205f9，最新整合與033遷移驗證請見 VALIDATION-LATEST.md。
+
 ## 遠端基線（2026-11-23 唯讀核實）
 
 - origin: https://github.com/ericmat85/-dqa-smart-lab.git

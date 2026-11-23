@@ -1,6 +1,6 @@
 # PR #47 更新但不部署：唯讀盤點
 
-查核日期：2026-11-23。沒有 push、PR metadata 寫入、hosting 設定修改、CI 修改、部署、合併或遠端 migration。
+查核日期：2026-11-23。最新PR head為b9dac32f5e80123c3cc2629d0094236e8cd63404；其新增CI Python依賴安裝仍不含deploy步驟，Vercel repo設定未變。不把他人遠端更新當成不部署證據。沒有 push、PR metadata 寫入、hosting 設定修改、CI 修改、部署、合併或遠端 migration。
 
 ## 結論
 

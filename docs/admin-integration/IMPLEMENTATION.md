@@ -8,6 +8,10 @@
 
 圖片需求採父任務逐張實際檢視的摘要。本執行緒未另取圖，未宣稱重看原圖；repo 不含截圖或截圖種子資料。
 
+## 最新 PR47 本機整合
+
+交付前遠端新增 `c5205f994a8b236b21eb5e99b30060622b99ccb9`（AI 引擎設定、100項專案委託）。已在本機整合並保留遠端新增功能；回歸另修正一般草稿被批次鎖定的相容性問題（詳 VALIDATION-LATEST.md），未推送。該版本占用 032，因此本功能改為 `033_workspace_profile.sql`，回滾亦改為033。前述032為原交付歷史。其後再保留最新 b9dac32f5e80123c3cc2629d0094236e8cd63404 的CI依賴修正，最終patch以b9dac32為基線。最新驗證以 VALIDATION-LATEST.md 為準；原驗證不可冒充新基線結果。
+
 ## 實作及資料契約
 
 - 同一個 `dqa_business.settings`、module `workspace_profile_v1` 保存顯示名稱、顯示日期／時區與實驗室資訊，未另建組織表。Cloud 模式移除瀏覽器組織名稱編輯／摘要入口；Demo 模式保留原有本機名稱編輯流程，明確不作為 Cloud 共用資料。部門、成員與設備據點仍沿用原來源。
@@ -48,8 +52,8 @@
 
 ## 本機重播與回滾
 
-Python 3.12.14（沿用 render-backend/.python-version）；這些腳本只用標準庫，未改 requirements 或 CI。以 `uv run --python 3.12.14 --no-project python database/tools/prepare_profile_local.py --directory <全新 worktree 外目錄>` 建立 network=none、無 host ports 的 PostgreSQL 17 容器，套用 001–032 與兩合成租戶，補測試平台 Storage/verified Auth 替身。不得用此腳本或測試 seed 操作雲端。
+Python 3.12.14（沿用 render-backend/.python-version）；這些腳本只用標準庫，未改 requirements 或 CI。以 `uv run --python 3.12.14 --no-project python database/tools/prepare_profile_local.py --directory <全新 worktree 外目錄>` 建立 network=none、無 host ports 的 PostgreSQL 17 容器，套用 001–033 與兩合成租戶，補測試平台 Storage/verified Auth 替身。不得用此腳本或測試 seed 操作雲端。
 
-針對既有資料庫部署仍需另案授權與基線核對；此交付未部署。032 只新增兩 RPC，不改舊函式或 schema。回滾先退回 UI/API 版本，再使用 database/rollback/032_workspace_profile.sql 移除新函式，保留 profile 資料與稽核以供恢復；不刪使用者設定。migration journal 的遠端管理不在本次範圍。
+針對既有資料庫部署仍需另案授權與基線核對；此交付未部署。033 只新增兩 RPC，不改舊函式或 schema。回滾先退回 UI/API 版本，再使用 database/rollback/033_workspace_profile.sql 移除新函式，保留 profile 資料與稽核以供恢復；不刪使用者設定。migration journal 的遠端管理不在本次範圍。
 
-資料層參考：[Supabase Database Functions](https://supabase.com/docs/guides/database/functions)、[官方 Changelog](https://supabase.com/changelog.md)。沒有使用新 SDK／CLI 介接；沿用 repo 既有 user-JWT RPC 架構。032 是此獨立分支的序號，未來與其他未合併分支整合前必須核對 migration 順序，不能直接覆蓋其他分支同號檔。
+資料層參考：[Supabase Database Functions](https://supabase.com/docs/guides/database/functions)、[官方 Changelog](https://supabase.com/changelog.md)。沒有使用新 SDK／CLI 介接；沿用 repo 既有 user-JWT RPC 架構。033 是此獨立分支的序號，未來與其他未合併分支整合前必須核對 migration 順序，不能直接覆蓋其他分支同號檔。
