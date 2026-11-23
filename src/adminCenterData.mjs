@@ -11,7 +11,7 @@ export const ADMIN_MODULES=[
  ['data-maintenance','資料維護與 Demo 工具','archive',1,'資料庫回收區','集中委託清理、資料還原與 Demo 資料維護。'],
  ['interface','介面設定','settings',1,'已實作','調整字體、語言與列表每頁顯示筆數。'],
  ['ai','AI 引擎管理','ai',2,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
- ['notifications','通知與提醒設定','notifications',2,'資料連動','依現有案件與設備資料整理站內提醒。'],
+ ['notifications','通知與提醒設定','notifications',2,'資料連動','管理案件通知、站內提醒與電子郵件寄送狀態。'],
  ['quality','品質與稽核設定','review',2,'資料連動','建立改善追蹤，連結案件、設備與試驗來源。'],
  ['qualifications','人員資格管理','accounts',2,'資料連動','管理訓練與資格到期紀錄，對照現有人員。'],
  ['organization','組織與租戶設定','maintenance',3,'資料連動','工作區設定與現有人員、部門及據點概況。'],
