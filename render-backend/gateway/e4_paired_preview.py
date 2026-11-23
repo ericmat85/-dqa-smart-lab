@@ -21,7 +21,7 @@ def install_openai_egress_guard(mail_enabled=False):
   rows=resolve(host,port,*args,**kwargs)
   if host in ('api.openai.com',b'api.openai.com') and str(port)=='443':allowed.update(r[4][0] for r in rows)
   name=host.decode() if isinstance(host,bytes) else host
-  if mail_enabled and threading.current_thread().name=='business-mail-outbox' and (name,str(port)) in {('smtp.gmail.com','465'),('mmazbwzdiizabikmiily.supabase.co','443')}:mail_allowed.update((r[4][0],int(port)) for r in rows)
+  if mail_enabled and threading.current_thread().name=='business-mail-outbox' and (name,str(port)) in {('smtp.gmail.com','465'),('smtp.gmail.com','587'),('mmazbwzdiizabikmiily.supabase.co','443')}:mail_allowed.update((r[4][0],int(port)) for r in rows)
   return rows
  def permitted(sock,address):
   if sock.family not in (socket.AF_INET,socket.AF_INET6):return

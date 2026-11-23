@@ -6,5 +6,9 @@
   "historical_backfill": false,
   "unknown_delivery_auto_retry": false,
   "known_not_sent_max_attempts": 3,
-  "attachments": false
+  "attachments": false,
+  "gmail_tls_ports": [
+    465,
+    587
+  ]
 }

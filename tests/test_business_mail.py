@@ -8,6 +8,7 @@ from gateway.business_mail import BusinessMailWorker,POLICY,URL
 class SMTP:
  def __init__(self,owner,*args,**kwargs):self.owner=owner;owner.commands.append('TLS');assert args[:2]==('smtp.gmail.com',465);assert kwargs['context'].verify_mode==2
  def ehlo(self):self.owner.commands.append('EHLO')
+ def starttls(self,context):self.owner.commands.append('STARTTLS');assert context.verify_mode==2
  def login(self,*args):
   self.owner.commands.append('AUTH')
   if self.owner.mode=='auth':raise smtplib.SMTPAuthenticationError(535,b'no')
@@ -38,6 +39,14 @@ class Tests(unittest.TestCase):
    raise AssertionError(name)
   self.worker=BusinessMailWorker(self.env,httpx.Client(transport=httpx.MockTransport(transport)),lambda *a,**kw:SMTP(self,*a,**kw));self.assertTrue(self.worker.enabled)
  def tearDown(self):self.worker.client.close()
+ def test_starttls_fallback_authenticates_only_after_tls(self):
+  def ssl_failure(*a,**kw):raise TimeoutError()
+  def starttls(*a,**kw):
+   self.commands.append('TCP587');return SMTP(self,'smtp.gmail.com',465,context=kw.pop('context',__import__('ssl').create_default_context()))
+  self.worker.smtp_factory=ssl_failure;self.worker.starttls_factory=starttls;self.worker.verify();self.assertTrue(self.worker.ready);self.assertLess(self.commands.index('STARTTLS'),self.commands.index('AUTH'));self.assertNotIn('DATA',self.commands)
+ def test_connection_diagnostics_do_not_expose_credentials(self):
+  def failure(*a,**kw):raise TimeoutError('SYNTHETIC_PASSWORD')
+  self.worker.smtp_factory=failure;self.worker.starttls_factory=failure;self.worker.verify();self.assertEqual(self.worker.status()['failure_code'],'NETWORK_TIMEOUT');self.assertNotIn('SYNTHETIC_PASSWORD',json.dumps(self.worker.status()))
  def test_smtp_ready_checks_auth_without_message(self):self.worker.verify();self.assertTrue(self.worker.ready);self.assertNotIn('MAIL',self.commands);self.assertNotIn('DATA',self.commands)
  def test_success_authorizes_before_data_and_receipts(self):
   self.assertEqual(self.worker.process_one(),'SENT');self.assertLess(self.commands.index('AUTHORIZE'),self.commands.index('DATA'));self.assertEqual(self.finish[-1]['p_state'],'SENT');self.assertNotIn(b'SYNTHETIC_PASSWORD',self.message);self.assertNotIn(self.env['BUSINESS_MAIL_SERVICE_KEY'].encode(),self.message);self.assertIn(b'/request/dashboard',self.message)
