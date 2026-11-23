@@ -30,3 +30,11 @@ export async function readStorageBytes(fetchImpl,env,token,intent){
  for await(const chunk of res.body){length+=chunk.length;if(length>LIMIT)throw Error('HUMAN_FILE_INVALID');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
  if(bytes.length!==intent.byte_size||createHash('sha256').update(bytes).digest('hex')!==intent.sha256)throw Error('HUMAN_FILE_HASH_MISMATCH');return bytes;
 }
+
+// A bounded, explicit subset of report fields for AI; no pictures/signature bytes.
+export async function reportAIFields(bytes){
+ zipBounds(bytes);const Excel=(await import('exceljs')).default,book=new Excel.Workbook();await book.xlsx.load(bytes);
+ if(book.worksheets.length>32)throw Error('HUMAN_FILE_INVALID');const cells=[];
+ for(const sheet of book.worksheets.slice(0,2))for(const address of ['A1','B4','C12','I16','A44','B16','D12']){const text=sheet.getCell(address).text;if(text)cells.push({sheet:sheet.name,cell:address,text});}
+ if(Buffer.byteLength(JSON.stringify(cells))>6000)throw Error('AI_SOURCE_TOO_LARGE');return cells;
+}

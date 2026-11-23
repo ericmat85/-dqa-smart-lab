@@ -1,3 +1,5 @@
+import {businessClient} from './businessClient.mjs';
+import {businessAIEnabled,askBusinessAI,renderBusinessAI} from './businessAIClient.mjs';
 import {appStorage} from './originalBusiness.mjs';
 import {readUiPreferences} from './uiPreferences.mjs';
 import {assistantLanguage} from './assistantLanguage.mjs';
@@ -22,6 +24,7 @@ export function closePreviewAISession(system){
  clearE4Activity(system);
  for(const key of labCursors.keys())if(key.startsWith(system+':'))labCursors.delete(key);
  if(system==='lms'){clearE2Activity();clearE3Activity();clearReportDraftHandoff();}
+ if(businessAIEnabled())return Promise.resolve({status:'NOT_REQUIRED'});
  if(!enabled||base!=='/api/preview')return Promise.resolve({status:'NOT_REQUIRED'});
  const operation=setAISessionState(system,'PENDING');
  globalThis.dispatchEvent?.(new CustomEvent('dqa:ai-session-ended',{detail:{system}}));
@@ -41,6 +44,13 @@ export async function establishSession(system,accountId,fetchImpl,signal){
 }
 
 export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[],onReportDraft=()=>{},language=readUiPreferences().language}={}){
+ if(businessAIEnabled()){
+  if(['/clear','清除對話'].includes(question.trim())){await businessClient.request('/ai/clear',{method:'POST',body:{system}});return language==='en'?'Conversation cleared; no model call.':'對話已清除；未呼叫模型。';}
+  const selected=selectE4ChatMode(question),q=selected.mode==='DOCUMENT_QA'?'文件問答：'+selected.question:selected.question;
+  const ticket=beginE4Activity({system,accountId:storage?.getItem(sessionKey(system)),mode:selected.mode});
+  try{const data=await askBusinessAI('E4',{question:q,language:assistantLanguage(language)},{system,signal,operationId:idempotencyKey});finishE4Activity(ticket,{status:'SUCCESS',httpStatus:200,packet:{data,trace_id:data.trace_id}});return renderBusinessAI(data);}
+  catch(error){finishE4Activity(ticket,{status:signal?.aborted?'CANCELLED':'ERROR',errorCode:error.code,packet:{trace_id:error.trace}});throw error;}
+ }
  // E4-only Preview: this floating assistant never dispatches other engines.
  const selected=selectE4ChatMode(question);const scope=e4LabScope(selected.question,{document:selected.mode==='DOCUMENT_QA'});if(!scope.allowed)throw Object.assign(Error(scope.reply),{code:scope.code});if(['/clear','清除對話'].includes(question.trim()))selected.question='/clear';
  const url=endpoint('/ui/live/E4');

@@ -1,3 +1,4 @@
+import {businessAIEnabled} from './businessAIClient.mjs';
 import {appStorage} from './originalBusiness.mjs';
 import useUiPreferences from './useUiPreferences.js';
 import {faqQuestion,scopeReply} from './assistantLanguage.mjs';
@@ -94,10 +95,10 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
    if(!clear)requireEngineEnabled('E4');
    const matchedFaq=findCommonQuestion(trimmed);
    const scope=e4LabScope(matchedFaq?.question||trimmed,{document:/^(?:文件問答|Document Q&A)\s*[:：]/i.test(trimmed)});
-   const faq=scope.allowed&&matchedFaq;
+   const faq=!businessAIEnabled()&&scope.allowed&&matchedFaq;
    const dynamic=faq&&['overview','pending','running','standby','stock'].includes(faq.id);
    let current={snapshot,metrics};
-   if(scope.allowed&&(!faq||dynamic)){
+   if(!businessAIEnabled()&&scope.allowed&&(!faq||dynamic)){
     let storage;try{storage=appStorage();}catch{storage={getItem(){throw Error('Storage unavailable');}};}
     current=readE4CurrentData(snapshot,metrics,system,storage);
     if(!faq&&system==='lms'){try{const {allReports}=await import('./reportStore.mjs');current.snapshot={...current.snapshot,reports:await allReports()};}catch{current.snapshot={...current.snapshot,reports:undefined};}}

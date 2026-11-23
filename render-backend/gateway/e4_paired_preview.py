@@ -30,6 +30,8 @@ def install_openai_egress_guard():
 
 class PairedApp:
  def __init__(self,mock_uds,live_state,live_key,mock_available=True,mock_process=None,e2_state=None):
+  from gateway.business_ai import BusinessAI
+  self.business_ai=BusinessAI(os.environ,live_state,e2_state)
   self.mock_uds=mock_uds;self.live_state=live_state;self.mock_available=mock_available;self.mock_process=mock_process;self.e2_state=e2_state
   from gateway.e2_preview_provider import E2SchedulingService
   e2=E2SchedulingService(live_state.ledger,e2_state.service if e2_state else None,disabled_code=e2_state.code if e2_state else 'E2_SPEND_APPROVAL_REQUIRED')
@@ -37,6 +39,8 @@ class PairedApp:
  async def __call__(self,scope,receive,send):
   if scope['type']!='http':return await self.live_app(scope,receive,send)
   trace='I-'+uuid.uuid4().hex;path=scope['path'];method=scope['method']
+  if path.startswith('/__business_ai/'):
+   return await self.business_ai(scope,receive,send)
   async def reply(status,packet):
    await send({'type':'http.response.start','status':status,'headers':[(b'content-type',b'application/json'),(b'cache-control',b'no-store'),(b'x-trace-id',trace.encode())]})
    await send({'type':'http.response.body','body':json.dumps(packet).encode()})

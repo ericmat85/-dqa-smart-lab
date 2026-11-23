@@ -1,3 +1,4 @@
+import {businessAIEnabled} from './businessAIClient.mjs';
 import {prepareSharedDraftForm} from './sharedScheduleDrafts.mjs';
 import {equipmentSpaceUnits} from './equipmentSpace.mjs';
 import {useState} from 'react';
@@ -9,14 +10,14 @@ import './ScheduleArrangement.css';
 import AiScheduleButton from './AiScheduleButton.jsx';
 import {equipmentMatches,enabledExecutors} from './scheduleEquipment.mjs';
 
-export default function ScheduleArrangement({editing,form,onChange,equipment,accounts,onRecommend,message,onRefresh}) {
+export default function ScheduleArrangement({editing,form,onChange,equipment,accounts,onRecommend,message,onRefresh,modelCandidates,onApplyCandidate,applyingCandidate=false}) {
   const selected=equipment.find(row=>row.id===form.equipmentId);
   const executors=enabledExecutors(accounts);
   const selectedIds=[...new Set([form.equipmentId,...(form.equipmentIds||[])].filter(Boolean))],requiredCount=Number(form.equipmentCount)||1;
   const [ruleError,setRuleError]=useState(''),profile=trialProfile(editing.title);
   const update=patch=>{const next={...form,...patch};try{if(Object.hasOwn(patch,'end')&&profile?.mode==='batch'&&!profile.fixed_duration&&explicitHours(editing)===null&&next.time&&next.end){const span=(Date.parse(next.end+'T00:00:00Z')-Date.parse(next.time+'T00:00:00Z'))/86400000+1;if(Number.isInteger(span)&&span>0)next.durationHours=span*24;}onChange(editing.businessDatabase?prepareSharedDraftForm({editing,form:next,equipment,updateEnd:['time','equipmentCount','equipmentId','equipmentIds'].some(k=>Object.hasOwn(patch,k))}):prepareManualTrialForm({editing,form:next,updateEnd:Object.hasOwn(patch,'time')||Object.hasOwn(patch,'equipmentCount')}));setRuleError('');}catch(error){onChange(next);setRuleError(error.message);}};
   return <section className="schedule-arrangement" aria-label="設備與排程安排">
-    <header className="schedule-arrangement-header"><div><span>RESOURCE & SCHEDULE</span><div className="help-title-row"><h4>設備與排程安排</h4><HelpTip>選擇待機設備，安排執行人與試驗日期</HelpTip></div></div><AiScheduleButton onRecommend={onRecommend} disabled={editing.businessDatabase} disabledReason="共用資料目前僅開放人工排程草稿"/></header>
+    <header className="schedule-arrangement-header"><div><span>RESOURCE & SCHEDULE</span><div className="help-title-row"><h4>設備與排程安排</h4><HelpTip>選擇待機設備，安排執行人與試驗日期</HelpTip></div></div><AiScheduleButton onRecommend={onRecommend} disabled={editing.businessDatabase&&!businessAIEnabled()} disabledReason="此版本尚未啟用 AI 模型"/></header>
     <div className="schedule-arrangement-hint"><span>待機設備 <b>{equipment.filter(row=>row.status==='待機中').length}</b>／{equipment.length} 台</span><button type="button" onClick={onRefresh}>重新讀取設備狀態 ↻</button></div>
     <div className="schedule-arrangement-hint" aria-label="試驗工時與設備規則"><span>{profileSummary(profile,Number(editing.quantity)||1)}{form.durationHours&&profile&&!profile.fixed_duration?` 本次每批 ${form.durationHours} 小時。`:null}</span></div>
     <div className="schedule-arrangement-content"><section className="schedule-arrangement-device"><div className="schedule-arrangement-step"><span>01</span><h5>選擇實驗設備</h5></div><label><span>設備選擇 <span className="required-mark" aria-hidden="true">*</span></span><select aria-label="設備選擇" value={form.equipmentId||''} onChange={event=>{const row=equipment.find(item=>item.id===event.target.value);update({equipmentId:row?.id||'',equipmentIds:[],eq:row?.name||''});}}><option value="">請選擇待機中的適用設備</option>{equipment.map(row=><option key={row.id} value={row.id} disabled={row.status!=='待機中'||!equipmentMatches(editing.title,row)}>{row.id} · {row.name} · 【{row.status}】{!equipmentMatches(editing.title,row)?' · 類型不適用':''}</option>)}</select></label>
@@ -29,6 +30,7 @@ export default function ScheduleArrangement({editing,form,onChange,equipment,acc
     {profile&&!equipment.some(row=>equipmentMatches(editing.title,row))&&<div className="schedule-arrangement-message" role="status">台帳尚無此試驗的對應設備；不會套用其他機型。</div>}
     {ruleError&&<div className="schedule-arrangement-message" role="alert">{ruleError}</div>}
     {message&&<div className="schedule-arrangement-message" role="status">{message}</div>}
+    {modelCandidates&&<details className="business-ai-candidates" open><summary>AI 候選方案 · {modelCandidates.candidates.length} 項</summary><div>{modelCandidates.candidates.map(c=><article key={c.id}><strong>方案 {c.id}{c.id===modelCandidates.selected_candidate_id?' · AI 推薦':''}</strong><p>{c.plan.start_date} → {c.plan.end_date}</p><p>{c.plan.allocations.map(a=>equipment.find(e=>e.databaseId===a.equipment_id)?.name||'設備資料').join('、')} · {c.plan.executor_label}</p><button type="button" className="template-btn" disabled={applyingCandidate} onClick={()=>onApplyCandidate?.(c.id)}>帶入此方案</button></article>)}</div></details>}
     <footer>{editing.businessDatabase?"讀取已簽核的試驗及目前資源，保存為跨裝置可讀取的排程草稿。":"自動讀取試驗、設備與人員資料產生排程建議；確認後按「儲存排程」才會套用。"}</footer>
   </section>;
 }

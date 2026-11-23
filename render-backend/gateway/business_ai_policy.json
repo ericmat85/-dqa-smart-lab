@@ -1,0 +1,13 @@
+{
+  "approval": "USER_REQUEST_E1_E4_REAL_MODELS_DATABASE_PREVIEW_20261123",
+  "engines": ["E1", "E2", "E3", "E4"],
+  "model": "gpt-6-luna",
+  "expires_at": "2026-12-31T23:59:00+08:00",
+  "per_call_usd": "0.05",
+  "ledger_mapping": {"E1": "E4", "E2": "E2", "E3": "E4", "E4": "E4"},
+  "new_budget": "0.00",
+  "data_scope": "AUTHENTICATED_LABORATORY_DATABASE_PROJECTIONS",
+  "excluded": ["accounts", "permissions", "credentials", "unbuilt_DQA", "non_laboratory_topics"],
+  "business_writes": false,
+  "automatic_retries": false
+}
