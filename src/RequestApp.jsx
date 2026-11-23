@@ -258,7 +258,7 @@ export default function RequestApp() {
       if(workflow.locked||draftSaving.current)return false;
       if(!asDraft){const errors=isProjectEntry(form)?{...submitErrors({...form,quantity:'1',testItems:['專案分項'],specification:'專案分項',judgementCriteria:'專案分項'},requestSignature),...projectErrors(form)}:submitErrors(form,requestSignature);if(Object.keys(errors).length){setFormErrors(errors);return false;}if(!requestWorkflowEnabled()){notify('人工委託簽核尚待限定開放，草稿可繼續儲存。');return false;}}
       if(!hasAnyFormData(form)&&!requestSignature){notify('請至少填寫一項委託資訊，再儲存草稿。');return false;}
-      draftSaving.current=true;setProjectSaving(true);
+      draftSaving.current=true;setProjectSaving(isProjectEntry(form)&&!editingDraftId);
       if(!draftOperation.current)draftOperation.current=crypto.randomUUID();
       try{
         const submitted=JSON.stringify({form,signature:requestSignature});
