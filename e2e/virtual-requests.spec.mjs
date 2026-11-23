@@ -1,3 +1,4 @@
+import {createReportTemplate} from '../src/reportWorkbook.mjs';
 import {syntheticReportPhoto} from '../tests/helpers/syntheticReportPhoto.mjs';
 import {test,expect} from '@playwright/test';
 import Excel from 'exceljs';
@@ -89,3 +90,10 @@ test('assistant checkpoints update native virtual trial; completed case can subm
 });
 test('real cases are excluded from acceleration',async({page})=>{const s=state('REAL');booked(s);await install(page,s);await page.goto('/lab/dashboard');const d=await open(page);await expect(d.getByRole('option',{name:/REQ-VIRTUAL-BROWSER/})).toHaveCount(0);await expect(d.getByText('目前沒有已確認接收的虛擬委託。',{exact:false})).toBeVisible();await expect(d.getByRole('button',{name:'推進至 50%'})).toBeDisabled();expect(s.writes).toHaveLength(0);expect(s.errors).toEqual([]);});
 test('lost acceleration acknowledgement recovers the same receipt without a second advance',async({page})=>{const s=state();booked(s);s.unknown=true;await install(page,s);await page.goto('/lab/dashboard');let d=await open(page);await d.getByRole('button',{name:'推進至 50%'}).click();await expect(d.getByRole('alert')).toBeVisible();await page.reload();d=await open(page);await expect(d.getByRole('button',{name:'推進至 100%'})).toBeEnabled();expect(s.writes).toHaveLength(1);expect(s.schedule.virtual_percent).toBe(50);expect(s.errors).toEqual([]);});
+
+test('missing virtual mark displays Chinese guidance before any upload or workflow mutation',async({page},info)=>{
+ const s=state();booked(s);s.schedule.status='COMPLETED';s.schedule.virtual_percent=100;s.requests[0].status='COMPLETED';await install(page,s);await page.goto('/lab/dashboard');await page.getByRole('button',{name:'提交報告',exact:true}).click();const d=page.getByRole('dialog',{name:'提交試驗報告'});
+ const bytes=Buffer.from(await createReportTemplate({id:s.requests[0].legacy_id,executionKind:'REAL',productCode:'SYNTHETIC',testItems:['Synthetic generic'],quantity:'1'},true));
+ await page.getByLabel('上傳簽名檔',{exact:true}).check();await page.locator('.dqa-signature-input input[type=file]').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1kAAAAASUVORK5CYII=','base64')});
+ await d.getByLabel('上傳 Excel 報告（必填）').setInputFiles({name:'unmarked.xlsx',mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',buffer:bytes});await d.getByRole('button',{name:'提交',exact:true}).click();const warning=d.getByRole('alert');await expect(warning).toContainText('請使用本案範本');await expect(warning).not.toContainText('HUMAN_VIRTUAL_MARK_REQUIRED');await warning.scrollIntoViewIfNeeded();await page.screenshot({path:info.outputPath('virtual-mark-chinese-guidance.png'),fullPage:true});expect(s.upload).toBeUndefined();expect(s.writes).toHaveLength(0);expect(s.errors).toEqual([]);
+});

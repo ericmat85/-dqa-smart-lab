@@ -12,7 +12,7 @@ export async function executeHuman(command){
  catch(e){if(dispatched&&!e.outcomeUnknown)pending(null);throw e;}finally{working.delete(key);}
 }
 export async function lookupHuman(){const p=pendingHumanOperation();if(!p)return null;const {data}=await businessClient.request('/execution/result/'+p.operation_id);if(['SAVED','EXPIRED'].includes(data.state)){pending(null);await refreshOriginalBusiness({afterWrite:true});}return data.state;}
-export const humanMessage=e=>e.code?businessErrorMessage(e):e.message;
+export const humanMessage=e=>{const code=e.code||(/^HUMAN_[A-Z_]+$/.test(e.message||'')?e.message:null);return code?businessErrorMessage({...e,code}):e.message;};
 export async function humanFile(id,expectedHash){
  const {data}=await businessClient.request('/execution/download/'+id);
  if(!/^[a-f0-9]{64}$/.test(data?.sha256||'')||expectedHash&&expectedHash!==data.sha256)throw Error('報告檔案雜湊不一致，已停止讀取。');
