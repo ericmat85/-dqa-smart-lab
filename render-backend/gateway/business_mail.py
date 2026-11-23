@@ -17,7 +17,7 @@ class MailError(Exception):
  def __init__(self,code,retryable=False,unknown=False):self.code=code;self.retryable=retryable;self.unknown=unknown
 class BusinessMailWorker:
  def __init__(self,env,client=None,smtp_factory=None,clock=time.time,starttls_factory=None):
-  self.env=env;self.clock=clock;self.worker=str(uuid.uuid4());self.stop_event=threading.Event();self.thread=None;self.ready=False;self.code='NOT_CONFIGURED';self.last_check=0;self.last_heartbeat=0;self.failure_code='';self.failure_stage='';self.last_port=465
+  self.env=env;self.clock=clock;self.worker=str(uuid.uuid4());self.stop_event=threading.Event();self.thread=None;self.ready=False;self.code='NOT_CONFIGURED';self.last_check=0;self.last_heartbeat=0;self.failure_code='';self.failure_stage='';self.failure_type='';self.auth_mechanisms=[];self.last_port=465
   self.enabled=env.get('BUSINESS_MAIL_ENABLED')=='1' and env.get('BUSINESS_MAIL_POLICY_SHA256')==hashlib.sha256(POLICY.read_bytes()).hexdigest();self.client=client;self.smtp_factory=smtp_factory or smtplib.SMTP_SSL;self.starttls_factory=starttls_factory or smtplib.SMTP
   self.simulated=client is not None and isinstance(getattr(client,'_transport',None),httpx.MockTransport)
   if not self.enabled:return
@@ -36,7 +36,8 @@ class BusinessMailWorker:
  def heartbeat(self):
   self.rpc('business_mail_heartbeat',{'p_tenant':self.tenant,'p_worker':self.worker,'p_ready':self.ready,'p_code':self.code});self.last_heartbeat=self.clock()
  def diagnose(self,error):
-  self.failure_code=('SMTP_AUTH_REJECTED' if isinstance(error,smtplib.SMTPAuthenticationError) else 'DNS_UNAVAILABLE' if isinstance(error,socket.gaierror) else 'NETWORK_TIMEOUT' if isinstance(error,TimeoutError) else 'TLS_REJECTED' if isinstance(error,ssl.SSLError) else 'EGRESS_DENIED' if isinstance(error,OSError) and error.args==('LIVE_EGRESS_DENIED',) else 'SMTP_REJECTED_'+str(error.smtp_code) if isinstance(error,smtplib.SMTPResponseException) else 'NETWORK_ERROR_'+str(error.errno) if isinstance(error,OSError) and isinstance(error.errno,int) else 'CONNECTION_UNAVAILABLE')
+  self.failure_type=type(error).__name__ if re.fullmatch('[A-Za-z_]{1,80}',type(error).__name__) else 'Exception'
+  self.failure_code=('SMTP_AUTH_REJECTED' if isinstance(error,smtplib.SMTPAuthenticationError) else 'DNS_UNAVAILABLE' if isinstance(error,socket.gaierror) else 'NETWORK_TIMEOUT' if isinstance(error,TimeoutError) else 'TLS_REJECTED' if isinstance(error,ssl.SSLError) else 'EGRESS_DENIED' if isinstance(error,OSError) and error.args==('LIVE_EGRESS_DENIED',) else 'SMTP_REJECTED_'+str(error.smtp_code) if isinstance(error,smtplib.SMTPResponseException) else 'NETWORK_ERROR_'+str(error.errno) if isinstance(error,OSError) and isinstance(error.errno,int) else 'SMTP_AUTH_UNSUPPORTED' if isinstance(error,smtplib.SMTPNotSupportedError) or isinstance(error,smtplib.SMTPException) and error.args==('No suitable authentication method found.',) else 'CONNECTION_UNAVAILABLE')
  def connection(self):
   for port in [465,587]:
    server=None;self.last_port=port;self.failure_stage='CONNECT_TLS' if port==465 else 'CONNECT_STARTTLS'
@@ -44,7 +45,7 @@ class BusinessMailWorker:
     if port==465:server=self.smtp_factory('smtp.gmail.com',465,timeout=8,context=ssl.create_default_context())
     else:
      server=self.starttls_factory('smtp.gmail.com',587,timeout=8);server.ehlo();self.failure_stage='STARTTLS';server.starttls(context=ssl.create_default_context())
-    server.ehlo();self.failure_stage='AUTH';server.login(self.sender,self.env['BUSINESS_MAIL_SMTP_PASSWORD']);self.failure_stage='';self.failure_code='';return server
+    server.ehlo();self.auth_mechanisms=[m for m in server.esmtp_features.get('auth','').upper().split() if m in ('PLAIN','LOGIN','XOAUTH2','CRAM-MD5')];self.failure_stage='AUTH';server.login(self.sender,self.env['BUSINESS_MAIL_SMTP_PASSWORD']);self.failure_stage='';self.failure_code='';self.failure_type='';return server
    except Exception as error:
     self.diagnose(error)
     if server:server.close()
@@ -98,7 +99,7 @@ class BusinessMailWorker:
   while not self.stop_event.is_set():
    delay=10
    try:
-    if not self.last_check or self.clock()-self.last_check>(900 if self.ready else 60):self.verify()
+    if not self.last_check or self.clock()-self.last_check>(900 if self.ready else 300):self.verify()
     elif self.clock()-self.last_heartbeat>30:self.heartbeat()
     if self.ready:
      result=self.process_one();delay=60 if result=='DAILY_LIMIT' else 10 if result in ('EMPTY','PAUSED','BUSY') else 2
@@ -109,4 +110,4 @@ class BusinessMailWorker:
  def stop(self):
   self.stop_event.set()
   if self.thread:self.thread.join(timeout=10)
- def status(self):return {'enabled':bool(self.enabled),'ready':bool(self.enabled and self.ready),'code':self.code,'mock_transport':self.simulated,'smtp_port':self.last_port,'failure_stage':self.failure_stage,'failure_code':self.failure_code}
+ def status(self):return {'enabled':bool(self.enabled),'ready':bool(self.enabled and self.ready),'code':self.code,'mock_transport':self.simulated,'smtp_port':self.last_port,'failure_stage':self.failure_stage,'failure_code':self.failure_code,'failure_type':self.failure_type,'auth_mechanisms':self.auth_mechanisms}

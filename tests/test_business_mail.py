@@ -6,7 +6,7 @@ sys.path.insert(0,str(Path(__file__).parents[1]/'render-backend'))
 import httpx
 from gateway.business_mail import BusinessMailWorker,POLICY,URL
 class SMTP:
- def __init__(self,owner,*args,**kwargs):self.owner=owner;owner.commands.append('TLS');assert args[:2]==('smtp.gmail.com',465);assert kwargs['context'].verify_mode==2
+ def __init__(self,owner,*args,**kwargs):self.owner=owner;self.esmtp_features={'auth':'PLAIN LOGIN'};owner.commands.append('TLS');assert args[:2]==('smtp.gmail.com',465);assert kwargs['context'].verify_mode==2
  def ehlo(self):self.owner.commands.append('EHLO')
  def starttls(self,context):self.owner.commands.append('STARTTLS');assert context.verify_mode==2
  def login(self,*args):
@@ -44,6 +44,10 @@ class Tests(unittest.TestCase):
   def starttls(*a,**kw):
    self.commands.append('TCP587');return SMTP(self,'smtp.gmail.com',465,context=kw.pop('context',__import__('ssl').create_default_context()))
   self.worker.smtp_factory=ssl_failure;self.worker.starttls_factory=starttls;self.worker.verify();self.assertTrue(self.worker.ready);self.assertLess(self.commands.index('STARTTLS'),self.commands.index('AUTH'));self.assertNotIn('DATA',self.commands)
+ def test_unsupported_auth_has_distinct_diagnostic(self):
+  def login(*a):raise smtplib.SMTPNotSupportedError('AUTH unavailable')
+  def factory(*a,**kw):server=SMTP(self,*a,**kw);server.login=login;return server
+  self.worker.smtp_factory=factory;self.worker.starttls_factory=lambda *a,**kw:factory('smtp.gmail.com',465,timeout=8,context=__import__('ssl').create_default_context());self.worker.verify();self.assertEqual(self.worker.failure_code,'SMTP_AUTH_UNSUPPORTED')
  def test_connection_diagnostics_do_not_expose_credentials(self):
   def failure(*a,**kw):raise TimeoutError('SYNTHETIC_PASSWORD')
   self.worker.smtp_factory=failure;self.worker.starttls_factory=failure;self.worker.verify();self.assertEqual(self.worker.status()['failure_code'],'NETWORK_TIMEOUT');self.assertNotIn('SYNTHETIC_PASSWORD',json.dumps(self.worker.status()))
