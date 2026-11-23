@@ -1,0 +1,27 @@
+import {businessClient} from './businessClient.mjs';
+export const PROJECT_LIMIT=100;
+export const isProjectEntry=form=>form.priority==='專案'&&!form.id&&!form.projectGroupId&&Array.isArray(form.projectItems);
+export function projectItem(trial,{specification='',acceptance=''}={}){return {key:crypto.randomUUID(),name:trial,quantity:'1',specification,judgementRequired:'需作判定',judgementCriteria:acceptance};}
+export function projectErrors(form){const errors={};if(!String(form.projectName||'').trim()||form.projectName.length>100)errors.projectItems='請填寫100字以內的專案名稱';if(!form.projectItems?.length||form.projectItems.length>PROJECT_LIMIT)errors.projectItems='專案須包含1至100個項目';for(const [i,r] of (form.projectItems||[]).entries()){if(!r.name||!Number.isSafeInteger(Number(r.quantity))||Number(r.quantity)<1||Number(r.quantity)>999999||!r.specification?.trim()||r.specification.length>3000||!['需作判定','不作判定'].includes(r.judgementRequired)||r.judgementRequired==='需作判定'&&!r.judgementCriteria?.trim()||String(r.judgementCriteria||'').length>3000){errors.projectItems=`請完成第${i+1}項的數量、試驗手法及判定方式（文字各限3000字）`;break;}}return errors;}
+export function projectCommand(form,signature,submit,trials){
+ const details=Object.fromEntries(['product','productType','project','customerPartNo','priority','testItems','purpose','purposeOther','sampleSource','sampleSourceOther','productVersion','pcbaVersion','softwareVersion','manufactureDate','sampleDescription','judgementRequired','notes'].map(k=>[k,form[k]??(['testItems','purpose','sampleSource'].includes(k)?[]:'')]));
+ return {name:String(form.projectName||'').trim(),execution_kind:form.executionKind==='VIRTUAL'?'VIRTUAL':'REAL',submit,common:{product_code:form.productCode||form.product||'',customer_name:form.customer||'',purpose:(form.purpose||[]).join('、'),requested_date:form.dueDate||null,form_details:details,draft_signature_data:signature},items:(form.projectItems||[]).map(item=>{const trial=trials.find(t=>[t.name,...(t.aliases||[])].includes(item.name));if(!trial)throw Error('試驗目錄已更新，請重新確認專案項目。');return {trial_id:trial.id,name:trial.name,quantity:String(item.quantity||'').trim()?Number(item.quantity):null,specification:item.specification||'',acceptance:item.judgementRequired==='不作判定'?(item.judgementCriteria?.trim()||'不作判定；僅記錄試驗結果。'):item.judgementCriteria||'',judgementRequired:item.judgementRequired};})};
+}
+const uuid=/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
+export async function saveProject(command,{scope,request=businessClient.request,storage=globalThis.sessionStorage,operationId=()=>crypto.randomUUID(),stillCurrent=()=>true}={}){
+ if(!scope)throw Error('SESSION_REVOKED');const key='dqa-project-operation:'+scope;
+ const fingerprint=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(command)))),b=>b.toString(16).padStart(2,'0')).join('');
+ let pending;try{pending=JSON.parse(storage.getItem(key)||'null');}catch{throw Error('無法讀取專案儲存狀態，請保留表單並重試。');}
+ const call=async(path,options)=>{if(!stillCurrent())throw Error('SESSION_REVOKED');const response=await request(path,options);if(!stillCurrent())throw Error('SESSION_REVOKED');return response.data;};
+ const verify=result=>{if(!result||result.id!==pending.id||!['PLANNED','SAVED','EXPIRED','NOT_FOUND'].includes(result.state))throw Object.assign(Error('專案儲存結果尚未確認，請保留表單後重試。'),{outcomeUnknown:true});if(result.state==='SAVED'&&(!Array.isArray(result.request_ids)||result.count!==result.request_ids.length||result.count<1||result.count>100||!result.request_ids.every(id=>uuid.test(id))))throw Error('專案儲存結果格式異常，請保留表單後重試。');return result;};
+ if(pending){if(!uuid.test(pending.id)||typeof pending.fingerprint!=='string')throw Error('專案儲存狀態異常。');const result=verify(await call('/projects/result/'+pending.id));if(result.state==='SAVED'){storage.removeItem(key);if(pending.fingerprint!==fingerprint)throw Error('前一版專案已儲存；目前表單仍保留新修改，請先至委託清單確認。');return result;}if(['EXPIRED','NOT_FOUND'].includes(result.state)){storage.removeItem(key);pending=null;}else if(pending.fingerprint!==fingerprint)throw Error('前一版專案尚待完成，請恢復原填寫內容再重試，避免重複建立。');}
+ if(!pending){pending={id:operationId(),fingerprint};storage.setItem(key,JSON.stringify(pending));}
+ const body={operation_id:pending.id,command};
+ try{
+  let result=verify(await call('/projects/prepare',{method:'POST',body}));if(result.state!=='SAVED')result=verify(await call('/projects/execute',{method:'POST',body}));if(result.state!=='SAVED')throw Object.assign(Error('專案儲存結果尚未確認，請保留表單後重試。'),{outcomeUnknown:true});storage.removeItem(key);return result;
+ }catch(error){
+  // A locking lookup waits for an in-flight transaction; lost acknowledgements never create a second batch.
+  try{const result=verify(await call('/projects/result/'+pending.id));if(result.state==='SAVED'){storage.removeItem(key);return result;}if(['NOT_FOUND','EXPIRED'].includes(result.state)||!error.outcomeUnknown&&!error.outcome_unknown&&error.status>=400&&error.status<500)storage.removeItem(key);}catch{/* keep the operation ID; retries reconcile before executing */}
+  throw error;
+ }
+}

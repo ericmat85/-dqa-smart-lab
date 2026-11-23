@@ -3,17 +3,18 @@ import {createBusinessHandler,COOKIE,openSession} from '../server/business/handl
 import {createBusinessClient} from '../src/businessClient.mjs';
 const A='a0000000-0000-0000-0000-000000000001',U='10000000-0000-0000-0000-000000000001';
 const env={BUSINESS_SUPABASE_SERVICE_ROLE_KEY:'x.'+Buffer.from(JSON.stringify({role:'service_role',ref:'mmazbwzdiizabikmiily'})).toString('base64url')+'.synthetic',BUSINESS_AI_ENABLED:'true',BUSINESS_AI_GATEWAY_SECRET:'FAKE_BUSINESS_AI_TEST_SECRET_1234567890',BUSINESS_AI_BACKEND_URL:'https://dqa-e4-mock-4fbdeebf.onrender.com',BUSINESS_ENABLED:'true',BUSINESS_ORIGIN:'https://preview.test',BUSINESS_SUPABASE_URL:'https://mmazbwzdiizabikmiily.supabase.co',BUSINESS_SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiJ9.'+Buffer.from(JSON.stringify({role:'anon',ref:'mmazbwzdiizabikmiily'})).toString('base64url')+'.synthetic',BUSINESS_COOKIE_KEY:Buffer.alloc(32,7).toString('base64url')};
-function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRevocation=false,maintenanceError=null,mode="ok";const operations=new Map();const fetchImpl=async(raw,options={})=>{
+function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRevocation=false,maintenanceError=null,mode="ok",admin=true;const operations=new Map();const fetchImpl=async(raw,options={})=>{
  const url=new URL(raw);calls.push({url,options});assert.equal(options.redirect,'error');
  const body=options.body?JSON.parse(options.body):{};const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json',...headers}});
 
  if(url.origin===env.BUSINESS_AI_BACKEND_URL){
   const at=options.headers['X-Business-AI-At'],raw=options.body||'';assert.equal(options.headers['X-Business-AI-Signature'],createHmac('sha256',env.BUSINESS_AI_GATEWAY_SECRET).update(`BUSINESS_AI_V1.${options.method}.${url.pathname}.${at}.${raw}`).digest('hex'));
   if(url.pathname==='/__business_ai/health')return json({data:{engines:{E1:{ready:true},E2:{ready:true},E3:{ready:true},E4:{ready:true}},model_call_performed:false}});
+  if(url.pathname==='/__business_ai/settings'){if(mode==='settings-lost')throw Error('synthetic lost config response');return json({data:body.action==='READ'?{engine:body.engine,revision:0,enabled:true,key_configured:true,key_mask:'••••TEST',model_call_performed:false}:{engine:body.engine,revision:body.body.expected_revision+1,operation_id:body.body.operation_id,saved:true,model_call_performed:false}});}
   if(url.pathname==='/__business_ai/result'){const entry=operations.get(body.operation_id);return json({data:entry?.provider?{state:'SUCCEEDED',data:entry.provider}:{state:'NOT_FOUND'}});}
   assert.equal(url.pathname,'/__business_ai/generate');assert.equal(body.subject.length,64);assert.ok(!JSON.stringify(body).includes('synthetic@example.invalid'));assert.ok(!JSON.stringify(body).includes('ACCESS_TOKEN'));
   if(mode==='network')throw Error('synthetic transport loss');
-  const packet={engine:body.engine,operation_id:body.operation_id,execution_mode:mode==='mock'?'MOCK':'LIVE_PROVIDER',real_ai:mode!=='mock',provider:'openai_responses',model:'gpt-6-luna',provider_request_id:'req_SYNTHETIC_TRANSPORT_ONLY',provider_response_id:'resp_SYNTHETIC_TRANSPORT_ONLY',trace_id:'I-'+'a'.repeat(32),response_language:body.language,usage:{input_tokens:80,output_tokens:40},estimated_cost_usd:'0.000028',result:{engine:body.engine,summary:'合成傳輸測試，未呼叫真實模型。',findings:[],sections:[],references:['SUMMARY'],selected_candidate_id:body.engine==='E2'?'C1':''}};operations.get(body.operation_id).provider=packet;return json({data:packet});
+  const packet={engine:body.engine,operation_id:body.operation_id,execution_mode:mode==='mock'?'MOCK':'LIVE_PROVIDER',real_ai:mode!=='mock',provider:'openai_responses',model:mode==='model-sol'?'gpt-6-sol':mode==='model-disabled'?'gpt-6.2-sol':'gpt-6-luna',provider_request_id:'req_SYNTHETIC_TRANSPORT_ONLY',provider_response_id:'resp_SYNTHETIC_TRANSPORT_ONLY',trace_id:'I-'+'a'.repeat(32),response_language:body.language,usage:{input_tokens:80,output_tokens:40},estimated_cost_usd:mode==='model-sol'?'0.00056':'0.000028',result:{engine:body.engine,summary:'合成傳輸測試，未呼叫真實模型。',findings:[],sections:[],references:['SUMMARY'],selected_candidate_id:body.engine==='E2'?'C1':''}};operations.get(body.operation_id).provider=packet;return json({data:packet});
  }
  assert.equal(url.origin,env.BUSINESS_SUPABASE_URL);
  const aiName=url.pathname.split('/').pop();
@@ -48,14 +49,14 @@ function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRev
  if(['prepare_request_operation','execute_request_operation','request_operation_result','request_signature_image','request_document_version'].includes(rpc)){assert.equal(body.p_tenant,A);if(maintenanceError)return json({message:maintenanceError},400);if(failWrite&&rpc==='execute_request_operation')throw Error('synthetic lost acknowledgement');return json({state:rpc==='prepare_request_operation'?'PLANNED':'SAVED',id:body.p_operation||body.p_id});}
  if(['prepare_human_operation','execute_human_operation','human_operation_result'].includes(rpc)){assert.equal(body.p_tenant,A);if(maintenanceError)return json({message:maintenanceError},400);if(failWrite&&rpc==='execute_human_operation')throw Error('synthetic lost acknowledgement');return json({state:rpc==='prepare_human_operation'?'PLANNED':'SAVED',id:body.p_operation});}
  if(rpc==='claim_pending_memberships')return json(0);
- if(rpc==='connection_context')return json({user_id:U,memberships:[{id:'member',tenant_id:A,display_name:'Synthetic',tenant_name:'Synthetic Lab',permissions:[],is_admin:true}]});
+ if(rpc==='connection_context')return json({user_id:U,memberships:[{id:'member',tenant_id:A,display_name:'Synthetic',tenant_name:'Synthetic Lab',permissions:[],is_admin:admin,systems:['lms','lab','request'],pages:['settings']}]});
  if(rpc==='open_browser_session'){sessions.set(body.p_id,{tenant:body.p_tenant,hash:body.p_nonce_sha256,revoked:false});return json({id:body.p_id,expires_at:new Date(Date.now()+28800000).toISOString()});}
  if(rpc==='check_browser_session'){const s=sessions.get(body.p_id);return json(s&&!s.revoked&&s.hash===body.p_nonce_sha256?s.tenant:null);}
  if(rpc==='revoke_browser_session'){if(failRevocation)return json(false);const s=sessions.get(body.p_id);if(s)s.revoked=true;return json(!!s);}
  if(['create_request_draft','update_request_draft'].includes(rpc)){if(failWrite)throw new Error('synthetic network failure');if(body.p_data.status)return json({message:'DRAFT_FIELDS_INVALID'},400);return json({id:body.p_id,status:'DRAFT',revision:1});}
  if(url.pathname==='/rest/v1/requests'){assert.equal(url.searchParams.get('tenant_id'),'eq.'+A);return json([] ,200,{'content-range':'*/0'});}
  throw Error('Unexpected upstream '+url.pathname);
- };const handler=createBusinessHandler({env,fetchImpl});return {handler,calls,operations,setMode:v=>{mode=v;},fetchImpl,setMaintenanceError:v=>{maintenanceError=v;},setFailWrite:v=>{failWrite=v;},setFailRevocation:v=>{failRevocation=v;}};}
+ };const handler=createBusinessHandler({env,fetchImpl});return {handler,calls,operations,setAdmin:v=>{admin=v;},setMode:v=>{mode=v;},fetchImpl,setMaintenanceError:v=>{maintenanceError=v;},setFailWrite:v=>{failWrite=v;},setFailRevocation:v=>{failRevocation=v;}};}
 async function call(handler,path,options={}){const req={url:options.url||'/api/business'+path,query:options.query,params:options.params,method:options.method||'GET',headers:{...(options.method?{'origin':env.BUSINESS_ORIGIN,'content-type':'application/json'}:{}),...(options.cookie?{cookie:options.cookie}:{}),...options.headers},body:options.body};const headers={};let result;const res={setHeader:(k,v)=>{headers[k.toLowerCase()]=v;},status(status){this.statusCode=status;return this;},json(body){result={status:this.statusCode,body,headers};return result;}};await handler(req,res);return result;}
 async function login(f){const r=await call(f.handler,'/login',{method:'POST',body:{email:'synthetic@example.invalid',password:'synthetic-only'}});assert.equal(r.status,200,JSON.stringify(r.body));return r.headers['set-cookie'].split(';')[0];}
 
@@ -79,3 +80,35 @@ test('unsupported interface language is rejected before model call',async()=>{co
 test('generic laboratory test-catalog question retrieves trial definitions rather than substituting requests',async()=>{const f=fixture(),cookie=await login(f),b=aiBody();b.input.question='目前有哪些試驗項目與試驗資訊？';assert.equal((await call(f.handler,'/ai/generate',{method:'POST',body:b,cookie})).status,200);const context=JSON.parse(providerCalls(f)[0].options.body).context;assert.ok(context.records.some(r=>r.name==='高溫高濕'));assert.equal(context.counts.trials,1);assert.ok(!context.records.some(r=>r.product_code));});
 
 test('AI scheduling receives planner U while request review omits the legacy requester U',async()=>{const f=fixture(),cookie=await login(f);let r=await call(f.handler,'/ai/generate',{method:'POST',body:aiBody('E2'),cookie});assert.equal(r.status,200);let context=JSON.parse(providerCalls(f)[0].options.body).context;assert.equal(context.sample_space_units,2);assert.equal(context.sample_space_source,'PLANNER_INPUT');r=await call(f.handler,'/ai/generate',{method:'POST',body:aiBody('E1'),cookie});assert.equal(r.status,200);context=JSON.parse(providerCalls(f)[1].options.body).context;for(const record of context.records.filter(x=>x.reference.startsWith('requests:')))assert.equal(Object.hasOwn(record,'sample_space_units'),false);});
+
+const settingsBody=()=>({operation_id:crypto.randomUUID(),expected_revision:0,enabled:false,model:'gpt-6-luna',per_call_usd:'0.04',total_cap_usd:'0.5',max_output_tokens:256,key_action:'KEEP'});
+test('all four engine configuration routes use signed, workspace-bound admin settings without model calls',async()=>{
+ const f=fixture(),cookie=await login(f);
+ for(const engine of ['E1','E2','E3','E4']){
+  const r=await call(f.handler,'/ai/settings/'+engine,{cookie});assert.equal(r.status,200,JSON.stringify(r.body));assert.equal(r.body.data.engine,engine);assert.equal(r.body.data.can_manage,true);
+  const b=settingsBody(),saved=await call(f.handler,'/ai/settings/'+engine,{method:'POST',body:b,cookie});assert.equal(saved.status,200);assert.equal(saved.body.data.saved,true);
+ }
+ const settings=f.calls.filter(x=>x.url.pathname==='/__business_ai/settings');assert.equal(settings.length,8);
+ for(const c of settings){const b=JSON.parse(c.options.body);assert.match(b.workspace,/^[a-f0-9]{64}$/);assert.match(b.actor,/^[a-f0-9]{64}$/);assert.ok(!c.options.body.includes('ACCESS_TOKEN'));}
+ assert.equal(providerCalls(f).length,0);
+});
+test('current database role blocks non-admin configuration reads and writes before reaching gateway',async()=>{
+ const f=fixture(),cookie=await login(f);f.setAdmin(false);
+ for(const method of ['GET','POST']){const r=await call(f.handler,'/ai/settings/E1',{method,body:method==='POST'?settingsBody():undefined,cookie});assert.equal(r.status,403);assert.equal(r.body.error.code,'AI_SETTINGS_ADMIN_REQUIRED');}
+ assert.equal(f.calls.filter(c=>c.url.pathname==='/__business_ai/settings').length,0);
+});
+test('configuration route rejects anonymous callers, foreign origins, queries and scope injection',async()=>{
+ const f=fixture(),cookie=await login(f);
+ assert.equal((await call(f.handler,'/ai/settings/E4')).status,401);
+ assert.equal((await call(f.handler,'/ai/settings/E4',{method:'POST',body:settingsBody(),cookie,headers:{origin:'https://foreign.invalid'}})).status,403);
+ assert.equal((await call(f.handler,'/ai/settings/E4?tenant=other',{cookie})).status,422);
+ for(const extra of [{workspace:'other'},{actor:'fake'},{tenant_id:'other'},{endpoint:'https://evil.invalid'}])assert.equal((await call(f.handler,'/ai/settings/E4',{method:'POST',body:{...settingsBody(),...extra},cookie})).status,422);
+ assert.equal(f.calls.filter(c=>c.url.pathname==='/__business_ai/settings').length,0);
+});
+test('lost settings receipt is uncertain and never automatically resubmitted',async()=>{
+ const f=fixture(),cookie=await login(f);f.setMode('settings-lost');const r=await call(f.handler,'/ai/settings/E2',{method:'POST',body:settingsBody(),cookie});assert.equal(r.status,503);assert.equal(r.body.outcome_unknown,true);assert.equal(f.calls.filter(c=>c.url.pathname==='/__business_ai/settings').length,1);assert.equal(providerCalls(f).length,0);
+});
+
+test('BFF accepts compatible selected models and refuses disabled profiles in provider evidence',async()=>{
+ for(const [mode,status] of [['model-sol',200],['model-disabled',502]]){const f=fixture(),cookie=await login(f);f.setMode(mode);const r=await call(f.handler,'/ai/generate',{method:'POST',body:aiBody(),cookie});assert.equal(r.status,status,JSON.stringify(r.body));if(status===200)assert.equal(r.body.data.model,'gpt-6-sol');else assert.equal(r.body.error.code,'AI_PROVIDER_EVIDENCE_REQUIRED');assert.equal(providerCalls(f).length,1);}
+});

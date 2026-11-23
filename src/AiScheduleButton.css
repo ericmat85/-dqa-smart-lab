@@ -11,20 +11,20 @@
 .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-verified-progress {
   left: 0;
   background: linear-gradient(90deg, #7196ff, #4055e8);
-  transition: width 220ms ease-out;
+  transition: width 100ms linear;
 }
 .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress {
   overflow: hidden;
   background: #5374f22b;
-  transition: left 220ms ease-out;
+  transition: left 100ms linear, width 100ms linear;
 }
 .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress > i {
   display: block;
   height: 100%;
-  width: 55%;
+  width: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, transparent, #526af5aa 30%, #dce9ff 55%, #526af5aa 75%, transparent);
-  animation: schedule-work-sweep 1.25s linear infinite;
+  animation: schedule-work-glow 2.4s ease-in-out infinite;
 }
 :is(#root, body) .lms-enterprise .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress > .schedule-ai-working-progress {
   background: #5374f22b;
@@ -71,9 +71,9 @@
 .schedule-ai-dialog[data-workflow="schedule"][data-phase="complete"] .schedule-ai-progress-heading strong {
   color: #27816a;
 }
-@keyframes schedule-work-sweep {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(290%); }
+@keyframes schedule-work-glow {
+  0%, 100% { opacity: .3; }
+  50% { opacity: .8; }
 }
 @keyframes schedule-step-spin {
   to { transform: rotate(360deg); }
@@ -97,7 +97,6 @@
   }
   .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress > i {
     animation: none;
-    transform: translateX(40%);
   }
   .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span,
   .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span::after,

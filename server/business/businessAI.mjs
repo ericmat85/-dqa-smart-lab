@@ -1,3 +1,4 @@
+import {compatibleModelEvidence,verifiedModelCost} from '../../src/businessModelCatalog.mjs';
 import {createHash,createHmac} from 'node:crypto';
 import {accountDeletionServiceKey} from './accountDeletion.mjs';
 import {e4LabScope} from '../../src/e4LabScope.mjs';
@@ -10,7 +11,7 @@ const COLUMNS={requests:'execution_kind,id,legacy_id,trial_id,product_code,purpo
 const TABLES={requests:'requests',trials:'trial_definitions',equipment:'equipment',materials:'materials',schedules:'schedules',reports:'reports',borrows:'borrows',qualifications:'qualifications',quality:'quality_records',documents:'artifacts'};
 function select(row,keys){return Object.fromEntries(keys.filter(k=>row[k]!==undefined).map(k=>[k,row[k]]));}
 function providerEvidence(data,engine,operation,language){
- return data?.engine===engine&&data.operation_id===operation&&data.real_ai===true&&data.execution_mode==='LIVE_PROVIDER'&&data.provider==='openai_responses'&&data.model==='gpt-6-luna'&&/^req_[A-Za-z0-9_-]+$/.test(data.provider_request_id||'')&&/^resp_[A-Za-z0-9_-]+$/.test(data.provider_response_id||'')&&/^I-[a-f0-9]{32}$/.test(data.trace_id||'')&&['en','zh-TW'].includes(data.response_language)&&(!language||data.response_language===language)&&Number.isSafeInteger(data.usage?.input_tokens)&&Number.isSafeInteger(data.usage?.output_tokens)&&data.usage.input_tokens>=0&&data.usage.output_tokens>=0&&/^\d+(?:\.\d+)?$/.test(data.estimated_cost_usd||'')&&Number(data.estimated_cost_usd)<=.05&&typeof data.result?.summary==='string'&&Array.isArray(data.result.references)&&Array.isArray(data.result.findings)&&Array.isArray(data.result.sections);
+ return data?.engine===engine&&data.operation_id===operation&&data.real_ai===true&&data.execution_mode==='LIVE_PROVIDER'&&data.provider==='openai_responses'&&compatibleModelEvidence(data)&&/^req_[A-Za-z0-9_-]+$/.test(data.provider_request_id||'')&&/^resp_[A-Za-z0-9_-]+$/.test(data.provider_response_id||'')&&/^I-[a-f0-9]{32}$/.test(data.trace_id||'')&&['en','zh-TW'].includes(data.response_language)&&(!language||data.response_language===language)&&Number.isSafeInteger(data.usage?.input_tokens)&&Number.isSafeInteger(data.usage?.output_tokens)&&data.usage.input_tokens>=0&&data.usage.output_tokens>=0&&/^\d+(?:\.\d+)?$/.test(data.estimated_cost_usd||'')&&Number(data.estimated_cost_usd)<=.05&&verifiedModelCost(data)&&typeof data.result?.summary==='string'&&Array.isArray(data.result.references)&&Array.isArray(data.result.findings)&&Array.isArray(data.result.sections);
 }
 function brief(kind,r){
  const fields={requests:['execution_kind','legacy_id','product_code','quantity','requested_date','status','revision'],trials:['legacy_id','name','profile_code','duration_hours','specification_version','revision'],equipment:['legacy_id','name','category','space_units','operational_status','revision'],materials:['legacy_id','name','unit','available_quantity','min_stock','status','revision'],schedules:['execution_kind','virtual_percent','virtual_at','legacy_id','request_id','starts_at','ends_at','sample_space_units','test_hours','scheduling_unit','scheduling_days','status','revision'],reports:['request_id','status','revision'],borrows:['legacy_id','equipment_id','material_id','quantity','purpose','starts_at','due_at','status','revision'],qualifications:['equipment_id','trial_id','training','issued_on','expires_on','status','revision'],quality:['title','request_id','equipment_id','trial_id','status','severity','cause','action','resolution','due_on','revision'],documents:['legacy_id','kind','name','request_id','trial_id','revision']};
@@ -23,13 +24,30 @@ export async function handleBusinessAI({path,req,res,parsed,env,fetchImpl,sessio
  const serviceRpc=async(name,args)=>(await upstream('/rest/v1/rpc/'+name,{method:'POST',body:args,profile:true,headers:{apikey:key,Authorization:'Bearer '+key}})).data;
  async function remote(route,body,signal){
   const method=body===undefined?'GET':'POST',raw=body===undefined?'':JSON.stringify(body),at=String(Date.now());
+  const changes=route==='/__business_ai/generate'||route==='/__business_ai/settings'&&body?.action==='SAVE';
   const signature=createHmac('sha256',secret).update(`BUSINESS_AI_V1.${method}.${route}.${at}.${raw}`).digest('hex');
-  let r;try{r=await fetchImpl(BACKEND+route,{method,body:body===undefined?undefined:raw,headers:{'Content-Type':'application/json','X-Business-AI-At':at,'X-Business-AI-Signature':signature},redirect:'error',signal:signal?AbortSignal.any([AbortSignal.timeout(45000),signal]):AbortSignal.timeout(15000)});}catch{throw new ApiError(503,body?'AI_OUTCOME_UNKNOWN':'AI_BACKEND_UNAVAILABLE',{outcome_unknown:!!body});}
-  let p;try{const text=await r.text();if(Buffer.byteLength(text)>200000)throw Error();p=JSON.parse(text);}catch{throw new ApiError(502,'AI_RESPONSE_INVALID',{outcome_unknown:!!body});}
+  let r;try{r=await fetchImpl(BACKEND+route,{method,body:body===undefined?undefined:raw,headers:{'Content-Type':'application/json','X-Business-AI-At':at,'X-Business-AI-Signature':signature},redirect:'error',signal:signal?AbortSignal.any([AbortSignal.timeout(45000),signal]):AbortSignal.timeout(15000)});}catch{throw new ApiError(503,changes?'AI_OUTCOME_UNKNOWN':'AI_BACKEND_UNAVAILABLE',{outcome_unknown:changes});}
+  let p;try{const text=await r.text();if(Buffer.byteLength(text)>200000)throw Error();p=JSON.parse(text);}catch{throw new ApiError(502,'AI_RESPONSE_INVALID',{outcome_unknown:changes});}
   if(!r.ok){const code=/^[A-Z0-9_]{1,100}$/.test(p.error?.code||'')?p.error.code:'AI_PROVIDER_UNAVAILABLE';throw new ApiError(r.status,code,{outcome_unknown:!!p.outcome_unknown,provider_trace:p.trace_id});}return p;
  }
+ const workspace=hash(session.tenant);
+ const settingsMatch=path.match(/^\/ai\/settings\/(E[1-4])$/);
+ if(settingsMatch){
+  if(!['GET','POST'].includes(req.method))throw new ApiError(405,'METHOD_DENIED');
+  const context=await rpc('connection_context',{},session.access);
+  const member=context?.memberships?.find(m=>m.tenant_id===session.tenant);
+  if(member?.is_admin!==true||!member.systems?.includes('lms')||!member.pages?.includes('settings'))throw new ApiError(403,'AI_SETTINGS_ADMIN_REQUIRED');
+  let body;
+  if(req.method==='POST'){
+   body=await bodyOf(req);fields(body,['operation_id','expected_revision','enabled','model','per_call_usd','total_cap_usd','max_output_tokens','key_action','api_key','engine_controls']);
+   if(!UUID.test(body.operation_id||''))throw new ApiError(422,'AI_SETTINGS_FIELDS_INVALID');
+   await valid(session);
+  }
+  const packet=await remote('/__business_ai/settings',{workspace,engine:settingsMatch[1],actor:hash(identity.id),action:req.method==='GET'?'READ':'SAVE',...(body?{body}:{})});
+  return reply(200,{data:{...packet.data,can_manage:true},provider_trace:packet.trace_id});
+ }
  if(path==='/ai/status'&&req.method==='GET'){
-  const [health,observations]=await Promise.all([remote('/__business_ai/health'),rpc('business_ai_overview',{p_tenant:session.tenant},session.access)]);return reply(200,{data:{...health.data,observations},provider_trace:health.trace_id});
+  const [health,observations]=await Promise.all([remote('/__business_ai/health',{workspace}),rpc('business_ai_overview',{p_tenant:session.tenant},session.access)]);return reply(200,{data:{...health.data,observations},provider_trace:health.trace_id});
  }
  const resultMatch=path.match(/^\/ai\/result\/([a-f0-9-]{36})$/);
  if(resultMatch&&req.method==='GET'){
@@ -111,7 +129,7 @@ export async function handleBusinessAI({path,req,res,parsed,env,fetchImpl,sessio
   if(!claimed)throw new ApiError(409,'AI_OUTCOME_UNKNOWN',{outcome_unknown:true,operation_id});
   const controller=new AbortController();const cancelled=()=>controller.abort();const closed=()=>{if(!res.writableEnded)cancelled();};req.once?.('aborted',cancelled);res.once?.('close',closed);
   let packet;
-  try{packet=await remote('/__business_ai/generate',{engine,operation_id,subject:hash(session.tenant+':'+identity.id),session_nonce:hash(session.id),language,question,context},controller.signal);}finally{req.off?.('aborted',cancelled);res.off?.('close',closed);}
+  try{packet=await remote('/__business_ai/generate',{engine,workspace,operation_id,subject:hash(session.tenant+':'+identity.id),session_nonce:hash(session.id),language,question,context},controller.signal);}finally{req.off?.('aborted',cancelled);res.off?.('close',closed);}
   const data=packet.data;
   if(!providerEvidence(data,engine,operation_id,language)||data.result.references.some(r=>!context.references.includes(r)))throw new ApiError(502,'AI_PROVIDER_EVIDENCE_REQUIRED',{outcome_unknown:true,operation_id});
   await valid(session);

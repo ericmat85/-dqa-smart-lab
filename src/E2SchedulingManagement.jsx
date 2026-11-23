@@ -39,7 +39,7 @@ export default function E2SchedulingManagement({account,preferencesOnly=false}){
    <p className="e2-management-hint">設定限目前瀏覽器，其他分頁會同步；不回寫既有案件。{!editable&&'目前帳號為唯讀，請由具既有管理權限的帳號調整。'}</p>
    {snapshot?.events[0]&&<p className="e2-management-hint">最近更新：{time(Date.parse(snapshot.events[0].at))}（台灣時間）・{snapshot.events[0].actorId}</p>}
    {editable&&<button className="template-btn" type="button" onClick={()=>{if(!window.confirm('還原本瀏覽器的排程偏好為預設值？既有排程、請求紀錄與服務端預算不會改變。'))return;try{resetE2Settings(account);setError('');setNotice('已還原排程預設值。');}catch(error){setError(error.message);}}}>還原排程預設值</button>}
-  </article><article className="e2-settings-card"><h4>固定執行保護</h4><ul className="e2-guard-list"><li>條件取自試驗資料，不從設備能力反推</li><li>容量、設備、人員及占用資料不足時回報資料不足</li><li>高溫高濕連續 250H；振動每顆 20H、跳過週末</li><li>候選方案經驗證後帶入草稿，按儲存才生效</li><li>不自動重送；模型、Token 與預算由服務端授權及帳本控制</li></ul><p className="e2-management-hint">本頁沒有 API Key、模型啟用或費用上限的修改欄位。</p></article></div>
+  </article><article className="e2-settings-card"><h4>固定執行保護</h4><ul className="e2-guard-list"><li>條件取自試驗資料，不從設備能力反推</li><li>容量、設備、人員及占用資料不足時回報資料不足</li><li>高溫高濕連續 250H；振動每顆 20H、跳過週末</li><li>候選方案經驗證後帶入草稿，按儲存才生效</li><li>不自動重送；模型、Token 與預算由服務端授權及帳本控制</li></ul><p className="e2-management-hint">模型、API Key 與費用上限請使用「模型與費用設定」。</p></article></div>
   {notice&&<p className="management-notice" role="status">{notice}</p>}{error&&<p className="management-error" role="alert">{error}</p>}
   {!preferencesOnly&&<><p className="e4-monitor-scope">目前帳號・本分頁最近 30 分鐘，最多 40 筆，重新整理或登出即清除。只保存狀態、數量、用量及追蹤識別碼，不保存試驗內容或憑證；不是全站監控或正式費用帳本。獨立導覽模擬不列入 API 請求。清除觀察紀錄不會取消請求或釋放預算。</p>
   <div className="e4-monitor-stats e2-monitor-stats" aria-label="E2 排程請求統計">

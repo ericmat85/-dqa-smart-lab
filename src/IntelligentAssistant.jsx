@@ -2,7 +2,8 @@ import {requestDemoStartIntent,requestDemoReply} from './requestDemoCommand.mjs'
 import FlowTestDialog from './FlowTestDialog.jsx';
 import {flowTestIntent} from './flowTestTiming.mjs';
 import {businessAIEnabled} from './businessAIClient.mjs';
-import {appStorage} from './originalBusiness.mjs';
+import {answerBusinessFAQ} from './businessFAQ.mjs';
+import {appStorage,originalBusinessEnabled} from './originalBusiness.mjs';
 import useUiPreferences from './useUiPreferences.js';
 import {faqQuestion,scopeReply} from './assistantLanguage.mjs';
 import {e4LabScope} from './e4LabScope.mjs';
@@ -99,13 +100,13 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms',onDe
    const demoStart=requestDemoStartIntent(trimmed);
    if(demoStart){reply=system==='request'&&onDemoStart?onDemoStart(language):requestDemoReply('WRONG_SYSTEM',language);}
    else {
-   if(!clear)requireEngineEnabled('E4');
+   if(!clear&&!findCommonQuestion(trimmed))requireEngineEnabled('E4');
    const acceleration=flowTestIntent(trimmed);
    if(acceleration){setFlowTestOpen(true);reply=language==='en'?'Opened virtual-request controls. Confirm a checkpoint to advance the virtual trial.':'已開啟虛擬委託加速器。確認推進後會更新虛擬試驗狀態，真實委託依正常時間執行。';}
    else {
    const matchedFaq=findCommonQuestion(trimmed);
    const scope=e4LabScope(matchedFaq?.question||trimmed,{document:/^(?:文件問答|Document Q&A)\s*[:：]/i.test(trimmed)});
-   const faq=!businessAIEnabled()&&scope.allowed&&matchedFaq;
+   const faq=scope.allowed&&matchedFaq;
    const dynamic=faq&&['overview','pending','running','standby','stock'].includes(faq.id);
    let current={snapshot,metrics};
    if(!businessAIEnabled()&&scope.allowed&&(!faq||dynamic)){
@@ -113,7 +114,7 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms',onDe
     current=readE4CurrentData(snapshot,metrics,system,storage);
     if(!faq&&system==='lms'){try{const {allReports}=await import('./reportStore.mjs');current.snapshot={...current.snapshot,reports:await allReports()};}catch{current.snapshot={...current.snapshot,reports:undefined};}}
    }
-   reply=!scope.allowed?scopeReply(scope,language):faq?commonQuestionReply(trimmed,current.snapshot,current.metrics,system,language):trimmed?await askPreviewAssistant(trimmed,system,{...current,language,signal:controller.signal,contextHint:turns.slice(-4).map(turn=>turn.question),onReportDraft:value=>{reportDraft=value;}}):'附件僅展示檔名，尚未送至模型。';
+   reply=!scope.allowed?scopeReply(scope,language):faq?originalBusinessEnabled()?await answerBusinessFAQ(trimmed,{system,language,signal:controller.signal}):commonQuestionReply(trimmed,current.snapshot,current.metrics,system,language):trimmed?await askPreviewAssistant(trimmed,system,{...current,language,signal:controller.signal,contextHint:turns.slice(-4).map(turn=>turn.question),onReportDraft:value=>{reportDraft=value;}}):'附件僅展示檔名，尚未送至模型。';
    if(!scope.allowed||faq){let accountId;try{accountId=sessionStorage.getItem('dqa-'+system+'-account-id');}catch{}observeE4Local({system,accountId,route:scope.allowed?'FAQ':'RULE',status:scope.allowed?'SUCCESS':'ERROR',errorCode:scope.code});}
    if(reportDraft)setTurns(rows=>rows.map(row=>row.id===id?{...row,reportDraft}:row));
    }
