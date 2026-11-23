@@ -19,7 +19,7 @@ export default function LabSettings({onNavigate,focusSection,account,onOpenModul
  const connected=originalBusinessEnabled();
  const [sharedProfile,setSharedProfile]=useState(null);
  useEffect(()=>{if(!connected)return;let active=true;businessClient.request('/access?section=profile').then(packet=>{if(active)setSharedProfile({accountId:account?.id,configuration:packet.data?.configuration});}).catch(()=>{if(active)setSharedProfile({accountId:account?.id,configuration:null});});return()=>{active=false;};},[connected,account?.id]);
- const profile=sharedProfile?.accountId===account?.id?sharedProfile.configuration:null;
+ const profile=sharedProfile?.accountId===account?.id?sharedProfile?.configuration:null;
  const workspace=connected?(profile?.workspaceName||'工作區資料待確認'):adminData?.settings.organization.company&&!adminData.settings.organization.company.startsWith('Demo ')?adminData.settings.organization.company:'DQA Smart Lab';
  useEffect(()=>{if(focusSection==='activity')onOpenModule('parameters?section=activity');},[focusSection,onOpenModule]);
  const [checked,setChecked]=useState('');
