@@ -1244,6 +1244,7 @@ LMS 委託審查|LMS request reviews
 主題|Theme
 `.trim().split('\n').map(line=>{const separator=line.indexOf('|');return [line.slice(0,separator),line.slice(separator+1)];});
 entries.push(
+ ['Demo 填入已標記為虛擬委託；重設後可建立真實委託。','Demo fill marks this request as virtual. Reset the form to create a real request.'],['確認虛擬排程','Confirm virtual schedule'],['已接收，可由助理加速','Received · Ask the assistant to accelerate'],['虛擬委託','Virtual request'],['真實委託','Real request'],['委託種類','Request type'],['虛擬委託・實際流程','Virtual request · Native workflow'],['虛擬試驗進度','Virtual trial progress'],['虛擬試驗已完成','Virtual trial completed'],['虛擬試驗進行中','Virtual trial in progress'],['等待加速虛擬試驗','Awaiting virtual acceleration'],['委託種類已固定，不能變更。','The saved request type cannot be changed.'],['僅供流程測試，可由 AI 助理加速試驗；報告標示測試用途。','For workflow testing. The AI assistant can accelerate the trial; reports are marked for testing.'],['依正常排程時間執行。Demo 填入會自動選為虛擬委託。','Runs on the normal schedule. Demo fill automatically selects a virtual request.'],
  ['流程測試加速器','Flow-test accelerator'],['資料庫測試副本','Database rehearsal copy'],['獨立 Demo 展示','Isolated Demo'],
  ['關閉流程測試加速器','Close flow-test accelerator'],['來源案件','Source case'],['請選擇已確認接收的案件','Select a received case'],
  ['重新讀取測試資料','Reload rehearsal data'],['原始工時','Original test hours'],['原排程','Original schedule'],['排程時窗','Scheduled calendar window'],

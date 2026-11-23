@@ -1,3 +1,4 @@
+import {markVirtualPdf} from './virtualDocuments.mjs';
 import {reportToPdf} from './reportPdf.mjs';
 import {requestWorkbookBytes} from './requestDocumentWorkbook.mjs';
 export async function requestToPdf(request,{fontBytes,fontSubset=false}={}) {
@@ -14,6 +15,6 @@ export async function buildCasePdf({request,reportBytes,fontBytes,fontSubset=fal
   const pages=await output.copyPages(source,source.getPageIndices());pages.forEach(page=>output.addPage(page));
   sections.push({kind,firstPage,pageCount:pages.length});
  }
- output.setTitle(`DQA 結案文件 ${request.id}（Demo）`);output.setSubject('委託單 → 試驗報告；圖片簽名不具正式電子簽章效力');
- return {bytes:new Uint8Array(await output.save()),sections};
+ output.setTitle(`DQA 結案文件 ${request.id}`);output.setSubject('委託單 → 試驗報告；圖片簽名不具正式電子簽章效力');
+ await markVirtualPdf(output,request);return {bytes:new Uint8Array(await output.save()),sections};
 }

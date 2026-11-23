@@ -1,3 +1,4 @@
+import {isVirtualRequest} from './requestExecutionKind.mjs';
 import {originalBusinessEnabled} from './originalBusiness.mjs';
 import {usesEquipment} from './scheduleResources.mjs';
 import {DEMO_SCHEDULES} from './demoSchedules.mjs';
@@ -69,7 +70,7 @@ export function deriveLabMetrics(snapshot,now=Date.now()) {
   const week=calendarWindow(now);
   const weekMs=week.end-week.start;
   const equipmentUsage=snapshot.equipment.map(machine=>{
-    const intervals=schedules.filter(row=>usesEquipment(row,machine)&&['已排程','試驗中','進行中','暫停中','已完成'].includes(row.status)).flatMap(row=>{
+    const intervals=schedules.filter(row=>!isVirtualRequest(row)&&usesEquipment(row,machine)&&['已排程','試驗中','進行中','暫停中','已完成'].includes(row.status)).flatMap(row=>{
       const bounds=scheduleProgress(row,now);
       return bounds.start!==undefined&&bounds.start<week.end&&bounds.end>week.start?[[Math.max(bounds.start,week.start),Math.min(bounds.end,week.end)]]:[];
     });

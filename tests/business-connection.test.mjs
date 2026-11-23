@@ -30,7 +30,7 @@ function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRev
  if(rpc==='open_browser_session'){sessions.set(body.p_id,{tenant:body.p_tenant,hash:body.p_nonce_sha256,revoked:false});return json({id:body.p_id,expires_at:new Date(Date.now()+28800000).toISOString()});}
  if(rpc==='check_browser_session'){const s=sessions.get(body.p_id);return json(s&&!s.revoked&&s.hash===body.p_nonce_sha256?s.tenant:null);}
  if(rpc==='revoke_browser_session'){if(failRevocation)return json(false);const s=sessions.get(body.p_id);if(s)s.revoked=true;return json(!!s);}
- if(['create_request_draft','update_request_draft'].includes(rpc)){if(failWrite)throw new Error('synthetic network failure');if(body.p_data.status)return json({message:'DRAFT_FIELDS_INVALID'},400);return json({id:body.p_id,status:'DRAFT',revision:1});}
+ if(['create_request_draft','create_classified_request_draft','update_request_draft'].includes(rpc)){if(failWrite)throw new Error('synthetic network failure');if(body.p_data.status)return json({message:'DRAFT_FIELDS_INVALID'},400);return json({id:body.p_id,status:'DRAFT',revision:1});}
  if(url.pathname==='/rest/v1/requests'){assert.equal(url.searchParams.get('tenant_id'),'eq.'+A);return json([] ,200,{'content-range':'*/0'});}
  throw Error('Unexpected upstream '+url.pathname);
  };const handler=createBusinessHandler({env,fetchImpl});return {handler,calls,fetchImpl,setMaintenanceError:v=>{maintenanceError=v;},setFailWrite:v=>{failWrite=v;},setFailRevocation:v=>{failRevocation=v;}};}
@@ -181,3 +181,16 @@ test('lost flow test acknowledgement never dispatches a second write',async()=>{
 test('anonymous and cross-site flow test mutations cannot reach the database',async()=>{const f=fixture(),cookie=await login(f);const body={operation_id:flowCommand.run_id,command:flowCommand};assert.equal((await call(f.handler,'/flow-tests/execute',{method:'POST',body})).status,401);assert.equal((await call(f.handler,'/flow-tests/execute',{method:'POST',body,cookie,headers:{origin:'https://attacker.invalid'}})).status,403);});
 
 test('flow-test report download is marked, escaped, nonexecutable and private',async()=>{const f=fixture(),cookie=await login(f);const r=await call(f.handler,'/flow-tests/report/'+flowCommand.request_id,{cookie});assert.equal(r.status,200);assert.match(r.body,/流程測試｜非正式試驗結果/);assert.match(r.body,/&lt;script&gt;/);assert.doesNotMatch(r.body,/<script>/);assert.equal(r.headers['cache-control'],'no-store');assert.match(r.headers['content-disposition'],/^attachment;/);assert.match(r.headers['content-security-policy'],/default-src 'none'/);});
+
+test('new virtual requests use the classified RPC; old clients still create REAL',async()=>{
+ const f=fixture(),cookie=await login(f),id='fa000000-0000-4000-8000-000000000010';
+ for(const kind of ['VIRTUAL','REAL',undefined]){
+  const r=await call(f.handler,'/data/requests',{method:'POST',cookie,body:{id,data:{product_code:'SYNTHETIC'},...(kind?{execution_kind:kind}:{})}});assert.equal(r.status,201,JSON.stringify(r.body));
+  const c=f.calls.at(-1);assert.equal(c.url.pathname.split('/').at(-1),kind==='VIRTUAL'?'create_classified_request_draft':'create_request_draft');const args=JSON.parse(c.options.body);assert.equal(args.p_tenant,A);assert.equal(args.p_kind,kind==='VIRTUAL'?'VIRTUAL':undefined);
+ }
+});
+test('invalid purpose and attempts to change a saved classification are rejected before writing',async()=>{
+ const f=fixture(),cookie=await login(f),id='fa000000-0000-4000-8000-000000000010';
+ let r=await call(f.handler,'/data/requests',{method:'POST',cookie,body:{id,data:{},execution_kind:'DEMO_GUESS'}});assert.equal(r.status,422);assert.equal(r.body.error.code,'EXECUTION_KIND_INVALID');
+ r=await call(f.handler,'/data/requests/'+id,{method:'PATCH',cookie,body:{expected_revision:1,data:{},execution_kind:'VIRTUAL'}});assert.equal(r.status,422);assert.ok(!f.calls.some(c=>/create_request_draft|create_classified_request_draft|update_request_draft/.test(c.url.pathname)));
+});

@@ -97,7 +97,7 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms'}){
   try{
    if(!clear)requireEngineEnabled('E4');
    const acceleration=flowTestIntent(trimmed);
-   if(acceleration){setFlowTestOpen(true);reply=language==='en'?'Opened flow-test controls. No production data was changed.':'已開啟流程測試操作。尚未變更任何正式資料。';}
+   if(acceleration){setFlowTestOpen(true);reply=language==='en'?'Opened virtual-request controls. Confirm a checkpoint to advance the virtual trial.':'已開啟虛擬委託加速器。確認推進後會更新虛擬試驗狀態，真實委託依正常時間執行。';}
    else {
    const matchedFaq=findCommonQuestion(trimmed);
    const scope=e4LabScope(matchedFaq?.question||trimmed,{document:/^(?:文件問答|Document Q&A)\s*[:：]/i.test(trimmed)});

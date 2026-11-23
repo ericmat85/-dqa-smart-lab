@@ -1,3 +1,4 @@
+import {validateWorkbookPurpose,validatePdfPurpose} from '../../src/virtualDocuments.mjs';
 import {generalProfile,inspectGeneralReport} from '../../src/reportProfiles.mjs';
 import {inflateRawSync} from 'node:zlib';
 import {createHash,createHmac} from 'node:crypto';
@@ -15,8 +16,8 @@ export function zipBounds(bytes){
 }
 export async function validateHumanFile(bytes,intent){
  if(bytes.length!==intent.byte_size||bytes.length>LIMIT||createHash('sha256').update(bytes).digest('hex')!==intent.sha256)throw Error('HUMAN_FILE_HASH_MISMATCH');
- if(intent.kind==='ARCHIVE'){if(!bytes.subarray(0,5).equals(Buffer.from('%PDF-')))throw Error('HUMAN_FILE_INVALID');const {PDFDocument}=await import('pdf-lib');const pdf=await PDFDocument.load(bytes,{ignoreEncryption:false});if(pdf.getPageCount()<2||pdf.getPageCount()>200)throw Error('HUMAN_FILE_INVALID');return;}
- zipBounds(bytes);const Excel=(await import('exceljs')).default,book=new Excel.Workbook();await book.xlsx.load(bytes);if(book.worksheets.length>32)throw Error('HUMAN_FILE_INVALID');let cells=0;
+ if(intent.kind==='ARCHIVE'){if(!bytes.subarray(0,5).equals(Buffer.from('%PDF-')))throw Error('HUMAN_FILE_INVALID');const {PDFDocument}=await import('pdf-lib');const pdf=await PDFDocument.load(bytes,{ignoreEncryption:false});if(pdf.getPageCount()<2||pdf.getPageCount()>200)throw Error('HUMAN_FILE_INVALID');await validatePdfPurpose(pdf,intent);return;}
+ zipBounds(bytes);const Excel=(await import('exceljs')).default,book=new Excel.Workbook();await book.xlsx.load(bytes);if(book.worksheets.length>32)throw Error('HUMAN_FILE_INVALID');validateWorkbookPurpose(book,intent);let cells=0;
  book.eachSheet(sheet=>{sheet.eachRow(row=>row.eachCell(cell=>{cells++;if(cells>50000)throw Error('HUMAN_FILE_INVALID');const v=cell.value;if(v&&typeof v==='object'&&('formula'in v||'sharedFormula'in v)){if(v.result===undefined||/\[|\]|https?:|WEBSERVICE|HYPERLINK/i.test(v.formula||''))throw Error('HUMAN_FILE_INVALID');}}));});
  if(generalProfile(book)){if(!inspectGeneralReport(book,intent.request_legacy_id,{productCode:intent.product_code,testItems:[intent.trial_name]}).every(c=>c.ok))throw Error('HUMAN_REPORT_BINDING_INVALID');return;}
  const cover=book.getWorksheet('報告首頁'),main=book.worksheets.find(s=>s.state==='visible'||!s.state);if(!main)throw Error('HUMAN_FILE_INVALID');

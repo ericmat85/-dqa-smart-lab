@@ -72,6 +72,7 @@ export function makeE2Context({editing,form,equipment,accounts,rows,now=Date.now
  const reservations=[];let reservationsComplete=Number.isFinite(start)&&Number.isFinite(end);
  if(!reservationsComplete)issue('SEARCH_WINDOW_REQUIRED',editing.id);
  for(const row of rows){
+  if(row.businessDatabase&&row.executionKind==='VIRTUAL')continue;
   if(row.id===editing.id||!['已排程','試驗中','進行中','暫停中','待核准','已完成','已結案'].includes(row.status))continue;
   let period;try{period=reservationWindow(row,now);}catch{reservationsComplete=false;issue('INVALID_RESERVATION_DATES_OR_BUFFER',row.id);continue;}
   if(!period||!Number.isFinite(period.start)){reservationsComplete=false;issue('RESERVATION_DATES_REQUIRED',row.id);continue;}

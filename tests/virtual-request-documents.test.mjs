@@ -1,0 +1,35 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import Excel from 'exceljs';import {PDFDocument,PDFName} from 'pdf-lib';import {createHash} from 'node:crypto';
+import {createReportTemplate,inspectReport,stampReport} from '../src/reportWorkbook.mjs';
+import {validateHumanFile} from '../server/business/humanReports.mjs';
+import {markVirtualPdf,validatePdfPurpose,VIRTUAL_SHEET,VIRTUAL_BANNER} from '../src/virtualDocuments.mjs';
+import {isVirtualRequest} from '../src/requestExecutionKind.mjs';
+import {scheduleProgress} from '../src/scheduleProgress.mjs';import {reservationWindow} from '../src/scheduleResources.mjs';
+const request={id:'REQ-VIRTUAL-1',executionKind:'VIRTUAL',productCode:'SYNTHETIC',testItems:['Synthetic generic'],quantity:'1',execution:{hours:1}};
+const intent=(bytes,kind='REPORT',execution_kind='VIRTUAL')=>({kind,execution_kind,request_legacy_id:request.id,byte_size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+async function workbook(){const b=await createReportTemplate(request,true);return Buffer.from(b);}
+test('Demo is never inferred from notes or project names',()=>{assert.equal(isVirtualRequest({notes:'Demo',productCode:'TEST'}),false);assert.equal(isVirtualRequest({executionKind:'VIRTUAL'}),true);assert.equal(isVirtualRequest({executionKind:'REAL',execution_kind:'VIRTUAL'}),false);});
+test('virtual Excel preserves fixed binding cells and marks every visible sheet',async()=>{const bytes=await workbook(),book=new Excel.Workbook();await book.xlsx.load(bytes);assert.equal(book.worksheets[0].getCell('B4').text,request.id);assert.equal(book.getWorksheet(VIRTUAL_SHEET).getCell('B1').text,request.id);assert.ok(book.worksheets.every(s=>s.headerFooter.oddHeader===VIRTUAL_BANNER));await validateHumanFile(bytes,intent(bytes));assert.ok((await inspectReport(bytes,request.id,'synthetic.xlsx',request)).ok);});
+test('unmarked virtual workbook cannot be uploaded',async()=>{const b=new Excel.Workbook();await b.xlsx.load(await workbook());b.removeWorksheet(VIRTUAL_SHEET);const bytes=Buffer.from(await b.xlsx.writeBuffer());await assert.rejects(validateHumanFile(bytes,intent(bytes)),/HUMAN_VIRTUAL_MARK_REQUIRED/);});
+test('virtual Excel cannot be submitted as a real report',async()=>{const bytes=await workbook();await assert.rejects(validateHumanFile(bytes,intent(bytes,'REPORT','REAL')),/HUMAN_REPORT_PURPOSE_MISMATCH/);});
+test('removing one sheet print header is rejected',async()=>{const b=new Excel.Workbook();await b.xlsx.load(await workbook());b.worksheets[0].headerFooter.oddHeader='';const bytes=Buffer.from(await b.xlsx.writeBuffer());await assert.rejects(validateHumanFile(bytes,intent(bytes)),/HUMAN_VIRTUAL_MARK_REQUIRED/);});
+test('a virtual mark for another request is rejected',async()=>{const bytes=await workbook();await assert.rejects(validateHumanFile(bytes,{...intent(bytes),request_legacy_id:'REQ-OTHER'}),/HUMAN_VIRTUAL_MARK_REQUIRED/);});
+test('real template does not acquire virtual sheets or headers',async()=>{const bytes=await createReportTemplate({...request,executionKind:'REAL'},true),book=new Excel.Workbook();await book.xlsx.load(bytes);assert.equal(book.getWorksheet(VIRTUAL_SHEET),undefined);await validateHumanFile(Buffer.from(bytes),intent(Buffer.from(bytes),'REPORT','REAL'));});
+test('virtual PDF marks every page and survives serialization',async()=>{const pdf=await PDFDocument.create();pdf.addPage();pdf.addPage();await markVirtualPdf(pdf,request);const bytes=Buffer.from(await pdf.save());await validateHumanFile(bytes,intent(bytes,'ARCHIVE'));await assert.rejects(validateHumanFile(bytes,intent(bytes,'ARCHIVE','REAL')),/HUMAN_REPORT_PURPOSE_MISMATCH/);});
+test('PDF metadata without page marks cannot pass virtual upload',async()=>{const pdf=await PDFDocument.create();pdf.addPage();pdf.addPage();await markVirtualPdf(pdf,request);pdf.getPage(1).node.delete(PDFName.of('Contents'));await assert.rejects(validatePdfPurpose(await PDFDocument.load(await pdf.save()),request),/HUMAN_VIRTUAL_MARK_REQUIRED/);});
+test('virtual PDF purpose must match the exact request',async()=>{const pdf=await PDFDocument.create();pdf.addPage();await markVirtualPdf(pdf,request);await assert.rejects(validatePdfPurpose(await PDFDocument.load(await pdf.save()),{...request,id:'OTHER'}),/HUMAN_VIRTUAL_MARK_REQUIRED/);});
+test('virtual progress is the server checkpoint while real progress uses wall time',()=>{const s={businessDatabase:true,time:'2026-12-01T00:00:00+08:00',end:'2026-12-02T00:00:00+08:00',status:'試驗中',executionKind:'VIRTUAL',virtualPercent:50};assert.equal(scheduleProgress(s,Date.parse('2026-11-23T00:00Z')).fraction,.5);assert.equal(scheduleProgress({...s,executionKind:'REAL'},Date.parse('2026-11-23T00:00Z')).fraction,0);assert.equal(reservationWindow(s),null);assert.ok(reservationWindow({...s,executionKind:'REAL'}));});
+
+test('executor signing preserves virtual markers and report binding',async()=>{
+ const bytes=await workbook(),signature='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1kAAAAASUVORK5CYII=';
+ const stamped=Buffer.from(await stampReport(bytes,{sheetName:'試驗報告',level:'executor',signature,actor:'Synthetic executor',at:'2026-11-23T00:00:00Z'}));await validateHumanFile(stamped,intent(stamped));
+});
+test('trial-specific virtual dossier marks every generated PDF page',async()=>{
+ const {readFile}=await import('node:fs/promises'),{buildCasePdf}=await import('../src/casePdf.mjs');const q={...request,testItems:['IPX6 防水'],specification:'試驗時間：1 小時。',purpose:['合成驗證'],requester:'Synthetic',customer:'Synthetic'};
+ const reportBytes=await createReportTemplate(q,true),check=await inspectReport(reportBytes,q.id,'virtual.xlsx',q);assert.ok(check.ok,JSON.stringify(check));
+ const fontBytes=await readFile('public/fonts/NotoSansCJKtc-Regular.otf'),{reportToPdf}=await import('../src/reportPdf.mjs'),pdfBytes=await reportToPdf(reportBytes,{fontBytes,fontSubset:true,requestId:q.id});const result=await buildCasePdf({request:q,reportBytes:pdfBytes,fontBytes,fontSubset:true});await validateHumanFile(Buffer.from(result.bytes),intent(Buffer.from(result.bytes),'ARCHIVE'));assert.ok(result.sections.length===2);assert.ok((await PDFDocument.load(result.bytes)).getPageCount()>=2);
+});
+test('general-performance report accepts its purpose sheet without weakening fixed template checks',async()=>{
+ const {readFile}=await import('node:fs/promises');const q={...request,testItems:['一般性能試驗'],customer:'Synthetic',purpose:['新產品'],sampleSource:['社內'],execution:{plannedStart:'2026-11-23T00:00:00+08:00',completedAt:'2026-11-24T00:00:00+08:00'}};
+ const bytes=Buffer.from(await createReportTemplate(q,true,{templateBytes:await readFile('public/templates/general-performance-v1.xlsx')}));const checks=await inspectReport(bytes,q.id,'virtual-general.xlsx',q);assert.ok(checks.ok,JSON.stringify(checks.checks.filter(x=>!x.ok)));await validateHumanFile(bytes,{...intent(bytes),trial_name:'一般性能試驗',product_code:q.productCode});
+});

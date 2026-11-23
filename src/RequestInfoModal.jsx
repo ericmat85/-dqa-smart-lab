@@ -1,3 +1,4 @@
+import ExecutionKindBadge from './ExecutionKindBadge.jsx';
 import RequestCloseIcon from './RequestCloseIcon.jsx';
 import HelpTip from './HelpTip.jsx';
 import {displayTaipei,requestStatusClass} from './requestWorkspace.mjs';
@@ -33,7 +34,7 @@ export default function RequestInfoModal({ request: supplied, onClose, onEdit, a
   return <div className={`rq-app ${dark?'rq-theme-dark':'rq-theme-light'}`} style={{minHeight:0}}><div className="rq-modal-backdrop rq-request-detail-backdrop" style={{zIndex:1400}} role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
     <section ref={root} tabIndex={-1} className="rq-request-detail-modal" role="dialog" aria-modal="true" aria-labelledby="rq-request-detail-title">
       <header className="rq-request-detail-header">
-        <div><p className="rq-eyebrow">ELECTRONIC TEST REQUEST</p><div className="help-title-row"><h2 id="rq-request-detail-title">{selected.id}｜委託單資訊</h2><HelpTip>完整委託內容、試驗需求與簽核進度</HelpTip></div></div>
+        <div><p className="rq-eyebrow">ELECTRONIC TEST REQUEST</p><div className="help-title-row"><h2 id="rq-request-detail-title">{selected.id}｜委託單資訊</h2><ExecutionKindBadge request={selected}/><HelpTip>完整委託內容、試驗需求與簽核進度</HelpTip></div></div>
         <button type="button" className="rq-close" onClick={() => onClose()} aria-label="關閉委託單資訊"><RequestCloseIcon/></button>
       </header>
       <div className="rq-request-detail-body"><ReportCasePanel request={selected} account={account}/>

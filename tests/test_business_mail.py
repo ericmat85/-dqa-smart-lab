@@ -51,6 +51,8 @@ class Tests(unittest.TestCase):
  def test_connection_diagnostics_do_not_expose_credentials(self):
   def failure(*a,**kw):raise TimeoutError('SYNTHETIC_PASSWORD')
   self.worker.smtp_factory=failure;self.worker.starttls_factory=failure;self.worker.verify();self.assertEqual(self.worker.status()['failure_code'],'NETWORK_TIMEOUT');self.assertNotIn('SYNTHETIC_PASSWORD',json.dumps(self.worker.status()))
+ def test_virtual_notification_is_marked_in_subject_and_body(self):
+  self.grant['request_code']='[虛擬委託／流程測試] REQ-SYNTHETIC';self.grant['kind']='TRIAL_COMPLETED';message=self.worker.message(self.grant);self.assertIn('[虛擬委託／流程測試]',message['Subject']);self.assertIn('不代表實體試驗結果',message.get_content());self.assertNotIn('DATA',self.commands)
  def test_smtp_ready_checks_auth_without_message(self):self.worker.verify();self.assertTrue(self.worker.ready);self.assertNotIn('MAIL',self.commands);self.assertNotIn('DATA',self.commands)
  def test_success_authorizes_before_data_and_receipts(self):
   self.assertEqual(self.worker.process_one(),'SENT');self.assertLess(self.commands.index('AUTHORIZE'),self.commands.index('DATA'));self.assertEqual(self.finish[-1]['p_state'],'SENT');self.assertNotIn(b'SYNTHETIC_PASSWORD',self.message);self.assertNotIn(self.env['BUSINESS_MAIL_SERVICE_KEY'].encode(),self.message);self.assertIn(b'/request/dashboard',self.message)

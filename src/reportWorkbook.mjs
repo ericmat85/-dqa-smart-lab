@@ -1,3 +1,4 @@
+import {markVirtualWorkbook,validateWorkbookPurpose,VIRTUAL_SHEET} from './virtualDocuments.mjs';
 import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {addTrialReportForms,labTemplateProfile,formAssets} from './labFormLayout.mjs';
 import {fillGeneralDemo} from './generalDemoData.mjs';
@@ -7,6 +8,11 @@ import {reportBounds,cellText,normalizeReportMerges} from './reportLayout.mjs';
 import {DEFAULT_SIGNATURE_CELLS} from './reportRules.mjs';
 export async function excelModule(){const module=await import('exceljs/dist/exceljs.min.js');return module.default;}
 export async function createReportTemplate(request={},demo=false,options={}){
+ const bytes=await buildReportTemplate(request,demo,options);
+ if(request.executionKind!=='VIRTUAL'&&request.execution_kind!=='VIRTUAL')return bytes;
+ const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(bytes);markVirtualWorkbook(book,request);return new Uint8Array(await book.xlsx.writeBuffer());
+}
+async function buildReportTemplate(request={},demo=false,options={}){
  if(options.requireTrialMatch&&request.testItems?.length!==1)throw Error('本案試驗項目不明確，未改用通用範本。');
  if(isGeneralRequest(request))return createGeneralTemplate(request,demo,options);
  // Interactive case downloads opt into strict historical-name matching. Preserve
@@ -42,13 +48,14 @@ export async function inspectReport(bytes,requestId,fileName,request){
  const sheet=book.worksheets.find(row=>row.state==='visible'||!row.state);if(!sheet)throw Error('報告沒有可讀取的工作表。');
  if(/篩檢條件|生成來源|上傳作業說明/.test(fileName))throw Error('這是規則／篩檢條件參考表，並非已填寫的試驗報告。請使用「下載本案 Excel 範本」填寫後上傳。');
  book.eachSheet(ws=>reportBounds(ws));
+ validateWorkbookPurpose(book,request||{id:requestId});
  const profile=generalProfile(book),labProfile=labTemplateProfile(book);
  if(labProfile){
   const cover=book.getWorksheet('報告首頁'),results=book.getWorksheet('結果與照片');
   checks.push({label:'委託編號一致',ok:cover.getCell('I16').text===`DQA-${requestId}`,detail:cover.getCell('I16').text});
   checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0])?.id===findTrialDefinition(cover.getCell('C12').text)?.id&&!!findTrialDefinition(cover.getCell('C12').text))),detail:cover.getCell('C12').text});
   checks.push({label:'試驗結果已填寫',ok:Boolean(cover.getCell('A44').text.trim())&&['C12','G12','C16','G16','C20','G20'].some(a=>Boolean(results.getCell(a).text.trim())),detail:'結果摘要與至少一筆試驗觀察須填寫；範本提示及照片不能當成量測證據。'});
-  checks.push({label:'工作表皆有對應輸出',ok:book.worksheets.every(s=>['委託單','報告首頁','試驗過程','結果與照片','範本資訊','試驗紀錄'].includes(s.name)||/^(規範|判定)續頁\d+$/.test(s.name)),detail:'未辨識工作表不可併入簽核。'});
+  checks.push({label:'工作表皆有對應輸出',ok:book.worksheets.every(s=>[VIRTUAL_SHEET,'委託單','報告首頁','試驗過程','結果與照片','範本資訊','試驗紀錄'].includes(s.name)||/^(規範|判定)續頁\d+$/.test(s.name)),detail:'未辨識工作表不可併入簽核。'});
  }
  else if(profile){refreshHeaderReferences(book);checks.push(...inspectGeneralReport(book,requestId,request));}
  else{

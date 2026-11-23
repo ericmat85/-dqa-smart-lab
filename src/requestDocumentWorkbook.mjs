@@ -1,3 +1,4 @@
+import {markVirtualWorkbook} from './virtualDocuments.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {getSignatureHistory} from './signatureHistory.mjs';
 import {addRequestForm,formAssets} from './labFormLayout.mjs';
@@ -16,5 +17,5 @@ export async function requestWorkbookBytes(request,{assets}={}){
   const history=book.addWorksheet('簽核追溯');history.columns=[16,20,25,25,24].map(width=>({width}));history.addRow(['階段','操作者','時間','決定','簽名']);
   records.forEach((r,i)=>{const row=i+2;history.addRow([r.stage,r.actor||r.actorId,r.at||'',r.decision||'','']);history.getRow(row).height=60;addSignature(book,history,r.signature,4,row-1,130,45);});history.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0};
  }
- return new Uint8Array(await book.xlsx.writeBuffer());
+ markVirtualWorkbook(book,request);return new Uint8Array(await book.xlsx.writeBuffer());
 }
