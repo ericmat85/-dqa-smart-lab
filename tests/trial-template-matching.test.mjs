@@ -34,3 +34,16 @@ test('receipt download uses approved schedule facts and tolerates the existing e
 test('cancellation and corrupted sources never download or overwrite current business records',async()=>{seed();const controller=new AbortController();await assert.rejects(readCaseTrialTemplate(access,storage,{signal:controller.signal,build:async()=>{controller.abort();return new Uint8Array([1]);}}),{name:'AbortError'});storage.setItem('dqa-request-demo-v2','{broken');await assert.rejects(readCaseTrialTemplate(access,storage),/來源資料/);assert.equal(storage.getItem('dqa-request-demo-v2'),'{broken');});
 
 test('explicit custom definitions override legacy fallback and the library never advertises another template alias',()=>{const base=defaultTrialCatalog()[0],admin=INITIAL_ACCOUNTS.find(a=>a.id==='U001');const custom=saveTrialDefinition({...base,id:undefined,name:'高溫儲存試驗',profileId:'UNVERIFIED'},admin,{storage,expectedRevision:0});assert.equal(findTrialDefinition('高溫儲存試驗').id,custom.id);const catalog=readTrialCatalog().rows;assert(!correspondingTrialNames(catalog[0],catalog).includes('高溫儲存試驗'));assert.equal(findTrialDefinition('高溫運作試驗').id,'TRIAL-020');});
+
+test('database template requires a received booking assigned to the current executor',async()=>{
+ const s=seed({...source(),businessDatabase:true}),schedule={id:'SCH-DATABASE',requestId:s.id,reservationId:'DB-RESERVATION',time:'2026-12-01T00:00:00+08:00',end:'2026-12-12T00:00:00+08:00',eq:'資料庫指定設備',owner:'指定執行人',sampleCode:'SAMPLE-DATABASE'};
+ storage.setItem('dqa-schedules-demo-v1',JSON.stringify([schedule]));
+ const receipt={id:s.id,scheduleId:schedule.id,reservationId:schedule.reservationId,scheduledStart:schedule.time,scheduledEnd:schedule.end,executorId:access.actorId};
+ storage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([receipt]));
+ await assert.rejects(readCaseTrialTemplate(access,storage),/確認接收/);
+ storage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{...receipt,acceptedAt:'2026-11-23T00:00:00Z',executorId:'OTHER'}]));
+ await assert.rejects(readCaseTrialTemplate(access,storage),/執行人員/);
+ storage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{...receipt,acceptedAt:'2026-11-23T00:00:00Z'}]));
+ await readCaseTrialTemplate(access,storage,{build:async input=>{assert.equal(input.execution.sampleCode,'SAMPLE-DATABASE');assert.equal(input.execution.equipment,'資料庫指定設備');return new Uint8Array([1]);}});
+ await assert.rejects(readCaseTrialTemplate(access,storage,{build:async()=>{storage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{...receipt,acceptedAt:'2026-11-23T00:00:00Z',executorId:'OTHER'}]));return new Uint8Array([1]);}}),/執行人員/);
+});

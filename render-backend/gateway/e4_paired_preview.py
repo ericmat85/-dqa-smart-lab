@@ -15,19 +15,21 @@ def mock_environment(env):
  result.update(AI_SPEND_APPROVED='0',LIVE_PROVIDER_ENABLED='false',LIVE_AI_ENABLED='false',PYTHONDONTWRITEBYTECODE='1')
  return result
 
-def install_openai_egress_guard(mail_enabled=False):
+def install_openai_egress_guard(mail_enabled=False,lab_clock_enabled=False):
  allowed=set();mail_allowed=set();resolve=socket.getaddrinfo;connect=socket.socket.connect;connect_ex=socket.socket.connect_ex
  def getaddrinfo(host,port,*args,**kwargs):
   rows=resolve(host,port,*args,**kwargs)
   if host in ('api.openai.com',b'api.openai.com') and str(port)=='443':allowed.update(r[4][0] for r in rows)
   name=host.decode() if isinstance(host,bytes) else host
   if mail_enabled and threading.current_thread().name=='business-mail-outbox' and (name,str(port)) in {('smtp.gmail.com','465'),('smtp.gmail.com','587'),('mmazbwzdiizabikmiily.supabase.co','443')}:mail_allowed.update((r[4][0],int(port)) for r in rows)
+  if lab_clock_enabled and threading.current_thread().name=='lab-schedule-clock' and (name,str(port))==('mmazbwzdiizabikmiily.supabase.co','443'):mail_allowed.update((r[4][0],int(port)) for r in rows)
   return rows
  def permitted(sock,address):
   if sock.family not in (socket.AF_INET,socket.AF_INET6):return
   if isinstance(address,tuple) and len(address)>=2:
    if address[1]==443 and address[0] in allowed:return
    if mail_enabled and threading.current_thread().name=='business-mail-outbox' and (address[0],address[1]) in mail_allowed:return
+   if lab_clock_enabled and threading.current_thread().name=='lab-schedule-clock' and address[1]==443 and (address[0],address[1]) in mail_allowed:return
   raise OSError('LIVE_EGRESS_DENIED')
  def guarded_connect(sock,address):permitted(sock,address);return connect(sock,address)
  def guarded_connect_ex(sock,address):permitted(sock,address);return connect_ex(sock,address)
@@ -39,6 +41,8 @@ class PairedApp:
   self.business_ai=BusinessAI(os.environ,live_state,e2_state)
   from gateway.business_mail import BusinessMailWorker
   self.business_mail=BusinessMailWorker(os.environ)
+  from gateway.lab_schedule_clock import LabScheduleClock
+  self.lab_schedule_clock=LabScheduleClock(os.environ)
   self.mock_uds=mock_uds;self.live_state=live_state;self.mock_available=mock_available;self.mock_process=mock_process;self.e2_state=e2_state
   from gateway.e2_preview_provider import E2SchedulingService
   e2=E2SchedulingService(live_state.ledger,e2_state.service if e2_state else None,disabled_code=e2_state.code if e2_state else 'E2_SPEND_APPROVAL_REQUIRED')
@@ -47,8 +51,10 @@ class PairedApp:
   if scope['type']=='lifespan':
    async def lifecycle():
     message=await receive()
-    if message['type']=='lifespan.startup':self.business_mail.start()
-    elif message['type']=='lifespan.shutdown':await asyncio.to_thread(self.business_mail.stop)
+    if message['type']=='lifespan.startup':
+     self.business_mail.start();self.lab_schedule_clock.start()
+    elif message['type']=='lifespan.shutdown':
+     await asyncio.gather(asyncio.to_thread(self.business_mail.stop),asyncio.to_thread(self.lab_schedule_clock.stop))
     return message
    return await self.live_app(scope,lifecycle,send)
   if scope['type']!='http':return await self.live_app(scope,receive,send)
@@ -74,7 +80,7 @@ class PairedApp:
     except Exception:pass
    e2_ready=self.e2_state is not None and self.e2_state.service is not None and time.time()<self.e2_state.service.settings.expires
    e2_code=('BUDGET_EXPIRED' if self.e2_state and self.e2_state.service and not e2_ready else self.e2_state.code) if self.e2_state else 'E2_SPEND_APPROVAL_REQUIRED'
-   return await reply(200 if healthy else 503,{'status':'alive' if healthy else 'unavailable','business_mail':self.business_mail.status(),'e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation,'e2_provider':e2_code,'e2_ledger':'AVAILABLE' if self.e2_state and self.e2_state.ledger else 'UNAVAILABLE','e2_paid_inference_approved':bool(e2_ready and not self.e2_state.service.simulation)})
+   return await reply(200 if healthy else 503,{'status':'alive' if healthy else 'unavailable','business_mail':self.business_mail.status(),'lab_schedule_clock':self.lab_schedule_clock.status(),'e4_provider':'MOCK_HTTP_ONLY' if mock_available else 'DISABLED','mock_provider':'MOCK_HTTP_ONLY' if mock_available else 'UNAVAILABLE_OR_EXPIRED','live_provider':live_code,'live_ledger':'AVAILABLE' if self.live_state.ledger else 'UNAVAILABLE','paid_inference_approved':live_ready and not self.live_state.service.simulation,'e2_provider':e2_code,'e2_ledger':'AVAILABLE' if self.e2_state and self.e2_state.ledger else 'UNAVAILABLE','e2_paid_inference_approved':bool(e2_ready and not self.e2_state.service.simulation)})
   if path==LIVE_PATH:
    if method!='POST':return await error(405,'METHOD_DENIED')
    return await self.live_app({**scope,'path':MOCK_PATH,'raw_path':MOCK_PATH.encode()},receive,send)
@@ -140,7 +146,7 @@ def main():
  if not live_key.isascii() or len(live_key)<32:raise RuntimeError('LIVE_GATEWAY_SECRET_REQUIRED')
  from gateway.business_mail import POLICY as MAIL_POLICY
  mail_approved=env.get('BUSINESS_MAIL_ENABLED')=='1' and env.get('BUSINESS_MAIL_POLICY_SHA256')==hashlib.sha256(MAIL_POLICY.read_bytes()).hexdigest()
- install_openai_egress_guard(mail_approved)
+ install_openai_egress_guard(mail_approved,env.get('BUSINESS_LAB_AUTOSTART_ENABLED')=='1')
  state=ProviderState()
  try:state=load_provider(env)
  except E4Error as error:state=ProviderState(code=error.code,status=error.status)

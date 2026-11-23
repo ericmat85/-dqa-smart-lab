@@ -1243,6 +1243,18 @@ LMS 委託審查|LMS request reviews
 項異常|errors
 主題|Theme
 `.trim().split('\n').map(line=>{const separator=line.indexOf('|');return [line.slice(0,separator),line.slice(separator+1)];});
+entries.push(
+ ['流程測試加速器','Flow-test accelerator'],['資料庫測試副本','Database rehearsal copy'],['獨立 Demo 展示','Isolated Demo'],
+ ['關閉流程測試加速器','Close flow-test accelerator'],['來源案件','Source case'],['請選擇已確認接收的案件','Select a received case'],
+ ['重新讀取測試資料','Reload rehearsal data'],['原始工時','Original test hours'],['原排程','Original schedule'],['排程時窗','Scheduled calendar window'],
+ ['模擬進度','Simulated progress'],['模擬經過時間','Simulated elapsed time'],['模擬時間','Virtual time'],['實際操作時間','Actual operation time'],
+ ['測試原因','Reason for rehearsal'],['建立並標記測試副本','Create and mark rehearsal copy'],['下載流程測試紀錄','Download rehearsal record'],
+ ['正在核對並讀取測試資料…','Checking and loading rehearsal data…'],['流程測試｜非正式試驗結果','FLOW TEST | Not an official test result'],
+ ['請由工作區管理者先建立測試副本。','Ask a workspace administrator to create a marked rehearsal copy first.'],
+ ['目前沒有可讀取且已確認接收的排程，請先完成排程與實驗室接收。','No received schedule is available. Complete scheduling and lab receipt first.'],
+ ['僅推進明確標記的測試副本；正式委託、原排程與設備預約不會改變。','Only a marked rehearsal copy advances. Production requests, schedules and equipment reservations remain unchanged.'],
+ ['僅操作目前隔離 Demo 的案件，不連接正式資料庫。','Only isolated browser Demo cases are changed; the production database is not used.']
+);
 export const ENGLISH_UI=Object.fromEntries(entries);
 let locale=readUiPreferences().language;
 if(typeof window!=='undefined'){
@@ -1255,6 +1267,8 @@ export function translateText(value,language=locale){
  if(ENGLISH_UI[text])return value.replace(text,ENGLISH_UI[text]);
  const requestCount=text.match(/^共 (\d+) 筆(借用)? · 每頁最多 (\d+) 筆(.*)$/);if(requestCount)return `${requestCount[1]} ${requestCount[2]?'loans':'records'} · Up to ${requestCount[3]} per page${requestCount[4]?' · Due dates and workflow status are shown separately':''}`;
  const page=text.match(/^第\s*(\d+)\s*頁$/);if(page)return `Page ${page[1]}`;
+ const rehearsalProgress=text.match(/^推進至 (50|100)%$/);if(rehearsalProgress)return 'Advance to '+rehearsalProgress[1]+'%';
+ const rehearsalConfirm=text.match(/^輸入 FLOW TEST (.+)$/);if(rehearsalConfirm)return 'Type FLOW TEST '+rehearsalConfirm[1];
  const count=text.match(/^(\d+)\s*(天|筆|項|件|台|小時|分鐘)$/);if(count)return `${count[1]} ${ENGLISH_UI[count[2]]}`;
  const empty=text.match(/^目前沒有可查閱的(.+)。$/);if(empty)return `No ${translateText(empty[1],language).toLowerCase()} available.`;
  const pageRange=text.match(/^第\s*(\d+)\s*[–-]\s*(\d+)\s*筆，共\s*(\d+)\s*筆$/);if(pageRange)return `Showing ${pageRange[1]}–${pageRange[2]} of ${pageRange[3]}`;

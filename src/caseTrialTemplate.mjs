@@ -25,7 +25,7 @@ function sourceFor({requestId,actorId},storage){
  if(!accessSystem(actor,'lab',storage)||!canAccessLabPage(actor,'requests',storage))throw Error('目前帳號沒有取得本案試驗範本的權限。');
  const found=rows(storage,'dqa-request-demo-v2').filter(r=>r.id===requestId);
  if(found.length!==1)throw Error('找不到唯一且完整的本案電子委託資料，已停止下載；未改用通用範本。');
- const source=found[0];if(source.status==='取消')throw Error('本案已取消，停止產生範本。');
+ const source=found[0];if(source.businessDatabase){const work=rows(storage,'dqa_lab_demo_requests_v1').find(r=>r.id===requestId);if(!work?.acceptedAt||work.executorId!==actorId)throw Error('僅本案已確認接收的執行人員可下載試驗範本。');}if(source.status==='取消')throw Error('本案已取消，停止產生範本。');
  const mapping=caseTrialMapping(source,storage),catalog=readTrialCatalog(storage);
  return {source:structuredClone(executionSource(source,storage)),trial:structuredClone(mapping),catalogRevision:catalog.revision};
 }
