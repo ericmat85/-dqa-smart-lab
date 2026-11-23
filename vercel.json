@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/business/:path+",
+      "destination": "/api/business?path=:path"
+    },
+    {
       "source": "/tour",
       "destination": "/index.html"
     },

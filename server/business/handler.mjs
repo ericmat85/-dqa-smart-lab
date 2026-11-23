@@ -44,7 +44,7 @@ function businessRoute(req,origin){
  if(hints.some(x=>x!==hints[0]))throw new ApiError(422,'ROUTE_PARAMETER_INVALID');
  const pathname=parsed.pathname.replace(/\/$/,'');let path=pathname.startsWith('/api/business/')?pathname.slice('/api/business'.length):null;
  if(allowed(path)){if(hints.length&&hints[0]!==path)throw new ApiError(422,'ROUTE_PARAMETER_INVALID');}
- else if(['/api/business','/api/business/[...path]','/api/business/[...path].js'].includes(pathname)&&hints.length)path=hints[0];
+ else if(['/api/business','/api/business/index','/api/business/index.js','/api/business/[...path]','/api/business/[...path].js'].includes(pathname)&&hints.length)path=hints[0];
  else throw new ApiError(404,'ROUTE_NOT_FOUND');
  parsed.searchParams.delete('path');
  if(path==='/data/requests'&&parsed.searchParams.has('id')){
@@ -210,7 +210,9 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     if(!['/planning/prepare','/planning/execute'].includes(path)||req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');const body=await bodyOf(req,16384);fields(body,['operation_id','command']);const c=body.command;
     if(!UUID.test(body.operation_id||'')||!c||typeof c!=='object'||Array.isArray(c))throw new ApiError(422,'PLANNING_FIELDS_INVALID');fields(c,['request_id','expected_request_revision','expected_draft_revision','data']);
     if(!UUID.test(c.request_id||'')||!Number.isSafeInteger(c.expected_request_revision)||c.expected_request_revision<1||!Number.isSafeInteger(c.expected_draft_revision)||c.expected_draft_revision<0||!c.data||typeof c.data!=='object'||Array.isArray(c.data))throw new ApiError(422,'PLANNING_FIELDS_INVALID');
-    fields(c.data,['equipment_ids','equipment_revisions','executor_id','executor_revision','start_date','end_date','sample_code','note','preparation_minutes','cleanup_minutes']);dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_schedule_draft':'execute_schedule_draft',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
+    fields(c.data,['equipment_ids','equipment_revisions','executor_id','executor_revision','start_date','end_date','sample_code','note','preparation_minutes','cleanup_minutes','sample_space_units']);
+    if(!Number.isSafeInteger(c.data.sample_space_units)||c.data.sample_space_units<1||c.data.sample_space_units>100000)throw new ApiError(422,'PLANNING_FIELDS_INVALID');
+    dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_schedule_draft':'execute_schedule_draft',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path.startsWith('/workflow/')){
     if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
