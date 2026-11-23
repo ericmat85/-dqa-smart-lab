@@ -1,0 +1,17 @@
+.lms-header-action-icon{display:none!important}
+.lms-header-action-label{display:contents}
+@media(max-width:900px){
+ html body #root .dashboard-shell.lms-enterprise .live-dashboard{margin-right:0;width:100%;max-width:100%;box-sizing:border-box}
+ html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(button,a,summary):has(>.lms-header-action-label){position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;min-width:36px;max-width:36px;height:36px;min-height:36px;box-sizing:border-box;padding:0!important;gap:0;white-space:nowrap}
+ html body #root .dashboard-shell.lms-enterprise .lms-header-action-icon{display:block!important;width:20px;height:20px;flex:none;margin:0;pointer-events:none}
+ html body #root .dashboard-shell.lms-enterprise .lms-header-action-label{display:block;position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+ html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading){display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;text-align:left}
+ html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading)>div:first-child{flex:1;min-width:0;text-align:left}
+ html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading) .help-title-row{justify-content:flex-start;text-align:left}
+ html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading) :is(h1,h2){justify-content:flex-start;text-align:left;overflow-wrap:anywhere}
+ html body #root .dashboard-shell.lms-enterprise .template-heading>:is(.schedule-heading-actions,.equipment-header-actions,.admin-actions),html body #root .dashboard-shell.lms-enterprise .account-heading-actions{display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;gap:8px;width:auto;margin:0}
+ html body #root .dashboard-shell.lms-enterprise .template-heading>.management-export-menu{flex:0 0 36px;width:36px}
+ html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel>header{flex-wrap:nowrap;align-items:center;gap:8px}
+ html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel>header>div:first-child{flex:1;min-width:0}
+}
+@media(max-width:380px){html body #root .dashboard-shell.lms-enterprise .dashboard-content :is(.template-heading,.account-page-heading) h2{font-size:20px}}

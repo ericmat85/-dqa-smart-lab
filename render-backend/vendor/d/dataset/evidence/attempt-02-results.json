@@ -1,0 +1,514 @@
+{
+  "task": "D-COMP-1111-AI4-DATA-P02",
+  "tests_run": 125,
+  "pass": 125,
+  "fail": 0,
+  "error": 0,
+  "skip": 0,
+  "cases": [
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E1_DEVIATION",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E1_MISSING",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E2_CAPACITY",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E2_DATE_CONFLICT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E2_HUMIDITY",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E2_MISSING",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E2_TEMPERATURE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E3_MISSING",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E4_NO_SOURCE",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_NEG_E4_VERSION_CONFLICT",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_001_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_001_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_001_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_001_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_002_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_002_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_002_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_002_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_003_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_003_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_003_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_003_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_004_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_004_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_004_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_004_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_005_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_005_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_005_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_005_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_006_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_006_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_006_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_006_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_007_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_007_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_007_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_007_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_008_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_008_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_008_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_008_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_009_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_009_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_009_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_009_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_010_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_010_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_010_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_010_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_011_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_011_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_011_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_011_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_012_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_012_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_012_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_012_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_013_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_013_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_013_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_013_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_014_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_014_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_014_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_014_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_015_E1",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_015_E2",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_015_E3",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_actual_core_SYNTH_REQ_015_E4",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_contains_pass_and_fail",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_fifteen_one_to_one",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_full_validation",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_001",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_002",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_003",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_004",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_005",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_006",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_007",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_008",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_009",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_010",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_011",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_012",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_013",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_014",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_independent_recalculation_SYNTH_REQ_015",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_network_denied",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_nine_stage_constants",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_no_fabricated_approvals",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_no_formal_capacity_or_model_claim",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_outside_write_denied",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_pages_cover_two_to_five",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_photos_are_requirements_not_files",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_conditions_mismatch",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_duplicate_report",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_duplicate_request",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_empty_section",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_fake_image",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_fake_model_call",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_fake_signature",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_hour_schedule",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_illegal_catalog",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_missing_expected",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_missing_raw",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_missing_value",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_not_synthetic",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_photo_missing",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_report_wrong_type",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_too_few_requests",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_two_test_items",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_chart",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_date",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_engine_status",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_equipment",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_limits",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_pass",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_quantity",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_sample_pass",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_source_digest",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_wrong_units",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_reject_zero_page",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_staging_no_writes",
+      "status": "CURRENT_PASS"
+    },
+    {
+      "id": "test_dataset.Dataset.test_staging_request_fields",
+      "status": "CURRENT_PASS"
+    }
+  ],
+  "failure_details": [],
+  "engine_calls": 70,
+  "mode": "ACTUAL_RULE_CORE_NO_PROVIDER",
+  "API_DB": "NOT_RUN"
+}

@@ -1,0 +1,15 @@
+# Business email notifications
+
+Personal notification consent is stored in `dqa_business.notification_preferences`, bound to the authenticated membership and protected by a revision check. Existing browser preferences migrate only for that same current membership. The preference never grants access to other accounts or cases.
+
+Migration 020 adds a transactional outbox for future request, review, scheduling, receipt, trial, report review and archive events. Recipients come from current case relationships and role permissions. Enqueueing, dispatch, and SMTP DATA authorization each validate current consent and access. Already completed actionable stages are skipped; historical cases are not backfilled.
+
+The existing Render process runs a separate mail thread using Gmail SMTP over verified TLS (port 465, with port 587 STARTTLS fallback before authentication), with a fixed Supabase service-role RPC interface. SMTP and database network destinations are restricted to that mail thread; model threads retain their existing OpenAI-only egress. The mock subprocess inherits neither mail nor database credentials. Browser/Vercel code holds no SMTP password and cannot choose email recipients or write delivery receipts.
+
+Deployment requires `BUSINESS_MAIL_ENABLED=1`, the SHA256 of `render-backend/gateway/business_mail_policy.json` in `BUSINESS_MAIL_POLICY_SHA256`, and runtime-only `BUSINESS_MAIL_SUPABASE_URL`, `BUSINESS_MAIL_SERVICE_KEY`, `BUSINESS_MAIL_TENANT`, `BUSINESS_MAIL_SMTP_HOST`, `BUSINESS_MAIL_SMTP_PORT`, `BUSINESS_MAIL_SMTP_USER`, `BUSINESS_MAIL_SMTP_PASSWORD`, and `BUSINESS_MAIL_SITE_ORIGIN`. The SMTP account is the already configured Gmail sender; do not commit these values. Enable the tenant's private mail policy only after the worker heartbeat reports `SMTP_AUTH_READY` from an actual TLS/authentication check.
+
+Dispatch is serialized per tenant, with a 90-second durable lease, a one-use authorization fence and a default cap of 200 accepted emails per Taipei calendar day. Only known not-sent transient failures retry, up to three attempts. A lost delivery acknowledgment or expired in-flight lease becomes `UNKNOWN` and is never automatically sent again. `SENT` means SMTP accepted the message; it does not establish inbox delivery. Messages include minimal case identifiers and a worklist link, with no attachments or untrusted free text.
+
+Personal settings offers an authenticated self-test (one per minute, five per Taipei calendar day) using the same outbox and idempotent operation. System management → Notifications shows durable delivery states. Workflow emails require the recipient to be enabled, verified, opted in, and still authorized. Notifications run independently of an open browser.
+
+Validation: `database/tests/verify_business_notifications.py` against an isolated PostgreSQL database, `tests/test_business_mail.py` with transport doubles, `tests/businessNotifications.test.mjs`, and `playwright.business-notifications.config.mjs` for desktop and mobile. Test fixtures never send real emails.

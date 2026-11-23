@@ -500,6 +500,30 @@ body:has(.rq-theme-dark) .rq-delete-confirm-modal .rq-btn-light{background:#2938
 .rq-entry-dialog .rq-form-header>div{min-width:0}
 @media(max-width:620px){.rq-entry-backdrop.rq-app{padding:12px}.rq-entry-backdrop .rq-entry-dialog{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);height:auto;border-radius:14px}.rq-entry-dialog .rq-form-header{padding:14px}.rq-entry-dialog .rq-form-header h2{font-size:19px}.rq-entry-dialog .rq-form-header>div:last-child{flex-wrap:wrap}.rq-entry-dialog .rq-form-footer{padding:12px;gap:8px}.rq-entry-dialog .rq-form-footer>div{flex-wrap:wrap;justify-content:flex-end}}
 .rq-entry-dialog .rq-entry-grid>label.rq-entry-grid-one{grid-column:1/-1;margin-top:0}
+
+/* Trial catalog: selectable list and live reference use the full existing dialog. */
+.rq-entry-dialog .rq-test-picker-modal{width:100%;max-height:calc(100dvh - 48px);min-height:0;box-shadow:none}
+.rq-test-picker-modal .rq-test-picker-header,.rq-test-picker-modal .rq-test-picker-footer{flex-shrink:0}
+.rq-test-picker-content.rq-test-picker-columns{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);padding:0;overflow:hidden;flex:1 1 auto}
+.rq-test-picker-list{padding:18px 22px;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.rq-test-reference{padding:22px;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;border-left:1px solid var(--enterprise-border,var(--rq-border,#dce5f2));color:var(--enterprise-text,var(--rq-text,#18345a))}
+.rq-test-reference h3{margin:0 0 10px;font-size:18px;line-height:1.5}
+.rq-test-reference h4{margin:20px 0 8px;font-size:13px}
+.rq-test-reference p,.rq-test-reference pre{font:inherit;font-size:12px;line-height:1.85;overflow-wrap:anywhere}
+.rq-test-reference pre{white-space:pre-wrap;margin:0}
+.rq-test-reference-note,.rq-test-reference-empty p{color:var(--enterprise-secondary,var(--rq-muted,#7186a3))}
+.rq-test-reference dl{margin:16px 0 0}
+.rq-test-reference dl>div{padding:10px 0;border-bottom:1px solid var(--enterprise-border,var(--rq-border,#dce5f2))}
+.rq-test-reference dt{font-size:11px;color:var(--enterprise-secondary,var(--rq-muted,#7186a3))}
+.rq-test-reference dd{margin:5px 0 0;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.rq-test-reference-empty{padding:32px 0}
+@media(max-width:760px){
+ .rq-entry-dialog .rq-test-picker-modal{max-height:calc(100dvh - 24px)}
+ .rq-test-picker-content.rq-test-picker-columns{grid-template-columns:minmax(0,1fr);overflow-y:auto}
+ .rq-test-picker-list{max-height:36dvh;padding:14px}
+ .rq-test-reference{max-height:42dvh;padding:16px;border-left:0;border-top:1px solid var(--enterprise-border,var(--rq-border,#dce5f2))}
+ .rq-test-reference-empty{padding:0}
+}
 .rq-entry-backdrop.rq-theme-dark{--rq-card:var(--surface,#1f2937);--rq-page:var(--page,#111827);--rq-text:var(--text,#e5edf8);--rq-muted:var(--muted,#b4c4d8);--rq-border:var(--border,#40516a)}
 
 /* Shared information dialogs: inset content without nested outer frames. */

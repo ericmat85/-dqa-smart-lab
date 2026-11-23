@@ -1,0 +1,30 @@
+{
+  "approval_id": "E4-LIVE-20261112-US1",
+  "evidence": {
+    "model_access": "OPENAI_GET_V1_MODELS_LISTED_GPT_6_LUNA_NO_INFERENCE",
+    "network": "FIXED_OPENAI_TLS_ONLY_PARENT_EGRESS_WITH_CREDENTIAL_FREE_NO_TCP_MOCK_CHILD_RUNTIME_MODEL_GET_REQUIRED",
+    "pricing": "https://developers.openai.com/api/docs/pricing#standard",
+    "storage": "RENDER_DISK_dsk-dbqsscdbedkc73ekro20_NORMAL_START_REDEPLOY_DEP_dbqsuuom7kps73dlnr30",
+    "user_budget": "USER_APPROVED_EXPIRY_ONLY_USD0.05_PER_CALL_USD1_CUMULATIVE_UNTIL_2026-12-31T23:59+08:00_NO_REFILL"
+  },
+  "expires_at": "2026-12-31T23:59:00+08:00",
+  "input_usd_per_million": "0.10",
+  "limits": {
+    "calls_per_minute": 2,
+    "history_pairs": 4,
+    "max_concurrent": 1,
+    "max_input_tokens": 8192,
+    "max_output_tokens": 768,
+    "request_timeout_seconds": 20
+  },
+  "live_state_directory": "/var/data/e4-mock/live/E4-LIVE-20261112-US1",
+  "max_instances": 1,
+  "max_workers": 1,
+  "model": "gpt-6-luna",
+  "output_usd_per_million": "0.50",
+  "per_call_usd": "0.05",
+  "persistent_mount": "/var/data/e4-mock",
+  "render_service_id": "srv-dbqssc5bedkc73ekrnf0",
+  "scope": "E4_PRIVATE_PREVIEW_SYNTHETIC_ONLY",
+  "total_usd": "1.00"
+}

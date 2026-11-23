@@ -1,0 +1,839 @@
+{
+  "version": 1,
+  "scope": "SYNTHETIC_DEMO_ONLY_NOT_PHYSICAL_CERTIFICATION",
+  "evidence_note": "本檔尺寸、載重與樣品形狀均為明示合成範例；不由舊 capacity 或 usableVolumeLitres 換算，不代表真實設備證書。",
+  "cases": [
+    {
+      "id": "SCH-026-01",
+      "request_id": "REQ-2026-001",
+      "title": "高溫儲存試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-01-v1"
+      },
+      "profile_id": "HIGH_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-02",
+      "request_id": "REQ-2026-002",
+      "title": "溫濕度循環",
+      "family": "TEMPERATURE_HUMIDITY",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-02-v1"
+      },
+      "profile_id": "HUMIDITY_CYCLE"
+    },
+    {
+      "id": "SCH-026-03",
+      "request_id": "REQ-2026-003",
+      "title": "振動耐久試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-03-v1"
+      },
+      "profile_id": "VIBRATION_DURABILITY"
+    },
+    {
+      "id": "SCH-026-04",
+      "request_id": "REQ-2026-004",
+      "title": "鹽霧試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-04-v1"
+      },
+      "profile_id": "SALT_SPRAY"
+    },
+    {
+      "id": "SCH-026-05",
+      "request_id": "REQ-2026-005",
+      "title": "高低溫循環試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-05-v1"
+      },
+      "profile_id": "THERMAL_CYCLE"
+    },
+    {
+      "id": "SCH-026-06",
+      "request_id": "REQ-2026-006",
+      "title": "高溫運作試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-06-v1"
+      },
+      "profile_id": "HIGH_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-07",
+      "request_id": "REQ-2026-007",
+      "title": "低溫啟動試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-07-v1"
+      },
+      "profile_id": "LOW_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-08",
+      "request_id": "REQ-2026-008",
+      "title": "溫濕度儲存試驗",
+      "family": "TEMPERATURE_HUMIDITY",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-08-v1"
+      },
+      "profile_id": "HUMIDITY_CYCLE"
+    },
+    {
+      "id": "SCH-026-09",
+      "request_id": "REQ-2026-009",
+      "title": "熱衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-09-v1"
+      },
+      "profile_id": "THERMAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-10",
+      "request_id": "REQ-2026-010",
+      "title": "振動耐久試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-10-v1"
+      },
+      "profile_id": "VIBRATION_DURABILITY"
+    },
+    {
+      "id": "SCH-026-11",
+      "request_id": "REQ-2026-011",
+      "title": "機械衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-11-v1"
+      },
+      "profile_id": "MECHANICAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-12",
+      "request_id": "REQ-2026-012",
+      "title": "鹽霧腐蝕試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-12-v1"
+      },
+      "profile_id": "SALT_SPRAY"
+    },
+    {
+      "id": "SCH-026-13",
+      "request_id": "REQ-2026-013",
+      "title": "防水 IPX6 試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-13-v1"
+      },
+      "profile_id": "WATER_INGRESS"
+    },
+    {
+      "id": "SCH-026-14",
+      "request_id": "REQ-2026-014",
+      "title": "ESD 靜電放電試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-14-v1"
+      },
+      "profile_id": "ESD"
+    },
+    {
+      "id": "SCH-026-15",
+      "request_id": "REQ-2026-015",
+      "title": "高低溫循環試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-15-v1"
+      },
+      "profile_id": "THERMAL_CYCLE"
+    },
+    {
+      "id": "SCH-026-16",
+      "request_id": "REQ-2026-016",
+      "title": "高溫運作試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-16-v1"
+      },
+      "profile_id": "HIGH_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-17",
+      "request_id": "REQ-2026-017",
+      "title": "低溫啟動試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-17-v1"
+      },
+      "profile_id": "LOW_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-18",
+      "request_id": "REQ-2026-018",
+      "title": "溫濕度儲存試驗",
+      "family": "TEMPERATURE_HUMIDITY",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-18-v1"
+      },
+      "profile_id": "HUMIDITY_CYCLE"
+    },
+    {
+      "id": "SCH-026-19",
+      "request_id": "REQ-2026-019",
+      "title": "熱衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-19-v1"
+      },
+      "profile_id": "THERMAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-20",
+      "request_id": "REQ-2026-020",
+      "title": "振動耐久試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-20-v1"
+      },
+      "profile_id": "VIBRATION_DURABILITY"
+    },
+    {
+      "id": "SCH-026-21",
+      "request_id": "REQ-2026-021",
+      "title": "機械衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-21-v1"
+      },
+      "profile_id": "MECHANICAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-22",
+      "request_id": "REQ-2026-022",
+      "title": "鹽霧腐蝕試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-22-v1"
+      },
+      "profile_id": "SALT_SPRAY"
+    },
+    {
+      "id": "SCH-026-23",
+      "request_id": "REQ-2026-023",
+      "title": "防水 IPX6 試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-23-v1"
+      },
+      "profile_id": "WATER_INGRESS"
+    },
+    {
+      "id": "SCH-026-24",
+      "request_id": "REQ-2026-024",
+      "title": "ESD 靜電放電試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-24-v1"
+      },
+      "profile_id": "ESD"
+    },
+    {
+      "id": "SCH-026-25",
+      "request_id": "REQ-2026-025",
+      "title": "高低溫循環試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-25-v1"
+      },
+      "profile_id": "THERMAL_CYCLE"
+    },
+    {
+      "id": "SCH-026-26",
+      "request_id": "REQ-2026-026",
+      "title": "高溫運作試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-26-v1"
+      },
+      "profile_id": "HIGH_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-27",
+      "request_id": "REQ-2026-027",
+      "title": "低溫啟動試驗",
+      "family": "TEMPERATURE",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-27-v1"
+      },
+      "profile_id": "LOW_TEMPERATURE"
+    },
+    {
+      "id": "SCH-026-28",
+      "request_id": "REQ-2026-028",
+      "title": "溫濕度儲存試驗",
+      "family": "TEMPERATURE_HUMIDITY",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-28-v1"
+      },
+      "profile_id": "HUMIDITY_CYCLE"
+    },
+    {
+      "id": "SCH-026-29",
+      "request_id": "REQ-2026-029",
+      "title": "熱衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-29-v1"
+      },
+      "profile_id": "THERMAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-30",
+      "request_id": "REQ-2026-030",
+      "title": "振動耐久試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-30-v1"
+      },
+      "profile_id": "VIBRATION_DURABILITY"
+    },
+    {
+      "id": "SCH-026-31",
+      "request_id": "REQ-2026-031",
+      "title": "機械衝擊試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-31-v1"
+      },
+      "profile_id": "MECHANICAL_SHOCK"
+    },
+    {
+      "id": "SCH-026-32",
+      "request_id": "REQ-2026-032",
+      "title": "鹽霧腐蝕試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-32-v1"
+      },
+      "profile_id": "SALT_SPRAY"
+    },
+    {
+      "id": "SCH-026-33",
+      "request_id": "REQ-2026-033",
+      "title": "防水 IPX6 試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-33-v1"
+      },
+      "profile_id": "WATER_INGRESS"
+    },
+    {
+      "id": "SCH-026-34",
+      "request_id": "REQ-2026-034",
+      "title": "ESD 靜電放電試驗",
+      "family": "UNVERIFIED_CONDITIONS",
+      "sample": {
+        "dimensions_mm": [
+          100,
+          100,
+          100
+        ],
+        "mass_kg": 0.1,
+        "clearance_mm": 10,
+        "evidence_id": "SYNTH-E2-SAMPLE-SCH-026-34-v1"
+      },
+      "profile_id": "ESD"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "EQ-001",
+      "name": "環境試驗箱 #01",
+      "model": "ENV-600",
+      "specification": "-40～150°C；升降溫 3°C/min；600 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 6
+    },
+    {
+      "id": "EQ-002",
+      "name": "環境試驗箱 #02",
+      "model": "ENV-600",
+      "specification": "-40～150°C；升降溫 3°C/min；600 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 6
+    },
+    {
+      "id": "EQ-003",
+      "name": "環境試驗箱 #03",
+      "model": "ENV-1000",
+      "specification": "-70～180°C；升降溫 5°C/min；1,000 L",
+      "families": [
+        "TEMPERATURE"
+      ],
+      "evidence": {
+        "inner_mm": [
+          500,
+          500,
+          600
+        ],
+        "max_samples": 8,
+        "max_load_kg": 5,
+        "temperature": [
+          -70,
+          180
+        ],
+        "humidity": null,
+        "id": "SYNTH-E2-CHAMBER-EQ-003-v1",
+        "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+      },
+      "space_units": 10
+    },
+    {
+      "id": "EQ-004",
+      "name": "環境試驗箱 #04",
+      "model": "ENV-300",
+      "specification": "-20～150°C；升降溫 2°C/min；300 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 4
+    },
+    {
+      "id": "EQ-005",
+      "name": "恆溫恆濕機 A",
+      "model": "HUM-800",
+      "specification": "-40～150°C；20～98%RH；800 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 8
+    },
+    {
+      "id": "EQ-006",
+      "name": "恆溫恆濕機 B",
+      "model": "HUM-800",
+      "specification": "-40～150°C；20～98%RH；800 L",
+      "families": [
+        "TEMPERATURE",
+        "TEMPERATURE_HUMIDITY"
+      ],
+      "evidence": {
+        "inner_mm": [
+          500,
+          400,
+          550
+        ],
+        "max_samples": 6,
+        "max_load_kg": 4,
+        "temperature": [
+          -40,
+          150
+        ],
+        "humidity": [
+          20,
+          98
+        ],
+        "id": "SYNTH-E2-CHAMBER-EQ-006-v1",
+        "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+      },
+      "space_units": 8
+    },
+    {
+      "id": "EQ-007",
+      "name": "恆溫恆濕機 C",
+      "model": "HUM-400",
+      "specification": "-20～150°C；30～95%RH；400 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 4
+    },
+    {
+      "id": "EQ-008",
+      "name": "恆溫恆濕機 D",
+      "model": "HUM-1200",
+      "specification": "-70～150°C；20～98%RH；1,200 L",
+      "families": [
+        "TEMPERATURE",
+        "TEMPERATURE_HUMIDITY"
+      ],
+      "evidence": {
+        "inner_mm": [
+          600,
+          500,
+          600
+        ],
+        "max_samples": 10,
+        "max_load_kg": 8,
+        "temperature": [
+          -70,
+          150
+        ],
+        "humidity": [
+          20,
+          98
+        ],
+        "id": "SYNTH-E2-CHAMBER-EQ-008-v1",
+        "source": "SYNTHETIC_FIXTURE_DOCUMENT"
+      },
+      "space_units": 12
+    },
+    {
+      "id": "EQ-009",
+      "name": "振動試驗機 #01",
+      "model": "VIB-10K",
+      "specification": "5～2,000 Hz；額定推力 10 kN；最大負載 100 kg",
+      "families": [],
+      "evidence": null,
+      "space_units": 2
+    },
+    {
+      "id": "EQ-010",
+      "name": "振動試驗機 #02",
+      "model": "VIB-20K",
+      "specification": "5～2,500 Hz；額定推力 20 kN；最大負載 200 kg",
+      "families": [],
+      "evidence": null,
+      "space_units": 3
+    },
+    {
+      "id": "EQ-011",
+      "name": "鹽霧試驗機 #01",
+      "model": "SALT-600",
+      "specification": "35～60°C；箱體 600 L；噴霧量可調",
+      "families": [],
+      "evidence": null,
+      "space_units": 8
+    },
+    {
+      "id": "EQ-012",
+      "name": "鹽霧試驗機 #02",
+      "model": "SALT-1000",
+      "specification": "35～60°C；箱體 1,000 L；連續／間歇噴霧",
+      "families": [],
+      "evidence": null,
+      "space_units": 12
+    },
+    {
+      "id": "EQ-013",
+      "name": "拉力試驗機 #01",
+      "model": "TENS-5K",
+      "specification": "荷重 5 kN；速度 0.1～500 mm/min",
+      "families": [],
+      "evidence": null,
+      "space_units": 1
+    },
+    {
+      "id": "EQ-014",
+      "name": "防水試驗機 #01",
+      "model": "WATER-X6",
+      "specification": "IPX5／IPX6 示範配置；流量 12.5～100 L/min",
+      "families": [],
+      "evidence": null,
+      "space_units": 2
+    },
+    {
+      "id": "EQ-015",
+      "name": "ESD 試驗設備 #01",
+      "model": "ESD-30",
+      "specification": "接觸放電 ±8 kV；空氣放電 ±15 kV；最高設定 ±30 kV",
+      "families": [],
+      "evidence": null,
+      "space_units": 1
+    },
+    {
+      "id": "EQ-016",
+      "name": "冷熱衝擊機",
+      "model": "SHOCK-100",
+      "specification": "低溫槽 -70°C；高溫槽 200°C；測試區 100 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 3
+    },
+    {
+      "id": "EQ-017",
+      "name": "耐候機",
+      "model": "UV-500",
+      "specification": "UV 光源；輻照度可調；黑板溫度 35～85°C",
+      "families": [],
+      "evidence": null,
+      "space_units": 8
+    },
+    {
+      "id": "EQ-018",
+      "name": "高溫爐 #01",
+      "model": "OVEN-250",
+      "specification": "室溫＋10～250°C；強制熱風循環；250 L",
+      "families": [],
+      "evidence": null,
+      "space_units": 6
+    },
+    {
+      "id": "EQ-019",
+      "name": "數位顯微鏡 #01",
+      "model": "MICRO-200",
+      "specification": "放大倍率 20～200×；影像尺寸量測",
+      "families": [],
+      "evidence": null,
+      "space_units": 1
+    },
+    {
+      "id": "EQ-020",
+      "name": "防塵試驗箱 #01",
+      "model": "DUST-800",
+      "specification": "IP5X／IP6X 示範配置；800 L；負壓可調",
+      "families": [],
+      "evidence": null,
+      "space_units": 4
+    }
+  ],
+  "executors": [
+    "U003"
+  ],
+  "limits": {
+    "equipment": 24,
+    "personnel": 30,
+    "reservations": 32,
+    "horizon_days": 14,
+    "machines": 4,
+    "quantity": 1000,
+    "payload_bytes": 8192
+  },
+  "space_unit_note": "U 為原 Demo 台帳的相對空間單位，與公升無換算關係；體積、尺寸、載重及放置件數證據仍獨立檢查。"
+}

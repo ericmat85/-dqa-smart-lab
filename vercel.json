@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
+      "source": "/api/business/:path+",
+      "destination": "/api/business?path=:path"
+    },
+    {
       "source": "/tour",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/account/:path*",
       "destination": "/index.html"
     },
     {
@@ -20,5 +28,10 @@
       "source": "/validation/:path*",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "preview/i-render-backend-*": false
+    }
+  }
 }

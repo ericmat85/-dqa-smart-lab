@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 export const INITIAL_ACCOUNTS = [
 
   {
@@ -85,8 +86,8 @@ export function migrateAdminAccount(accounts){
 }
 export function readDemoAccounts() {
   try {
-    const stored = JSON.parse(window.localStorage.getItem(KEY) || 'null');
-    if (Array.isArray(stored)){const next=migrateAdminAccount(stored);if(JSON.stringify(next)!==JSON.stringify(stored)){try{window.localStorage.setItem(KEY,JSON.stringify(next));}catch{/* Continue with the migrated in-memory account. */}}return next;}
+    const stored = JSON.parse(appStorage().getItem(KEY) || 'null');
+    if (Array.isArray(stored)){const next=migrateAdminAccount(stored);if(JSON.stringify(next)!==JSON.stringify(stored)){try{appStorage().setItem(KEY,JSON.stringify(next));}catch{/* Continue with the migrated in-memory account. */}}return next;}
   } catch { /* Keep invalid stored data intact; use defaults in memory. */ }
   return INITIAL_ACCOUNTS;
 }

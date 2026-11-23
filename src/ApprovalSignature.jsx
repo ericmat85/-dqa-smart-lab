@@ -3,12 +3,14 @@ import SignaturePad from './SignaturePad.jsx';
 import DefaultSignatureActions from './DefaultSignatureActions.jsx';
 import './SignatureInput.css';
 
-export default function ApprovalSignature({ label="主管簽名", accountId, mode, onModeChange, value, onChange, onError }) {
+export default function ApprovalSignature({ label="主管簽名", accountId, mode, onModeChange, value, onChange, onError, defaultActions=true, preserveModeDrafts=false }) {
   const readerRef = useRef(null);
+  const drafts = useRef({draw:'',upload:''});
   useEffect(() => () => readerRef.current?.abort(), []);
   const changeMode = next => {
     readerRef.current?.abort();
-    onChange('');
+    if(preserveModeDrafts){drafts.current[mode]=value;onChange(drafts.current[next]||'');}
+    else onChange('');
     onModeChange(next);
   };
   const upload = event => {
@@ -27,16 +29,18 @@ export default function ApprovalSignature({ label="主管簽名", accountId, mod
     reader.onerror = () => onError('簽名圖片無法讀取，請重新選擇。');
     reader.readAsDataURL(file);
   };
+  const uploadValue=mode==='upload'?value:drafts.current.upload;
+  const uploadInput=<>
+      <label className="rq-label">{label}檔<input className="rq-input" type="file" accept="image/png,image/jpeg" onChange={upload} /></label>
+      {defaultActions&&<DefaultSignatureActions accountId={accountId} value={uploadValue} onChange={onChange} beforeApply={() => readerRef.current?.abort()} />}
+      <small>支援 PNG、JPG，檔案不超過 1 MB。</small>
+      {uploadValue && <div style={{ marginTop: 10 }}><img src={uploadValue} alt={`${label}預覽`} style={{ display: 'block', width: '100%', maxWidth: 600, height: 120, objectFit: 'contain', objectPosition: 'left center', background: '#fff' }} /><button type="button" className="rq-btn rq-btn-small signature-upload-clear" onClick={() => onChange('')}>清除簽名</button></div>}
+  </>;
   return <div className="dqa-signature-input" style={{ margin: '12px 0' }}>
     <div className="rq-radio-row" role="group" aria-label={`${label}方式`}>
       <label><input type="radio" name="approvalSignatureMode" checked={mode === 'draw'} onChange={() => changeMode('draw')} /> 手寫簽名</label>
       <label><input type="radio" name="approvalSignatureMode" checked={mode === 'upload'} onChange={() => changeMode('upload')} /> 上傳簽名檔</label>
     </div>
-    {mode === 'draw' ? <SignaturePad onChange={onChange} label={label} /> : <>
-      <label className="rq-label">{label}檔<input className="rq-input" type="file" accept="image/png,image/jpeg" onChange={upload} /></label>
-      <DefaultSignatureActions accountId={accountId} value={value} onChange={onChange} beforeApply={() => readerRef.current?.abort()} />
-      <small>支援 PNG、JPG，檔案不超過 1 MB。</small>
-      {value && <div style={{ marginTop: 10 }}><img src={value} alt={`${label}預覽`} style={{ display: 'block', width: '100%', maxWidth: 600, height: 120, objectFit: 'contain', objectPosition: 'left center', background: '#fff' }} /><button type="button" className="rq-btn rq-btn-small" onClick={() => onChange('')}>清除簽名</button></div>}
-    </>}
+    {preserveModeDrafts?<><div hidden={mode!=='draw'}><SignaturePad onChange={onChange} label={label}/></div><div hidden={mode!=='upload'}>{uploadInput}</div></>:mode==='draw'?<SignaturePad onChange={onChange} label={label}/>:uploadInput}
   </div>;
 }

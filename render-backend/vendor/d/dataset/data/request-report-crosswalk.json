@@ -1,0 +1,212 @@
+[
+  {
+    "requestId": "SYNTH-REQ-001",
+    "reportId": "SYNTH-REP-001",
+    "testItemId": "SYNTH-TI-001",
+    "catalogType": "其他",
+    "variant": "一般性能合成案例",
+    "samples": 3,
+    "pages": 3,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-001-SETUP",
+      "SYNTH-ASSET-001-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-002",
+    "reportId": "SYNTH-REP-002",
+    "testItemId": "SYNTH-TI-002",
+    "catalogType": "高溫試驗",
+    "variant": "高溫動作",
+    "samples": 3,
+    "pages": 4,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-002-SETUP",
+      "SYNTH-ASSET-002-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-003",
+    "reportId": "SYNTH-REP-003",
+    "testItemId": "SYNTH-TI-003",
+    "catalogType": "低溫試驗",
+    "variant": "低溫動作",
+    "samples": 3,
+    "pages": 5,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-003-SETUP",
+      "SYNTH-ASSET-003-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-004",
+    "reportId": "SYNTH-REP-004",
+    "testItemId": "SYNTH-TI-004",
+    "catalogType": "高溫試驗",
+    "variant": "高溫儲存",
+    "samples": 3,
+    "pages": 2,
+    "result": "FAIL",
+    "photoAssetIds": [
+      "SYNTH-ASSET-004-SETUP",
+      "SYNTH-ASSET-004-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-005",
+    "reportId": "SYNTH-REP-005",
+    "testItemId": "SYNTH-TI-005",
+    "catalogType": "低溫試驗",
+    "variant": "低溫儲存",
+    "samples": 3,
+    "pages": 3,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-005-SETUP",
+      "SYNTH-ASSET-005-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-006",
+    "reportId": "SYNTH-REP-006",
+    "testItemId": "SYNTH-TI-006",
+    "catalogType": "高溫高濕",
+    "variant": "高溫高濕",
+    "samples": 3,
+    "pages": 4,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-006-SETUP",
+      "SYNTH-ASSET-006-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-007",
+    "reportId": "SYNTH-REP-007",
+    "testItemId": "SYNTH-TI-007",
+    "catalogType": "溫度循環",
+    "variant": "溫度循環",
+    "samples": 3,
+    "pages": 5,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-007-SETUP",
+      "SYNTH-ASSET-007-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-008",
+    "reportId": "SYNTH-REP-008",
+    "testItemId": "SYNTH-TI-008",
+    "catalogType": "熱衝擊",
+    "variant": "冷熱衝擊",
+    "samples": 3,
+    "pages": 2,
+    "result": "FAIL",
+    "photoAssetIds": [
+      "SYNTH-ASSET-008-SETUP",
+      "SYNTH-ASSET-008-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-009",
+    "reportId": "SYNTH-REP-009",
+    "testItemId": "SYNTH-TI-009",
+    "catalogType": "熱衝擊",
+    "variant": "耐熱衝擊合成變體",
+    "samples": 3,
+    "pages": 3,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-009-SETUP",
+      "SYNTH-ASSET-009-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-010",
+    "reportId": "SYNTH-REP-010",
+    "testItemId": "SYNTH-TI-010",
+    "catalogType": "振動試驗",
+    "variant": "振動",
+    "samples": 3,
+    "pages": 4,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-010-SETUP",
+      "SYNTH-ASSET-010-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-011",
+    "reportId": "SYNTH-REP-011",
+    "testItemId": "SYNTH-TI-011",
+    "catalogType": "機械衝擊",
+    "variant": "機械衝擊",
+    "samples": 3,
+    "pages": 5,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-011-SETUP",
+      "SYNTH-ASSET-011-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-012",
+    "reportId": "SYNTH-REP-012",
+    "testItemId": "SYNTH-TI-012",
+    "catalogType": "IPX6 防水",
+    "variant": "防水",
+    "samples": 3,
+    "pages": 2,
+    "result": "FAIL",
+    "photoAssetIds": [
+      "SYNTH-ASSET-012-SETUP",
+      "SYNTH-ASSET-012-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-013",
+    "reportId": "SYNTH-REP-013",
+    "testItemId": "SYNTH-TI-013",
+    "catalogType": "鹽霧試驗",
+    "variant": "鹽霧",
+    "samples": 3,
+    "pages": 3,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-013-SETUP",
+      "SYNTH-ASSET-013-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-014",
+    "reportId": "SYNTH-REP-014",
+    "testItemId": "SYNTH-TI-014",
+    "catalogType": "ESD 靜電",
+    "variant": "靜電放電",
+    "samples": 3,
+    "pages": 4,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-014-SETUP",
+      "SYNTH-ASSET-014-DURING_TEST"
+    ]
+  },
+  {
+    "requestId": "SYNTH-REQ-015",
+    "reportId": "SYNTH-REP-015",
+    "testItemId": "SYNTH-TI-015",
+    "catalogType": "其他",
+    "variant": "暗電流合成案例",
+    "samples": 3,
+    "pages": 5,
+    "result": "PASS",
+    "photoAssetIds": [
+      "SYNTH-ASSET-015-SETUP",
+      "SYNTH-ASSET-015-DURING_TEST"
+    ]
+  }
+]

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {accessSystem,ROLE} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
 import {canReadReport} from './reportRules.mjs';
@@ -15,7 +16,7 @@ export function canReadArchivedReport(actor,report,request,system,storage){
 export function archiveRequests(storage){
  const value=JSON.parse(storage.getItem('dqa-request-demo-v2')||'[]');if(!Array.isArray(value))throw Error('委託資料無法讀取，無法確認資料庫權限。');return value;
 }
-export async function readArchivedPdf({actorId,requestId,system},storage=window.localStorage,repository={get:getReport}){
+export async function readArchivedPdf({actorId,requestId,system},storage=appStorage(),repository={get:getReport}){
  const authorize=report=>{
   const accounts=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS));if(!Array.isArray(accounts))throw Error('帳號資料無法讀取，拒絕提供檔案。');
   const actor=accounts.find(row=>row.id===actorId),request=archiveRequests(storage).find(row=>row.id===requestId);

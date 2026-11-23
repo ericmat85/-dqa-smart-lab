@@ -1,3 +1,4 @@
+import AssistantIcon from './AssistantIcon.jsx';
 // Consistent outline icons; no platform-dependent Unicode/emoji rendering.
 const paths={
  new:'M12 4v16 M4 12h16',
@@ -17,5 +18,6 @@ const paths={
  logout:'M10 4H4v16h6 M9 12h12 M17 8l4 4-4 4',
 };
 export default function LmsSidebarIcon({name}){
+ if(name==='ai')return <AssistantIcon size={22} className="lms-sidebar-icon"/>;
  return <svg className="lms-sidebar-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]||paths.dashboard}/></svg>;
 }

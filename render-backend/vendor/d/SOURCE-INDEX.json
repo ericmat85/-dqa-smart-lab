@@ -1,0 +1,411 @@
+{
+  "source_product_head": "df2ee6f15aaa7feef9fb0a7ea5fa794bb4c768b8",
+  "core_fixed_handoff_commit": "e1b2faefec412dfc061e45595bc8f06aa1119543",
+  "core_fixed_zip_sha256": "5577987950666213bfa566b4ff095d4c27e0cdf46519015958d18cefd1cb385c",
+  "dynamic_manifest_sha256": "3b135c60b587967309c034d68bcd5037e3c0a486dd35a5287108e6f5ac784273",
+  "dataset_manifest_sha256": "41cfc073b19f2febc85ef07c42f2e73380b92c3cdf53349182f2d7bf353529e4",
+  "copy_map": [
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/README.md",
+      "package_path": "dynamic/README.md",
+      "sha256": "f9a87dde7b3a3f137e11d06bd04a2b2e9bf44080b571ef4c1c15a87c5f0470f7",
+      "bytes": 418
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/build_cases.py",
+      "package_path": "dynamic/build_cases.py",
+      "sha256": "28a866f801e2b13e99b702ac202b2f7b3f9686c5e4f3efd94e108e38fcaf1763",
+      "bytes": 8449
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/dynamic_adapter.py",
+      "package_path": "dynamic/dynamic_adapter.py",
+      "sha256": "9a2ba88f33832c5f04a8221df9c71742d9684d68ee1c2742b1a50d40ca67e36e",
+      "bytes": 5965
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/dynamic-input-output-trace.json",
+      "package_path": "dynamic/evidence/dynamic-input-output-trace.json",
+      "sha256": "15169513019ec4325ee5881fce3ad66ad570a6d54158c1b98c8065cb03837350",
+      "bytes": 1035916
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/final-report.md",
+      "package_path": "dynamic/evidence/final-report.md",
+      "sha256": "4751682c80b0c310f8f60c665cd8d00dd73f52b37cdde08dea0a90f1cbf8dacb",
+      "bytes": 6539
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/legacy-numeric-format-audit.json",
+      "package_path": "dynamic/evidence/legacy-numeric-format-audit.json",
+      "sha256": "14092722c236a1d76e44ee5540d56c88039a2b8941229dbb3563877fa7aea3e5",
+      "bytes": 42646
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/numeric-precision-report.json",
+      "package_path": "dynamic/evidence/numeric-precision-report.json",
+      "sha256": "fadb2be9f594f3e29d6e641cf3dacd7968a3309b715b38d17d3c8fe890e56405",
+      "bytes": 518
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/source-baseline.json",
+      "package_path": "dynamic/evidence/source-baseline.json",
+      "sha256": "aaaeaf789be7ec4917e0cae2afa6c084f3d3a5e48ee608510392307046319edc",
+      "bytes": 7027
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/source-differences.patch",
+      "package_path": "dynamic/evidence/source-differences.patch",
+      "sha256": "973ebd8bc893890ff33d83e1e76d6a9cec04abe8751b5464c4d2b47181a009f6",
+      "bytes": 23698
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/test-results.json",
+      "package_path": "dynamic/evidence/test-results.json",
+      "sha256": "c7eb6bef5562679bb5222228f4e76d3579454c633311b16392bb95edc58b2ab4",
+      "bytes": 11929
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/evidence/verification-report.json",
+      "package_path": "dynamic/evidence/verification-report.json",
+      "sha256": "d49256dc206b8ab737c6f26c412d0acb078cbc7e1f9ab9828600bc9d688dc347",
+      "bytes": 824
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/run_offline.py",
+      "package_path": "dynamic/run_offline.py",
+      "sha256": "42b54c6fca48b2276bc7b3c7ec580c162e82256cc208f7c3bddb2eeff193abd8",
+      "bytes": 3017
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/__init__.py",
+      "package_path": "runtime/ai_engine_core/__init__.py",
+      "sha256": "12b4de99d6b339f1dcc4b29dc7e21c2a7c02c62f02cd890213396a8e7794cfcb",
+      "bytes": 665
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/engines.py",
+      "package_path": "runtime/ai_engine_core/engines.py",
+      "sha256": "c2dacbdde12b1e14bda236fc4ae3ab66c0e2f4830a97b00e3fd13502ef273f5a",
+      "bytes": 9770
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/models.py",
+      "package_path": "runtime/ai_engine_core/models.py",
+      "sha256": "f531a0f36e522a23469eb99560e17a6a764941aba1ad03b5ff1f8834c5ed098e",
+      "bytes": 6940
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/orchestration_validation.py",
+      "package_path": "runtime/ai_engine_core/orchestration_validation.py",
+      "sha256": "7799db1d0f804a3062869afaa8807096e2c21111e782e3c091d73d7305e75d0d",
+      "bytes": 4445
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/provider.py",
+      "package_path": "runtime/ai_engine_core/provider.py",
+      "sha256": "de6ef0999851ebe119300808ebc505b937181f0857d46951080cc09aabd577d6",
+      "bytes": 606
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/service.py",
+      "package_path": "runtime/ai_engine_core/service.py",
+      "sha256": "563abbe18e16ce4e43d2c24bf6de14f1cacff87e327a57b0db04bd55e5111dba",
+      "bytes": 5580
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/simulation.py",
+      "package_path": "runtime/ai_engine_core/simulation.py",
+      "sha256": "debc33b5660c4ec5be01e9cc41569a9d0c804010ef3f54228b81d1bd4db27e62",
+      "bytes": 3175
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/runtime/ai_engine_core/validation.py",
+      "package_path": "runtime/ai_engine_core/validation.py",
+      "sha256": "50d6eb41e31d42f05369ab4b4a782264fa127eac2ccfa4c348d7a22c8fdf1b8f",
+      "bytes": 6523
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-dynamic-input-p01/tests/test_dynamic.py",
+      "package_path": "dynamic/tests/test_dynamic.py",
+      "sha256": "15512294782f703c4517a4f39547ca391a72d6dcdb090718662641f6fba4eafb",
+      "bytes": 5801
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/A_IMPORT_INTERFACE.md",
+      "package_path": "dataset/A_IMPORT_INTERFACE.md",
+      "sha256": "421a4bf048343c884d189b6e2a6fd23a9650a3698315e9a3a2a1cbbcef51c9b4",
+      "bytes": 3222
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/README.md",
+      "package_path": "dataset/README.md",
+      "sha256": "9a06d89b434c66028213c16782e813fb1da0cd500177411877d82d0627a52baa",
+      "bytes": 2941
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/a_import_adapter.py",
+      "package_path": "dataset/a_import_adapter.py",
+      "sha256": "aeef570d75142fb4f8846c5a376792d27c1f7cf566586b1e43c62616eb4e7d3b",
+      "bytes": 1241
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/build_dataset.py",
+      "package_path": "dataset/build_dataset.py",
+      "sha256": "a3400586782936c26f2a3bd7fa2428b00a698446c185cc35f72bf252288660ca",
+      "bytes": 18130
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/a_staging_import_v1.json",
+      "package_path": "dataset/data/a_staging_import_v1.json",
+      "sha256": "148b272db0768a28d91b10780cef1c9639130282dd32f1579977d95385d81d78",
+      "bytes": 419890
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/catalog-snapshot.json",
+      "package_path": "dataset/data/catalog-snapshot.json",
+      "sha256": "c6dc04f646196833b029f584a574d0867e8285ce8a5af0bc959540cf7f743818",
+      "bytes": 405
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/competition_ai4_demo_dataset_v1.json",
+      "package_path": "dataset/data/competition_ai4_demo_dataset_v1.json",
+      "sha256": "4be05ab363d94926ec74783e551dde567576a87a575d6b5800f5b16434d46100",
+      "bytes": 954451
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/field-guide.md",
+      "package_path": "dataset/data/field-guide.md",
+      "sha256": "decf8ae294062cc8af2336f67d226cecbd6f5db44881d19d2198a0f25b8de897",
+      "bytes": 4174
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/photo_asset_requirements_v1.json",
+      "package_path": "dataset/data/photo_asset_requirements_v1.json",
+      "sha256": "71807c2c1c239fa912fd363b9a9697642296afd21f4505f4b9c43e33d245a1ac",
+      "bytes": 19390
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-001.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-001.json",
+      "sha256": "e61a8a09c948e4530dcc9e96474991b7404abac30ca69ee11dc62b3e94181208",
+      "bytes": 4254
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-002.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-002.json",
+      "sha256": "58a94e6a2f89c09648437ef88dbc4aa5fb6417fb836caf5ecba9a4836222e6dd",
+      "bytes": 4344
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-003.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-003.json",
+      "sha256": "7119e0c44255a97d0765014b4754498838fd4cc206fa6d9d23883b262a3d175f",
+      "bytes": 4239
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-004.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-004.json",
+      "sha256": "25d8d8b2fcc70654ddd0064e8ffbc18cbf956c763b901b2b4565b047697b15b3",
+      "bytes": 4347
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-005.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-005.json",
+      "sha256": "f004a4cef519182861332e44b2dc7e69d6a0e89e800be536cb5c262711463543",
+      "bytes": 4360
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-006.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-006.json",
+      "sha256": "883bdaccdad9f709f839d6c5e354d8f29bc5100948e2858d0d3b7ac02c8c60f0",
+      "bytes": 4412
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-007.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-007.json",
+      "sha256": "a4b791f065735ba5196a2106db1d85df10944bffb3a93f042959087be65a32ec",
+      "bytes": 4390
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-008.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-008.json",
+      "sha256": "f58c7a18543b5ead44eaf9d47cd863f1725c9052badaee703dc0210a81889d5e",
+      "bytes": 4373
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-009.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-009.json",
+      "sha256": "9362b581819420eaba67b0edc46c0c3b734cbf05c260423d7b2023e496224b2f",
+      "bytes": 4331
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-010.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-010.json",
+      "sha256": "7c3518056c1efb6f472f11877919a67d8984f92a4e8ec882db68a8d1c06e39d0",
+      "bytes": 4454
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-011.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-011.json",
+      "sha256": "05ded162e96b74a94ad958e64d5f141335a334f9e213fd3d2a7043dfb0e9ec87",
+      "bytes": 4440
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-012.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-012.json",
+      "sha256": "3229f728de4bdef21d52c4c82c7e134bfa2d09d99e33a3bf22acdbc16903eef4",
+      "bytes": 4458
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-013.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-013.json",
+      "sha256": "c1b423851aa628f5550eb418837eb7c2127342e0056f94b447f6316e7f01a0d3",
+      "bytes": 4320
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-014.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-014.json",
+      "sha256": "47506cd7e196d46d27cd7983f5543a24acff94bc13e5c0240a86539f481f124f",
+      "bytes": 4356
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/raw/SYNTH-REQ-015.json",
+      "package_path": "dataset/data/raw/SYNTH-REQ-015.json",
+      "sha256": "276e23e2f3e661b3219bbf8a1a4a49511e8092f55e7cee5ce4ec5745fb4f6136",
+      "bytes": 4313
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/request-report-crosswalk.json",
+      "package_path": "dataset/data/request-report-crosswalk.json",
+      "sha256": "29d6178506cbe7c30739d782a8002c0387015d02878c38fa003f1f65a1638765",
+      "bytes": 4917
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/data/request-report-crosswalk.md",
+      "package_path": "dataset/data/request-report-crosswalk.md",
+      "sha256": "f689e4f64db6b90ff3fc1ffd28b17c172bf31e3489068383f04cd80e92ed2e0b",
+      "bytes": 1363
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/attempt-01-prevalidation.json",
+      "package_path": "dataset/evidence/attempt-01-prevalidation.json",
+      "sha256": "48c8fe360ed3f28a9acd8ffcb246d54d91a0ef04cabf0a138e3ce09257707113",
+      "bytes": 317
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/attempt-02-results.json",
+      "package_path": "dataset/evidence/attempt-02-results.json",
+      "sha256": "eccf539232df7ffb1539de86468680640a75ee5e5a1fe09567de342b371990cf",
+      "bytes": 14393
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/attempt-03-results.json",
+      "package_path": "dataset/evidence/attempt-03-results.json",
+      "sha256": "a49b0c92e808fa8a1fa436146781a16dedf40e1000328d699762dd4d6b7006a1",
+      "bytes": 14747
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/core-execution-results.json",
+      "package_path": "dataset/evidence/core-execution-results.json",
+      "sha256": "057b32092d88b88261e34b56e1656fb2f8929becaa6ca46648a42dcf5e2ed1db",
+      "bytes": 280775
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/documentation-assembly-note.json",
+      "package_path": "dataset/evidence/documentation-assembly-note.json",
+      "sha256": "54b56b5285445d03a0ecdf2ff89cfa178d3bcf4b9d8f52c7ec2d18f27f24a63a",
+      "bytes": 205
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/source-baseline.json",
+      "package_path": "dataset/evidence/source-baseline.json",
+      "sha256": "6cd937cf42693e547bcfa097b062e163b74bb50a705698ca006080ef32ddf733",
+      "bytes": 2721
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/source-preservation.json",
+      "package_path": "dataset/evidence/source-preservation.json",
+      "sha256": "63114913068c02a39880e49381337c7f8e0195541dab2402ad1a37d076790775",
+      "bytes": 397
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/test-results.json",
+      "package_path": "dataset/evidence/test-results.json",
+      "sha256": "a49b0c92e808fa8a1fa436146781a16dedf40e1000328d699762dd4d6b7006a1",
+      "bytes": 14747
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/evidence/verification-report.json",
+      "package_path": "dataset/evidence/verification-report.json",
+      "sha256": "9c1b83ace0e33aade70555da66d4022329a44b9afad47f9ee332b16994847d29",
+      "bytes": 705
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/run_offline.py",
+      "package_path": "dataset/run_offline.py",
+      "sha256": "ed5f5b42bfee8ebd0e0b69ebae14d2ed97323ea7fc670cebadf9249ea03552d1",
+      "bytes": 2421
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/__init__.py",
+      "package_path": "runtime/ai_engine_core/__init__.py",
+      "sha256": "12b4de99d6b339f1dcc4b29dc7e21c2a7c02c62f02cd890213396a8e7794cfcb",
+      "bytes": 665
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/engines.py",
+      "package_path": "runtime/ai_engine_core/engines.py",
+      "sha256": "c2dacbdde12b1e14bda236fc4ae3ab66c0e2f4830a97b00e3fd13502ef273f5a",
+      "bytes": 9770
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/models.py",
+      "package_path": "runtime/ai_engine_core/models.py",
+      "sha256": "f531a0f36e522a23469eb99560e17a6a764941aba1ad03b5ff1f8834c5ed098e",
+      "bytes": 6940
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/orchestration_validation.py",
+      "package_path": "runtime/ai_engine_core/orchestration_validation.py",
+      "sha256": "7799db1d0f804a3062869afaa8807096e2c21111e782e3c091d73d7305e75d0d",
+      "bytes": 4445
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/provider.py",
+      "package_path": "runtime/ai_engine_core/provider.py",
+      "sha256": "de6ef0999851ebe119300808ebc505b937181f0857d46951080cc09aabd577d6",
+      "bytes": 606
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/service.py",
+      "package_path": "runtime/ai_engine_core/service.py",
+      "sha256": "563abbe18e16ce4e43d2c24bf6de14f1cacff87e327a57b0db04bd55e5111dba",
+      "bytes": 5580
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/simulation.py",
+      "package_path": "runtime/ai_engine_core/simulation.py",
+      "sha256": "debc33b5660c4ec5be01e9cc41569a9d0c804010ef3f54228b81d1bd4db27e62",
+      "bytes": 3175
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/runtime/ai_engine_core/validation.py",
+      "package_path": "runtime/ai_engine_core/validation.py",
+      "sha256": "50d6eb41e31d42f05369ab4b4a782264fa127eac2ccfa4c348d7a22c8fdf1b8f",
+      "bytes": 6523
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/tests/test_dataset.py",
+      "package_path": "dataset/tests/test_dataset.py",
+      "sha256": "dd5c749d4f542ea0953ec8de95ee27c48de8e7e691034d4da19aff34f929ff97",
+      "bytes": 6450
+    },
+    {
+      "original_path": "/workspace/d-comp-1111-ai4-data-p02/validate_dataset.py",
+      "package_path": "dataset/validate_dataset.py",
+      "sha256": "a3adc26e42e64e7e6253bd8e02af994defe436e1d0216aac7d5f17b64c5e85ad",
+      "bytes": 9193
+    }
+  ]
+}

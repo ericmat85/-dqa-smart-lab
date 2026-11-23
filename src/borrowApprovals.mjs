@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {submitMaterialBorrowRequest,decideMaterialBorrowRequest} from './materialBorrowing.mjs';
 export {returnBorrowMaterial} from './materialBorrowing.mjs';
 import {isCalendarDate} from './requestDate.mjs';
@@ -24,7 +25,7 @@ function assertAvailable(machine,form,storage,now){
  });
  if(conflict)throw Error(`設備與排程 ${conflict.requestId||conflict.id} 衝突，請改選設備或借用日期。`);
 }
-export function submitBorrowRequest(form,actorId,storage=window.localStorage){
+export function submitBorrowRequest(form,actorId,storage=appStorage()){
  if(form.resourceType==='material')return submitMaterialBorrowRequest(form,actorId,storage);
  if(form.resourceType&&form.resourceType!=='equipment')throw Error('請選擇設備或物料借用。');
  recoverLifecycleTransaction(storage);
@@ -34,7 +35,7 @@ export function submitBorrowRequest(form,actorId,storage=window.localStorage){
  const row={...form,equipmentId:machine.id,equipment:machine.name,id:`BOR-${new Date().getFullYear()}-${crypto.randomUUID().slice(0,8)}`,status:'待核准',actorId,actor:actor.name,createdAt:new Date().toISOString(),history:[]};
  storage.setItem(BORROW_KEY,JSON.stringify([row,...read(storage,BORROW_KEY)]));return row;
 }
-export function decideBorrowRequest({id,actorId,approve,comment='',signature=''},storage=window.localStorage){
+export function decideBorrowRequest({id,actorId,approve,comment='',signature=''},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const rows=read(storage,BORROW_KEY),row=rows.find(item=>item.id===id);if(row?.resourceType==='material')return decideMaterialBorrowRequest({id,actorId,approve,comment,signature},storage);if(!row||!['待核准','待確認'].includes(row.status))throw Error('借用申請已處理或已移除，請重新整理。');
  const accounts=read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS),actor=accounts.find(item=>item.id===actorId);
@@ -48,7 +49,7 @@ export function decideBorrowRequest({id,actorId,approve,comment='',signature=''}
  if(approve)transaction.equipment=JSON.stringify(equipment.map(m=>m.id===machine.id?{...m,status:'借用',currentRequest:'',estimatedEnd:'',activeBorrowId:id,borrower:row.requester,borrowReturnDate:row.returnDate,records:[{id:crypto.randomUUID(),date:at,type:'設備借用',actor:actor.name,actorId,result:'待機中 → 借用',detail:`${id}；借用人：${row.requester}；預計歸還：${row.returnDate}`},...(m.records||[])]}:m));
  commitLifecycleTransaction(storage,transaction);return next;
 }
-export function returnBorrowEquipment({equipmentId,actorId,comment='',expectedBorrowId},storage=window.localStorage){
+export function returnBorrowEquipment({equipmentId,actorId,comment='',expectedBorrowId},storage=appStorage()){
  recoverLifecycleTransaction(storage);
  const equipment=read(storage,EQUIPMENT_KEY,DEMO_EQUIPMENT),machine=equipment.find(m=>m.id===equipmentId),rows=read(storage,BORROW_KEY),row=rows.find(r=>r.id===machine?.activeBorrowId);
  if(expectedBorrowId&&expectedBorrowId!==machine?.activeBorrowId)throw Error('借用單已更新，請重新開啟歸還確認。');

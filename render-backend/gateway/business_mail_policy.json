@@ -1,0 +1,14 @@
+{
+  "approval": "USER_REQUEST_REAL_BUSINESS_EMAIL_NOTIFICATIONS_20261123",
+  "scope": "ENABLED_VERIFIED_WORKSPACE_MEMBERS_WITH_PERSONAL_OPT_IN",
+  "transport": "EXISTING_GMAIL_SMTP_TLS",
+  "recipient_source": "AUTHORITATIVE_DATABASE_WORKFLOW_AND_MEMBERSHIP",
+  "historical_backfill": false,
+  "unknown_delivery_auto_retry": false,
+  "known_not_sent_max_attempts": 3,
+  "attachments": false,
+  "gmail_tls_ports": [
+    465,
+    587
+  ]
+}

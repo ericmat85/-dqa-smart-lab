@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-11-16",
+  "images": [
+    {
+      "file": "synthetic-sample.png",
+      "synthetic": true,
+      "method": "AI_GENERATED_ILLUSTRATION",
+      "sha256": "8cf663c3e7b3426423bf899a5e0c39a92d04c2de377f3c752915a6551644f52c",
+      "caption": "共用合成 Demo 樣品照片；非實拍，不是量測或結果證據。",
+      "test_evidence": false
+    },
+    {
+      "file": "synthetic-placement.png",
+      "synthetic": true,
+      "method": "AI_GENERATED_ILLUSTRATION",
+      "sha256": "8b0bd9fc6167ff877e1b40887be6f7acf5e40e9494ba3f1b7e589d0d7d2c778d",
+      "caption": "合成環境試驗箱擺放圖；只用於環境箱類試驗，不代表實際曝露條件。",
+      "test_evidence": false
+    }
+  ],
+  "original_pdf_signatures_reused": false
+}

@@ -1,3 +1,4 @@
+import {appStorage} from './originalBusiness.mjs';
 import {ROLE_KEY,BUILTIN_ROLE_KEY} from './customRoles.mjs';
 import {useSyncExternalStore} from 'react';
 import {LAB_SOURCES,readLabSnapshot} from './labData.mjs';
@@ -10,7 +11,7 @@ const serverStorage={getItem:()=>null};
 export function getLabSnapshot() {
   if(typeof window==='undefined')return cached||(cached=readLabSnapshot(serverStorage));
   let next,storage;
-  try{storage=window.localStorage;next=JSON.stringify(keys.map(key=>storage.getItem(key)));}catch{next='unreadable';storage={getItem(){throw Error('Storage unavailable');}};}
+  try{storage=appStorage();next=JSON.stringify(keys.map(key=>storage.getItem(key)));}catch{next='unreadable';storage={getItem(){throw Error('Storage unavailable');}};}
   if(!cached||signature!==next){signature=next;cached=readLabSnapshot(storage);}
   return cached;
 }

@@ -1,0 +1,129 @@
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress {
+  position: relative;
+  isolation: isolate;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress > span {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: inherit;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-verified-progress {
+  left: 0;
+  background: linear-gradient(90deg, #7196ff, #4055e8);
+  transition: width 100ms linear;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress {
+  overflow: hidden;
+  background: #5374f22b;
+  transition: left 100ms linear, width 100ms linear;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #526af5aa 30%, #dce9ff 55%, #526af5aa 75%, transparent);
+  animation: schedule-work-glow 2.4s ease-in-out infinite;
+}
+:is(#root, body) .lms-enterprise .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress > .schedule-ai-working-progress {
+  background: #5374f22b;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress-heading strong {
+  font-variant-numeric: tabular-nums;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li {
+  transition: color 180ms ease-out;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li > span {
+  position: relative;
+  box-sizing: border-box;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span {
+  animation: schedule-step-breathe 1.6s ease-in-out infinite;
+  color: #218362;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 2px solid #27966c26;
+  border-top-color: #27966c;
+  border-radius: 50%;
+  animation: schedule-step-spin 950ms linear infinite;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.complete > span {
+  animation: schedule-step-confirm 220ms ease-out both;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps svg path {
+  stroke-dasharray: 24;
+  animation: schedule-check-draw 220ms ease-out both;
+}
+.schedule-ai-dialog[data-workflow="schedule"][data-phase="complete"] .schedule-ai-progress-heading strong {
+  color: #27816a;
+}
+@keyframes schedule-work-glow {
+  0%, 100% { opacity: .3; }
+  50% { opacity: .8; }
+}
+@keyframes schedule-step-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes schedule-step-breathe {
+  0%, 100% { box-shadow: 0 0 0 4px #27966c0a; }
+  50% { box-shadow: 0 0 0 6px #27966c20; }
+}
+@keyframes schedule-step-confirm {
+  from { transform: scale(.85); }
+  to { transform: scale(1); }
+}
+@keyframes schedule-check-draw {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-progress > span,
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li {
+    transition: none;
+  }
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-working-progress > i {
+    animation: none;
+  }
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span,
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span::after,
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.complete > span,
+  .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps svg path {
+    animation: none;
+  }
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-brand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+:is(#root, body) .lms-enterprise .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-brand .schedule-ai-symbol {
+  display: grid;
+  margin: 0;
+  flex: 0 0 54px;
+}
+:is(#root, body) .lms-enterprise .schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-steps li.active > span {
+  color: #218362;
+  background: #e9f8f0;
+}
+.schedule-ai-dialog[data-workflow="schedule"] .schedule-ai-brand-name {
+  color: #657b99;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}

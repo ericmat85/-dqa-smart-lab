@@ -1,0 +1,30 @@
+"""Verify a supplied browser export in an isolated, non-networked local PostgreSQL."""
+import argparse,hashlib,json,os,subprocess,unittest,uuid
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('--state',required=True);p.add_argument('--manifest',required=True);p.add_argument('--source',required=True);p.add_argument('--result',required=True);a=p.parse_args();state=json.loads(Path(a.state).read_text());manifest=json.loads(Path(a.manifest).read_text());source=json.loads(Path(a.source).read_text());assert state['network']=='none' and not state['published_ports'];T=manifest['tenant_id'];U=manifest['importer_auth_user_id'];B=manifest['batch_id'];env={k:v for k,v in os.environ.items() if k not in ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH']};cmd=['docker','--host=unix:///var/run/docker.sock','exec','-i',state['container'],'psql','-X','-qAt','-v','ON_ERROR_STOP=1','-U',state['owner'],'-d',state['database']]
+AUTH=f"SET LOCAL request.jwt.claim.sub='{U}';SET LOCAL ROLE authenticated;"
+def run(sql):return subprocess.run(cmd,input='BEGIN;'+sql+';ROLLBACK;',text=True,capture_output=True,env=env)
+class ImportTests(unittest.TestCase):
+ def value(self,sql):
+  r=run(sql);self.assertEqual(r.returncode,0,r.stderr);return r.stdout.strip()
+ def deny(self,sql,text):
+  r=run(sql);self.assertNotEqual(r.returncode,0);self.assertIn(text,r.stderr)
+ def test_every_source_record_roundtrips(self):
+  rows=json.loads(self.value(f"SELECT jsonb_agg(jsonb_build_object('collection',source_collection,'legacy_id',legacy_id,'payload',payload)) FROM dqa_business.import_rows WHERE tenant_id='{T}' AND batch_id='{B}' AND source_collection<>'_source_envelope'"));actual={(r['collection'],r['legacy_id']):r['payload'] for r in rows};expected={(c['name'],r['id']):r for c in source['payload']['collections'] for r in c['rows']};self.assertEqual(actual,expected);self.assertEqual(len(actual),manifest['business_rows'])
+ def test_original_export_file_bytes_preserved(self):self.assertEqual(self.value(f"SELECT encode(sha256(convert_to(payload->>'original_json','UTF8')),'hex') FROM dqa_business.import_rows WHERE tenant_id='{T}' AND batch_id='{B}' AND source_collection='_source_envelope'"),manifest['source_file_sha256'])
+ def test_equipment_U_status_and_specification_match_source(self):
+  actual=json.loads(self.value(f"SELECT jsonb_agg(jsonb_build_object('id',legacy_id,'space',space_units,'status',operational_status,'specification',specification,'owner_id',owner_member_id)) FROM dqa_business.equipment WHERE tenant_id='{T}'"));expected={x['legacy_id']:x for x in manifest['equipment']};self.assertEqual(len(actual),len(expected))
+  for r in actual:self.assertEqual((r['space'],r['status'],r['specification']),(expected[r['id']]['space_units'],expected[r['id']]['operational_status'],expected[r['id']]['specification']));self.assertIsNone(r['owner_id'])
+ def test_no_workflow_records_promoted(self):self.assertEqual(self.value(f"SELECT (SELECT count(*) FROM dqa_business.requests WHERE tenant_id='{T}'),(SELECT count(*) FROM dqa_business.schedules WHERE tenant_id='{T}'),(SELECT count(*) FROM dqa_business.approval_events WHERE tenant_id='{T}')"),'0|0|0')
+ def test_admin_snapshot_contains_archive_but_not_raw_envelope(self):
+  snapshot=json.loads(self.value(AUTH+f"SELECT dqa_business.original_ui_snapshot('{T}')"));archive=snapshot['legacy_import'];self.assertEqual(archive['metadata']['mode'],'READ_ONLY_ARCHIVE');self.assertEqual(archive['reviews'],sorted(next(c['rows'] for c in source['payload']['collections'] if c['name']=='reviews'),key=lambda r:r['id']));self.assertEqual(len(archive['schedules']),manifest['source_counts']['schedules']);self.assertEqual(len(archive['labAudit']),manifest['source_counts']['labAudit']);self.assertNotIn('original_json',json.dumps(snapshot))
+ def test_nonadmin_cannot_read_archive(self):
+  r,m,u=[str(uuid.uuid4()) for _ in range(3)];prep=f"INSERT INTO auth.users(id) VALUES ('{u}');INSERT INTO dqa_business.roles(id,tenant_id,code,name,permissions) VALUES ('{r}','{T}','temporary-read','Temporary reader','{{equipment.read}}');INSERT INTO dqa_business.memberships(id,tenant_id,auth_user_id,legacy_id,display_name,role_id) VALUES ('{m}','{T}','{u}','TEMP-READER','Temporary reader','{r}');SET LOCAL request.jwt.claim.sub='{u}';SET LOCAL ROLE authenticated;";self.assertEqual(self.value(prep+f"SELECT dqa_business.original_ui_snapshot('{T}')?'legacy_import',(SELECT count(*) FROM dqa_business.import_rows WHERE tenant_id='{T}')"),'f|0')
+ def test_foreign_tenant_denied(self):self.deny("SET LOCAL request.jwt.claim.sub='20000000-0000-0000-0000-000000000001';SET LOCAL ROLE authenticated;"+f"SELECT dqa_business.original_ui_snapshot('{T}')",'MEMBERSHIP_REQUIRED')
+ def test_anon_denied(self):self.deny('SET LOCAL ROLE anon;'+f"SELECT dqa_business.original_ui_snapshot('{T}')",'permission denied')
+ def test_archive_rows_append_only_even_for_owner(self):self.deny(f"UPDATE dqa_business.import_rows SET payload='{{}}' WHERE tenant_id='{T}' AND batch_id='{B}'",'APPEND_ONLY_RECORD')
+ def test_browser_cannot_change_equipment(self):self.deny(AUTH+f"UPDATE dqa_business.equipment SET space_units=999 WHERE tenant_id='{T}'",'permission denied')
+ def test_original_workflow_gate_still_blocks_approval(self):
+  self.deny(f"INSERT INTO dqa_business.requests(tenant_id,legacy_id,owner_member_id,status) SELECT '{T}','FORBIDDEN-ACTIVATION',id,'AWAITING_SCHEDULING' FROM dqa_business.memberships WHERE tenant_id='{T}' AND auth_user_id='{U}'",'RULE_NOT_APPROVED')
+ def test_no_legacy_actor_granted_auth_account(self):self.assertEqual(self.value(f"SELECT count(*) FROM dqa_business.memberships WHERE tenant_id='{T}'"),'1')
+r=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(ImportTests));Path(a.result).write_text(json.dumps({'tests':r.testsRun,'failures':len(r.failures),'errors':len(r.errors),'passed':r.wasSuccessful(),'network':'none'},indent=2)+'\n');raise SystemExit(not r.wasSuccessful())

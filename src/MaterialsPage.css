@@ -4,3 +4,13 @@
 .material-borrow-returns{margin:16px 0;border:1px solid var(--enterprise-border,#dce5f1);border-radius:8px;padding:14px;background:var(--enterprise-card,#fff);color:var(--enterprise-text,#0f172a)}.material-borrow-returns h3{margin:0 0 12px;font-size:15px}.material-borrow-returns .lab-operation-dialog textarea{display:block;width:100%;margin-top:8px}
 
 .material-borrow-returns .lab-operation-dialog form>header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--enterprise-border,#dee6f0)}
+
+/* Match LMS action buttons only in the mobile laboratory materials header. */
+@media(max-width:900px){
+ html body #root .lab-catalog-workspace .materials-page .template-heading{display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;text-align:left}
+ html body #root .lab-catalog-workspace .materials-page .template-heading>div:first-child{flex:1;min-width:0;text-align:left}
+ html body #root .lab-catalog-workspace .materials-page .equipment-header-actions{display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;gap:8px;width:auto;margin:0}
+ html body #root .lab-catalog-workspace .materials-page .equipment-header-actions>button{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;min-width:36px;max-width:36px;height:36px;min-height:36px;box-sizing:border-box;padding:0;gap:0;white-space:nowrap}
+ html body #root .lab-catalog-workspace .materials-page .equipment-header-actions .lms-header-action-icon{display:block!important;width:20px;height:20px;flex:none;margin:0;pointer-events:none}
+ html body #root .lab-catalog-workspace .materials-page .equipment-header-actions .lms-header-action-label{display:block;position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+}

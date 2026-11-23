@@ -1,0 +1,7 @@
+{
+  "identity": "帳號|帳戶|密碼|權限|角色|使用者名單|登入憑證|API.?key|密鑰|金鑰|secret|cookie|token明文|token值|RBAC|RLS|account|password|permission|credential",
+  "unbuilt": "DQA|品質驗證入口|品質稽核模組",
+  "outside": "股票|股價|投資|加密貨幣|比特幣|房價|食譜|旅遊|政治|運勢|笑話|天氣|stock price|investment|recipe|weather|horoscope",
+  "laboratory": "實驗室|智能助理|AI助理|模型|文件問答|試驗|測試|委託|排程|設備|機台|規範|手法|條件|樣品|物料|庫存|報告|借用|取消|中斷|校驗|保養|維護|進度|簽核流程|溫度|高溫|低溫|濕度|溼度|振動|振幅|衝擊|跌落|鹽霧|靜電|防水|防塵|拉力|插拔|電壓|耐候|量測|系統|導覽|監控|用量|費用|Token|REQ-|SCH-|EQ-|MAT-|TRIAL-|laborator|trial|test|equipment|schedule|specification|synthetic|report|material|measurement|簽名|簽核|退件|接收|加速|資料同步|重新整理",
+  "neutral": "^(?:你好|您好|嗨|hi|hello|謝謝|謝謝你|好|好的|了解|繼續|為什麼|再試一次|下一頁|列出來|問題|合成條件|條件|請解釋|你可以幫我做什麼|清除對話|/clear|/logout)[！!。？?\\s]*$"
+}

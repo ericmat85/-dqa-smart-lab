@@ -1,35 +1,12 @@
-export const testOptions = ['高溫試驗', '低溫試驗', '高溫高濕', '溫度循環', '熱衝擊', '振動試驗', '機械衝擊', 'IPX6 防水', '鹽霧試驗', 'ESD 靜電', 'EMC 電磁相容', '日照試驗', '其他'];
-// 示範試驗規範目錄：正式環境應改由 LMS/資料庫 API 取得最新核准版本。
-export const testSpecificationCatalog = {
-  '高溫試驗': '參考規範：依產品驗證計畫／客戶規範；請確認試驗溫度、持續時間、通電狀態與判定條件。',
-  '低溫試驗': '參考規範：依產品驗證計畫／客戶規範；請確認試驗溫度、持續時間、通電狀態與判定條件。',
-  '高溫高濕': '參考規範：依產品驗證計畫／客戶規範；請確認溫度、相對濕度、試驗時間及試後檢查要求。',
-  '溫度循環': '參考規範：依產品驗證計畫／客戶規範；請確認高低溫點、轉換時間、停留時間與循環次數。',
-  '熱衝擊': '參考規範：依產品驗證計畫／客戶規範；請確認高低溫條件、轉移時間、停留時間及循環次數。',
-  '振動試驗': '參考規範：依產品驗證計畫／客戶規範；請確認頻率範圍、加速度／振幅、軸向、時間與固定方式。',
-  '機械衝擊': '參考規範：依產品驗證計畫／客戶規範；請確認衝擊波形、峰值加速度、脈衝時間、方向與次數。',
-  'IPX6 防水': '參考規範：依產品驗證計畫／客戶規範；請確認噴嘴、流量、距離、試驗時間及試後判定要求。',
-  '鹽霧試驗': '參考規範：依產品驗證計畫／客戶規範；請確認試驗液、溫度、時間、pH 與試後評價方式。',
-  'ESD 靜電': '參考規範：依產品驗證計畫／客戶規範；請確認接觸／空氣放電、測試點、電壓等級、次數與運作狀態。',
-  'EMC 電磁相容': '參考規範：依產品驗證計畫／客戶規範；請確認適用標準、頻率範圍、等級、佈置及性能判定準則。',
-  '日照試驗': '參考規範：依產品驗證計畫／客戶規範；請確認光源、輻照度、溫濕度、照射時間與試後檢查。',
-  '其他': '請填入核准的試驗規範編號、版本、試驗條件、時間、方法與判定要求。'
-};
-export function buildSpecification(items) { return (items || []).map(name => `${name}：${testSpecificationCatalog[name] || '請依核准試驗規範填寫條件與判定要求。'}`).join('\n\n'); }
-// 示範判定基準目錄：正式環境應由 LMS 核准的試驗項目資料庫/API 取得。
-export const testAcceptanceCriteriaCatalog = {
-  '高溫試驗': '參考判定基準：試驗後產品外觀、功能與電氣特性符合產品規格及核准驗證計畫，無異常損壞。',
-  '低溫試驗': '參考判定基準：試驗後產品外觀、功能與電氣特性符合產品規格及核准驗證計畫，無異常損壞。',
-  '高溫高濕': '參考判定基準：試驗後產品外觀、功能與電氣特性符合產品規格及核准驗證計畫；無凝露造成的異常、腐蝕或功能失效。',
-  '溫度循環': '參考判定基準：完成規定循環後，產品外觀、功能及電氣特性符合核准規格，無裂痕、鬆脫或功能異常。',
-  '熱衝擊': '參考判定基準：完成規定熱衝擊循環後，產品無可見損傷，功能及電氣特性符合核准規格。',
-  '振動試驗': '參考判定基準：試驗後產品結構無破損或鬆脫，連接器及固定件正常，功能與電氣特性符合核准規格。',
-  '機械衝擊': '參考判定基準：試驗後產品無破裂、脫落或結構損傷，功能與電氣特性符合核准規格。',
-  'IPX6 防水': '參考判定基準：試驗後產品內部無不允許之進水，功能與電氣特性符合核准規格及客戶要求。',
-  '鹽霧試驗': '參考判定基準：試驗後腐蝕程度及外觀符合核准規格，產品功能與電氣特性符合要求。',
-  'ESD 靜電': '參考判定基準：依核准性能判定準則，試驗中及試驗後產品功能符合指定性能等級，無不可恢復故障或資料遺失。',
-  'EMC 電磁相容': '參考判定基準：依核准 EMC 規範，發射與抗擾度結果符合限值及性能判定準則。',
-  '日照試驗': '參考判定基準：試驗後產品外觀、顏色、材料及功能變化符合核准規格，無不可接受之劣化。',
-  '其他': '請依核准試驗計畫或客戶規範輸入明確的允收條件、量測項目及判定方法。'
-};
-export function buildAcceptanceCriteria(item) { return testAcceptanceCriteriaCatalog[item] || ''; }
+import {sourceConditions} from './trialSourceFacts.mjs';
+import {testOptions,getTestReference as baseReference,testAcceptanceCriteriaCatalog,testSpecificationCatalog} from './trialCatalogData.mjs';
+import {findTrialDefinition} from './trialCatalogStore.mjs';
+export {testOptions,testAcceptanceCriteriaCatalog,testSpecificationCatalog};
+export function getTestReference(name){
+ let row;try{row=findTrialDefinition(name);}catch{return null;}if(!row)return null;
+ const parsed=sourceConditions({specification:row.specification}),conditionText=parsed.supplied?[['temperature','溫度','°C'],['humidity','濕度','%RH'],['frequency','頻率','Hz']].filter(([key])=>parsed.conditions[key+'Min']!==undefined).map(([key,label,unit])=>{const a=parsed.conditions[key+'Min'],b=parsed.conditions[key+'Max'];return label+' '+(a===b?a:a+'～'+b)+unit;}).join('；'):'依試驗規範確認，未提供數值';
+ const base=baseReference(testOptions.find(option=>baseReference(option).profileId===row.profileId))||{};
+ return {...base,name:row.name,specification:row.specification,acceptance:row.acceptance,equipment:row.equipment,profileId:row.profileId,conditions:conditionText,calendar:base.calendar||'尚未設定排程規則',duration:base.duration?base.duration.replace(/\d+(?:\.\d+)? 小時/,row.durationHours+' 小時'):row.durationHours+' 小時',durationHours:row.durationHours,version:row.version,catalogId:row.id};
+}
+export function buildSpecification(items){return (items||[]).map(name=>`${name}：${findTrialDefinition(name)?.specification||'請依核准試驗規範填寫條件與判定要求。'}`).join('\n\n');}
+export function buildAcceptanceCriteria(name){return findTrialDefinition(name)?.acceptance||testAcceptanceCriteriaCatalog[name==='機械衝擊'?'機械衝擊試驗':name]||'';}

@@ -41,7 +41,7 @@ export async function buildNineStageSeed({signature,now=Date.now(),fontBytes,onP
  const currentAccounts=read(storage,'dqa-shared-demo-accounts-v1',INITIAL_ACCOUNTS);
  for(const account of SEED_ACCOUNTS){const old=currentAccounts.find(r=>r.id===account.id);if(old&&!old.demoSeed)throw Error('Demo帳號編號與既有帳號衝突，未清除資料。');}
  const accounts=[...currentAccounts.filter(r=>!SEED_ACCOUNTS.some(a=>a.id===r.id)),...SEED_ACCOUNTS];write(storage,'dqa-shared-demo-accounts-v1',accounts);
- const fixtures=Array.from({length:6},(_,i)=>({id:`SEED-EQ-${i+1}`,name:`模擬環境試驗箱 ${i+1}`,category:'溫度試驗',model:`FICTIONAL-${i+1}`,location:`虛構實驗室／${i+1}`,owner:'模擬設備負責人',capacity:10,usableVolumeLitres:120,dailyHours:24,status:'待機中',currentRequest:'',specification:'DEMO -40°C~150°C，僅供假資料流程展示',nextCalibration:getRequestDate(new Date(now+365*86400000)),records:[],demoSeed:true}));
+ const fixtures=Array.from({length:6},(_,i)=>({id:`SEED-EQ-${i+1}`,name:`模擬環境試驗箱 ${i+1}`,category:'溫度試驗',model:`FICTIONAL-${i+1}`,location:`虛構實驗室／${i+1}`,owner:'模擬設備負責人',capacity:10,spaceUnits:10,usableVolumeLitres:120,dailyHours:24,status:'待機中',currentRequest:'',specification:'DEMO -40°C~150°C，僅供假資料流程展示',nextCalibration:getRequestDate(new Date(now+365*86400000)),records:[],demoSeed:true}));
  const equipment=read(storage,'dqa-equipment-demo-v1',DEMO_EQUIPMENT);for(const machine of fixtures){const old=equipment.find(r=>r.id===machine.id);if(old&&!old.demoSeed)throw Error('Demo設備編號衝突，未清除資料。');}
  write(storage,'dqa-equipment-demo-v1',[...equipment.filter(r=>!fixtures.some(m=>m.id===r.id)),...fixtures]);
  if(!storage.getItem('dqa-materials-demo-v1'))write(storage,'dqa-materials-demo-v1',DEMO_MATERIALS);

@@ -1,0 +1,2714 @@
+{
+  "registry_version": "d-stage-0.1",
+  "mode": "SYNTHETIC_TEST_ONLY",
+  "authority": "LOCAL_FIXTURE_AUTHOR_NOT_PRODUCTION_OR_B_AUTHORITY",
+  "entries": [
+    {
+      "fixture_name": "e1_original",
+      "operation": "request-review",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "product_code": "SYN_PRODUCT",
+        "specification": "SYNTHETIC 20C",
+        "judgment_criteria": "SYNTHETIC 25C",
+        "quantity": 3,
+        "sop_excerpts": [
+          "SYNTHETIC SOP: human review required."
+        ],
+        "customer_spec_excerpts": [
+          "SYNTHETIC customer specification: 25C."
+        ]
+      },
+      "fingerprint": "4f51aaaf61419795a966ece6cf12c1ae61f3465115c3b0286fff6c079adb7818",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E1",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "request": {
+                "product": "SYN_PRODUCT",
+                "date": "2026-11-09",
+                "quantity": 3,
+                "conditions": {
+                  "temperature_min": 20,
+                  "temperature_max": 20,
+                  "humidity_min": 40,
+                  "humidity_max": 50
+                }
+              },
+              "customer_spec": {
+                "ref": {
+                  "document_id": "SYNTH-E1-SPEC",
+                  "version": "1",
+                  "locator": "customer_spec_excerpts/0",
+                  "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+                },
+                "conditions": {
+                  "temperature_min": 25,
+                  "temperature_max": 25,
+                  "humidity_min": 40,
+                  "humidity_max": 50
+                }
+              },
+              "supervisor_endorsement": {
+                "status": "SYNTHETIC_NOT_SIGNED"
+              },
+              "technical_review": "UNKNOWN"
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E1-SPEC",
+                "version": "1",
+                "locator": "customer_spec_excerpts/0",
+                "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E1-SPEC",
+                  "version": "1",
+                  "locator": "customer_spec_excerpts/0",
+                  "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "73e30a0a66b6693484c02ac90ff83cc1e6bf836981217c779eed02934a2259a4"
+    },
+    {
+      "fixture_name": "e1_registered_match",
+      "operation": "request-review",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "product_code": "SYN_PRODUCT",
+        "specification": "SYNTHETIC 25C",
+        "judgment_criteria": "SYNTHETIC 25C",
+        "quantity": 3,
+        "sop_excerpts": [
+          "SYNTHETIC SOP: human review required."
+        ],
+        "customer_spec_excerpts": [
+          "SYNTHETIC customer specification: 25C."
+        ]
+      },
+      "fingerprint": "82ff3fda846257c05a3f43763379965c3df0d98b19d25eda41465085ae838247",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E1",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "request": {
+                "product": "SYN_PRODUCT",
+                "date": "2026-11-09",
+                "quantity": 3,
+                "conditions": {
+                  "temperature_min": 25,
+                  "temperature_max": 25,
+                  "humidity_min": 40,
+                  "humidity_max": 50
+                }
+              },
+              "customer_spec": {
+                "ref": {
+                  "document_id": "SYNTH-E1-SPEC",
+                  "version": "1",
+                  "locator": "customer_spec_excerpts/0",
+                  "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+                },
+                "conditions": {
+                  "temperature_min": 25,
+                  "temperature_max": 25,
+                  "humidity_min": 40,
+                  "humidity_max": 50
+                }
+              },
+              "supervisor_endorsement": {
+                "status": "SYNTHETIC_NOT_SIGNED"
+              },
+              "technical_review": "UNKNOWN"
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E1-SPEC",
+                "version": "1",
+                "locator": "customer_spec_excerpts/0",
+                "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E1-SPEC",
+                  "version": "1",
+                  "locator": "customer_spec_excerpts/0",
+                  "digest": "e32f75fa181243540ca09ce08538ce5d0759a2ef0e06ed643ec80c172f268f43"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "f205ad86610adeda3bdc18846fec929d76d57e392bff4dba197372954c770841"
+    },
+    {
+      "fixture_name": "e3_original_missing_value",
+      "operation": "report-review",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "revision_id": "SYN_R1",
+        "template_id": "SYN_TEMPLATE",
+        "cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "25",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ]
+      },
+      "fingerprint": "d015ad01e6b648c04ba9aab66958409c64bedfdce6bf29f4ea9d578db790a223",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [],
+      "admission_block": "MISSING_REGISTERED_MEASUREMENT_VALUE",
+      "sidecar": {
+        "original_cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "25",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ]
+      },
+      "record_digest": "31eda309143d0f8a4d674d1e43abf8ae203aad16062947a8b1ccb03c010ca90e"
+    },
+    {
+      "fixture_name": "e3_registered_complete",
+      "operation": "report-review",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "revision_id": "SYN_R1",
+        "template_id": "SYN_TEMPLATE",
+        "cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "24",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "25",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ]
+      },
+      "fingerprint": "f4edf6683b28acb44f55cabf1712b7a424c14e2f2ca42ea961bafa627a863b75",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E3",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "raw_data_ref": {
+                "document_id": "SYNTH-E3-RAW",
+                "version": "SYN_R1",
+                "locator": "cells",
+                "digest": "608deb925a33cf80c8b1cd861488b01753d23d2f2fbbf336221fd3a09b96c782"
+              },
+              "raw_data_digest": "608deb925a33cf80c8b1cd861488b01753d23d2f2fbbf336221fd3a09b96c782",
+              "measurements": [
+                {
+                  "name": "SYN_REPORT!A1",
+                  "value": 24,
+                  "unit": "C",
+                  "min": 20,
+                  "max": 30
+                },
+                {
+                  "name": "SYN_REPORT!B2",
+                  "value": 25,
+                  "unit": "C",
+                  "min": 20,
+                  "max": 30
+                }
+              ],
+              "template_ref": {
+                "document_id": "SYN_TEMPLATE",
+                "version": "1",
+                "locator": "synthetic/template",
+                "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+              },
+              "required_fields": {
+                "report_id": "SYNTH-REPORT",
+                "trial_id": "SYNTH-REPORT-TRIAL",
+                "title": "Synthetic report review"
+              },
+              "original_result": "FAIL"
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E3-RAW",
+                "version": "SYN_R1",
+                "locator": "cells",
+                "digest": "608deb925a33cf80c8b1cd861488b01753d23d2f2fbbf336221fd3a09b96c782"
+              },
+              {
+                "document_id": "SYN_TEMPLATE",
+                "version": "1",
+                "locator": "synthetic/template",
+                "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E3-RAW",
+                  "version": "SYN_R1",
+                  "locator": "cells",
+                  "digest": "608deb925a33cf80c8b1cd861488b01753d23d2f2fbbf336221fd3a09b96c782"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              },
+              {
+                "ref": {
+                  "document_id": "SYN_TEMPLATE",
+                  "version": "1",
+                  "locator": "synthetic/template",
+                  "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "original_cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "24",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "25",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ],
+        "original_excel_result": "FAIL",
+        "electronic_signoff": "PENDING_HUMAN"
+      },
+      "record_digest": "799ed192024959302ead11542f0cfbd68219a8841a6772809af3d25828073d3b"
+    },
+    {
+      "fixture_name": "e3_registered_outlier",
+      "operation": "report-review",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "revision_id": "SYN_R1",
+        "template_id": "SYN_TEMPLATE",
+        "cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "24",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "999",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ]
+      },
+      "fingerprint": "c830f27c6b5f2c23bd0c8a57909c501b72da6e1aa742e2e5a3aa92db156b9fac",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E3",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "raw_data_ref": {
+                "document_id": "SYNTH-E3-RAW",
+                "version": "SYN_R1",
+                "locator": "cells",
+                "digest": "036f14b771e45ea72f4b51dae3a6f53414d6eba8fba2a77586a8684faefece23"
+              },
+              "raw_data_digest": "036f14b771e45ea72f4b51dae3a6f53414d6eba8fba2a77586a8684faefece23",
+              "measurements": [
+                {
+                  "name": "SYN_REPORT!A1",
+                  "value": 24,
+                  "unit": "C",
+                  "min": 20,
+                  "max": 30
+                },
+                {
+                  "name": "SYN_REPORT!B2",
+                  "value": 999,
+                  "unit": "C",
+                  "min": 20,
+                  "max": 30
+                }
+              ],
+              "template_ref": {
+                "document_id": "SYN_TEMPLATE",
+                "version": "1",
+                "locator": "synthetic/template",
+                "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+              },
+              "required_fields": {
+                "report_id": "SYNTH-REPORT",
+                "trial_id": "SYNTH-REPORT-TRIAL",
+                "title": "Synthetic report review"
+              },
+              "original_result": "FAIL"
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E3-RAW",
+                "version": "SYN_R1",
+                "locator": "cells",
+                "digest": "036f14b771e45ea72f4b51dae3a6f53414d6eba8fba2a77586a8684faefece23"
+              },
+              {
+                "document_id": "SYN_TEMPLATE",
+                "version": "1",
+                "locator": "synthetic/template",
+                "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E3-RAW",
+                  "version": "SYN_R1",
+                  "locator": "cells",
+                  "digest": "036f14b771e45ea72f4b51dae3a6f53414d6eba8fba2a77586a8684faefece23"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              },
+              {
+                "ref": {
+                  "document_id": "SYN_TEMPLATE",
+                  "version": "1",
+                  "locator": "synthetic/template",
+                  "digest": "7df81dbe4b57600cb870bbfe47432c144e38308b6aa9d0a7f48736d9b762c231"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "original_cells": [
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "A1",
+            "value": "24",
+            "criterion": "SYNTHETIC value required."
+          },
+          {
+            "sheet": "SYN_REPORT",
+            "cell": "B2",
+            "value": "999",
+            "criterion": "SYNTHETIC verify against approved criterion."
+          }
+        ],
+        "original_excel_result": "FAIL",
+        "electronic_signoff": "PENDING_HUMAN"
+      },
+      "record_digest": "d833806676aec3f057f4887dcb0dbc0c6d88ad2a7a8e602ed961ce0ca328b288"
+    },
+    {
+      "fixture_name": "e4_original_question",
+      "operation": "assistant",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "question": "What does the synthetic excerpt require?",
+        "documents": [
+          {
+            "source_id": "SYN_DOC",
+            "revision": "SYN_R1",
+            "locator": "section-1",
+            "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+          }
+        ]
+      },
+      "fingerprint": "719e667883482a120fa70265e33d29c7de4ab7979fc77e8b218b5302b56bb628",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E4",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "query": "What does the synthetic excerpt require?",
+              "documents": [
+                {
+                  "ref": {
+                    "document_id": "SYN_DOC",
+                    "version": "SYN_R1",
+                    "locator": "section-1",
+                    "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                  },
+                  "title": "SYN_DOC",
+                  "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+                }
+              ],
+              "version_policy": "EXACT",
+              "fixture_only": true
+            },
+            "source_refs": [
+              {
+                "document_id": "SYN_DOC",
+                "version": "SYN_R1",
+                "locator": "section-1",
+                "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYN_DOC",
+                  "version": "SYN_R1",
+                  "locator": "section-1",
+                  "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "2a90da2f8dfbd1f10986274062639bdd9fa7f693b18b0be8e6738d49f2f24496"
+    },
+    {
+      "fixture_name": "e4_registered_match",
+      "operation": "assistant",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "question": "engineer confirmation",
+        "documents": [
+          {
+            "source_id": "SYN_DOC",
+            "revision": "SYN_R1",
+            "locator": "section-1",
+            "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+          }
+        ]
+      },
+      "fingerprint": "f078339c61654c1309c9fadddf07b3d17572402803364ff3538acda33f87d645",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E4",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "query": "engineer confirmation",
+              "documents": [
+                {
+                  "ref": {
+                    "document_id": "SYN_DOC",
+                    "version": "SYN_R1",
+                    "locator": "section-1",
+                    "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                  },
+                  "title": "SYN_DOC",
+                  "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+                }
+              ],
+              "version_policy": "EXACT",
+              "fixture_only": true
+            },
+            "source_refs": [
+              {
+                "document_id": "SYN_DOC",
+                "version": "SYN_R1",
+                "locator": "section-1",
+                "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYN_DOC",
+                  "version": "SYN_R1",
+                  "locator": "section-1",
+                  "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "62d0d115db78fabbbaa2aa7c329be891bef1d15817a5de0739e12758504df6d0"
+    },
+    {
+      "fixture_name": "e4_registered_no_match",
+      "operation": "assistant",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "question": "SYNTHETIC_UNMATCHED_QUERY",
+        "documents": [
+          {
+            "source_id": "SYN_DOC",
+            "revision": "SYN_R1",
+            "locator": "section-1",
+            "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+          }
+        ]
+      },
+      "fingerprint": "dc5714405a3259b5cfb8d2863d4d3c4c62718242a7ef04ed1be79119ac8cb9d6",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E4",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "query": "SYNTHETIC_UNMATCHED_QUERY",
+              "documents": [
+                {
+                  "ref": {
+                    "document_id": "SYN_DOC",
+                    "version": "SYN_R1",
+                    "locator": "section-1",
+                    "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                  },
+                  "title": "SYN_DOC",
+                  "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+                }
+              ],
+              "version_policy": "EXACT",
+              "fixture_only": true
+            },
+            "source_refs": [
+              {
+                "document_id": "SYN_DOC",
+                "version": "SYN_R1",
+                "locator": "section-1",
+                "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYN_DOC",
+                  "version": "SYN_R1",
+                  "locator": "section-1",
+                  "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "7b3bc6826c443014ef8916984c1855c1f0bc6e524074f61258dcdcfa68bcc5fa"
+    },
+    {
+      "fixture_name": "e4_registered_version_conflict",
+      "operation": "assistant",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "question": "engineer confirmation",
+        "documents": [
+          {
+            "source_id": "SYN_DOC",
+            "revision": "SYN_R1",
+            "locator": "section-1",
+            "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+          },
+          {
+            "source_id": "SYN_DOC_V2",
+            "revision": "SYN_R2",
+            "locator": "section-1",
+            "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+          }
+        ]
+      },
+      "fingerprint": "6d0fe13c0bb2d36c64033787a491063ce8df6491a37c92a46642639b54719081",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E4",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "query": "engineer confirmation",
+              "documents": [
+                {
+                  "ref": {
+                    "document_id": "SYN_DOC",
+                    "version": "SYN_R1",
+                    "locator": "section-1",
+                    "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                  },
+                  "title": "SYN_DOC",
+                  "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+                },
+                {
+                  "ref": {
+                    "document_id": "SYN_DOC",
+                    "version": "SYN_R2",
+                    "locator": "section-1",
+                    "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                  },
+                  "title": "SYN_DOC_V2",
+                  "text": "SYNTHETIC: engineer confirmation is required before scheduling."
+                }
+              ],
+              "version_policy": "EXACT",
+              "fixture_only": true
+            },
+            "source_refs": [
+              {
+                "document_id": "SYN_DOC",
+                "version": "SYN_R1",
+                "locator": "section-1",
+                "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+              },
+              {
+                "document_id": "SYN_DOC",
+                "version": "SYN_R2",
+                "locator": "section-1",
+                "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYN_DOC",
+                  "version": "SYN_R1",
+                  "locator": "section-1",
+                  "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              },
+              {
+                "ref": {
+                  "document_id": "SYN_DOC",
+                  "version": "SYN_R2",
+                  "locator": "section-1",
+                  "digest": "961e9aad3139e358c57cccf6e33ed472f6f09146fe148049b3a3840056ad8583"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {},
+      "record_digest": "61ce5623577a9412a29889cf3049eeaf9ce1c058a35f6f8dc4c1bbedb4879369"
+    },
+    {
+      "fixture_name": "e2_original",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "6365e8967bd07d9763b2c3ee6b4377d8c41136a4cb56d38e708d8e36e611ff95",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-09",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-11",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "a81de40281957bd0491e879431caa33712da668d64130295d0c3e9fa3ba79adf"
+    },
+    {
+      "fixture_name": "e2_exact_fraction",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "0.125"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10.125"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "30efc8d05d1ee42fcd25b4ea109ffbbbc54fa19ba91eea86c454c191831b6b1e",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-09",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 0.125
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10.125,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "1cf0cc25373a063983e53fd405fcde156b52fa64e807d8334fba7c6752481f93"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "1cf0cc25373a063983e53fd405fcde156b52fa64e807d8334fba7c6752481f93"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "1cf0cc25373a063983e53fd405fcde156b52fa64e807d8334fba7c6752481f93"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "0.125",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "1cf0cc25373a063983e53fd405fcde156b52fa64e807d8334fba7c6752481f93"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "1cf0cc25373a063983e53fd405fcde156b52fa64e807d8334fba7c6752481f93"
+                  },
+                  "usable_litres": "10.125",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-11",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10.125,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "87482e4ff977a9974fd01d3edfd49cb6e279233b4fe2ad41e2799ff77b1d7082"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "87482e4ff977a9974fd01d3edfd49cb6e279233b4fe2ad41e2799ff77b1d7082"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "87482e4ff977a9974fd01d3edfd49cb6e279233b4fe2ad41e2799ff77b1d7082"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "87482e4ff977a9974fd01d3edfd49cb6e279233b4fe2ad41e2799ff77b1d7082"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "87482e4ff977a9974fd01d3edfd49cb6e279233b4fe2ad41e2799ff77b1d7082"
+                  },
+                  "usable_litres": "10.125",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "0beaf88af84fb23a60aa2d0ea50ecde58446ebf4fbfb4890276c21c05e988443"
+    },
+    {
+      "fixture_name": "e2_inexact_decimal",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "0.1"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "568a11feda60ab5f3efed078748b90033e904d596736f01c656b4f4e71c0a330",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [],
+      "admission_block": "DECIMAL_NOT_EXACT_FOR_NATIVE_CORE",
+      "sidecar": {
+        "selection_plan": [],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "ecf6fc3f8449db4b6635efd470cf54c54b5d7777ed7cc9e39d54985a97868e16"
+    },
+    {
+      "fixture_name": "e2_missing_volume",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": null
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "8d74f4825da0b0f55b4334f40d2fea17b29f98c0a37553e2371ceeb1bf22e4b7",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [],
+      "admission_block": "DECIMAL_NOT_EXACT_FOR_NATIVE_CORE",
+      "sidecar": {
+        "selection_plan": [],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "28246fdfa7d985502508cbee85ddbaafb746069f55b9929cba6f7d9bf8eef802"
+    },
+    {
+      "fixture_name": "e2_missing_count_capacity",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": null,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "11c29ba4b7f87ed3d162105aa820a1b1884825bfa55695c21a8fc9c0f341eb5f",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [],
+      "admission_block": "CAPACITY_DATA_MISSING",
+      "sidecar": {
+        "selection_plan": [],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "1c33b701db7f3a95e3bd387b728fb9126358a033c0f72d2d2df51b8ae92b6acc"
+    },
+    {
+      "fixture_name": "e2_zero_candidates",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "2"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "05af1191e4a16a00dd9c58b570c12f0dc4c65304b8b84e1769e8d2b7e39508e2",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-09",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 2,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "bf838a1ca15b1f91aa3a1eb9efc3aba4e01095eee47885fc9662ccf23412d172"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "bf838a1ca15b1f91aa3a1eb9efc3aba4e01095eee47885fc9662ccf23412d172"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "bf838a1ca15b1f91aa3a1eb9efc3aba4e01095eee47885fc9662ccf23412d172"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "bf838a1ca15b1f91aa3a1eb9efc3aba4e01095eee47885fc9662ccf23412d172"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "bf838a1ca15b1f91aa3a1eb9efc3aba4e01095eee47885fc9662ccf23412d172"
+                  },
+                  "usable_litres": "2",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-11",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 2,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "7b707e8570191d4cc8179289a0cd0479813b11bb17be62fc3d260a95fa53e87c"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "7b707e8570191d4cc8179289a0cd0479813b11bb17be62fc3d260a95fa53e87c"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "7b707e8570191d4cc8179289a0cd0479813b11bb17be62fc3d260a95fa53e87c"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "7b707e8570191d4cc8179289a0cd0479813b11bb17be62fc3d260a95fa53e87c"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "7b707e8570191d4cc8179289a0cd0479813b11bb17be62fc3d260a95fa53e87c"
+                  },
+                  "usable_litres": "2",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "736789891057b908949b6c69631640e642a1a27baaef656cd984dca9261b31bd"
+    },
+    {
+      "fixture_name": "e2_condition_conflict",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_20C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "c2419780f36db47b22a8f1bfb433414b98172c2c4adffcfd816eb2d44bc929d1",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-09",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 20,
+                    "temperature_max": 20,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "0d1c0ffb0b623b35749291dafb105f70f698b0531b60029135c072bc50cf0337"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "0d1c0ffb0b623b35749291dafb105f70f698b0531b60029135c072bc50cf0337"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "0d1c0ffb0b623b35749291dafb105f70f698b0531b60029135c072bc50cf0337"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "0d1c0ffb0b623b35749291dafb105f70f698b0531b60029135c072bc50cf0337"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "0d1c0ffb0b623b35749291dafb105f70f698b0531b60029135c072bc50cf0337"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-11",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 20,
+                    "temperature_max": 20,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "32a10d7593b837d71f6a946899186a0d3361040c255bf0a894e96a9dc236293c"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "32a10d7593b837d71f6a946899186a0d3361040c255bf0a894e96a9dc236293c"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "32a10d7593b837d71f6a946899186a0d3361040c255bf0a894e96a9dc236293c"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "32a10d7593b837d71f6a946899186a0d3361040c255bf0a894e96a9dc236293c"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "32a10d7593b837d71f6a946899186a0d3361040c255bf0a894e96a9dc236293c"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "a93c8fcb38f2fce1728542b6ae93015d1b56e8aa8724cdee5d12e4d90e9f32d2"
+    },
+    {
+      "fixture_name": "e2_cross_trial_conflict",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-09",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "51770b82e58bd649baaf064de433948a17b913e888f535e4a82997df1525d9d3",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-09",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "4f689bdcdcedaf22dd786878047228f4cd58c0b165ccfcf0159ea2d68234c389"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-09",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "25e046c21198d62bc74d30cce946aa9a49bb2147f72ed6817f3c95cb2e54cb1d"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "25e046c21198d62bc74d30cce946aa9a49bb2147f72ed6817f3c95cb2e54cb1d"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "25e046c21198d62bc74d30cce946aa9a49bb2147f72ed6817f3c95cb2e54cb1d"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "25e046c21198d62bc74d30cce946aa9a49bb2147f72ed6817f3c95cb2e54cb1d"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "25e046c21198d62bc74d30cce946aa9a49bb2147f72ed6817f3c95cb2e54cb1d"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "95aebd70312a55c4f9ab5cd6bdb8b0b6e1c269045661a3f715e2ca8ca33506ac"
+    },
+    {
+      "fixture_name": "e2_outside_window",
+      "operation": "schedule-recommendation",
+      "wire_payload": {
+        "schema_version": "1.0",
+        "synthetic": true,
+        "case_id": "SYN_CASE",
+        "snapshot_version": 1,
+        "time_unit": "day",
+        "timezone": "Asia/Taipei",
+        "trials": [
+          {
+            "trial_id": "SYN_T1",
+            "conditions": "SYN_25C",
+            "quantity": 3,
+            "duration_days": 2,
+            "start_date": "2026-11-14",
+            "sample_volume_litres": "3"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "conditions": "SYN_25C",
+            "quantity": 2,
+            "duration_days": 1,
+            "start_date": "2026-11-11",
+            "sample_volume_litres": "3"
+          }
+        ],
+        "equipment": [
+          {
+            "resource_id": "SYN_EQ",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13",
+            "capacity": 5,
+            "usable_volume_litres": "10"
+          }
+        ],
+        "engineers": [
+          {
+            "resource_id": "SYN_OWNER",
+            "capabilities": [
+              "SYN_25C"
+            ],
+            "available_start": "2026-11-09",
+            "available_end": "2026-11-13"
+          }
+        ]
+      },
+      "fingerprint": "205f05a038d1cb5910b00768fabf674bfbe08ccf521e03511b6b65ff5678e89f",
+      "source_mode": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+      "core_inputs": [
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T1",
+              "start_date": "2026-11-14",
+              "duration_days": 2,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 3,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "2f466fc0d24a30c4975474fa1e2bf24be36acc878c076f3fa54a5a1fd417deca"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "2f466fc0d24a30c4975474fa1e2bf24be36acc878c076f3fa54a5a1fd417deca"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T1",
+                  "digest": "2f466fc0d24a30c4975474fa1e2bf24be36acc878c076f3fa54a5a1fd417deca"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T1",
+                "digest": "2f466fc0d24a30c4975474fa1e2bf24be36acc878c076f3fa54a5a1fd417deca"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T1",
+                    "digest": "2f466fc0d24a30c4975474fa1e2bf24be36acc878c076f3fa54a5a1fd417deca"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        },
+        {
+          "request": {
+            "engine_id": "E2",
+            "schema_version": "0.1.0-draft",
+            "request_id": "SYNTH-INTERNAL-REQ",
+            "correlation_id": "SYNTH-INTERNAL-CORR",
+            "request_payload": {
+              "trial_id": "SYN_T2",
+              "start_date": "2026-11-11",
+              "duration_days": 1,
+              "granularity": "DAY",
+              "conditions": {
+                "temperature_min": 25,
+                "temperature_max": 25,
+                "humidity_min": 40,
+                "humidity_max": 50
+              },
+              "samples": {
+                "count": 2,
+                "volume_l": 3
+              },
+              "required_devices": 1,
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "safe": true,
+                  "max_samples": 5,
+                  "usable_volume_l": 10,
+                  "conditions": {
+                    "temperature_min": 25,
+                    "temperature_max": 25,
+                    "humidity_min": 40,
+                    "humidity_max": 50
+                  },
+                  "ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                  }
+                }
+              ],
+              "reservations": []
+            },
+            "source_refs": [
+              {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+              }
+            ]
+          },
+          "context": {
+            "mode": "SYNTHETIC_TEST_ONLY",
+            "timezone": "Asia/Taipei",
+            "sources": [
+              {
+                "ref": {
+                  "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                  "version": "1",
+                  "locator": "SYN_T2",
+                  "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                },
+                "state": "CURRENT_SYNTHETIC"
+              }
+            ],
+            "capacity_evidence": {
+              "unit": "L",
+              "kind": "SYNTHETIC_SAMPLE_AND_FIXTURE_ENVELOPE",
+              "sample_litres": "3",
+              "fixture_included": true,
+              "source_ref": {
+                "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                "version": "1",
+                "locator": "SYN_T2",
+                "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+              },
+              "equipment": [
+                {
+                  "id": "SYN_EQ",
+                  "source_ref": {
+                    "document_id": "SYNTH-E2-BUNDLE-SYN_EQ",
+                    "version": "1",
+                    "locator": "SYN_T2",
+                    "digest": "0473352ee35e4fd089246cde0a224575631964f7664539049feeec8c5e60c098"
+                  },
+                  "usable_litres": "10",
+                  "max_samples": 5,
+                  "configuration_fixture": "SYNTH-CONFIG-1",
+                  "placement_check": "SYNTHETIC_PASS"
+                }
+              ]
+            },
+            "availability": [
+              {
+                "equipment_id": "SYN_EQ",
+                "from_date": "2026-11-09",
+                "through_date": "2026-11-13",
+                "revision": "SYNTH-AVAIL-1"
+              }
+            ]
+          }
+        }
+      ],
+      "admission_block": null,
+      "sidecar": {
+        "selection_plan": [
+          {
+            "trial_id": "SYN_T1",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          },
+          {
+            "trial_id": "SYN_T2",
+            "equipment_ids": [
+              "SYN_EQ"
+            ],
+            "engineer_id": "SYN_OWNER"
+          }
+        ],
+        "selection_authority": "AUTHOR_DECLARED_SYNTHETIC_NOT_B_RUNTIME",
+        "qualification_status": "NOT_VERIFIED"
+      },
+      "record_digest": "a10f29cdfe7208252f1ed124f71a31c2b8032fda83c7721f6b792d4eed0128d2"
+    }
+  ]
+}

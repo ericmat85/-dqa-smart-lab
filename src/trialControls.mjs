@@ -1,19 +1,22 @@
+import {appStorage} from './originalBusiness.mjs';
 import {canControlTrial} from './trialPermissions.mjs';
 import {accessSystem} from './demoPermissions.mjs';
 import {customRole} from './customRoles.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
+import {ALL_DEMO_REQUESTS} from './demoLmsRequests.mjs';
 import {scheduleProgress} from './scheduleProgress.mjs';
 import {usesEquipment,reservationWindow} from './scheduleResources.mjs';
 import {commitLifecycleTransaction,recoverLifecycleTransaction,reconcileSchedules} from './scheduleLifecycle.mjs';
 import {updateRequestExecution} from './requestExecution.mjs';
 import {completeLabTrial} from './labReceipts.mjs';
+import {shiftedOperationAllowed} from './trialProfiles.mjs';
 const read=(s,k)=>JSON.parse(s.getItem(k)||'[]');
 function actorFor(storage,id,system){
  const a=JSON.parse(storage.getItem('dqa-shared-demo-accounts-v1')||JSON.stringify(INITIAL_ACCOUNTS)).find(a=>a.id===id);
  if(!accessSystem(a,system,storage)||(system==='lms'&&customRole(a,storage)&&!customRole(a,storage).pages.includes('schedule')))throw Error('目前帳號沒有此操作權限。');
  return a;
 }
-export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storage=window.localStorage){
+export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storage=appStorage()){
  recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lms');if(!canControlTrial(actor,storage))throw Error('僅 lv1 一階主管可暫停或恢復試驗。');
  const schedules=read(storage,'dqa-schedules-demo-v1'),row=schedules.find(r=>r.id===scheduleId),lab=read(storage,'dqa_lab_demo_requests_v1'),receipt=lab.find(r=>r.scheduleId===scheduleId);
  if(!row||!receipt?.acceptedAt||receipt.reservationId!==row.reservationId||receipt.scheduledStart!==row.time||receipt.scheduledEnd!==row.end||row.reportInfo?.stage||read(storage,'dqa-lab-operations-v1').some(r=>r.requestId===row.requestId&&r.status==='待審核'))throw Error('案件未接收、已送報告或有待核准申請，無法暫停／恢復。');
@@ -23,6 +26,7 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
  if(paused&&schedules.some(r=>r.id!==row.id&&machines.some(m=>usesEquipment(r,m))&&['試驗中','進行中','暫停中'].includes(r.status)))throw Error('設備由其他試驗共用中，請先確認其他試驗，避免一併暫停。');
  const at=new Date(now).toISOString(),action=paused?'暫停試驗':'恢復試驗';
  const updated={...row,status:paused?'暫停中':'試驗中',pauseStartedAt:paused?at:null,pauseTotalMs:Number(row.pauseTotalMs||0)+(paused?0:Math.max(0,now-Date.parse(row.pauseStartedAt))),history:[...(row.history||[]),`${at} ${actor.name} ${action}`]};
+ if(!paused&&!row.demoAccelerator&&row.trialExecution&&!shiftedOperationAllowed(row.trialExecution,updated.pauseTotalMs,Date.parse(row.pauseStartedAt)-Number(row.pauseTotalMs||0)))throw Error('恢復後的操作時段會跨週末，請先重新安排平日作業時段。');
  const resumed=reservationWindow(updated,now);
  if(!paused&&schedules.some(r=>r.id!==row.id&&['已排程','試驗中','進行中','暫停中','待核准'].includes(r.status)&&machines.some(m=>usesEquipment(r,m))&&(()=>{const w=reservationWindow(r,now);return w&&w.start<resumed.end&&resumed.start<w.end;})()))throw Error('順延後與其他設備排程衝突，請先調整其他排程再恢復。');
  const next=schedules.map(r=>r.id===row.id?updated:r),nextLab=lab.map(r=>r.scheduleId===row.id?{...r,status:updated.status}:r);
@@ -31,12 +35,18 @@ export function setTrialPaused({scheduleId,actorId,paused,now=Date.now()},storag
  const audit=[{id:crypto.randomUUID(),requestId:row.requestId,actor:actor.name,actorId,at,time:at,action,reason:'排程管理確認操作',signature:''},...read(storage,'dqa_lab_demo_audit_v1')];
  commitLifecycleTransaction(storage,{schedules:JSON.stringify(next),equipment:JSON.stringify(nextEquipment),labRequests:JSON.stringify(nextLab),labAudit:JSON.stringify(audit),requests:JSON.stringify(updateRequestExecution(read(storage,'dqa-request-demo-v2'),next,nextLab,now))});return updated;
 }
-export function accelerateTrial({actorId,signature,requestId,now=Date.now()},storage=window.localStorage){
- recoverLifecycleTransaction(storage);const actor=actorFor(storage,actorId,'lab');
+function findAccelerationTarget({actorId,signature,requestId,now=Date.now()},storage=appStorage()){
+ const actor=actorFor(storage,actorId,'lab');
  const schedules=read(storage,'dqa-schedules-demo-v1'),lab=read(storage,'dqa_lab_demo_requests_v1');
  const sources=read(storage,'dqa-request-demo-v2');
  const operations=read(storage,'dqa-lab-operations-v1');
- const reviews=read(storage,'dqa-lms-reviews-v1');
+ // Match the UI's default Demo source only when the review key is absent.
+ // Existing empty, changed or unreadable records must never be auto-approved.
+ const rawReviews=storage.getItem('dqa-lms-reviews-v1');let reviews;
+ try{
+  reviews=rawReviews===null?ALL_DEMO_REQUESTS:JSON.parse(rawReviews);
+  if(!Array.isArray(reviews))throw Error('INVALID_REVIEW_ARRAY');
+ }catch{throw Error('委託審查資料無法讀取；未套用預設審查狀態，請先確認資料。');}
  const completeSource=id=>{
   if(requestId&&id!==requestId)return false;
   const source=sources.find(r=>r.id===id);
@@ -49,11 +59,20 @@ export function accelerateTrial({actorId,signature,requestId,now=Date.now()},sto
  const matchingSchedule=receipt=>schedules.find(row=>row.id===receipt.scheduleId&&row.requestId===receipt.id&&row.reservationId&&row.reservationId===receipt.reservationId&&row.time===receipt.scheduledStart&&row.end===receipt.scheduledEnd);
  const usable=receipt=>{const row=matchingSchedule(receipt);return completeSource(receipt.id)&&Number.isFinite(Date.parse(receipt.acceptedAt))&&Date.parse(receipt.acceptedAt)<=now&&!receipt.reportInfo?.stage&&!receipt.pendingOperationId&&!operations.some(o=>o.requestId===receipt.id&&o.status==='待審核')&&row&&!row.reportInfo?.stage&&!row.pendingOperationId;};
  const running=lab.find(r=>usable(r)&&r.demoAccelerator&&r.status==='試驗中');
- if(running)return {id:running.id,stage:'completed',row:completeLabTrial({requestId:running.id,actorId,signature,now},storage)};
+ if(running)return {actor,schedules,lab,receipt:running,row:matchingSchedule(running),complete:true};
  if(lab.some(r=>usable(r)&&r.demoAccelerator&&r.status==='暫停中'))throw Error('加速中的試驗已暫停，請先在排程管理恢復試驗。');
- const receipt=lab.find(r=>{const row=matchingSchedule(r);return usable(r)&&r.status==='已排程'&&row.status==='已排程'&&!row.pauseStartedAt&&scheduleProgress(row,now).phase==='waiting';});
- if(!receipt)throw Error('目前沒有已排程、已接收且等待開始的現有委託單；請先完成排程並由實驗室確認接收。Demo 試驗加速器不會建立新案件。');
+ const receipt=lab.filter(r=>{const row=matchingSchedule(r);return usable(r)&&['已排程','試驗中'].includes(r.status)&&['已排程','試驗中','進行中'].includes(row.status)&&!row.pauseStartedAt&&['waiting','running'].includes(scheduleProgress(row,now).phase);}).sort((a,b)=>Math.abs(scheduleProgress(matchingSchedule(a),now).start-now)-Math.abs(scheduleProgress(matchingSchedule(b),now).start-now)||String(a.id).localeCompare(String(b.id)))[0];
+ if(!receipt)throw Error('目前沒有已排程、已接收且等待開始或正在執行的現有委託單；請先完成排程並由實驗室確認接收。Demo 試驗加速器不會建立新案件。');
  const row=matchingSchedule(receipt);
+ return {actor,schedules,lab,receipt,row,complete:false};
+}
+export function trialAcceleratorAvailability(options,storage=appStorage()){
+ try{const state=findAccelerationTarget(options,storage);return {enabled:true,id:state.receipt.id,nextPercent:state.complete?100:50,reason:''};}catch(error){return {enabled:false,reason:error.message};}
+}
+export function accelerateTrial({actorId,signature,requestId,now=Date.now()},storage=appStorage()){
+ recoverLifecycleTransaction(storage);const state=findAccelerationTarget({actorId,requestId,now},storage);
+ const {actor,schedules,lab,receipt,row}=state;
+ if(state.complete)return {id:receipt.id,stage:'completed',percent:100,row:completeLabTrial({requestId:receipt.id,actorId,signature,now},storage)};
  const duration=24*3600000,time=new Date(now-duration/2).toISOString(),end=new Date(now+duration/2).toISOString();
  const updated={...row,time,end,status:'試驗中',pauseTotalMs:0,pauseStartedAt:null,demoAccelerator:true};
  const equipment=read(storage,'dqa-equipment-demo-v1'),machines=equipment.filter(m=>usesEquipment(row,m));
@@ -61,5 +80,5 @@ export function accelerateTrial({actorId,signature,requestId,now=Date.now()},sto
  if(!machines.length||machines.some(m=>!['待機中','使用中'].includes(m.status))||schedules.some(r=>r.id!==row.id&&['已排程','試驗中','進行中','暫停中','待核准'].includes(r.status)&&machines.some(m=>usesEquipment(r,m))&&(()=>{const w=reservationWindow(r,now);return w&&w.start<window.end&&window.start<w.end;})()))throw Error('加速後的日程與其他設備保留衝突，請先調整排程。');
  const nextLab=lab.map(r=>r.id===receipt.id?{...r,scheduledStart:time,scheduledEnd:end,status:'試驗中',demoAccelerator:true}:r);
  const result=reconcileSchedules(schedules.map(r=>r.id===row.id?updated:r),equipment,now),at=new Date(now).toISOString();
- commitLifecycleTransaction(storage,{schedules:JSON.stringify(result.schedules),equipment:JSON.stringify(result.equipment),labRequests:JSON.stringify(nextLab),requests:JSON.stringify(updateRequestExecution(read(storage,'dqa-request-demo-v2'),result.schedules,nextLab,now)),labAudit:JSON.stringify([{id:crypto.randomUUID(),requestId:receipt.id,actor:actor.name,actorId,at,time:at,action:'Demo試驗加速器：進度 50%',reason:'僅模擬試驗時間，不代表實際試驗結果',signature:''},...read(storage,'dqa_lab_demo_audit_v1')])});return {id:receipt.id,stage:'running'};
+ commitLifecycleTransaction(storage,{schedules:JSON.stringify(result.schedules),equipment:JSON.stringify(result.equipment),labRequests:JSON.stringify(nextLab),requests:JSON.stringify(updateRequestExecution(read(storage,'dqa-request-demo-v2'),result.schedules,nextLab,now)),labAudit:JSON.stringify([{id:crypto.randomUUID(),requestId:receipt.id,actor:actor.name,actorId,at,time:at,action:'Demo試驗加速器：進度 50%',reason:'僅模擬試驗時間，不代表實際試驗結果',signature:''},...read(storage,'dqa_lab_demo_audit_v1')])});return {id:receipt.id,stage:'running',percent:50};
 }

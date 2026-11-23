@@ -1,10 +1,14 @@
+import {appStorage} from './originalBusiness.mjs';
+import {equipmentSpaceUnits} from './equipmentSpace.mjs';
+import {trialProfile,profileEquipmentMatches,trialExecution,sequentialAllocations,operationBuffersAllowed} from './trialProfiles.mjs';
+import {explicitHours} from './trialSourceFacts.mjs';
 import {equipmentIds,reservationWindow,bufferMinutes} from './scheduleResources.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
 import {getRequestDate,isCalendarDate} from './requestDate.mjs';
 
 export const EQUIPMENT_KEY='dqa-equipment-demo-v1';
 export const SCHEDULE_KEY='dqa-schedules-demo-v1';
-export function readScheduleEquipment(storage=window.localStorage) {
+export function readScheduleEquipment(storage=appStorage()) {
   const raw=storage.getItem(EQUIPMENT_KEY);
   if(raw===null)return DEMO_EQUIPMENT;
   const rows=JSON.parse(raw);
@@ -14,12 +18,7 @@ export function readScheduleEquipment(storage=window.localStorage) {
 export const dateOnly=value=>value?String(value).slice(0,10):'';
 const day=value=>isCalendarDate(dateOnly(value))?Date.parse(`${dateOnly(value)}T00:00:00Z`):NaN;
 const addDays=(value,days)=>new Date(day(value)+days*86400000).toISOString().slice(0,10);
-export function equipmentMatches(title,equipment) {
-  const text=String(title||'');
-  const rules=[[/機械衝擊/,/機械衝擊/],[/熱衝擊|冷熱衝擊/,/冷熱衝擊/],[/振動/,/振動/],[/鹽霧|腐蝕/,/鹽霧/],[/IPX|防水|淋雨/i,/防水/],[/ESD|靜電/i,/ESD/i],[/日曬|日照|耐候|光照/,/耐候/],[/防塵|粉塵/,/防塵/],[/拉力/,/拉力/],[/溫濕度|高溫高濕|恆溫恆濕/,/恆溫恆濕/],[/低溫|溫度循環|高低溫/,/環境試驗箱|恆溫恆濕/],[/高溫/,/環境試驗箱|恆溫恆濕|高溫爐/],[/顯微|量測觀察/,/顯微鏡/]];
-  const rule=rules.find(([pattern])=>pattern.test(text));
-  return Boolean(rule&&rule[1].test(equipment.name));
-}
+export function equipmentMatches(title,equipment){return profileEquipmentMatches(trialProfile(title),equipment);}
 function sampleQuantity(value) {
   const quantity=Number(value);
   if(!Number.isSafeInteger(quantity)||quantity<1)throw Error('樣品數量須為正整數，請先修正委託資料。');
@@ -27,10 +26,11 @@ function sampleQuantity(value) {
 }
 // Only explicit numeric requirements are checked; free-text specifications remain for human review.
 export function validateConditions(machine,conditions={}) {
-  const specification=String(machine.specification||'').replaceAll('−','-');
+  const specification=String(machine.specification||'').replaceAll('−','-').replace(/(\d),(?=\d{3}(?:\D|$))/g,'$1');
   const temperature=/室溫/.test(specification)?null:specification.match(/(-?\d+(?:\.\d+)?)\s*[～~]\s*(-?\d+(?:\.\d+)?)\s*°?C/i);
   const humidity=specification.match(/(\d+(?:\.\d+)?)\s*[～~]\s*(\d+(?:\.\d+)?)\s*%\s*RH/i);
-  for(const [key,label,range] of [['temperature','溫度',temperature],['humidity','濕度',humidity]]) {
+  const frequency=specification.match(/(\d+(?:\.\d+)?)\s*[～~]\s*(\d+(?:\.\d+)?)\s*Hz/i);
+  for(const [key,label,range] of [['temperature','溫度',temperature],['humidity','濕度',humidity],['frequency','頻率',frequency]]) {
     const low=conditions[`${key}Min`],high=conditions[`${key}Max`];
     const absent=value=>value===undefined||value===null||String(value).trim()==='';
     if(absent(low)&&absent(high))continue;
@@ -40,7 +40,7 @@ export function validateConditions(machine,conditions={}) {
   }
 }
 export function enabledExecutors(accounts) {
-  return accounts.filter(row=>row.status==='啟用中'&&['實驗室工程師','實驗室副工程師'].includes(row.role));
+  return accounts.filter(row=>row.status==='啟用中'&&(row.businessIdentity?row.businessCanExecuteLab===true:['實驗室工程師','實驗室副工程師'].includes(row.role)));
 }
 export function findScheduleConflict(rows,proposal) {
  const period=reservationWindow(proposal);if(!period)return undefined;
@@ -55,31 +55,52 @@ export function findScheduleConflict(rows,proposal) {
 function deviceCount(form){const count=Number(form.equipmentCount||1);if(!Number.isInteger(count)||count<1||count>4)throw Error('Demo 設備台數須為 1～4 台。');return count;}
 function sampleVolume(form){
  const value=form.sampleVolumeLitres;
- if(value===undefined||value===null||String(value).trim()==='')throw Error('請填寫每件樣品使用空間（L），此欄位為必填。');
+ if(value===undefined||value===null||String(value).trim()==='')throw Error('樣品體積（L）是必填的來源資料；請先補齊試驗資料。');
  const volume=Number(value);
- if(!Number.isFinite(volume)||volume<=0)throw Error('每件樣品使用空間須為正數（L）。');
+ if(!Number.isFinite(volume)||volume<=0)throw Error('試驗資料中的樣品體積（L）須為正數。');
  return volume;
 }
-function effectiveCapacity(machine,form){
- const capacity=Number(machine.capacity);if(!Number.isSafeInteger(capacity)||capacity<1)throw Error('設備容量無效，請先修正設備台帳。');
+function sampleSpaceUnits(form){
+ const units=Number(form.sampleSpaceUnits);
+ if(!String(form.sampleSpaceUnits??'').trim()||!Number.isSafeInteger(units)||units<1)throw Error('每件樣品使用空間須為正整數（U）。');
+ return units;
+}
+function effectiveCapacity(machine,form,requirePhysicalVolume=false){
+ const capacity=Number(requirePhysicalVolume?machine.capacity:equipmentSpaceUnits(machine));if(!Number.isSafeInteger(capacity)||capacity<1)throw Error('設備容量無效，請先修正設備台帳。');
+ // The original Demo quota is an abstract U allocation, not a litre estimate.
+ // Guarded AI candidates opt into their independent physical evidence checks.
+ if(form.sampleSpaceUnits!==undefined&&!requirePhysicalVolume){const units=equipmentSpaceUnits(machine);if(units===null)throw Error('設備缺少必填的可用空間 U。');return Math.floor(units/sampleSpaceUnits(form));}
  const volume=sampleVolume(form);
  const available=Number(machine.usableVolumeLitres);
  if(!Number.isFinite(available)||available<=0)throw Error('設備缺少可驗證的使用空間，請確認設備台帳。');
- return Math.min(capacity,Math.floor(available/Number(volume)));
+ let count=Math.min(capacity,Math.floor(available/Number(volume)));
+ if(form.sampleSpaceUnits!==undefined){
+  const units=sampleSpaceUnits(form),availableUnits=equipmentSpaceUnits(machine);
+  if(!Number.isSafeInteger(availableUnits)||availableUnits<1)throw Error('設備缺少可核對的空間容量（U）。');
+  count=Math.min(count,Math.floor(availableUnits/units));
+ }
+ return count;
 }
-function allocateSamples(machines,form,quantity){
+function allocateSamples(machines,form,quantity,requirePhysicalVolume=false,profile=null){
+ if(profile?.mode==='serial'){
+  for(const machine of machines)if(effectiveCapacity(machine,form,requirePhysicalVolume)<1)throw Error('樣品空間或設備容量不足。');
+  return sequentialAllocations(machines.map(m=>m.id),quantity).map(a=>({equipmentId:a.equipment_id,quantity:a.quantity}));
+ }
  let remaining=quantity;
- const allocations=machines.map((machine,index)=>{const count=Math.max(0,Math.min(remaining-(machines.length-index-1),effectiveCapacity(machine,form)));remaining-=count;return {equipmentId:machine.id,quantity:count};});
+ const allocations=machines.map((machine,index)=>{const count=Math.max(0,Math.min(remaining-(machines.length-index-1),effectiveCapacity(machine,form,requirePhysicalVolume)));remaining-=count;return {equipmentId:machine.id,quantity:count};});
  if(allocations.some(row=>row.quantity<1))throw Error('每台設備至少須分配一件樣品，請減少台數或確認空間。');
- if(remaining>0)throw Error(machines.length===1&&quantity>Number(machines[0].capacity)?`樣品數量超過設備容量（${machines[0].capacity} 件）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
+ if(remaining>0)throw Error(machines.length===1&&quantity>Number(machines[0].capacity)?`樣品占用空間超過設備可用空間（${equipmentSpaceUnits(machines[0])??'待確認'} U）。`:'樣品數量超過設備容量或使用空間，請增加設備或調整樣品需求。');
  return allocations;
 }
-export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
+export function validateSchedule({editing,form,equipment,accounts,rows,today,requirePhysicalVolume=false}) {
  if(editing.status==='已完成')throw Error('試驗已完成，不可重新安排排程。');
  if(editing.reportInfo?.stage||editing.status==="已結案")throw Error("報告已提交，不可重新安排排程。");
  if(editing.status==='待核准')throw Error('此案件待核准，請先處理申請。');
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');
-  sampleVolume(form);
+  const profile=trialProfile(editing.title),ruled=profile&&Boolean(profile.fixed_duration||form.trialProfileId);
+  if(form.trialProfileId&&form.trialProfileId!==profile?.id)throw Error('試驗類型與排程資料不一致。');
+  const unitOnly=form.sampleSpaceUnits!==undefined&&!requirePhysicalVolume;
+  if(unitOnly)sampleSpaceUnits(form);else sampleVolume(form);
   const count=deviceCount(form),ids=equipmentIds(form);
   if(ids.length!==count)throw Error('所選設備數量與需求台數不符。');
   const machines=ids.map(id=>equipment.find(row=>row.id===id));
@@ -90,7 +111,7 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
    validateConditions(machine,form.conditions||editing.conditions);
   }
   const quantity=sampleQuantity(editing.quantity);
-  const allocations=allocateSamples(machines,form,quantity);
+  const allocations=allocateSamples(machines,form,quantity,requirePhysicalVolume,ruled?profile:null);
   const executors=enabledExecutors(accounts);
   const executor=executors.find(row=>row.id===form.ownerId);
   if(!executor)throw Error('請選擇啟用中的實驗室工程師或副工程師。');
@@ -99,9 +120,22 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today}) {
   if(!start||!end||!Number.isFinite(day(start))||!Number.isFinite(day(end)))throw Error('請填寫有效的開始與完成日期。');
   if(end<start)throw Error('預計完成日期不可早於開始日期。');
   if(today&&start<=today)throw Error('請安排明日或之後的日期，讓實驗室能在開始前確認接收。');
+  let execution=null;
+  if(ruled){
+   const known=explicitHours(editing),hours=profile.fixed_duration?profile.hours:known??Number(form.durationHours||profile.hours);
+   if(profile.fixed_duration&&known!==null&&known!==profile.hours)throw Error(`此試驗固定 ${profile.hours} 小時，原始試驗資料時長不一致。`);
+   try{execution=trialExecution(profile,start,allocations.map(a=>({...a,capacity:profile.id==='VIBRATION_DURABILITY'?1:effectiveCapacity(machines.find(m=>m.id===a.equipmentId),form,requirePhysicalVolume)})),hours);}
+   catch(error){if(error.message==='OPERATION_WEEKDAY_START_REQUIRED')throw Error('操作型試驗請從平日開始，週末不作業。');throw error;}
+   if(!operationBuffersAllowed(execution,bufferMinutes(form.preparationMinutes),bufferMinutes(form.cleanupMinutes)))throw Error('操作型試驗的準備／清理作業不可安排在週末。');
+   if(end!==execution.end_date)throw Error(`依試驗工時及作業日規則，預計完成日期應為 ${execution.end_date}。`);
+  }
   const proposal={...editing,...form,reservationId:crypto.randomUUID(),equipmentId:machines[0].id,equipmentIds:ids,equipmentCount:count,allocations,preparationMinutes:bufferMinutes(form.preparationMinutes),cleanupMinutes:bufferMinutes(form.cleanupMinutes),eq:machines.map(machine=>machine.name).join("、"),ownerId:executor.id,owner:executor.name,time:start,end,status:'已排程',remarks:form.note,sampleCode:form.sampleCode.trim()};
+  if(execution){proposal.trialProfileId=profile.id;proposal.durationHours=execution.hours_per_batch;proposal.trialExecution=execution;}
+  else {delete proposal.trialExecution;delete proposal.trialProfileId;}
   delete proposal.completedAt;
   delete proposal.equipmentReleaseHandledAt;
+  if(unitOnly)proposal.capacityValidation={basis:'DEMO_SPACE_UNITS_ONLY',physicalFeasibility:'NOT_ASSESSED'};
+  else delete proposal.capacityValidation;
   const conflict=findScheduleConflict(rows,proposal);
   if(conflict)throw Error(`設備或執行人時段衝突：${conflict.requestId||conflict.id}（${dateOnly(conflict.time)} 至 ${dateOnly(conflict.end||conflict.time)}）。`);
   return proposal;
@@ -110,10 +144,12 @@ export function recommendSchedule({editing,form,equipment,accounts,rows,today=ge
   if(editing.status==='取消')throw Error('此委託已取消，無法重新安排排程。');
   if(editing.reportInfo?.stage||['已結案','待核准'].includes(editing.status))throw Error('此案件目前無法重新安排排程。');
   const missing=value=>value===undefined||value===null||String(value).trim()==='';
-  const sampleVolumeEstimated=missing(form.sampleVolumeLitres)&&missing(editing.sampleVolumeLitres);
-  form={...form,sampleVolumeLitres:missing(form.sampleVolumeLitres)?(missing(editing.sampleVolumeLitres)?1:editing.sampleVolumeLitres):form.sampleVolumeLitres};
-  const sampleVolumeLitres=sampleVolume(form);
-  const quantity=sampleQuantity(editing.quantity),count=deviceCount(form);
+  const unitOnly=form.sampleSpaceUnits!==undefined;
+  const sampleVolumeEstimated=!unitOnly&&missing(form.sampleVolumeLitres)&&missing(editing.sampleVolumeLitres);
+  form={...form,sampleVolumeLitres:missing(form.sampleVolumeLitres)?(missing(editing.sampleVolumeLitres)?(unitOnly?'':1):editing.sampleVolumeLitres):form.sampleVolumeLitres};
+  const sampleVolumeLitres=unitOnly?form.sampleVolumeLitres:sampleVolume(form);
+  if(unitOnly)sampleSpaceUnits(form);
+  const quantity=sampleQuantity(editing.quantity),count=deviceCount(form),profile=trialProfile(editing.title),ruled=profile&&Boolean(profile.fixed_duration||form.trialProfileId);
   bufferMinutes(form.preparationMinutes);bufferMinutes(form.cleanupMinutes);
   const candidates=equipment.filter(row=>{
     if(row.status!=='待機中'||!equipmentMatches(editing.title,row))return false;
@@ -126,12 +162,16 @@ export function recommendSchedule({editing,form,equipment,accounts,rows,today=ge
   // Date-only reservations start at midnight in Taipei; tomorrow leaves time for lab receipt.
   const start=form.time&&Number.isFinite(day(form.time))&&form.time>today?form.time:addDays(today,1);
   for(let offset=0;offset<365;offset++){
-    const time=addDays(start,offset),end=addDays(time,duration-1);
+    const time=addDays(start,offset);let end=addDays(time,duration-1);
     for(const executor of executors){
       const free=candidates.filter(machine=>!findScheduleConflict(rows,{...form,id:editing.id,equipmentId:machine.id,equipmentIds:[machine.id],eq:machine.name,ownerId:executor.id,owner:executor.name,time,end}));
       const selected=free.sort((a,b)=>effectiveCapacity(b,form)-effectiveCapacity(a,form)).slice(0,count);
       if(selected.length!==count)continue;
-      try { allocateSamples(selected,form,quantity); } catch { continue; }
+      try {
+       const allocations=allocateSamples(selected,form,quantity,false,ruled?profile:null);
+       if(ruled){const plan=trialExecution(profile,time,allocations.map(a=>({...a,capacity:profile.id==='VIBRATION_DURABILITY'?1:effectiveCapacity(selected.find(m=>m.id===a.equipmentId),form)})),profile.fixed_duration?profile.hours:Number(form.durationHours||profile.hours));end=plan.end_date;}
+       if(selected.some(machine=>findScheduleConflict(rows,{...form,id:editing.id,equipmentId:machine.id,equipmentIds:[machine.id],ownerId:executor.id,time,end})))continue;
+      } catch { continue; }
       return {equipmentId:selected[0].id,equipmentIds:selected.map(row=>row.id),equipmentCount:count,eq:selected.map(row=>row.name).join('、'),ownerId:executor.id,owner:executor.name,time,end,duration,sampleVolumeLitres,sampleVolumeEstimated};
     }
   }

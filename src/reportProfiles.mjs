@@ -1,10 +1,11 @@
+import {isGeneralTrialName} from './trialTemplateMatching.mjs';
 import {cellText} from './reportLayout.mjs';
 export const GENERAL_PROFILE='general-performance-v1';
 export const GENERAL_COVER='1.1一般性能試驗-1';
 export const GENERAL_DETAIL='1.1一般性能試驗-2';
 export const GENERAL_PAGE_ENDS=[64,100,129,171,195,229];
 export const GENERAL_SIGNATURE_CELLS={level3:'F54',level2:'S54',executor:'AF54'};
-export const isGeneralRequest=request=>(request.testItems||[]).some(item=>/一般性能/.test(item));
+export const isGeneralRequest=request=>(request.testItems||[]).some(isGeneralTrialName);
 export function generalProfile(book){
  const cover=book.getWorksheet(GENERAL_COVER),detail=book.getWorksheet(GENERAL_DETAIL);
  if(!cover||!detail||(cover.state&&cover.state!=='visible')||(detail.state&&detail.state!=='visible')||cellText(cover.getCell('F9')).trim()!=='一般性能試驗'||!cellText(cover.getCell('S1')).includes('試驗報告單'))return null;
@@ -41,7 +42,7 @@ const marked=value=>/^(?:☑|☒|■|✓|✔|√|[xv]|OK|NG)$/i.test(value.trim(
 export function inspectGeneralReport(book,requestId,request){
  const sheet=book.getWorksheet(GENERAL_COVER),detail=book.getWorksheet(GENERAL_DETAIL),checks=[];
  const add=(label,ok,description)=>checks.push({label,ok,detail:description});
- add('工作表符合已接入版型',book.worksheets.filter(row=>!row.state||row.state==='visible').length===2,'請保留原本兩張工作表；額外文件不能以新增工作表方式合併，避免 PDF 遺漏內容');
+ add('工作表符合已接入版型',book.worksheets.filter(row=>row.name!=='虛擬委託標示'&&(!row.state||row.state==='visible')).length===2,'請保留原本兩張工作表；額外文件不能以新增工作表方式合併，避免 PDF 遺漏內容');
  const reportNo=text(sheet,'AK3');add('報告編號對應本案',reportNo===`DQA-${requestId}`||reportNo===requestId,`首頁 AK3：${reportNo||'未填'}；本案請填 DQA-${requestId}`);
  const product=text(sheet,'F13');add('品番已填寫且對應委託單',Boolean(product)&&(!request?.productCode||product===request.productCode),`首頁 F13：${product||'未填'}${request?.productCode?`；本案品番 ${request.productCode}`:''}`);
  add('品名已填寫',Boolean(text(sheet,'F11')),'首頁 F11：請填品名');

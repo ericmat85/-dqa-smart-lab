@@ -1,0 +1,2 @@
+# Install only on the on-premises gateway when Modbus RTU is needed.
+pyserial==3.5

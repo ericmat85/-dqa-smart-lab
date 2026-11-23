@@ -1,0 +1,267 @@
+--- /dev/null
++++ dynamic_adapter.py
+@@ -0,0 +1,74 @@
++"""D-only dynamic numeric/source validation around unchanged Rules Core."""
++from copy import deepcopy
++from decimal import Decimal,InvalidOperation
++from datetime import date,timedelta
++import re,math
++from ai_engine_core.service import EngineCore
++from ai_engine_core.models import digest
++class Block(ValueError):pass
++def require(ok,code):
++ if not ok:raise Block(code)
++def number(value,unit):
++ # Preserve lexical scale. Validating does not repair/pad/round input.
++ if unit in ('min','h','ms'):
++  require((type(value) is int and value>=0) or (type(value) is str and re.fullmatch(r'(?:0|[1-9][0-9]*)',value)), 'INTEGER_FORMAT_REQUIRED:'+unit)
++ elif unit in ('s','V'):
++  pattern=r'-?(?:0|[1-9][0-9]*)\.[0-9]{'+('2' if unit=='s' else '1')+'}'
++  require(type(value) is str and re.fullmatch(pattern,value), 'FIXED_DECIMAL_FORMAT_REQUIRED:'+unit)
++ else:require(type(value) in (str,int,float) and type(value) is not bool,'NUMERIC_VALUE_REQUIRED')
++ try:v=Decimal(str(value))
++ except InvalidOperation:raise Block('INVALID_NUMERIC') from None
++ require(v.is_finite(),'FINITE_VALUE_REQUIRED');return v
++
++def exact_native(value,unit):
++ d=number(value,unit)
++ if d==d.to_integral_value():return int(d)
++ f=float(d);require(math.isfinite(f) and Decimal.from_float(f)==d and Decimal(str(f))==d,'CORE_EXACT_NUMERIC_PROJECTION_UNSUPPORTED')
++ return f
++
++def source_check(raw,context):
++ require(type(context) is dict and context.get('synthetic') is True,'SYNTHETIC_CONTEXT_REQUIRED')
++ catalog=context.get('sourceCatalog');require(type(catalog) is list,'SOURCE_CATALOG_REQUIRED')
++ for ref in raw['source_refs']:
++  matches=[r for r in catalog if r.get('ref')==ref];require(len(matches)==1 and matches[0].get('state')=='CURRENT_SYNTHETIC','SOURCE_NOT_CURRENT_OR_MISMATCH')
++
++def prepare(raw,context):
++ raw=deepcopy(raw);p=raw['request_payload'];engine=raw['engine_id'];source_check(raw,context);findings=[]
++ if engine=='E1':
++  rows=p['request'].get('numericFields');require(type(rows) is list and bool(rows),'NUMERIC_FIELDS_REQUIRED')
++  require(len({x['name'] for x in rows})==len(rows),'DUPLICATE_NUMERIC_FIELD')
++  for x in rows:
++   value=number(x['value'],x['unit']);lo=number(x['lower'],x['unit']);hi=number(x['upper'],x['unit']);require(lo<=hi,'LIMIT_ORDER')
++   if not lo<=value<=hi:findings.append({'code':'NUMERIC_SPEC_DEVIATION','field':x['name'],'value':x['value'],'unit':x['unit'],'lower':x['lower'],'upper':x['upper'],'validator':'DYNAMIC_ADAPTER_DECIMAL_ONLY'})
++ elif engine=='E2':
++  ev=context.get('capacityEvidence');require(type(ev) is dict and ev.get('kind')=='SYNTHETIC_PHYSICAL_ENVELOPE' and ev.get('unit')=='L' and ev.get('fixtureIncluded') is True,'CAPACITY_EVIDENCE_REQUIRED')
++  # No Space Unit conversion or new capacity algorithm; only bind supplied evidence.
++  require(Decimal(ev['sampleVolumeLitres'])==Decimal(str(p['samples']['volume_l'])),'SAMPLE_VOLUME_EVIDENCE_MISMATCH')
++  rows=ev['equipment'];require(len(rows)==len(p['equipment']) and {r['id'] for r in rows}=={m['id'] for m in p['equipment']},'EQUIPMENT_EVIDENCE_SCOPE')
++  start=date.fromisoformat(p['start_date']);days=p['duration_days'];require(type(days) is int and days>0,'DAY_DURATION_INTEGER');end=start+timedelta(days=days-1)
++  require(context.get('timeUnit')=='day' and context.get('timezone')=='Asia/Taipei','DAY_TIMEZONE')
++  for m in p['equipment']:
++   row=next(r for r in rows if r['id']==m['id']);require(row['ref']==m['ref'] and row['revision']=='SYNTH-DYNAMIC-R1','CAPACITY_SOURCE_VERSION')
++   require(Decimal(row['usableVolumeLitres'])==Decimal(str(m['usable_volume_l'])) and type(row['capacity']) is int and row['capacity']==m['max_samples'],'CAPACITY_EVIDENCE_MISMATCH')
++   require(date.fromisoformat(row['availableStart'])<=start<=end<=date.fromisoformat(row['availableEnd']),'EQUIPMENT_WINDOW_UNVERIFIED')
++ elif engine=='E3':
++  require(context['requestId']==raw['request_id'] and context['trialId']==p['required_fields']['trial_id'] and context['reportId']==p['required_fields']['report_id'],'REQUEST_REPORT_BINDING_MISMATCH')
++  require(p['original_result']==context['originalResult'],'ORIGINAL_RESULT_CHANGED')
++  lexical=context['lexicalMeasurements'];require(len(lexical)==len(p['measurements']),'MEASUREMENT_ROW_COUNT')
++  require(len({r['name'] for r in lexical})==len(lexical),'DUPLICATE_MEASUREMENT')
++  for x,native in zip(lexical,p['measurements']):
++   converted={'name':x['name'],'unit':x['unit'],'value':exact_native(x['value'],x['unit']),'min':exact_native(x['lower'],x['unit']),'max':exact_native(x['upper'],x['unit'])}
++   require(converted==native,'LEXICAL_NATIVE_VALUE_MISMATCH')
++  require(p['raw_data_digest']==digest(p['measurements'])==p['raw_data_ref']['digest'],'MEASUREMENT_DIGEST')
++ return raw,findings
++
++def run(raw,context):
++ original=deepcopy((raw,context))
++ try:
++  admitted,findings=prepare(raw,context)
++ except (Block,ValueError,KeyError,TypeError,OverflowError) as e:
++  return {'status':'BLOCKED','reason':str(e) if isinstance(e,Block) else 'INVALID_INPUT_OR_CONTEXT','coreCalled':False,'coreOutput':None,'publicResult':None,'providerCalled':False,'preservedInput':deepcopy(raw),'inputDigest':digest(raw),'contextDigest':digest(context)}
++ out=EngineCore().run(admitted,actor_id='SYNTH-DYNAMIC-INPUT',occurred_at='2026-11-09T10:00:00+08:00').to_dict();payload=out['result_payload']
++ status='REJECTED' if out['status']=='REJECTED' else 'INDETERMINATE' if raw['engine_id']=='E2' and not payload['proposals'] else 'REFUSED' if raw['engine_id']=='E4' and payload['retrieval_status']!='FOUND' else 'ADVISORY'
++ require((raw,context)==original,'INPUT_MUTATION')
++ return {'status':status,'reason':None,'coreCalled':True,'coreOutput':out,'adapterFindings':findings,'publicResult':None,'providerCalled':False,'preservedInput':deepcopy(raw),'inputDigest':digest(raw),'contextDigest':digest(context),'numericChecks':'ADAPTER_VALIDATION_SEPARATE_FROM_CORE','reportGeneration':'NOT_IMPLEMENTED','fullEnumeration':'NOT_PROVEN','reservationCreated':False,'requiresHumanConfirmation':True}
+--- /dev/null
++++ build_cases.py
+@@ -0,0 +1,71 @@
++from pathlib import Path
++from copy import deepcopy
++from datetime import date,timedelta
++import json
++from ai_engine_core.models import digest
++from dynamic_adapter import exact_native
++SOURCE=Path('/workspace/d-comp-1111-ai4-data-p02/data/competition_ai4_demo_dataset_v1.json')
++def context(raw):return {'synthetic':True,'sourceCatalog':[{'ref':deepcopy(r),'state':'CURRENT_SYNTHETIC'} for r in raw['source_refs']]}
++def cases():
++ D=json.loads(SOURCE.read_text());sourceInputs={x['caseId']:x for x in D['engineInputs']};out=[]
++ for i,request in enumerate(D['requests'],1):
++  for engine in ['E1','E2','E3','E4']:
++   base=sourceInputs[request['requestId']+'-'+engine];raw=deepcopy(base['input']);raw['request_id']=f'SYNTH-DYN-{i:03}-{engine}';raw['correlation_id']=f'SYNTH-DYN-COR-{i:03}-{engine}';p=raw['request_payload'];ctx=context(raw)
++   if engine=='E1':
++    p['request']['product']=f'SYNTH-DYNAMIC-PRODUCT-{i:03}';p['request']['quantity']=i+2;p['request']['date']=str(date(2026,11,10)+timedelta(days=i%3))
++    p['request']['numericFields']=[{'name':'duration','value':'2.00','unit':'s','lower':'1.50','upper':'2.50'},{'name':'standby','value':'10','unit':'min','lower':'0','upper':'30'},{'name':'exposure','value':'8','unit':'h','lower':'1','upper':'24'},{'name':'response','value':str(200+i),'unit':'ms','lower':'0','upper':'400'},{'name':'supply','value':'12.5' if i%2 else '12.0','unit':'V','lower':'11.0','upper':'13.0'}]
++   elif engine=='E2':
++    needed=1+i%2;p['trial_id']=f'SYNTH-DYN-TRIAL-{i:03}';p['samples']['count']=needed+i%4;p['required_devices']=needed;p['start_date']=str(date(2026,11,10)+timedelta(days=i%3));p['duration_days']=1+i%2;p['reservations']=[]
++    original=deepcopy(p['equipment'][0]);p['equipment']=[];rows=[]
++    for j in range(3):
++     m=deepcopy(original);m['id']=f'SYNTH-DYN-EQ-{i:03}-{j}';m['max_samples']=4;m['usable_volume_l']=2;m['ref']=deepcopy(original['ref']);m['ref'].update(document_id=m['id'],version='SYNTH-DYNAMIC-R1');m['ref']['digest']=digest({'equipment_id':m['id'],'usableVolumeLitres':'2','capacity':4,'kind':'SYNTHETIC'})
++     p['equipment'].append(m);raw['source_refs'].append(deepcopy(m['ref']));rows.append({'id':m['id'],'usableVolumeLitres':'2','capacity':4,'revision':'SYNTH-DYNAMIC-R1','ref':deepcopy(m['ref']),'availableStart':p['start_date'],'availableEnd':str(date.fromisoformat(p['start_date'])+timedelta(days=p['duration_days']-1))})
++    ctx=context(raw);ctx.update(timeUnit='day',timezone='Asia/Taipei',capacityEvidence={'kind':'SYNTHETIC_PHYSICAL_ENVELOPE','unit':'L','fixtureIncluded':True,'sampleVolumeLitres':'0.125','equipment':rows})
++   elif engine=='E3':
++    lex=[{'name':f'SYNTH-DYN-RESPONSE-{i:03}','unit':'ms','value':str(200+i),'lower':'0','upper':'400'},{'name':f'SYNTH-DYN-SUPPLY-{i:03}','unit':'V','value':'12.5' if i%2 else '12.0','lower':'11.0','upper':'13.0'}]
++    p['measurements']=[{'name':x['name'],'unit':x['unit'],'value':exact_native(x['value'],x['unit']),'min':exact_native(x['lower'],x['unit']),'max':exact_native(x['upper'],x['unit'])} for x in lex]
++    p['required_fields'].update(report_id=f'SYNTH-DYN-REPORT-{i:03}',trial_id=f'SYNTH-DYN-TRIAL-{i:03}',title='SYNTHETIC dynamic review, not report generation');p['original_result']='PASS';p['raw_data_digest']=digest(p['measurements']);p['raw_data_ref']['digest']=p['raw_data_digest']
++    raw['source_refs']=[deepcopy(p['raw_data_ref']) if r['document_id']==p['raw_data_ref']['document_id'] else r for r in raw['source_refs']];ctx=context(raw);ctx.update(requestId=raw['request_id'],reportId=p['required_fields']['report_id'],trialId=p['required_fields']['trial_id'],originalResult='PASS',lexicalMeasurements=lex)
++   else:p['query']=['允收條件','必要治具','合成展示'][i%3]
++   out.append({'caseId':f'DYN-{i:03}-{engine}','sourceRequestId':request['requestId'],'sourceCaseId':base['caseId'],'sourceInputDigest':digest(base['input']),'engine':engine,'raw':raw,'context':ctx,'expectedStatus':'ADVISORY','expectedCoreCalled':True})
++ first={c['engine']:c for c in out[:4]}
++ def add(name,e,fn,status,called):
++  c=deepcopy(first[e]);c['caseId']='NEG-'+name;fn(c);c['expectedStatus']=status;c['expectedCoreCalled']=called;out.append(c)
++ add('E1-VOLTAGE-FORMAT','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][4].update(value='12.00'),'BLOCKED',False)
++ add('E1-SECONDS-FORMAT','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][0].update(value='2.0'),'BLOCKED',False)
++ add('E1-MINUTES-FORMAT','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][1].update(value='10.5'),'BLOCKED',False)
++ add('E1-HOURS-FORMAT','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][2].update(value='8.0'),'BLOCKED',False)
++ add('E1-MS-FORMAT','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][3].update(value='200.5'),'BLOCKED',False)
++ add('E1-INVALID-DATE','E1',lambda c:c['raw']['request_payload']['request'].update(date='2026-02-30'),'REJECTED',True)
++ add('E1-MISSING-FIELD','E1',lambda c:c['raw']['request_payload']['request'].pop('quantity'),'REJECTED',True)
++ add('E1-REVOKED-SOURCE','E1',lambda c:c['context']['sourceCatalog'][0].update(state='REVOKED'),'BLOCKED',False)
++ add('E1-VOLTAGE-DEVIATION','E1',lambda c:c['raw']['request_payload']['request']['numericFields'][4].update(value='14.0'),'ADVISORY',True)
++ add('E1-CONDITION-DEVIATION','E1',lambda c:c['raw']['request_payload']['request']['conditions'].update(temperature_max=35),'ADVISORY',True)
++ add('E2-MISSING-CAPACITY','E2',lambda c:c['context'].pop('capacityEvidence'),'BLOCKED',False)
++ add('E2-MISSING-VOLUME','E2',lambda c:c['raw']['request_payload']['samples'].pop('volume_l'),'BLOCKED',False)
++ def lowcap(c):
++  for m in c['raw']['request_payload']['equipment']:m['max_samples']=1
++  for m in c['context']['capacityEvidence']['equipment']:m['capacity']=1
++ add('E2-LOW-CAPACITY','E2',lowcap,'INDETERMINATE',True)
++ def conflict(c):
++  p=c['raw']['request_payload'];p['reservations']=[{'equipment_id':m['id'],'start_date':p['start_date'],'expected_end_date':p['start_date'],'pickup_confirmed':False} for m in p['equipment']]
++ add('E2-DATE-CONFLICT','E2',conflict,'INDETERMINATE',True)
++ add('E2-BAD-DATE','E2',lambda c:c['raw']['request_payload'].update(start_date='2026-13-01'),'BLOCKED',False)
++ add('E2-SPACE-UNIT','E2',lambda c:c['context']['capacityEvidence'].update(unit='SPACE_UNIT'),'BLOCKED',False)
++ add('E2-WINDOW-MISSING','E2',lambda c:c['context']['capacityEvidence']['equipment'][0].pop('availableEnd'),'BLOCKED',False)
++ add('E3-NONNUMERIC','E3',lambda c:c['context']['lexicalMeasurements'][0].update(value='bad'),'BLOCKED',False)
++ add('E3-WRONG-PRECISION','E3',lambda c:c['context']['lexicalMeasurements'][1].update(value='12.55'),'BLOCKED',False)
++ add('E3-BINDING-MISMATCH','E3',lambda c:c['context'].update(requestId='OTHER'),'BLOCKED',False)
++ add('E3-ORIGINAL-DECISION-CHANGED','E3',lambda c:c['raw']['request_payload'].update(original_result='FAIL'),'BLOCKED',False)
++ add('E3-NO-ROUNDING-12-1','E3',lambda c:c['context']['lexicalMeasurements'][1].update(value='12.1'),'BLOCKED',False)
++ def exceed(c):
++  p=c['raw']['request_payload'];c['context']['lexicalMeasurements'][0]['value']='900';p['measurements'][0]['value']=900;p['raw_data_digest']=digest(p['measurements']);p['raw_data_ref']['digest']=p['raw_data_digest'];c['raw']['source_refs']=[deepcopy(p['raw_data_ref']) if r['document_id']==p['raw_data_ref']['document_id'] else r for r in c['raw']['source_refs']];c['context']['sourceCatalog']=[{'ref':deepcopy(r),'state':'CURRENT_SYNTHETIC'} for r in c['raw']['source_refs']]
++ add('E3-OUT-OF-RANGE','E3',exceed,'ADVISORY',True)
++ add('E4-NO-SOURCE','E4',lambda c:c['raw']['request_payload'].update(documents=[]),'REFUSED',True)
++ add('E4-UNSUPPORTED-QUESTION','E4',lambda c:c['raw']['request_payload'].update(query='未記載的正式法規條號是什麼？'),'REFUSED',True)
++ add('E4-NONEXISTENT-CLAUSE','E4',lambda c:c['raw']['request_payload'].update(requested_clause='DOES_NOT_EXIST'),'REFUSED',True)
++ def versions(c):
++  p=c['raw']['request_payload'];d=deepcopy(p['documents'][0]);d['ref']['version']='SYNTH-R2';p['documents'].append(d);c['raw']['source_refs'].append(d['ref']);c['context']['sourceCatalog'].append({'ref':deepcopy(d['ref']),'state':'CURRENT_SYNTHETIC'})
++ add('E4-VERSION-CONFLICT','E4',versions,'REFUSED',True)
++ add('E4-STALE-SOURCE','E4',lambda c:c['context']['sourceCatalog'][0].update(state='STALE'),'BLOCKED',False)
++ return D,out
+--- /dev/null
++++ run_offline.py
+@@ -0,0 +1,34 @@
++import sys,os,json,unittest,hashlib
++from pathlib import Path
++O=Path(__file__).resolve().parent;sys.dont_write_bytecode=True;sys.path[:0]=[str(O),str(O/'runtime')]
++def audit(event,args):
++ if event.startswith('socket.') or event in ('subprocess.Popen','os.system'):raise RuntimeError('OFFLINE_ONLY')
++ if event=='open':
++  p,mode,flags=args;w=(isinstance(mode,str) and any(c in mode for c in 'wax+')) or isinstance(flags,int) and flags&(os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_APPEND|os.O_TRUNC)
++  if w and not Path(p).resolve().is_relative_to(O):raise RuntimeError('WRITE_OUTSIDE_ISOLATION')
++sys.addaudithook(audit)
++from build_cases import cases
++from dynamic_adapter import run,number
++from ai_engine_core.service import EngineCore
++D,C=cases();observed=[]
++def prof(frame,event,arg):
++ if event=='call' and frame.f_code is EngineCore.run.__code__:observed.append(frame.f_locals['raw']['engine_id'])
++old=sys.getprofile();sys.setprofile(prof)
++trace=[{**c,'output':run(c['raw'],c['context'])} for c in C]
++(O/'evidence/dynamic-input-output-trace.json').write_text(json.dumps(trace,ensure_ascii=False,indent=2)+'\n')
++audit_rows=[]
++for result in D['testResults']:
++ for row in result['rawMeasurements']:
++  try:number(row['value'],row['unit']);state='FORMAT_VALID';reason=None
++  except ValueError as e:state='REQUIRES_EXPLICIT_SOURCE_CORRECTION';reason=str(e)
++  audit_rows.append({'sourceRequestId':result['requestId'],'measurementId':row['measurementId'],'originalValue':row['value'],'unit':row['unit'],'state':state,'reason':reason,'mutated':False})
++(O/'evidence/legacy-numeric-format-audit.json').write_text(json.dumps(audit_rows,ensure_ascii=False,indent=2)+'\n')
++class Result(unittest.TextTestResult):
++ def __init__(self,*a,**kw):super().__init__(*a,**kw);self.rows=[]
++ def addSuccess(self,t):super().addSuccess(t);self.rows.append({'id':t.id(),'status':'CURRENT_PASS'})
++ def addFailure(self,t,e):super().addFailure(t,e);self.rows.append({'id':t.id(),'status':'CURRENT_FAIL'})
++ def addError(self,t,e):super().addError(t,e);self.rows.append({'id':t.id(),'status':'ERROR'})
++ def addSkip(self,t,why):super().addSkip(t,why);self.rows.append({'id':t.id(),'status':'NOT_RUN','reason':why})
++r=unittest.TextTestRunner(verbosity=1,resultclass=Result).run(unittest.TestLoader().discover(str(O/'tests')));sys.setprofile(old)
++report={'tests_run':r.testsRun,'pass':r.testsRun-len(r.failures)-len(r.errors)-len(r.skipped),'fail':len(r.failures),'error':len(r.errors),'skip':len(r.skipped),'cases':r.rows,'failure_details':[{'id':t.id(),'trace':v} for t,v in r.failures+r.errors],'dynamic_cases':len(trace),'observed_actual_core_calls':len(observed),'calls_by_engine':{e:observed.count(e) for e in ['E1','E2','E3','E4']},'provider':'NOT_RUN','registry_required':False,'legacy_format_gaps':sum(r['state']!='FORMAT_VALID' for r in audit_rows)}
++(O/'evidence/test-results.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k not in ('cases','failure_details')}));sys.exit(not r.wasSuccessful())
+--- /dev/null
++++ tests/test_dynamic.py
+@@ -0,0 +1,76 @@
++from pathlib import Path
++from copy import deepcopy
++from decimal import Decimal
++import unittest,json,sys
++from dynamic_adapter import run,number,exact_native
++from ai_engine_core.service import EngineCore
++O=Path(__file__).resolve().parents[1];TRACE=json.loads((O/'evidence/dynamic-input-output-trace.json').read_text())
++BY={x['caseId']:x for x in TRACE}
++class Dynamic(unittest.TestCase):
++ def test_all_fifteen_reused(self):self.assertEqual(len({r['sourceRequestId'] for r in TRACE}),15)
++ def test_dynamic_not_original_payload(self):
++  for c in TRACE:self.assertTrue(c['raw']['request_id'].startswith('SYNTH-DYN-'));self.assertIsNone(c['output']['publicResult']);self.assertFalse(c['output']['providerCalled'])
++ def test_no_registration_import(self):
++  self.assertNotIn('source_context',sys.modules);self.assertNotIn('input_mapper',sys.modules)
++ def test_e1_numeric_deviation(self):
++  o=BY['NEG-E1-VOLTAGE-DEVIATION']['output'];self.assertEqual(o['status'],'ADVISORY');self.assertTrue(o['adapterFindings']);self.assertEqual(o['adapterFindings'][0]['field'],'supply');self.assertFalse(o['coreOutput']['requires_human_review']['can_approve'])
++ def test_e1_core_condition_deviation(self):self.assertTrue(BY['NEG-E1-CONDITION-DEVIATION']['output']['coreOutput']['result_payload']['findings'])
++ def test_e2_variation(self):
++  positives=[x for x in TRACE if x['caseId'].startswith('DYN-') and x['engine']=='E2'];self.assertGreater(len({x['raw']['request_payload']['samples']['count'] for x in positives}),1);self.assertEqual({x['raw']['request_payload']['required_devices'] for x in positives},{1,2});self.assertGreater(len({x['raw']['request_payload']['start_date'] for x in positives}),1)
++ def test_e2_proposal_sums_days(self):
++  from datetime import date,timedelta
++  for c in TRACE:
++   if c['engine']!='E2' or c['output']['status']!='ADVISORY':continue
++   p=c['raw']['request_payload']
++   for q in c['output']['coreOutput']['result_payload']['proposals']:
++    self.assertEqual(sum(a['sample_count'] for a in q['allocations']),p['samples']['count']);self.assertEqual(q['start_date'],p['start_date']);self.assertEqual(q['expected_end_date'],str(date.fromisoformat(p['start_date'])+timedelta(days=p['duration_days']-1)));self.assertEqual(q['granularity'],'DAY');self.assertFalse(q['applied'])
++ def test_missing_evidence_not_no_feasible(self):
++  for key in ['NEG-E2-MISSING-CAPACITY','NEG-E2-SPACE-UNIT']:
++   o=BY[key]['output'];self.assertEqual(o['status'],'BLOCKED');self.assertFalse(o['coreCalled'])
++  self.assertNotIn('NO_FEASIBLE_SCHEDULE',json.dumps(TRACE))
++ def test_e3_review_not_generation(self):
++  o=BY['NEG-E3-OUT-OF-RANGE']['output'];p=o['coreOutput']['result_payload'];self.assertFalse(p['checks'][0]['within_declared_limits']);self.assertEqual(p['draft_data']['original_result'],'PASS');self.assertEqual(p['review_status'],'PENDING_HUMAN');self.assertEqual(o['reportGeneration'],'NOT_IMPLEMENTED')
++ def test_e3_outlier_warning(self):self.assertIn('DECLARED_RESULT_REQUIRES_HUMAN_REVIEW',BY['NEG-E3-OUT-OF-RANGE']['output']['coreOutput']['warnings'])
++ def test_e4_question_unchanged(self):
++  for c in TRACE:
++   if c['engine']=='E4':self.assertEqual(c['raw']['request_payload']['query'],c['output']['preservedInput']['request_payload']['query'])
++ def test_e4_answer_source_exact(self):
++  for c in TRACE:
++   if c['engine']=='E4' and c['output']['status']=='ADVISORY':
++    p=c['output']['coreOutput']['result_payload'];self.assertEqual(p['answer'],'\n'.join(x['quote'] for x in p['citations']));self.assertFalse(p['verified_regulatory_conclusion'])
++ def test_unsupported_questions_refuse(self):self.assertEqual(BY['NEG-E4-UNSUPPORTED-QUESTION']['output']['status'],'REFUSED')
++ def test_no_silent_numeric_rounding(self):self.assertEqual(BY['NEG-E3-NO-ROUNDING-12-1']['output']['reason'],'CORE_EXACT_NUMERIC_PROJECTION_UNSUPPORTED');self.assertEqual(BY['NEG-E3-NO-ROUNDING-12-1']['context']['lexicalMeasurements'][1]['value'],'12.1')
++ def test_format_valid_nonrepresentable_is_distinct(self):self.assertEqual(number('12.1','V'),Decimal('12.1'))
++ def test_seconds_exact_scale(self):self.assertEqual(number('2.00','s'),Decimal('2.00'))
++ def test_integer_units(self):
++  for u in ['min','h','ms']:self.assertEqual(number('8',u),Decimal(8));self.assertEqual(number(8,u),Decimal(8))
++ def test_negative_boolean_rejected_integer(self):
++  for x in [True,-1,'-1','2.0']:
++   with self.assertRaises(ValueError):number(x,'ms')
++ def test_precision_invalids(self):
++  for x,u in [('2','s'),('2.0','s'),('2.000','s'),('12','V'),('12.00','V'),('1.0','min'),('1.5','h'),('2.5','ms')]:
++   with self.assertRaises(ValueError):number(x,u)
++ def test_nonfinite_rejected(self):
++  for x in ['NaN','Infinity','-Infinity']:
++   with self.assertRaises(ValueError):number(x,'mA')
++ def test_unknown_source_version(self):
++  c=deepcopy(TRACE[0]);c['context']['sourceCatalog'][0]['ref']['version']='STALE';self.assertEqual(run(c['raw'],c['context'])['status'],'BLOCKED')
++ def test_no_network(self):
++  import socket
++  with self.assertRaises(RuntimeError):socket.socket()
++
++def replay(c):
++ def test(self):
++  before=deepcopy((c['raw'],c['context']));seen=[]
++  def profile(frame,event,arg):
++   if event=='call' and frame.f_code is EngineCore.run.__code__:seen.append(frame.f_locals['raw']['engine_id'])
++  old=sys.getprofile()
++  def chained(frame,event,arg):
++   profile(frame,event,arg)
++   if old:old(frame,event,arg)
++  sys.setprofile(chained)
++  try:o=run(c['raw'],c['context'])
++  finally:sys.setprofile(old)
++  self.assertEqual(o,c['output']);self.assertEqual(o['status'],c['expectedStatus']);self.assertEqual(o['coreCalled'],c['expectedCoreCalled']);self.assertEqual(len(seen),int(o['coreCalled']));self.assertEqual((c['raw'],c['context']),before)
++ return test
++for c in TRACE:setattr(Dynamic,'test_case_'+c['caseId'].replace('-','_'),replay(c))

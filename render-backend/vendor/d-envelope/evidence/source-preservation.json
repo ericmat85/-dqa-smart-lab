@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "original_files_matched": 48,
+  "original_mutations": [],
+  "product_head_index_status": "UNCHANGED",
+  "copied_dependencies": "BYTE_IDENTICAL",
+  "remote_git_writes": 0,
+  "Provider_calls": 0,
+  "API_DB_tests": "NOT_RUN"
+}

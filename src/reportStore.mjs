@@ -1,17 +1,18 @@
+import {originalReportIndex,originalBusinessEnabled} from './originalBusiness.mjs';
 import {caseResetVersion,caseResetActive} from './resetCases.mjs';
 import {reportMetadata} from './reportRules.mjs';
 const guidedDb=globalThis.__DQA_GUIDED_REPORT_DB__;
 const DB=typeof guidedDb==='string'&&/^dqa-tour-reports-[a-f0-9-]+$/.test(guidedDb)?guidedDb:'dqa_lab_demo_reports';
 function openDb(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB,2);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains('reports'))request.result.createObjectStore('reports',{keyPath:'requestId'});if(!request.result.objectStoreNames.contains('reportIndex')){const index=request.result.createObjectStore('reportIndex',{keyPath:'requestId'});const cursor=request.transaction.objectStore('reports').openCursor();cursor.onsuccess=()=>{if(cursor.result){const meta=reportMetadata(cursor.result.value);if(meta)index.put(meta);cursor.result.continue();}};}};request.onerror=()=>reject(request.error);request.onsuccess=()=>resolve(request.result);});}
-export async function getReport(requestId){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reports','readonly'),request=tx.objectStore('reports').get(requestId);request.onsuccess=()=>resolve(request.result||null);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
-export async function allReports(){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reportIndex','readonly'),request=tx.objectStore('reportIndex').getAll();request.onsuccess=()=>resolve(request.result);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
-export async function saveReport(report,expectedRevision,epoch){
+export async function getReport(requestId){if(originalBusinessEnabled())return (await import('./businessHumanClient.mjs')).getBusinessReport(requestId);const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reports','readonly'),request=tx.objectStore('reports').get(requestId);request.onsuccess=()=>resolve(request.result||null);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
+export async function allReports(){if(originalBusinessEnabled())return originalReportIndex();const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('reportIndex','readonly'),request=tx.objectStore('reportIndex').getAll();request.onsuccess=()=>resolve(request.result);tx.oncomplete=()=>db.close();tx.onerror=()=>{db.close();reject(tx.error);};});}
+export async function saveReport(report,expectedRevision,epoch){if(originalBusinessEnabled())throw Error('報告檔案尚未接通共用儲存；本次未寫入或提交。');
  const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(['reports','reportIndex'],'readwrite'),store=tx.objectStore('reports'),request=store.get(report.requestId);let error;
  request.onsuccess=()=>{if(epoch!==undefined&&(caseResetActive()||caseResetVersion()!==epoch)){error=Error("系統已重設，停止儲存報告。");tx.abort();return;}const current=request.result;if((expectedRevision===null&&current?.stage)||(typeof expectedRevision==='string'&&current?.revision!==expectedRevision)){error=Error('報告已更新或已提交，請重新開啟視窗。');tx.abort();return;}store.put(report);const meta=reportMetadata(report);if(meta)tx.objectStore('reportIndex').put(meta);};
  tx.oncomplete=()=>{db.close();resolve(report);};tx.onabort=tx.onerror=()=>{db.close();reject(error||tx.error||Error('報告儲存失敗。'));};});
 }
 
 // Seed replacement is one IndexedDB transaction, including the lightweight index.
-export async function replaceReportSet(reports){
+export async function replaceReportSet(reports){if(originalBusinessEnabled())throw Error('共用工作區不接受瀏覽器覆寫報告。');
  const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(['reports','reportIndex'],'readwrite');const store=tx.objectStore('reports'),index=tx.objectStore('reportIndex');store.clear();index.clear();for(const report of reports){store.put(report);const meta=reportMetadata(report);if(meta)index.put(meta);}tx.oncomplete=()=>{db.close();resolve();};tx.onabort=tx.onerror=()=>{db.close();reject(tx.error||Error('Demo報告替換失敗'));};});
 }

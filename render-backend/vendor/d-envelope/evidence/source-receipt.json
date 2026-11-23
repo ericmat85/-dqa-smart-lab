@@ -1,0 +1,26 @@
+[
+  {
+    "file": "d-core.zip",
+    "bytes": 68419,
+    "sha256": "5577987950666213bfa566b4ff095d4c27e0cdf46519015958d18cefd1cb385c",
+    "members": 36,
+    "CRC": "PASS",
+    "manifest": "MATCH"
+  },
+  {
+    "file": "d-p02.zip",
+    "bytes": 35712,
+    "sha256": "3f8df03a247993f6e4522b94a5aef1ecffce772bdff79aeaa346c38b98f7e5d5",
+    "members": 17,
+    "CRC": "PASS",
+    "manifest": "MATCH"
+  },
+  {
+    "file": "b-p04.zip",
+    "bytes": 91359,
+    "sha256": "8c4e3dfddb1b5ace62708ef18c352f67ae858c7b863ee156ef26b7d2e100049c",
+    "members": 49,
+    "CRC": "PASS",
+    "manifest": "MATCH"
+  }
+]

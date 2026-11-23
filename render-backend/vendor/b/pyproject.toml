@@ -1,0 +1,20 @@
+[project]
+name = "dqa-offline-core"
+version = "0.1.0"
+description = "P5-01 offline-only contracts and pure workflow logic"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "cryptography==46.0.3",
+    "fastapi==0.141.1",
+    "pydantic==2.13.4",
+    "pyjwt[crypto]==2.10.1",
+]
+
+[dependency-groups]
+dev = ["pytest==8.4.2", "httpx==0.28.1", "httpx2==2.0.0", "anyio==4.13.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--strict-markers -ra"
+filterwarnings = ["error"]

@@ -1,5 +1,10 @@
 import {readUiPreferences} from './uiPreferences.mjs';
 const entries=`
+電子委託 · 虛擬測試填入|Electronic Requests · Virtual test data
+您好！可以詢問委託流程；在空白新增委託單頁面輸入 /demo start，填入虛擬測試資料。|Hello! Ask about request workflows, or enter /demo start on a blank New Request page to fill in virtual test data.
+輸入問題或 /demo start…|Ask a question or enter /demo start…
+Enter 送出 · /demo start 填入虛擬委託 · /clear 清除對話|Enter to send · /demo start fills a virtual request · /clear clears chat
+
 整合試驗・排程・設備・報告|Connect testing, scheduling, equipment and reports
 打造智慧實驗室|Build a smarter laboratory
 流程標準化|Standardized workflows
@@ -432,7 +437,7 @@ PCBA 版次 PCBA Version|PCBA version
 樣品資訊|Sample information
 樣品來源|Sample source
 樣品來源與樣品資訊|Sample source and information
-樣品容量|Sample capacity
+可用空間 U|Available space U
 樣品編號|Sample ID
 每件樣品使用空間 L|Space per sample (L)
 判定基準|Acceptance criteria
@@ -494,8 +499,8 @@ PCBA 版次 PCBA Version|PCBA version
 保養檢查重點|Maintenance checklist
 獨立設備台帳|Individual equipment register
 每日可用時間|Available hours per day
-最大樣品數|Maximum samples
-可用空間 L（選填）|Available space in L (optional)
+可用空間 U|Available space U
+可用空間 U|Available space U
 人員與試驗時段|Operator and test dates
 排程備註|Schedule notes
 排程分析|Schedule analysis
@@ -1243,6 +1248,19 @@ LMS 委託審查|LMS request reviews
 項異常|errors
 主題|Theme
 `.trim().split('\n').map(line=>{const separator=line.indexOf('|');return [line.slice(0,separator),line.slice(separator+1)];});
+entries.push(
+ ['Demo 填入已標記為虛擬委託；重設後可建立真實委託。','Demo fill marks this request as virtual. Reset the form to create a real request.'],['確認虛擬排程','Confirm virtual schedule'],['已接收，可由助理加速','Received · Ask the assistant to accelerate'],['虛擬委託','Virtual request'],['真實委託','Real request'],['委託種類','Request type'],['虛擬委託・實際流程','Virtual request · Native workflow'],['虛擬試驗進度','Virtual trial progress'],['虛擬試驗已完成','Virtual trial completed'],['虛擬試驗進行中','Virtual trial in progress'],['等待加速虛擬試驗','Awaiting virtual acceleration'],['委託種類已固定，不能變更。','The saved request type cannot be changed.'],['僅供流程測試，可由 AI 助理加速試驗；報告標示測試用途。','For workflow testing. The AI assistant can accelerate the trial; reports are marked for testing.'],['依正常排程時間執行。Demo 填入會自動選為虛擬委託。','Runs on the normal schedule. Demo fill automatically selects a virtual request.'],
+ ['流程測試加速器','Flow-test accelerator'],['資料庫測試副本','Database rehearsal copy'],['獨立 Demo 展示','Isolated Demo'],
+ ['關閉流程測試加速器','Close flow-test accelerator'],['來源案件','Source case'],['請選擇已確認接收的案件','Select a received case'],
+ ['重新讀取測試資料','Reload rehearsal data'],['原始工時','Original test hours'],['原排程','Original schedule'],['排程時窗','Scheduled calendar window'],
+ ['模擬進度','Simulated progress'],['模擬經過時間','Simulated elapsed time'],['模擬時間','Virtual time'],['實際操作時間','Actual operation time'],
+ ['測試原因','Reason for rehearsal'],['建立並標記測試副本','Create and mark rehearsal copy'],['下載流程測試紀錄','Download rehearsal record'],
+ ['正在核對並讀取測試資料…','Checking and loading rehearsal data…'],['流程測試｜非正式試驗結果','FLOW TEST | Not an official test result'],
+ ['請由工作區管理者先建立測試副本。','Ask a workspace administrator to create a marked rehearsal copy first.'],
+ ['目前沒有可讀取且已確認接收的排程，請先完成排程與實驗室接收。','No received schedule is available. Complete scheduling and lab receipt first.'],
+ ['僅推進明確標記的測試副本；正式委託、原排程與設備預約不會改變。','Only a marked rehearsal copy advances. Production requests, schedules and equipment reservations remain unchanged.'],
+ ['僅操作目前隔離 Demo 的案件，不連接正式資料庫。','Only isolated browser Demo cases are changed; the production database is not used.']
+);
 export const ENGLISH_UI=Object.fromEntries(entries);
 let locale=readUiPreferences().language;
 if(typeof window!=='undefined'){
@@ -1255,6 +1273,8 @@ export function translateText(value,language=locale){
  if(ENGLISH_UI[text])return value.replace(text,ENGLISH_UI[text]);
  const requestCount=text.match(/^共 (\d+) 筆(借用)? · 每頁最多 (\d+) 筆(.*)$/);if(requestCount)return `${requestCount[1]} ${requestCount[2]?'loans':'records'} · Up to ${requestCount[3]} per page${requestCount[4]?' · Due dates and workflow status are shown separately':''}`;
  const page=text.match(/^第\s*(\d+)\s*頁$/);if(page)return `Page ${page[1]}`;
+ const rehearsalProgress=text.match(/^推進至 (50|100)%$/);if(rehearsalProgress)return 'Advance to '+rehearsalProgress[1]+'%';
+ const rehearsalConfirm=text.match(/^輸入 FLOW TEST (.+)$/);if(rehearsalConfirm)return 'Type FLOW TEST '+rehearsalConfirm[1];
  const count=text.match(/^(\d+)\s*(天|筆|項|件|台|小時|分鐘)$/);if(count)return `${count[1]} ${ENGLISH_UI[count[2]]}`;
  const empty=text.match(/^目前沒有可查閱的(.+)。$/);if(empty)return `No ${translateText(empty[1],language).toLowerCase()} available.`;
  const pageRange=text.match(/^第\s*(\d+)\s*[–-]\s*(\d+)\s*筆，共\s*(\d+)\s*筆$/);if(pageRange)return `Showing ${pageRange[1]}–${pageRange[2]} of ${pageRange[3]}`;

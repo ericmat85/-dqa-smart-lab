@@ -6,6 +6,7 @@ import './ScheduleTimeline.css';
 export default function ScheduleTimeline({row}) {
   const now=useSyncExternalStore(subscribeScheduleClock,scheduleClockSnapshot,scheduleServerSnapshot);
   const progress=scheduleProgress(row,now);
+  if(row.hasSharedDraft)return <div className="schedule-timeline"><div className="schedule-timeline-dates"><time>{row.time}</time><span aria-hidden="true">→</span><time>{row.end}</time></div><small>草稿日期 · 尚未預約</small></div>;
   if(progress.phase==='unscheduled'||progress.phase==='invalid')return <span className="schedule-timeline-unset">{progress.label}</span>;
   return <div className={`schedule-timeline ${progress.phase}`} title="依台灣時間按已儲存的試驗日程自動更新">
     <div className="schedule-timeline-dates"><time>{String(row.time).slice(0,10)}</time><span aria-hidden="true">→</span><time>{new Date(progress.end).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})}</time></div>

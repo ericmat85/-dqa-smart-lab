@@ -1,6 +1,32 @@
+import {canStopBusinessSchedule} from './trialCompletion.mjs';
+import {humanCommand,pendingHumanOperation} from './businessHumanClient.mjs';
+import ExecutionKindBadge from './ExecutionKindBadge.jsx';
+import {isVirtualRequest} from './requestExecutionKind.mjs';
+import useSharedSchedulePreview from './useSharedSchedulePreview.js';
+import {businessClient} from './businessClient.mjs';
+import {businessAIEnabled,askBusinessAI,reviewBusinessRequest} from './businessAIClient.mjs';
+import BusinessAccountEntry from './BusinessAccountEntry.jsx';
+import {BusinessBookButton,BusinessHumanPending} from './BusinessHumanControls.jsx';
+import {originalHumanSource} from './originalBusiness.mjs';
+import {scheduleDraftCommand,prepareSharedDraftForm} from './sharedScheduleDrafts.mjs';
+import {scheduleDraftReferences,resourceCan} from './originalBusiness.mjs';
+import useResourceMutation from './useResourceMutation.js';
+import ResourceOperationNotice from './ResourceOperationNotice.jsx';
+import {requestAction} from './requestWorkflowClient.mjs';
+import {originalBusinessEnabled,originalBusinessAccount,loginOriginalBusiness,logoutOriginalBusiness,originalBusinessError} from './originalBusiness.mjs';
+import {appStorage} from './originalBusiness.mjs';
+import RequestCloseIcon from './RequestCloseIcon.jsx';
+import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
+import {AdminModuleNav} from './AdminCenterCards.jsx';
+import {requireE2Enabled,applyE2Settings} from './e2PlanningSettings.mjs';
+import {beginE2Activity,finishE2Activity,draftE2Activity} from './e2Activity.mjs';
+import {prepareScheduleTrialForm,prepareManualTrialForm,schedulingErrorMessage} from './scheduleTrialInput.mjs';
+import {reviewE1Request} from './e1Review.mjs';
+import {askE2Scheduling,e2ProviderUnavailableMessage} from './e2PreviewClient.mjs';
+import {canonicalE2,e2SampleEvidence,describeE2Reason,describeE2CoverageIssue,makeE2Context,makeE2Draft,validateE2Applied} from './e2Scheduling.mjs';
 import AiReviewProgress from './AiReviewProgress.jsx';
 import AdminCenterModule from './AdminCenterModule.jsx';
-import {ADMIN_MODULES} from './adminCenterData.mjs';
+import {ADMIN_MODULES,AI_ENGINE_PAGES} from './adminCenterData.mjs';
 import {canViewAdmin} from './adminCenterStore.mjs';
 import './AccountRolePolish.css';
 import CatalogSearchToolbar from './CatalogSearchToolbar.jsx';
@@ -44,6 +70,7 @@ import useLabSnapshot from './useLabSnapshot.js';
 import {requestInformation} from './labData.mjs';
 import IntelligentAssistant from './IntelligentAssistant.jsx';
 import RoleSettings from './RoleSettings.jsx';
+import BusinessAccountManagement from './BusinessAccountManagement.jsx';
 import {BUILTIN_ROLES,readCustomRoles,canAccessLmsPage} from './customRoles.mjs';
 import './ManagementPages.css';
 import LiveDashboard from './LiveDashboard.jsx';
@@ -62,7 +89,7 @@ import {subscribeScheduleClock,scheduleClockSnapshot,scheduleServerSnapshot} fro
 import ScheduleTimeline from './ScheduleTimeline.jsx';
 import ScheduleViews from './ScheduleViews.jsx';
 import ScheduleArrangement from './ScheduleArrangement.jsx';
-import {readScheduleEquipment,validateSchedule,recommendSchedule,dateOnly,SCHEDULE_KEY,EQUIPMENT_KEY} from './scheduleEquipment.mjs';
+import {readScheduleEquipment,validateSchedule,dateOnly,SCHEDULE_KEY,EQUIPMENT_KEY} from './scheduleEquipment.mjs';
 import MaterialsPage from './MaterialsPage.jsx';
 import EquipmentPage from './EquipmentPage.jsx';
 import RequestInfoModal from './RequestInfoModal.jsx';
@@ -388,17 +415,18 @@ export function LoginPage({
 
 }) {
 
-  const [email, setEmail] = useState(() => system.id === "lms" ? "level1@example.com" : "");
+  const [email, setEmail] = useState(() => originalBusinessEnabled()?"":system.id === "lms" ? "level1@example.com" : "");
 
-  const [password, setPassword] = useState(() => system.id === "lms" ? DEMO_PASSWORD : "");
+  const [password, setPassword] = useState(() => originalBusinessEnabled()?"":system.id === "lms" ? DEMO_PASSWORD : "");
 
   const [error, setError] = useState("");
+  const loginPending=useRef(false);
 
 
 
 
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
 
     event.preventDefault();
 
@@ -420,7 +448,7 @@ export function LoginPage({
 
 
 
-    onLogin(email.trim().toLowerCase(), password, setError);
+    if(loginPending.current)return;loginPending.current=true;try{await onLogin(email.trim().toLowerCase(), password, setError);}finally{loginPending.current=false;}
 
   }
 
@@ -468,6 +496,7 @@ export function LoginPage({
 
 
 
+        {originalBusinessEnabled()&&!preview&&<BusinessAccountEntry/>}
         <button type="button" className="back-button" onClick={onBack}>
 
           ← 返回系統首頁
@@ -984,7 +1013,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
 
 
-        <div className="account-heading-actions">{onBack&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}>{backLabel}</button>}<button
+        <div className="account-heading-actions">{onBack&&backLabel!=='返回系統管理'&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button
 
           type="button"
 
@@ -994,7 +1023,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
         >
 
-          ＋ 新增帳號
+          <LmsHeaderActionLabel icon="add">＋ 新增帳號</LmsHeaderActionLabel>
 
         </button></div>
 
@@ -1519,6 +1548,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
 
 function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPage=null,onExit }) {
+ const workflow=useResourceMutation({endpoint:'/workflow',storagePrefix:'dqa-request-workflow-pending-v1'}),reviewContext=useRef(null);
  const requestResetEpoch=useRef(caseResetVersion());
  const reportRows=useReportSnapshot();
  const approvalSnapshot=useLabSnapshot();
@@ -1527,11 +1557,11 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  const [approvalInfo,setApprovalInfo]=useState(null);
 
  const [requests,setRequests] = useState(() => {
-   return mergeImportedRequests(readStoredRequests(ALL_DEMO_REQUESTS), readApprovedRequestsForLms());
+   return originalBusinessEnabled()?readStoredRequests([]):mergeImportedRequests(readStoredRequests(ALL_DEMO_REQUESTS), readApprovedRequestsForLms());
  });
  useEffect(() => {
    const refresh = () => setRequests(old => {
-     return mergeImportedRequests(readCancellationOverrides(old), readApprovedRequestsForLms());
+     return originalBusinessEnabled()?readStoredRequests([]):mergeImportedRequests(readCancellationOverrides(old), readApprovedRequestsForLms());
    });
    window.addEventListener("focus", refresh);
    window.addEventListener("storage", refresh);
@@ -1540,7 +1570,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  }, []);
  const [storageError, setStorageError] = useState("");
  useEffect(() => {
-   if(requestResetEpoch.current!==caseResetVersion())return;
+   if(originalBusinessEnabled()||requestResetEpoch.current!==caseResetVersion())return;
    // Report the result of synchronizing with browser storage.
    // eslint-disable-next-line react-hooks/set-state-in-effect
    setStorageError(writeStoredRequests(requests) ? "" : "簽核資料尚未儲存：瀏覽器空間不足或禁止儲存，請勿關閉此頁並先釋出空間。");
@@ -1556,19 +1586,9 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  const [notice,setNotice] = useState("");
  const [aiReview,setAiReview] = useState(null);
  const [aiReviewing,setAiReviewing] = useState(false);
+ const aiReviewOperation=useRef(null);useEffect(()=>()=>aiReviewOperation.current?.abort(),[selected]);
  const [aiProgress,setAiProgress] = useState(0);
  const aiReviewButton=useRef(null);
- const [pendingReviewResult,setPendingReviewResult] = useState(null);
- useEffect(() => {
-   if (!pendingReviewResult) return;
-   const started = Date.now();
-   const timer = window.setInterval(() => {
-     const progress = Math.min(100, Math.floor((Date.now()-started)/50));
-     setAiProgress(progress);
-     if(progress >= 100) { window.clearInterval(timer); setAiReview(pendingReviewResult); setAiReviewing(false); setPendingReviewResult(null); }
-   }, 100);
-   return () => window.clearInterval(timer);
- }, [pendingReviewResult]);
  const [showHistory,setShowHistory] = useState(subPage==='history');
  const [historyFilter,setHistoryFilter] = useState("完成");
  const approvalRows=requestApprovalRows(requests,approvalSnapshot.labOperations,approvalSnapshot.schedules,approvalSnapshot.borrows,reportRows);
@@ -1585,6 +1605,7 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
    onPendingReviewCountChange(pendingCount);
  }, [pendingCount, onPendingReviewCountChange]);
  const current = requests.find(r=>r.id===selected);
+ useEffect(()=>{if(!selected){reviewContext.current=null;return;}if(reviewContext.current?.id!==selected){const r=requests.find(v=>v.id===selected);reviewContext.current={id:selected,revision:r?.sourceRevision};}},[selected,requests]);
  useEffect(() => {
    if (!selected || !selectedFromHistory) return;
    const preventEscapeClose = (event) => {
@@ -1599,58 +1620,13 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  }, [selected, selectedFromHistory]);
  const update = (id,fn)=>setRequests(old=>old.map(r=>r.id===id?fn(r):r));
  const stamp=()=>new Date().toLocaleString("zh-TW",{hour12:false});
- function runAIReview(request){
-   if(!request) return;
-   setAiReviewing(true);
-   setAiProgress(0);
-   setAiReview(null);
-   // Demo 階段採用可解釋的規則檢查；尚未呼叫真正的 AI API。
-   const findings=[];
-   const requiredFields=[
-     ["產品代碼",request.productCode],
-     ["產品類型",request.productType],
-     ["需求日期",request.requestedDate],
-     ["測試數量",request.quantity],
-     ["試驗規範／試驗手法",request.specification],
-     ["判定基準",request.judgment]
-   ];
-   requiredFields.forEach(([label,value])=>{
-     if(value===undefined || value===null || String(value).trim()===""){
-       findings.push({level:"error",title:`缺少${label}`,detail:`「${label}」尚未填寫，建議補齊後再送主管審查。`});
-     }
-   });
-   if(request.quantity && (!Number.isFinite(Number(request.quantity)) || Number(request.quantity)<=0)){
-     findings.push({level:"error",title:"測試數量需確認",detail:"測試數量不是正數，請確認樣品數量及填寫格式。"});
-   }
-   if(request.requestedDate){
-     const normalized=String(request.requestedDate).replaceAll("/","-");
-     const parsed=new Date(normalized);
-     if(!Number.isNaN(parsed.getTime()) && parsed.getTime()<new Date("2026-01-01").getTime()){
-       findings.push({level:"warning",title:"需求日期可能過期",detail:"需求日期早於本 Demo 使用的資料年度，請確認日期是否正確。"});
-     }
-   }
-   const spec=String(request.specification||"").trim();
-   const judgment=String(request.judgment||"").trim();
-   if(spec && /依.*規範|依客戶規格|相關.*規範/.test(spec) && !/規範編號|標準編號|JIS|ISO|IEC|SAE|客戶規格/.test(spec)){
-     findings.push({level:"warning",title:"試驗規範引用較籠統",detail:"目前描述未明確列出規範編號或版本；建議補上適用規範、版本及試驗條件。"});
-   }
-   if(judgment && /依.*規格判定|需作判定|依核准/.test(judgment)){
-     findings.push({level:"warning",title:"判定基準可能不夠具體",detail:"目前判定基準偏向一般性描述，建議列出可量測的允收條件或引用明確條文。"});
-   }
-   if(!request.productVersion || !request.pcbaVersion || !request.softwareVersion){
-     findings.push({level:"warning",title:"版本資訊待確認",detail:"產品、PCBA 或軟體版本資訊有缺漏，請確認本次試驗樣品的版本識別是否完整。"});
-   }
-   const result={
-     id:request.id,
-     createdAt:new Date().toLocaleString("zh-TW",{hour12:false}),
-     findings,
-     summary:findings.some(x=>x.level==="error")?"有必要資料缺漏，建議補齊後再送審。":findings.length?"發現需要人工確認的項目，請主管與委託人核對。":"依目前可檢查欄位，未發現明顯缺漏；仍須由主管確認規格適用性。",
-     checkedFields:requiredFields.length,
-     mode:"Demo 規則檢查"
-   };
-   setPendingReviewResult(result);
+ async function runAIReview(request){
+  if(!request||aiReviewOperation.current)return;const controller=new AbortController();aiReviewOperation.current=controller;setAiReviewing(true);setAiProgress(0);setAiReview(null);
+  try{const source=approvalSnapshot.electronic.find(r=>r.id===request.id)||request;const result=businessAIEnabled()?await reviewBusinessRequest({...source,databaseId:request.databaseId||source.databaseId,sourceRevision:request.sourceRevision||source.sourceRevision},{signal:controller.signal}):reviewE1Request(source,{report:reportRows.find(r=>r.requestId===request.id)});if(!controller.signal.aborted){setAiReview({...result,id:request.id});setAiProgress(100);}}
+  catch(error){setNotice(error.message);}finally{if(aiReviewOperation.current===controller){aiReviewOperation.current=null;setAiReviewing(false);}}
  }
  function fillDemoReview() {
+   if(originalBusinessEnabled()&&!isVirtualRequest(current)){setNotice("真實委託請由本人簽名；Demo 填入只適用虛擬委託。");return;}
    if ((reviewSignature || comment.trim()) && !window.confirm('DEMO 填寫會覆蓋目前的簽名與審查意見，確定繼續？')) return;
    setReviewInputVersion(version => version + 1);
    setReviewMode('upload');
@@ -1658,7 +1634,11 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
    setComment('DEMO 測試：已確認委託內容與試驗需求，僅供審查流程展示。');
    setNotice('已填入測試簽名與審查意見，請確認後再提交。');
  }
- function decide(returnIt){ if(!current)return;
+ async function decide(returnIt){ if(!current)return;
+   if(originalBusinessEnabled()){
+     if(workflow.locked)return;const expectedRevision=reviewContext.current?.revision;if(!expectedRevision){setNotice('請重新開啟案件後簽核。');return;}
+     try{if(await workflow.submit(requestAction(current,returnIt?'RETURN':'LMS_APPROVE',{signature:reviewSignature,comment,expectedRevision}),'簽核結果已保存至資料庫。')){setRequests(readStoredRequests([]));setComment('');setReviewSignature('');setReviewInputVersion(v=>v+1);setSelected(null);}}catch(e){setNotice(originalBusinessError(e));}return;
+   }
    if (current.source === 'electronic-request') {
      try {
        const result = reviewElectronicRequest({id:current.id, accountId:currentUser?.id, expectedRevision:current.sourceRevision, returnIt, signature:reviewSignature, comment});
@@ -1674,37 +1654,44 @@ function RequestsPage({ onPendingReviewCountChange = () => {}, currentUser,subPa
  if(!canReview(currentUser,{...current,participantIds:current.applicant===currentUser?.name?[currentUser.id]:[],approvals:current.approvalRecords||[]})){setNotice("此帳號無權審核本案件，或已參與本案件的審查。");return;} if(!returnIt&&!reviewSignature){setNotice("請先完成電子簽名。");return;} if(returnIt&&!comment.trim()){setNotice("退回原因必填。");return;}  const level=current.approval+1; const action=returnIt?`第${level}階主管退回：${comment||"請補充資料"}`:`第${level}階主管核准`; update(current.id,r=>({...r,status:returnIt?"退回":level>=2?"完成":"待審查",approval:returnIt?0:level,approvalRecords:[...(r.approvalRecords||[]),{stage:level,actorId:currentUser.id,action:returnIt?"退回":"核准",at:new Date().toISOString()}],signatureRecords:[...getSignatureHistory(r),{stage:level,actor:currentUser.name,comment:comment.trim(),actorId:currentUser.id,signature:reviewSignature,at:new Date().toISOString(),decision:returnIt?"退回":"核准"}],history:[...r.history,`${stamp()} ${action}`]})); setNotice(returnIt?"已退回申請人補件；重新送出後將由第一階主管重新審查。":level>=2?"兩階主管皆已核准，委託狀態更新為完成。":"第一階主管已核准，等待第二階主管審查。"); setComment(""); setReviewSignature("");setReviewMode("draw"); if(returnIt||level>=2)setSelected(null); else setSelected(current.id); }
  const visible=approvalRows.filter(r=>(requestStatusFilter==='all'||r.status===requestStatusFilter)&&`${r.id} ${r.productCode||''} ${r.title} ${r.department} ${r.applicant}`.toLowerCase().includes(search.toLowerCase()));
  const historical=requests.filter(r=>["完成","取消","退回","已結案"].includes(r.status)&&r.status===historyFilter&&`${r.id} ${r.productCode||""} ${r.title} ${r.department} ${r.applicant}`.toLowerCase().includes(search.toLowerCase()));
- return <section className="panel generic-page lms-compact-requests"><div className={subPage?"template-page has-request-subpage":"template-page"}><div className="template-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="requests"/>試驗委託管理</h2><HelpTip>本頁顯示待審查、待核准與報告待審核委託；已完成、取消及退回案件請至歷史委託查詢。</HelpTip></div></div><a className="template-btn secondary request-history-button" href="/lms/requests/history" target="_blank" rel="opener">歷史委託</a></div>
+ function leaveRequestDetail(){setSelected(null);setAiReview(null);if(selectedFromHistory){setSelectedFromHistory(false);setShowHistory(true);}}
+ return <section className="panel generic-page lms-compact-requests"><div className={subPage?"template-page has-request-subpage":"template-page"}><div className="template-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="requests"/>試驗委託管理</h2><HelpTip>本頁顯示待審查、待核准與報告待審核委託；已完成、取消及退回案件請至歷史委託查詢。</HelpTip></div></div><a className="template-btn secondary request-history-button" href="/lms/requests/history" target="_blank" rel="opener"><LmsHeaderActionLabel icon="history">歷史委託</LmsHeaderActionLabel></a></div>
  <div className="schedule-view-tabs request-review-tabs" role="tablist" aria-label="委託審查分類">{reviewTabs.map(([key,label,count],index)=><button type="button" role="tab" key={key} id={`request-review-tab-${index}`} aria-selected={requestStatusFilter===key} aria-controls="request-review-panel" tabIndex={requestStatusFilter===key?0:-1} onClick={()=>setRequestStatusFilter(key)} onKeyDown={event=>reviewTabKeyDown(event,index)}><strong>{label}</strong><span>{count}</span></button>)}</div>
  {approvalOperationId&&<LabOperationApproval operationId={approvalOperationId} currentUser={currentUser} onClose={()=>setApprovalOperationId(null)}/>}
  {approvalInfo&&<RequestInfoModal account={currentUser} request={approvalInfo} onClose={()=>setApprovalInfo(null)}/>}
  {storageError && <div className="template-notice" role="alert">{storageError}<button type="button" onClick={() => setStorageError(writeStoredRequests(requests) ? "" : storageError)}>重試儲存</button></div>}
+ <ResourceOperationNotice operation={workflow} onSaved={()=>setSelected(null)}/>
  {notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}
  <section id="request-review-panel" role="tabpanel" aria-labelledby={`request-review-tab-${activeReviewTab}`} tabIndex={0}>
  <CatalogSearchToolbar kind="委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>setSearch('')}/>
  <div className="template-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}:${requestStatusFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","優先順序","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{visible.map(r=><tr key={r.operationId||r.id}><td><button type="button" className="request-id-link" onClick={()=>{if(r.reportId){setApprovalInfo(requestInformation(r,approvalSnapshot));return;}if(r.operationId?.startsWith('borrow:')){setApprovalOperationId(r.operationId);return;}if(r.operationId){setApprovalInfo({...requestInformation(r,approvalSnapshot),status:'待核准'});return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode("view");setComment("");setAiReview(null)}} title={`查看 ${r.id} 委託單細節`}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.priority}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{if(r.operationId){setApprovalOperationId(r.operationId);return;}setSelected(r.id);setReviewSignature("");setReviewMode("draw");setSelectedFromHistory(false);setModalMode(r.status==="待審查"?"review":"view");setComment("");setAiReview(null);}}>{requestActionLabel(r)}</button></td></tr>)}</tbody></PaginatedTable>{!visible.length&&<div className="template-empty">沒有符合條件的委託</div>}</div></section>
  <div className="template-info">顯示委託審查、申請核准與二／三階報告審核；已結案報告可在案件歷程查閱。</div>
- {showHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal" role="region" aria-labelledby="history-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="history-modal-title">歷史委託</h3><HelpTip>查詢已完成、取消及退回的委託單；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史委託" onClick={()=>subPage?onExit():setShowHistory(false)}>×</button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>{setSearch('');setHistoryFilter('完成');}} className="history-toolbar"><select className="template-select" value={historyFilter} onChange={e=>setHistoryFilter(e.target.value)}>{["完成","取消","退回"].map(x=><option key={x} value={x}>{x}</option>)}</select><span className="request-count">共 {historical.length} 筆</span></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historical.map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>查看</button></td></tr>)}</tbody></PaginatedTable>{!historical.length&&<div className="template-empty">此分類目前沒有歷史委託</div>}</div></div></section></div>}
- {aiReviewing&&current&&modalMode==='review'&&<AiReviewProgress progress={aiProgress} returnFocus={aiReviewButton} onCancel={()=>{setPendingReviewResult(null);setAiReviewing(false);setAiProgress(0);}}/>}
- {current&&<div className="request-modal-backdrop" role="presentation" onMouseDown={e=>{if(!selectedFromHistory&&e.target===e.currentTarget)setSelected(null)}}><section className="request-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="request-modal-title">{current.id}｜{current.title}</h3><HelpTip>委託詳細資料與簽核歷程</HelpTip></div></div><div className="request-modal-header-actions">{current.status === "待審查" && <button type="button" className="template-btn secondary" onClick={fillDemoReview}>DEMO 填寫</button>}{modalMode==="review"&&<button type="button" ref={aiReviewButton} className="template-btn ai-review-button" disabled={aiReviewing} onClick={()=>runAIReview(current)}><AssistantIcon/><span>{aiReviewing?"檢查中…":"AI 審查"}</span></button>}{selectedFromHistory?<button type="button" className="template-btn secondary" onClick={()=>{setSelected(null);setSelectedFromHistory(false);setAiReview(null);setShowHistory(true);}}>回上一頁</button>:<button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉視窗" onClick={()=>{setSelected(null);setAiReview(null);}}>×</button>}</div></div><div className="request-modal-body"><ReportCasePanel request={approvalSnapshot.electronic.find(row=>row.id===current.id)||current} account={currentUser}/>{notice && <div className="template-info" role="status">{notice}</div>}{modalMode==="review"&&aiReview&&aiReview.id===current.id&&<section className="ai-review-results" aria-live="polite"><div className="ai-review-results-heading"><div><span className="ai-review-eyebrow">DQA SMART REVIEW · {aiReview.mode}</span><h4>AI 審查結果</h4><p>{aiReview.summary}</p></div><button type="button" className="ai-review-dismiss" onClick={()=>setAiReview(null)} aria-label="關閉 AI 審查結果">×</button></div><div className="ai-review-metrics"><span>檢查欄位 <strong>{aiReview.checkedFields}</strong></span><span>待確認項目 <strong>{aiReview.findings.length}</strong></span><span>檢查時間 <strong>{aiReview.createdAt}</strong></span></div>{aiReview.findings.length===0?<div className="ai-review-empty"><strong>未發現明顯缺漏</strong><HelpTip>這只代表目前規則檢查未發現明顯問題，不代表試驗規格已獲正式認可。</HelpTip></div>:<div className="ai-review-finding-list">{aiReview.findings.map((finding,index)=><article className={`ai-review-finding ${finding.level}`} key={`${finding.title}-${index}`}><span className="ai-review-finding-icon">{finding.level==="error"?"!":"△"}</span><div><strong>{finding.title}</strong><p>{finding.detail}</p></div><span className="ai-review-level">{finding.level==="error"?"需補正":"待確認"}</span></article>)}</div>}<p className="ai-review-disclaimer">提示：目前為前端 Demo 規則檢查，尚未連接真正的 AI API 或讀取外部規格文件。結果僅供參考，不會自動核准或退回委託。</p></section>}<div className="request-form-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{current.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{current.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{current.customerName||"—"}</strong></div><div><label>客戶品番</label><strong>{current.customerPartNo||"—"}</strong></div><div><label>需求日期</label><strong>{current.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{current.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{(current.intentions||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{(current.sampleSource||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{current.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{current.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{current.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{current.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{current.specification||current.title}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{current.judgment||"依核准之試驗規格判定。"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{current.remarks||"—"}</div></div>{current.source === "electronic-request" && <div className="template-info">此電子委託的簽名與審查結果會同步回委託系統；雙階核准後進入待排程。</div>}<div className="detail-grid"><div><span>委託部門</span><strong>{current.department}</strong></div><div><span>申請人</span><strong>{current.applicant}</strong></div><div><span>目前狀態</span><strong><span className={`template-status status-${current.status}`}>{current.status}</span></strong></div><div><span>審查進度</span><strong>{current.approval}/2 階核准</strong></div></div><h4>雙階主管審查</h4><div className="approval-steps"><div className={current.approval>=1?"approved":""}><b>1</b><span>第一階主管</span><small>{current.approval>=1?"已核准":current.status==="退回"?"已退回":"待審查"}</small></div><div className={current.approval>=2?"approved":""}><b>2</b><span>第二階主管</span><small>{current.approval>=2?"已核准":"待第一階完成"}</small></div></div><SignatureHistory request={current} /><h4>完整操作歷程</h4><PaginatedList items={current.history} resetKey={current.id}>{page=><ul className="history-list">{page.map((h,i)=><li key={i}>{h}</li>)}</ul>}</PaginatedList>{current.status === "待審查" && <section className="request-form-preview"><h4>電子簽名與審核</h4><ApprovalSignature key={`${current.id}-${current.approval}-${reviewInputVersion}`} accountId={currentUser?.id} mode={reviewMode} onModeChange={setReviewMode} value={reviewSignature} onChange={setReviewSignature} onError={setNotice} /><label className="comment-label">審查意見（退回時請填寫）<textarea className="template-input" value={comment} onChange={e=>setComment(e.target.value)} placeholder="例如：請補充測試條件、樣品數量或規格依據" rows={3}/></label><div className="template-form-actions"><button type="button" className="template-btn" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(false)}>核准第 {current.approval+1} 階</button><button type="button" className="template-btn danger" disabled={!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(true)}>退回委託</button></div></section>}</div></section></div>}
+ {showHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal" role="region" aria-labelledby="history-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="history-modal-title">歷史委託</h3><HelpTip>查詢已完成、取消及退回的委託單；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史委託" onClick={()=>subPage?onExit():setShowHistory(false)}><RequestCloseIcon/></button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史委託" placeholder="搜尋委託編號、產品代碼、試驗項目、部門…" value={search} onChange={setSearch} onClear={()=>{setSearch('');setHistoryFilter('完成');}} className="history-toolbar"><select className="template-select" value={historyFilter} onChange={e=>setHistoryFilter(e.target.value)}>{["完成","取消","退回"].map(x=><option key={x} value={x}>{x}</option>)}</select><span className="request-count">共 {historical.length} 筆</span></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${search}:${historyFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","試驗項目","委託部門","申請人","提交日期","狀態","操作"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historical.map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>{r.id}</button></td><td>{r.productCode||"—"}</td><td>{r.title}</td><td>{r.department}</td><td>{r.applicant}</td><td>{r.submitted}</td><td><span className={`template-status status-${r.status}`}>{r.status}</span></td><td><button className="template-btn secondary" style={{padding:"7px 10px"}} onClick={()=>{setSelected(r.id);setSelectedFromHistory(true);setModalMode("view");setComment("");setAiReview(null);if(!subPage)setShowHistory(false)}}>查看</button></td></tr>)}</tbody></PaginatedTable>{!historical.length&&<div className="template-empty">此分類目前沒有歷史委託</div>}</div></div></section></div>}
+ {aiReviewing&&current&&modalMode==='review'&&<AiReviewProgress live={businessAIEnabled()} progress={aiProgress} returnFocus={aiReviewButton} onCancel={()=>{aiReviewOperation.current?.abort();setAiReviewing(false);setAiProgress(0);}}/>}
+ {current&&<div className="request-modal-backdrop" role="presentation" onMouseDown={e=>{if(!workflow.busy&&!selectedFromHistory&&e.target===e.currentTarget)setSelected(null)}}><section className="request-modal request-info-detail-modal" role="dialog" aria-modal="true" aria-labelledby="request-modal-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="request-modal-title">{current.id}｜{current.title}</h3><ExecutionKindBadge request={current}/><HelpTip>委託詳細資料與簽核歷程</HelpTip></div></div><div className="request-modal-header-actions">{current.status === "待審查" && <button type="button" className="template-btn secondary" onClick={fillDemoReview}><LmsHeaderActionLabel icon="edit">DEMO 填寫</LmsHeaderActionLabel></button>}{modalMode==="review"&&<button type="button" ref={aiReviewButton} className="template-btn ai-review-button" disabled={aiReviewing} onClick={()=>runAIReview(current)}><LmsHeaderActionLabel icon="assistant"><AssistantIcon/><span>{aiReviewing?"檢查中…":"AI 審查"}</span></LmsHeaderActionLabel></button>}{selectedFromHistory?<button type="button" className="template-btn secondary" onClick={()=>{setSelected(null);setSelectedFromHistory(false);setAiReview(null);setShowHistory(true);}}><LmsHeaderActionLabel icon="back">回上一頁</LmsHeaderActionLabel></button>:<button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉視窗" onClick={()=>{setSelected(null);setAiReview(null);}}><RequestCloseIcon/></button>}</div><button type="button" className="request-modal-close request-detail-mobile-close" aria-label="關閉視窗" onClick={leaveRequestDetail}><RequestCloseIcon/></button></div><div className="request-modal-body"><ResourceOperationNotice operation={workflow} onSaved={()=>setSelected(null)}/><ReportCasePanel request={approvalSnapshot.electronic.find(row=>row.id===current.id)||current} account={currentUser}/>{notice && <div className="template-info" role="status">{notice}</div>}{modalMode==="review"&&aiReview&&aiReview.id===current.id&&<section className="ai-review-results" aria-live="polite"><div className="ai-review-results-heading"><div><span className="ai-review-eyebrow">DQA SMART REVIEW · {aiReview.mode}</span><h4>AI 審查結果</h4><p>{aiReview.summary}</p></div><button type="button" className="ai-review-dismiss" onClick={()=>setAiReview(null)} aria-label="關閉 AI 審查結果">×</button></div><div className="ai-review-metrics"><span>{aiReview.real_ai?'來源項目':'檢查欄位'} <strong>{aiReview.checkedFields}</strong></span><span>待確認項目 <strong>{aiReview.findings.length}</strong></span><span>檢查時間 <strong>{aiReview.createdAt}</strong></span></div>{aiReview.findings.length===0?<div className="ai-review-empty"><strong>未發現明顯缺漏</strong><HelpTip>這只代表目前規則檢查未發現明顯問題，不代表試驗規格已獲正式認可。</HelpTip></div>:<div className="ai-review-finding-list">{aiReview.findings.map((finding,index)=><article className={`ai-review-finding ${finding.level}`} key={`${finding.title}-${index}`}><span className="ai-review-finding-icon">{finding.level==="error"?"!":"△"}</span><div><strong>{finding.title}</strong><p>{finding.detail}</p></div><span className="ai-review-level">{finding.level==="error"?"需補正":"待確認"}</span></article>)}</div>}<p className="ai-review-disclaimer">提示：目前為前端 Demo 規則檢查，未呼叫 AI 模型。已核對委託欄位、簽名完整性與可用的報告檢查摘要；未驗證簽名真偽，不會自動核准或退回委託。</p></section>}<div className="request-form-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{current.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{current.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{current.customerName||"—"}</strong></div><div><label>客戶品番</label><strong>{current.customerPartNo||"—"}</strong></div><div><label>需求日期</label><strong>{current.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{current.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{(current.intentions||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{(current.sampleSource||[]).map(x=><span key={x}>{x}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{current.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{current.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{current.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{current.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{current.specification||current.title}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{current.judgment||"依核准之試驗規格判定。"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{current.remarks||"—"}</div></div>{current.source === "electronic-request" && <div className="template-info">此電子委託的簽名與審查結果會同步回委託系統；雙階核准後進入待排程。</div>}<div className="detail-grid"><div><span>委託部門</span><strong>{current.department}</strong></div><div><span>申請人</span><strong>{current.applicant}</strong></div><div><span>目前狀態</span><strong><span className={`template-status status-${current.status}`}>{current.status}</span></strong></div><div><span>審查進度</span><strong>{current.approval}/2 階核准</strong></div></div><h4>雙階主管審查</h4><div className="approval-steps"><div className={current.approval>=1?"approved":""}><b>1</b><span>第一階主管</span><small>{current.approval>=1?"已核准":current.status==="退回"?"已退回":"待審查"}</small></div><div className={current.approval>=2?"approved":""}><b>2</b><span>第二階主管</span><small>{current.approval>=2?"已核准":"待第一階完成"}</small></div></div><SignatureHistory request={current} /><h4>完整操作歷程</h4><PaginatedList items={current.history} resetKey={current.id}>{page=><ul className="history-list">{page.map((h,i)=><li key={i}>{h}</li>)}</ul>}</PaginatedList>{current.status === "待審查" && <section className="request-form-preview" inert={originalBusinessEnabled()&&workflow.locked||undefined}><h4>電子簽名與審核</h4><ApprovalSignature key={`${current.id}-${current.approval}-${reviewInputVersion}`} accountId={currentUser?.id} mode={reviewMode} onModeChange={setReviewMode} value={reviewSignature} onChange={setReviewSignature} onError={setNotice} /><label className="comment-label">審查意見（退回時請填寫）<textarea className="template-input" value={comment} onChange={e=>setComment(e.target.value)} placeholder="例如：請補充測試條件、樣品數量或規格依據" rows={3}/></label><div className="template-form-actions"><button type="button" className="template-btn" disabled={workflow.locked||!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(false)}>核准第 {current.approval+1} 階</button><button type="button" className="template-btn danger" disabled={workflow.locked||!canReview(currentUser,{...current, approvals:current.approvalRecords || []})} onClick={()=>decide(true)}>退回委託</button></div></section>}</div><footer className="request-info-mobile-footer"><button type="button" className="template-btn secondary" onClick={leaveRequestDetail}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg>{selectedFromHistory?"返回歷史委託":"返回委託清單"}</button></footer></section></div>}
  </div></section>;
 }
 
 function readSavedSchedules(fallback){
- try{const data=JSON.parse(window.localStorage.getItem(SCHEDULE_KEY)||'null');return Array.isArray(data)&&data.every(row=>row?.id&&row?.requestId)?data:fallback;}catch{return fallback;}
+ try{const data=JSON.parse(appStorage().getItem(SCHEDULE_KEY)||'null');return Array.isArray(data)&&data.every(row=>row?.id&&row?.requestId)?data:fallback;}catch{return fallback;}
 }
 function SchedulePage({ currentUser, accounts = [], initialFilter = null, onScheduleCountsChange = () => {},subPage=null,onExit }){
+ const planning=useResourceMutation({endpoint:"/planning",storagePrefix:"dqa-schedule-draft-pending-v1"});
+ const stopping=useResourceMutation({endpoint:"/execution",storagePrefix:"dqa-schedule-stop-pending-v1"});
  const [scheduleFilter,setScheduleFilter]=useState(initialFilter || "未排程");
  const [scheduleSearch,setScheduleSearch]=useState("");
  const [notice,setNotice]=useState("");
  const [requestInfo, setRequestInfo] = useState(null);
  const openRequestInfo = row => {
    try {
-     const stored = JSON.parse(window.localStorage.getItem('dqa-request-demo-v2') || '[]');
+     const stored = JSON.parse(appStorage().getItem('dqa-request-demo-v2') || '[]');
      setRequestInfo(resolveScheduleRequest(row, Array.isArray(stored) ? stored : []));
    } catch { setRequestInfo(resolveScheduleRequest(row)); }
  };
  const [scheduleMessage,setScheduleMessage]=useState('');
+ const [e2Applied,setE2Applied]=useState(null);
+ const [businessE2Candidates,setBusinessE2Candidates]=useState(null),[applyingAICandidate,setApplyingAICandidate]=useState(false);
+ const e2Operation=useRef(null);
  const [equipmentCatalog,setEquipmentCatalog]=useState(()=>{try{return readScheduleEquipment();}catch{return [];}});
  const refreshEquipment=()=>{try{setEquipmentCatalog(readScheduleEquipment());setScheduleMessage('已重新讀取設備狀態。');}catch(error){setEquipmentCatalog([]);setScheduleMessage(error.message);}};
  useEffect(()=>{
@@ -1722,14 +1709,19 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const [editing,setEditing]=useState(null);
  const [showStopDialog,setShowStopDialog]=useState(false);
  const [stopError,setStopError]=useState('');
- function confirmStopSchedule(reason){
+ async function confirmStopSchedule(reason){
    if(!editing)return false;
+   if(originalBusinessEnabled()){
+    if(!canStopBusinessSchedule(currentUser,editing)||stopping.locked||pendingHumanOperation()){setStopError('目前無中止權限，或有待確認的操作。');return false;}
+    const ok=await stopping.submit(humanCommand('STOP',editing.requestId,{source:editing.humanSource,comment:reason}),editing.requestId+' 已中止排程並取消委託。');
+    if(ok){setShowStopDialog(false);setEditing(null);setSchedulingForm(null);}return ok;
+   }
    try{
      const result=stopRequestSchedules({scheduleId:editing.id,requestId:editing.requestId,actor:currentUser?.name,actorId:currentUser?.id,reason});
      setScheduleRows(result.schedules);setEquipmentCatalog(result.equipment);
      for(const name of ['dqa:schedules-updated','dqa:equipment-updated','dqa:request-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));
      setNotice(editing.requestId+' 已取消，相關排程已中止。');
-     setShowStopDialog(false);setEditing(null);setEditForm(null);
+     setShowStopDialog(false);setEditing(null);setSchedulingForm(null);
      return true;
    }catch(error){setStopError(error.message||'取消委託失敗，請確認瀏覽器空間後重試。');return false;}
  }
@@ -1739,8 +1731,8 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const displayScheduleRows=scheduleRows.map(row=>({...row,status:effectiveScheduleStatus(row,scheduleNow)}));
  const activeScheduleRows=displayScheduleRows.filter(row=>!['已完成','已結案'].includes(row.status));
  useEffect(()=>{
-   const refresh=()=>{try{const raw=window.localStorage.getItem(SCHEDULE_KEY);if(raw){const rows=JSON.parse(raw);if(Array.isArray(rows))setScheduleRows(old=>JSON.stringify(old)===raw?old:rows);}}catch{setScheduleMessage('無法讀取最新排程資料。');}};
-   try{if(window.localStorage.getItem(SCHEDULE_KEY)===null)window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(scheduleRows));}catch{setScheduleMessage('排程初始化儲存失敗，請確認瀏覽器權限與空間。');}
+   const refresh=()=>{try{const raw=appStorage().getItem(SCHEDULE_KEY);if(raw){const rows=JSON.parse(raw);if(Array.isArray(rows))setScheduleRows(old=>JSON.stringify(old)===raw?old:rows);}}catch{setScheduleMessage('無法讀取最新排程資料。');}};
+   try{if(appStorage().getItem(SCHEDULE_KEY)===null)appStorage().setItem(SCHEDULE_KEY,JSON.stringify(scheduleRows));}catch{setScheduleMessage('排程初始化儲存失敗，請確認瀏覽器權限與空間。');}
    const storage=event=>{if(event.key===SCHEDULE_KEY||event.key===null)refresh();};
    window.addEventListener('dqa:schedules-updated',refresh);window.addEventListener('storage',storage);
    return()=>{window.removeEventListener('dqa:schedules-updated',refresh);window.removeEventListener('storage',storage);};
@@ -1757,17 +1749,25 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
   onScheduleCountsChange(counts);
  }, [displayScheduleRows, onScheduleCountsChange]);
  const [editForm,setEditForm]=useState(null);
+ const editFormRef=useRef(null);
+ const setSchedulingForm=value=>{editFormRef.current=value;setEditForm(value);};
+ const formalBooked=originalBusinessEnabled()&&editing?.businessDatabase&&editing.status!=="未排程";
+ const sharedPreview=useSharedSchedulePreview({editing:originalBusinessEnabled()&&!formalBooked?editing:null,form:editForm,references:editing?.planningReferences});
+ const displayedScheduleForm=originalBusinessEnabled()&&!formalBooked&&editForm?{...editForm,end:sharedPreview.ready?sharedPreview.plan.end_date:''}:editForm;
  const historyScheduleRows=displayScheduleRows.map(r=>({
   ...r, id:r.id, productCode:r.productCode, sampleCode:r.sampleCode||`SMP-${String(r.requestId||r.id).replace(/[^A-Za-z0-9-]/g,"")}`, title:r.title, eq:r.eq, owner:r.owner,
   time:r.time, end:r.end, status:r.status
  }));
  function latestSchedules(){
-   const raw=window.localStorage.getItem(SCHEDULE_KEY);
+   const raw=appStorage().getItem(SCHEDULE_KEY);
    const rows=raw?JSON.parse(raw):scheduleRows;
    if(!Array.isArray(rows))throw Error('排程資料無法讀取，請重新載入。');
    return rows;
  }
  function openEditor(row){
+   if(originalBusinessEnabled()&&(!(resourceCan("schedules.plan")||resourceCan("schedules.book"))||planning.locked||stopping.locked)){setNotice("目前無排程草稿編輯權限，或仍有待確認的操作。");return;}
+   if(row.readOnly){setNotice('這筆是舊站匯入的唯讀排程；原狀態已保留，尚未啟用正式排程修改。');return;}
+   setE2Applied(null);setBusinessE2Candidates(null);
    const latest=scheduleRows.find(item=>item.id===row.id)||row;
    if(["已完成","已結案"].includes(effectiveScheduleStatus(latest,Date.now()))){setNotice("試驗已結束，不可編輯排程。");return;}
    if(row.status==='取消'){setNotice('此委託已取消，無法重新安排排程。');return;}
@@ -1776,34 +1776,102 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
    try{catalog=readScheduleEquipment();setEquipmentCatalog(catalog);}catch(error){setScheduleMessage(error.message);}
    const machine=catalog.find(item=>row.equipmentId?item.id===row.equipmentId:item.name===row.eq);
    const executor=accounts.find(item=>row.ownerId?item.id===row.ownerId:item.name===row.owner);
-   setEditing(row);setScheduleMessage(catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
-   setEditForm({equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??'',preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0});
+   setEditing(originalBusinessEnabled()?{...row,planningReferences:scheduleDraftReferences(),humanSource:originalHumanSource(row.requestId)}:row);setStopError('');setScheduleMessage(row.staleSharedDraft?'委託版本已變更；請核對所有條件後重新儲存草稿。':catalog.length?'':'設備台帳無法讀取或尚無設備，請先確認設備管理。');
+   const initial={equipmentId:machine?.id||'',eq:machine?.name||'',ownerId:executor?.id||'',owner:executor?.name||'',sampleCode:row.sampleCode||('SMP-'+String(row.requestId||row.id).replace(/[^A-Za-z0-9-]/g,'')),time:dateOnly(row.time),end:dateOnly(row.end||row.time),note:row.remarks||'',conditions:row.conditions||{},equipmentIds:row.equipmentIds||[],equipmentCount:row.equipmentCount||1,sampleVolumeLitres:row.sampleVolumeLitres??currentTrialRequest(row.requestId)?.sampleVolumeLitres??(e2SampleEvidence(row.id)?.dimensions_mm?.reduce((a,b)=>a*b,1)/1000000||''),sampleSpaceUnits:row.sampleSpaceUnits??(originalBusinessEnabled()?'':currentTrialRequest(row.requestId)?.sampleSpaceUnits??1),preparationMinutes:row.preparationMinutes||0,cleanupMinutes:row.cleanupMinutes||0};
+   try{setSchedulingForm(originalBusinessEnabled()?prepareSharedDraftForm({editing:row,form:initial,equipment:catalog}):prepareManualTrialForm({editing:row,form:initial}));}catch(error){setSchedulingForm(initial);setScheduleMessage(error.message);}
  }
- function autoScheduleCurrent(){
-   if(!editing||!editForm)return;
-   try{
-     const equipment=readScheduleEquipment();setEquipmentCatalog(equipment);
-     const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
-     const result=recommendSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows:latestSchedules()});
-     setEditForm(previous=>({...previous,...result}));
-     setScheduleMessage('已推薦 '+result.eq+'／'+result.owner+'，'+result.time+' 至 '+result.end+'（'+result.duration+' 天）。每件樣品使用空間 '+result.sampleVolumeLitres+' L'+(result.sampleVolumeEstimated?'（Demo 預設，請依實際樣品確認）':'')+'。請確認後儲存。');
-   }catch(error){setScheduleMessage(error.message||'無法產生建議，請確認設備與人員。');}
+ function currentTrialRequest(requestId=editing?.requestId){
+   for(const key of ['dqa-lms-reviews-v1','dqa-request-demo-v2']){const raw=appStorage().getItem(key);if(raw!==null){let rows;try{rows=JSON.parse(raw);}catch{throw new Error('委託資料無法讀取，未以合成範例覆蓋。');}if(!Array.isArray(rows)||!rows.every(row=>row&&typeof row.id==='string'&&(key!=='dqa-lms-reviews-v1'||Array.isArray(row.history))))throw new Error('委託資料格式不完整，請先確認原始資料。');}}
+   const list=mergeImportedRequests(readStoredRequests(ALL_DEMO_REQUESTS),readApprovedRequestsForLms());
+   return list.find(row=>row.id===requestId)||null;
  }
- function saveSchedule(){
+ async function autoScheduleCurrent({signal,onStage=()=>{}}={}){
+  if(originalBusinessEnabled()){
+   if(!businessAIEnabled()){setScheduleMessage('目前版本尚未啟用正式帳號 AI 排程。');return;}
+   if(!editing||!editForm||e2Operation.current)return;
+   if(!Number.isSafeInteger(Number(editForm.sampleSpaceUnits))||Number(editForm.sampleSpaceUnits)<1||Number(editForm.sampleSpaceUnits)>100000){setScheduleMessage('請先填寫每件樣品使用空間 U（1～100000 的整數）。');return;}
+   const operation=crypto.randomUUID();e2Operation.current=operation;const before=canonicalE2(editForm);setScheduleMessage('正在核對資料庫來源與可用候選方案…');
+   try{const preferences=requireE2Enabled().settings;onStage(0);const tomorrow=new Date(Date.now()+8*3600000+86400000).toISOString().slice(0,10),start=editForm.time&&editForm.time>=tomorrow?editForm.time:tomorrow,latest=new Date(Date.parse(start+'T00:00:00Z')+(preferences.searchDays-1)*86400000).toISOString().slice(0,10);onStage(1);
+    const data=await askBusinessAI('E2',{request_id:editing.requestDatabaseId,expected_revision:editing.requestRevision,options:{earliest:start,latest,equipment_count:Number(editForm.equipmentCount||1),sample_space_units:Number(editForm.sampleSpaceUnits),sample_code:editForm.sampleCode||'',preparation_minutes:Number(editForm.preparationMinutes||0),cleanup_minutes:Number(editForm.cleanupMinutes||0)},language:'zh-TW'},{signal,operationId:operation});
+    if(signal?.aborted||canonicalE2(editFormRef.current)!==before)throw Error('編輯內容已變更，未帶入舊的排程建議。');onStage(2);
+    if(!data.candidates?.some(c=>c.id===data.selected_candidate_id))throw Error('未取得通過驗證的候選方案。');
+    setBusinessE2Candidates({data,formStamp:before});setScheduleMessage(data.result.summary+' 請選擇候選方案帶入表單。Trace '+data.trace_id);return {status:'candidates'};
+   }catch(error){setScheduleMessage(error.message);}finally{e2Operation.current=null;}return;
+  }
+  if(!editing||!editForm)return;
+  if(e2Operation.current){setScheduleMessage('上一筆請求仍在處理，請稍候。');return;}
+  const operation=crypto.randomUUID();e2Operation.current=operation;setE2Applied(null);setScheduleMessage('正在讀取試驗與可用資源…');
+  const guided=globalThis.__DQA_GUIDED_CASE_ID__===editing.requestId&&window.parent!==window;
+  const activityTicket=guided?null:beginE2Activity(currentUser?.id);
+  try{
+   const originalForm=structuredClone(editForm);
+   if(guided){
+    onStage(0);const {recommendSchedule}=await import('./scheduleEquipment.mjs');
+    if(signal?.aborted)return;
+    const equipment=readScheduleEquipment(),rows=latestSchedules();onStage(1);
+    const suggestion=recommendSchedule({editing,form:originalForm,equipment,accounts,rows,today:getRequestDate()});
+    const draft={...originalForm,...suggestion};onStage(2);
+    validateSchedule({editing,form:draft,equipment,accounts,rows,today:getRequestDate()});
+    if(signal?.aborted)return;
+    setSchedulingForm(draft);setScheduleMessage('導覽規則示範：未呼叫模型。排程建議已帶入表單，確認後按「儲存排程」。');
+    return {status:'applied'};
+   }
+   const preferences=requireE2Enabled();
+   const resolved=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
+   const equipment=readScheduleEquipment(),roster=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+   const sourceForm=applyE2Settings({editing,form:resolved.form,settings:preferences.settings}),coverageIssues=[],context=makeE2Context({editing,form:sourceForm,equipment,accounts:roster,rows:latestSchedules(),onCoverageIssue:issue=>coverageIssues.push(issue)});
+   setSchedulingForm(sourceForm);
+   const data=await askE2Scheduling(context,{signal,onStage,idempotencyKey:operation,activityTicket});
+   if(signal?.aborted||e2Operation.current!==operation)return;
+   if(data.assessment.status!=='PROPOSAL_AVAILABLE'){
+    const details=coverageIssues.length?coverageIssues.map(describeE2CoverageIssue):data.assessment.reasons.map(describeE2Reason);
+    setScheduleMessage('目前無法提出可查核的排程建議。'+details.filter(text=>!/^[A-Z0-9_]+$/.test(text)).join(' '));return;
+   }
+   if(data.execution_mode==='RULE_BASED_ONLY'){setScheduleMessage(e2ProviderUnavailableMessage(data.provider_status));return;}
+   const candidate=data.assessment.candidates.find(item=>item.id===data.selected_candidate_id);
+   if(!candidate){setScheduleMessage('模型未選出可用方案，尚未變更排程。');return;}
+   if(canonicalE2(editFormRef.current)!==canonicalE2(sourceForm))throw Object.assign(Error('編輯內容已變更，請重新分析。'),{code:'STALE_INPUT'});
+   const fresh=prepareScheduleTrialForm({editing,form:originalForm,request:currentTrialRequest()});
+   if(fresh.signature!==resolved.signature)throw new Error('試驗資料已更新，請重新分析。');
+   const liveAccounts=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+   const approved=makeE2Draft({editing,form:sourceForm,equipment:readScheduleEquipment(),accounts:liveAccounts,rows:latestSchedules(),context,candidate});
+   draftE2Activity(activityTicket,'APPLIED');
+   setSchedulingForm(approved.form);setE2Applied({...approved,activityTicket,trace:data.trace_id,mode:data.execution_mode,trialSourceForm:originalForm,trialInputSignature:resolved.signature,trialInputProvenance:resolved.provenance});
+   setScheduleMessage((data.execution_mode==='MOCK'?'模擬測試：未呼叫真實模型。':'')+'依'+resolved.summary+'完成建議並帶入表單，尚未儲存排程。'+resolved.notes.join(' '));
+   return {status:'applied'};
+  }catch(error){
+   finishE2Activity(activityTicket,{status:signal?.aborted?'CANCELLED':'ERROR',httpStatus:error.httpStatus??error.aiHttpStatus,traceId:error.trace,errorCode:signal?.aborted?'REQUEST_CANCELLED':error.code||error.aiErrorCode||(/E2_DATA_BLOCKED/.test(error.message)?'SYNTHETIC_DATA_BLOCKED':'TRIAL_DATA_INCOMPLETE')});
+   draftE2Activity(activityTicket,'REJECTED');
+   if(e2Operation.current===operation)setScheduleMessage(signal?.aborted?'已取消等待；不會自動重送。':schedulingErrorMessage(error));
+  }
+  finally{if(e2Operation.current===operation)e2Operation.current=null;}
+ }
+ async function applyBusinessCandidate(id){
+  if(applyingAICandidate||!businessE2Candidates)return;setApplyingAICandidate(true);
+  try{if(canonicalE2(editFormRef.current)!==businessE2Candidates.formStamp)throw Error('表單已修改，請重新分析候選方案。');const c=businessE2Candidates.data.candidates.find(x=>x.id===id);if(!c)throw Error('候選方案不存在。');await businessClient.request('/ai/validate-schedule',{method:'POST',body:{command:c.command}});
+   const refs=editing.planningReferences,ids=c.command.data.equipment_ids.map(id=>refs.equipment.find(m=>m.id===id)?.legacy_id);if(ids.some(x=>!x))throw Error('設備來源已更新，請重新開啟。');
+   const next={...editForm,equipmentId:ids[0],equipmentIds:ids,equipmentCount:ids.length,ownerId:c.command.data.executor_id,sampleSpaceUnits:c.plan.sample_space_units,time:c.plan.start_date,end:c.plan.end_date,sampleCode:c.plan.sample_code,preparationMinutes:c.plan.preparation_minutes,cleanupMinutes:c.plan.cleanup_minutes};setSchedulingForm(next);setBusinessE2Candidates({...businessE2Candidates,formStamp:canonicalE2(next)});setScheduleMessage('已帶入候選方案 '+id+'。請確認後儲存，尚未保留設備。');
+  }catch(error){setScheduleMessage(originalBusinessError(error));}finally{setApplyingAICandidate(false);}
+ }
+ async function saveSchedule(){
    if(!editing||!editForm)return;
+   if(originalBusinessEnabled()){try{if(!sharedPreview.ready)throw Error(sharedPreview.error||'請補齊排程資料，等待後端確認完成日期後再儲存。');if(await planning.submit(sharedPreview.command,"排程草稿已保存至資料庫；尚未保留設備或啟動試驗。")){setScheduleRows(readSavedSchedules([]));setEditing(null);setSchedulingForm(null);}}catch(error){setScheduleMessage(originalBusinessError(error));}return;}
    try{
      const equipment=readScheduleEquipment();setEquipmentCatalog(equipment);
      const rows=latestSchedules(),current=rows.find(row=>row.id===editing.id);
      if(current&&['已完成','已結案'].includes(effectiveScheduleStatus(current,Date.now())))throw Error('試驗已結束，不可儲存排程。');
      if(!current||JSON.stringify(current)!==JSON.stringify(editing))throw Error('此案件排程已更新，請重新開啟編輯。');
-     const liveAccounts=JSON.parse(window.localStorage.getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
+     const liveAccounts=JSON.parse(appStorage().getItem('dqa-shared-demo-accounts-v1')||'null')||accounts;
      if(isActiveTrial({...current,status:effectiveScheduleStatus(current,Date.now())})&&!canControlTrial(liveAccounts.find(a=>a.id===currentUser?.id)))throw Error('僅 lv1 一階主管可儲存進行中試驗的排程。');
-     const proposal=validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows,today:getRequestDate()});
+     if(e2Applied&&prepareScheduleTrialForm({editing,form:e2Applied.trialSourceForm,request:currentTrialRequest()}).signature!==e2Applied.trialInputSignature)throw new Error('試驗資料已更新，請重新分析。');
+     const proposal=e2Applied?validateE2Applied({editing,form:editForm,equipment,accounts:liveAccounts,rows,approved:e2Applied}):validateSchedule({editing,form:editForm,equipment,accounts:liveAccounts,rows,today:getRequestDate()});
+     if(e2Applied)proposal.e2Review={trace:e2Applied.trace,mode:e2Applied.mode,candidateId:e2Applied.candidate.id,source:'SYNTHETIC_DIMENSION_DOCUMENTS',confirmation:'USER_SAVED_FORM',trialInputProvenance:e2Applied.trialInputProvenance};
      const updated=rows.map(row=>row.id===editing.id?proposal:row);
-     try{window.localStorage.setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
+     try{appStorage().setItem(SCHEDULE_KEY,JSON.stringify(updated));}catch{throw Error('排程儲存失敗，請確認瀏覽器空間與權限後重試。');}
+     if(e2Applied)draftE2Activity(e2Applied.activityTicket,'SAVED');
      setScheduleRows(updated);window.dispatchEvent(new Event('dqa:schedules-updated'));setNotice(editing.requestId+' 的排程已儲存在本機，列表與甘特圖已同步。');
-     setEditing(null);setEditForm(null);
-   }catch(error){setScheduleMessage(error.message||'無法儲存排程，請重試。');}
+     setEditing(null);setSchedulingForm(null);
+   }catch(error){setScheduleMessage(schedulingErrorMessage(error));}
  }
 
 
@@ -1814,11 +1882,11 @@ function SchedulePage({ currentUser, accounts = [], initialFilter = null, onSche
  const activityPreferences=useManagementPreferences();
  const activity=equipmentActivity(displayScheduleRows,equipmentCatalog,activityPreferences,scheduleNow);
 
- return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="schedule"/>試驗排程管理</h2><HelpTip>按「編輯排程」查看委託內容並安排設備；日程結束後自動完成並釋放設備。</HelpTip></div></div><div className="schedule-heading-actions"><a className="template-btn schedule-chart-button" href="/lms/schedule/chart" target="_blank" rel="opener"><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></a><a className="template-btn secondary schedule-history-button" href="/lms/schedule/history" target="_blank" rel="opener">歷史排程</a></div></div><div className="schedule-kpis schedule-kpis-timed summary-tiles"><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><ScheduleSummaryIcon kind="pending"/><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><ScheduleSummaryIcon kind="conflict"/><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><ScheduleSummaryIcon kind="scheduled"/><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><ScheduleSummaryIcon kind="running"/><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi equipment-activity-kpi" tabIndex={0} aria-describedby="schedule-activity-period" title={`台灣時間 ${activity.from} 至 ${activity.to}；依排程時數估算，重疊時段去除重複。`}><ScheduleSummaryIcon kind="activity"/><span>設備稼動率</span><strong>{activity.rate}%</strong><small className="schedule-activity-period" id="schedule-activity-period">統計 {activity.days} 天 · {activity.from} — {activity.to}</small></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<ScheduleViews rows={activeScheduleRows} accounts={accounts} equipment={equipmentCatalog} now={scheduleNow} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onClear={()=>{setScheduleSearch('');setScheduleFilter('全部');}} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備稼動率依區間內試驗排程時數／設備日曆總時數估算，並非實測開機時數；規則僅供流程驗證，尚未接正式資料庫。</div></div>
- {showGantt&&<div className="workspace-subpage"><section className="workspace-subpage-panel gantt-modal" role="region" aria-labelledby="schedule-gantt-title"><header className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-gantt-title">排程管理圖表</h3><HelpTip>分頁檢視設備或人力排程；可瀏覽過去與未來日期</HelpTip></div></div><button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉排程管理圖表" onClick={()=>subPage?onExit():setShowGantt(false)}>×</button></header><div className="request-modal-body"><div className="gantt-tabs" role="tablist" aria-label="甘特圖類型"><button type="button" role="tab" aria-selected={ganttTab==="equipment"} className={ganttTab==="equipment"?"active":""} onClick={()=>setGanttTab("equipment")}>設備排程甘特圖</button><button type="button" role="tab" aria-selected={ganttTab==="people"} className={ganttTab==="people"?"active":""} onClick={()=>setGanttTab("people")}>人力排程甘特圖</button></div><div className="gantt-controls"><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,-ganttDays))}}>← 前一段</button><label>起始日期 <input type="date" value={ganttStartDate} onChange={e=>e.target.value&&setGanttStartDate(e.target.value)}/></label><label>顯示天數 <select value={ganttDays} onChange={e=>setGanttDays(Number(e.target.value))}><option value={7}>7 天</option><option value={14}>14 天</option><option value={30}>30 天</option><option value={60}>60 天</option><option value={90}>90 天</option></select></label><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,ganttDays))}}>下一段 →</button><button type="button" className="template-btn secondary" onClick={()=>setGanttStartDate(getRequestDate())}>回到今天</button></div><div className="gantt-summary"><span><i className={`gantt-legend ${ganttTab}`}/>{ganttTab==="equipment"?"設備占用時段":"工程師工作時段"}</span><span><i className="gantt-legend conflict"/>衝突／待確認</span><small>{ganttStartDate} 至 {shiftGanttDate(ganttStartDate,ganttDays-1)}（Demo）</small></div><ScheduleGanttBoard rows={displayScheduleRows} equipment={equipmentCatalog} accounts={accounts} kind={ganttTab} date={ganttStartDate} days={ganttDays} now={scheduleNow} onEdit={row=>{if(!subPage)setShowGantt(false);openEditor(row);}}/><div className="gantt-footnote"><strong>排程判讀提醒</strong><HelpTip>可透過起始日期與日期跨度瀏覽任意過去或未來區間；左右切換不受目前 Demo 日期限制。設備與人力共用已儲存排程，包含已完成紀錄；未排程、取消與待核准項目不繪製。暫停順延與台灣日期依排程時間同步。甘特圖依現有排程資料繪製，點擊任務可開啟既有排程編輯。尚未接上正式資料庫的排程衝突計算與最佳化引擎。</HelpTip></div></div></section></div>}
- {showScheduleHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal schedule-history-modal" role="region" aria-labelledby="schedule-history-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-history-title">歷史排程</h3><HelpTip>依排程管理狀態查詢排程紀錄；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史排程" onClick={()=>subPage?onExit():setShowScheduleHistory(false)}>×</button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史排程" placeholder="搜尋委託編號、產品代碼、試驗項目或設備…" value={scheduleSearch} onChange={setScheduleSearch} onClear={()=>{setScheduleSearch('');setHistoryScheduleFilter('全部');}} className="history-toolbar"><select className="template-select" value={historyScheduleFilter} onChange={e=>setHistoryScheduleFilter(e.target.value)}>{[{value:"全部",label:"全部"},{value:"已排程",label:"已排程"},{value:"試驗中",label:"試驗中"},{value:"已完成",label:"已完成"},{value:"取消",label:"已取消"},{value:"未排程",label:"待排程"},{value:"有衝突",label:"排程衝突"}].map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${scheduleSearch}:${historyScheduleFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","樣品編號","試驗項目","設備","執行人","試驗日程","狀態"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={() => openRequestInfo(r)}>{r.requestId || "未關聯委託"}</button></td><td>{r.productCode||"—"}</td><td>{r.sampleCode||"—"}</td><td>{r.title}</td><td>{r.eq}</td><td>{r.owner}</td><td><ScheduleTimeline row={r}/></td><td><span className={`template-status status-${r.status}`}>{r.status==="未排程"?"待排程":r.status==="有衝突"?"排程衝突":r.status}</span></td></tr>)}</tbody></PaginatedTable>{!historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).length&&<div className="template-empty">此分類目前沒有歷史排程</div>}</div></div></section></div>}
- {editing&&editForm&&<div className="request-modal-backdrop schedule-modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget){setEditing(null);setEditForm(null);}}}><section className="request-modal schedule-edit-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-edit-title"><header className="request-modal-header"><div><h3 id="schedule-edit-title">編輯試驗排程｜{editing.requestId}</h3><ScheduleEditStatus row={editing} now={scheduleNow}/></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉" onClick={()=>{setEditing(null);setEditForm(null);}}>×</button></header><div className="request-modal-body schedule-edit-body"><details className="schedule-request-details"><summary>試驗資訊<small>{editing.requestId} · 點擊展開／收合</small></summary><div className="request-form-preview schedule-request-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{editing.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{editing.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{editing.customer||"—"}</strong></div><div><label>客戶品番</label><strong>{editing.customerPart||"—"}</strong></div><div><label>需求日期</label><strong>{editing.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{editing.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{String(editing.intent||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{String(editing.sampleSource||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{editing.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{editing.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{editing.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{editing.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{editing.testSpec||editing.title||"—"}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{editing.judgment||"—"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{editing.remarks||"—"}</div></div></details><ScheduleArrangement editing={editing} form={editForm} onChange={setEditForm} equipment={equipmentCatalog} accounts={accounts} onRecommend={autoScheduleCurrent} message={scheduleMessage} onRefresh={refreshEquipment} /></div><div className="template-form-actions schedule-edit-actions">{<button type="button" className="template-btn secondary" disabled={!trialPauseAvailability(currentUser,editing,scheduleNow).enabled} onClick={()=>{const paused=!editing.pauseStartedAt;if(!window.confirm(paused?'確定暫停試驗？設備將暫停占用，預估結束時間隨暫停時間往後順延。':'確定恢復試驗？暫停期間會計入預估結束時間。'))return;try{setTrialPaused({scheduleId:editing.id,actorId:currentUser?.id,paused});for(const name of ['dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));setEditing(null);setEditForm(null);setNotice(paused?'試驗與設備已暫停。':'試驗與設備已恢復，預估結束時間已順延。');}catch(error){setScheduleMessage(error.message);}}}>{editing.pauseStartedAt?'恢復試驗':'暫停試驗'}</button>}<button type="button" className="template-btn danger" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={()=>{setStopError('');setShowStopDialog(true);}}>中止排程</button><button className="template-btn schedule-save-button" disabled={isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={saveSchedule}>儲存排程</button></div></section></div>}
- {showStopDialog && editing && <StopScheduleDialog requestId={editing.requestId} onClose={()=>setShowStopDialog(false)} onConfirm={confirmStopSchedule} error={stopError} />}
+ return <section className="panel generic-page"><div className="template-page"><div className="template-heading schedule-page-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="schedule"/>試驗排程管理</h2><HelpTip>按「編輯排程」安排設備或由主管中止；到達排定結束時間後，由執行人確認完成。</HelpTip></div></div><div className="schedule-heading-actions"><a className="template-btn schedule-chart-button" href="/lms/schedule/chart" target="_blank" rel="opener"><LmsHeaderActionLabel icon="chart"><svg className="schedule-chart-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4.5v15h16"/><path d="M7 15h3v2H7zM11 10h3v7h-3zM15 6h3v11h-3z"/><path d="M7 15v2M11 10v7M15 6v11"/></svg><span>排程管理圖表</span></LmsHeaderActionLabel></a><a className="template-btn secondary schedule-history-button" href="/lms/schedule/history" target="_blank" rel="opener"><LmsHeaderActionLabel icon="history">歷史排程</LmsHeaderActionLabel></a></div></div><div className="schedule-kpis schedule-kpis-timed summary-tiles"><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="未排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="未排程"?"全部":"未排程")} aria-pressed={scheduleFilter==="未排程"}><ScheduleSummaryIcon kind="pending"/><span>待排程</span><strong>{unscheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="有衝突"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="有衝突"?"全部":"有衝突")} aria-pressed={scheduleFilter==="有衝突"}><ScheduleSummaryIcon kind="conflict"/><span>排程衝突</span><strong>{conflicts}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="已排程"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="已排程"?"全部":"已排程")} aria-pressed={scheduleFilter==="已排程"}><ScheduleSummaryIcon kind="scheduled"/><span>已排程</span><strong>{scheduled}</strong></button><button type="button" className={`template-kpi schedule-kpi-button summary-tile ${scheduleFilter==="試驗中"?"selected":""}`} onClick={()=>setScheduleFilter(scheduleFilter==="試驗中"?"全部":"試驗中")} aria-pressed={scheduleFilter==="試驗中"}><ScheduleSummaryIcon kind="running"/><span>試驗中</span><strong>{testing}</strong></button><div className="template-kpi equipment-activity-kpi" tabIndex={0} aria-describedby="schedule-activity-period" title={`台灣時間 ${activity.from} 至 ${activity.to}；依排程時數估算，重疊時段去除重複。`}><ScheduleSummaryIcon kind="activity"/><span>設備稼動率</span><strong>{activity.rate}%</strong><small className="schedule-activity-period" id="schedule-activity-period">統計 {activity.days} 天 · {activity.from} — {activity.to}</small></div></div>{notice&&<div className="template-notice">{notice}<button className="notice-close" onClick={()=>setNotice("")}>×</button></div>}<BusinessHumanPending/><ResourceOperationNotice operation={planning}/>{!showStopDialog&&<ResourceOperationNotice operation={stopping} onSaved={()=>{setEditing(null);setSchedulingForm(null);}}/>}<ScheduleViews canEdit={!originalBusinessEnabled()||resourceCan("schedules.plan")||resourceCan("schedules.book")} rows={activeScheduleRows} accounts={accounts} equipment={equipmentCatalog} now={scheduleNow} status={scheduleFilter} search={scheduleSearch} onSearch={setScheduleSearch} onClear={()=>{setScheduleSearch('');setScheduleFilter('全部');}} onRequest={openRequestInfo} onEdit={openEditor} /><div className="template-info">{originalBusinessEnabled()?"此頁顯示已簽核委託及共用排程草稿；草稿不會保留設備、變更委託狀態或啟動試驗。":"點選任一筆「編輯排程」，即可查看對應的試驗委託單內容，並填寫樣品編號、選擇設備、開始日期、預計完成日期及負責工程師。目前為前端 Demo；設備稼動率依區間內試驗排程時數／設備日曆總時數估算，並非實測開機時數；規則僅供流程驗證，尚未接正式資料庫。"}</div></div>
+ {showGantt&&<div className="workspace-subpage"><section className="workspace-subpage-panel gantt-modal" role="region" aria-labelledby="schedule-gantt-title"><header className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-gantt-title">排程管理圖表</h3><HelpTip>分頁檢視設備或人力排程；可瀏覽過去與未來日期</HelpTip></div></div><button type="button" className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉排程管理圖表" onClick={()=>subPage?onExit():setShowGantt(false)}><RequestCloseIcon/></button></header><div className="request-modal-body"><div className="gantt-tabs" role="tablist" aria-label="甘特圖類型"><button type="button" role="tab" aria-selected={ganttTab==="equipment"} className={ganttTab==="equipment"?"active":""} onClick={()=>setGanttTab("equipment")}>設備排程甘特圖</button><button type="button" role="tab" aria-selected={ganttTab==="people"} className={ganttTab==="people"?"active":""} onClick={()=>setGanttTab("people")}>人力排程甘特圖</button></div><div className="gantt-controls"><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,-ganttDays))}}>← 前一段</button><label>起始日期 <input type="date" value={ganttStartDate} onChange={e=>e.target.value&&setGanttStartDate(e.target.value)}/></label><label>顯示天數 <select value={ganttDays} onChange={e=>setGanttDays(Number(e.target.value))}><option value={7}>7 天</option><option value={14}>14 天</option><option value={30}>30 天</option><option value={60}>60 天</option><option value={90}>90 天</option></select></label><button type="button" className="template-btn secondary" onClick={()=>{setGanttStartDate(shiftGanttDate(ganttStartDate,ganttDays))}}>下一段 →</button><button type="button" className="template-btn secondary" onClick={()=>setGanttStartDate(getRequestDate())}>回到今天</button></div><div className="gantt-summary"><span><i className={`gantt-legend ${ganttTab}`}/>{ganttTab==="equipment"?"設備占用時段":"工程師工作時段"}</span><span><i className="gantt-legend conflict"/>衝突／待確認</span><small>{ganttStartDate} 至 {shiftGanttDate(ganttStartDate,ganttDays-1)}（Demo）</small></div><ScheduleGanttBoard rows={displayScheduleRows} equipment={equipmentCatalog} accounts={accounts} kind={ganttTab} date={ganttStartDate} days={ganttDays} now={scheduleNow} onEdit={row=>{if(!subPage)setShowGantt(false);openEditor(row);}}/><div className="gantt-footnote"><strong>排程判讀提醒</strong><HelpTip>可透過起始日期與日期跨度瀏覽任意過去或未來區間；左右切換不受目前 Demo 日期限制。設備與人力共用已儲存排程，包含已完成紀錄；未排程、取消與待核准項目不繪製。暫停順延與台灣日期依排程時間同步。甘特圖依現有排程資料繪製，點擊任務可開啟既有排程編輯。尚未接上正式資料庫的排程衝突計算與最佳化引擎。</HelpTip></div></div></section></div>}
+ {showScheduleHistory&&<div className="workspace-subpage"><section className="workspace-subpage-panel history-modal schedule-history-modal" role="region" aria-labelledby="schedule-history-title"><div className="request-modal-header"><div><div className="help-title-row"><h3 id="schedule-history-title">歷史排程</h3><HelpTip>依排程管理狀態查詢排程紀錄；此處僅供檢視。</HelpTip></div></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉歷史排程" onClick={()=>subPage?onExit():setShowScheduleHistory(false)}><RequestCloseIcon/></button></div><div className="request-modal-body"><CatalogSearchToolbar kind="歷史排程" placeholder="搜尋委託編號、產品代碼、試驗項目或設備…" value={scheduleSearch} onChange={setScheduleSearch} onClear={()=>{setScheduleSearch('');setHistoryScheduleFilter('全部');}} className="history-toolbar"><select className="template-select" value={historyScheduleFilter} onChange={e=>setHistoryScheduleFilter(e.target.value)}>{[{value:"全部",label:"全部"},{value:"已排程",label:"已排程"},{value:"試驗中",label:"試驗中"},{value:"已完成",label:"已完成"},{value:"取消",label:"已取消"},{value:"未排程",label:"待排程"},{value:"有衝突",label:"排程衝突"}].map(x=><option key={x.value} value={x.value}>{x.label}</option>)}</select></CatalogSearchToolbar><div className="template-table-wrap history-table-wrap"><PaginatedTable resetKey={`${scheduleSearch}:${historyScheduleFilter}`} className="template-table"><thead><tr>{["委託編號","產品代碼","樣品編號","試驗項目","設備","執行人","試驗日程","狀態"].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).map(r=><tr key={r.id}><td><button type="button" className="request-id-link" onClick={() => openRequestInfo(r)}>{r.requestId || "未關聯委託"}</button></td><td>{r.productCode||"—"}</td><td>{r.sampleCode||"—"}</td><td>{r.title}</td><td>{r.eq}</td><td>{r.owner}</td><td><ScheduleTimeline row={r}/></td><td><span className={`template-status status-${r.status}`}>{r.status==="未排程"?"待排程":r.status==="有衝突"?"排程衝突":r.status}</span></td></tr>)}</tbody></PaginatedTable>{!historyScheduleRows.filter(r=>(historyScheduleFilter==="全部"||r.status===historyScheduleFilter)&&[r.requestId,r.id,r.productCode,r.title,r.eq,r.owner,r.status].some(value=>String(value||"").toLowerCase().includes(scheduleSearch.trim().toLowerCase()))).length&&<div className="template-empty">此分類目前沒有歷史排程</div>}</div></div></section></div>}
+ {editing&&editForm&&<div className="request-modal-backdrop schedule-modal-backdrop" onMouseDown={e=>{if(!planning.busy&&!stopping.busy&&e.target===e.currentTarget){setEditing(null);setSchedulingForm(null);}}}><section className="request-modal schedule-edit-modal" role="dialog" aria-modal="true" aria-labelledby="schedule-edit-title"><header className="request-modal-header"><div><h3 id="schedule-edit-title">編輯試驗排程｜{editing.requestId}</h3><ScheduleEditStatus row={editing} now={scheduleNow}/></div><button className="request-modal-close" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",textAlign:"center",lineHeight:1,padding:0}} aria-label="關閉" disabled={planning.busy||stopping.busy} onClick={()=>{setEditing(null);setSchedulingForm(null);}}><RequestCloseIcon/></button></header><div className="request-modal-body schedule-edit-body"><BusinessHumanPending/><ResourceOperationNotice operation={planning} onSaved={()=>{setEditing(null);setSchedulingForm(null);}}/>{formalBooked&&<div className="template-info" role="status">已正式排程；目前設備、人員與時段供查閱。需中止試驗時，請使用下方「中止排程」。</div>}{originalBusinessEnabled()&&!formalBooked&&<div className="template-info" role="status">共用排程草稿：已簽核數量不變，樣品空間 U 由一階主管在此填寫。儲存會核對目前正式占用，但不保留設備；正式排程啟用前仍須重新檢查。{editing.hasSharedDraft?` 已保存草稿第 ${editing.draftRevision} 版。`:null}</div>}<details className="schedule-request-details"><summary>試驗資訊<small>{editing.requestId} · 點擊展開／收合</small></summary><div className="request-form-preview schedule-request-preview"><h4><span>1</span> 產品資訊 <small>Product Information</small></h4><div className="request-preview-grid"><div><label>產品代碼</label><strong>{editing.productCode||"—"}</strong></div><div><label>產品類型</label><strong>{editing.productType||"—"}</strong></div><div><label>客戶名稱</label><strong>{editing.customer||"—"}</strong></div><div><label>客戶品番</label><strong>{editing.customerPart||"—"}</strong></div><div><label>需求日期</label><strong>{editing.requestedDate||"—"}</strong></div><div><label>測試數量</label><strong>{editing.quantity||"—"} pcs</strong></div></div><h4><span>2</span> 試驗目的 <small>Test Intention</small></h4><p className="request-preview-tags">{String(editing.intent||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>3</span> 樣品來源 <small>Sample Source</small></h4><p className="request-preview-tags">{String(editing.sampleSource||"—").split(/[,，、]/).map((x,i)=><span key={i}>{x.trim()}</span>)}</p><h4><span>4</span> 樣品資訊 <small>Sample Information</small></h4><div className="request-preview-grid"><div><label>產品版本</label><strong>{editing.productVersion||"—"}</strong></div><div><label>PCBA 版本</label><strong>{editing.pcbaVersion||"—"}</strong></div><div><label>軟體版本</label><strong>{editing.softwareVersion||"—"}</strong></div><div><label>製造日期</label><strong>{editing.manufactureDate||"—"}</strong></div></div><h4><span>5</span> 試驗規範／試驗手法 <small>Test Specification / Test Method</small></h4><div className="request-preview-text">{editing.testSpec||editing.title||"—"}</div><h4><span>6</span> 判定基準 <small>Judgment Criteria</small></h4><div className="request-preview-text">{editing.judgment||"—"}</div><h4><span>7</span> 備註／簽核 <small>Note / Approval</small></h4><div className="request-preview-text">{editing.remarks||"—"}</div></div></details><div inert={planning.locked||stopping.locked||undefined}><fieldset disabled={formalBooked||stopping.locked} style={{border:0,padding:0,margin:0,minWidth:0}}><ScheduleArrangement editing={editing} form={displayedScheduleForm} planningPreview={sharedPreview} onChange={value=>{setSchedulingForm(value);setE2Applied(null);setBusinessE2Candidates(null);}} modelCandidates={businessE2Candidates?.data} onApplyCandidate={applyBusinessCandidate} applyingCandidate={applyingAICandidate} equipment={equipmentCatalog} accounts={accounts} onRecommend={autoScheduleCurrent} message={scheduleMessage} onRefresh={refreshEquipment} /></fieldset></div></div><div className="template-form-actions schedule-edit-actions">{<button type="button" className="template-btn secondary" disabled={originalBusinessEnabled()||!trialPauseAvailability(currentUser,editing,scheduleNow).enabled} onClick={()=>{const paused=!editing.pauseStartedAt;if(!window.confirm(paused?'確定暫停試驗？設備將暫停占用，預估結束時間隨暫停時間往後順延。':'確定恢復試驗？暫停期間會計入預估結束時間。'))return;try{setTrialPaused({scheduleId:editing.id,actorId:currentUser?.id,paused});for(const name of ['dqa:schedules-updated','dqa:equipment-updated','dqa:review-updated'])window.dispatchEvent(new Event(name));setEditing(null);setSchedulingForm(null);setNotice(paused?'試驗與設備已暫停。':'試驗與設備已恢復，預估結束時間已順延。');}catch(error){setScheduleMessage(error.message);}}}>{editing.pauseStartedAt?'恢復試驗':'暫停試驗'}</button>}<button type="button" className="template-btn danger" disabled={originalBusinessEnabled()?(!canStopBusinessSchedule(currentUser,editing)||stopping.locked||!!pendingHumanOperation()):isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={()=>{stopping.resetMessages();setStopError('');setShowStopDialog(true);}}>中止排程</button><BusinessBookButton editing={editing} form={displayedScheduleForm} disabled={stopping.locked||formalBooked||originalBusinessEnabled()&&!sharedPreview.ready} onSaved={()=>{setEditing(null);setSchedulingForm(null);setNotice(isVirtualRequest(editing)?"虛擬排程已保存，等待執行人確認接收；不保留實體資源。":"正式預約已保存，等待指派執行人確認接收。");}}/><button className="template-btn schedule-save-button" disabled={formalBooked||stopping.locked||planning.locked||originalBusinessEnabled()&&!sharedPreview.ready||isActiveTrial({...editing,status:effectiveScheduleStatus(editing,scheduleNow)})&&!canControlTrial(currentUser)} onClick={saveSchedule}>{originalBusinessEnabled()?"儲存排程草稿":"儲存排程"}</button></div></section></div>}
+ {showStopDialog && editing && <StopScheduleDialog requestId={editing.requestId} onClose={()=>setShowStopDialog(false)} onConfirm={confirmStopSchedule} error={stopError} operation={originalBusinessEnabled()?stopping:null} onSaved={()=>{setShowStopDialog(false);setEditing(null);setSchedulingForm(null);}} />}
  {requestInfo && <RequestInfoModal account={currentUser} request={requestInfo} onClose={() => setRequestInfo(null)} />}</section>;
 }
 
@@ -1844,6 +1912,9 @@ function DashboardPage({
   const requestedPage=path.split('/')[2]||'dashboard';
   const routePage=requestedPage==='accounts'?'settings':requestedPage;
   const settingsModule=requestedPage==='accounts'?'accounts':routePage==='settings'?(path.split('/')[3]||null):null;
+  const settingsEngine=settingsModule==='ai'?(path.split('/').slice(4).join('/')||null):null;
+  const enginePage=AI_ENGINE_PAGES.find(e=>e.code===settingsEngine);
+  useEffect(()=>{if(settingsEngine)document.querySelector('.lms-breadcrumbs [aria-current=page]')?.scrollIntoView({block:'nearest',inline:'end'});},[settingsEngine]);
   const subPage=path.endsWith('/history')?'history':path.endsWith('/chart')?'chart':null;
   const subLabel=subPage==='chart'?'排程管理圖表':routePage==='requests'?'歷史委託':'歷史排程';
   const [active, setActive] = useState(routePage);
@@ -1856,6 +1927,7 @@ function DashboardPage({
   function navigate(id, filter = null) {
     if(id==='accounts'||(id==='settings'&&!canAccessLmsPage(currentUser,'settings')&&canManageAccounts(currentUser))){if(!canManageAccounts(currentUser))return;setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/accounts');return;}
     if(!canAccessLmsPage(currentUser,id))return;
+    if(id==='settings'&&filter==='activity'){setActive('settings');setNotificationFilter(null);setSidebarOpen(false);appNavigate('/lms/settings/parameters?section=activity');return;}
     setActive(id);
     setNotificationFilter(filter);
     setSidebarOpen(false);
@@ -1903,7 +1975,7 @@ function DashboardPage({
           onNavigate={navigate}
           currentUser={currentUser}
           notificationCounts={notificationCounts}
-        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span><strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong></>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
+        ><nav className="lms-breadcrumbs" aria-label="麵包屑"><button type="button" onClick={onHome}>首頁</button><span aria-hidden="true">›</span><button type="button" onClick={()=>navigate('dashboard')}>實驗室管理系統</button><span aria-hidden="true">›</span>{settingsModule?<><button type="button" onClick={()=>navigate('settings')}>系統管理</button><span aria-hidden="true">›</span>{settingsEngine?<><button type="button" onClick={()=>appNavigate('/lms/settings/ai')}>AI 引擎管理</button><span aria-hidden="true">›</span><strong aria-current="page">{enginePage?`${enginePage.code} ${enginePage.name}`:'找不到 AI 引擎頁面'}</strong></>:<strong aria-current="page">{ADMIN_MODULES.find(m=>m.id===settingsModule)?.title||'找不到模組'}</strong>}</>:subPage?<><button type="button" onClick={()=>navigate(active)}>{NAV_ITEMS.find(item=>item.id===active)?.label}</button><span aria-hidden="true">›</span><strong aria-current="page">{subLabel}</strong></>:<strong aria-current="page">{NAV_ITEMS.find(item=>item.id===active)?.label||'儀表板'}</strong>}</nav></DashboardTopbar>
 
 
 
@@ -1923,13 +1995,13 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule module={settingsModule} account={currentUser} onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>appNavigate(`/lms/settings/${id}`)} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts">{originalBusinessEnabled()?<BusinessAccountManagement onBack={()=>navigate('settings')}/>:<AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/>}</div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(`/lms/settings/${id}`);}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
         </div>
 
-        <IntelligentAssistant snapshot={liveSnapshot} metrics={liveMetrics}/>
+        <IntelligentAssistant snapshot={{...liveSnapshot,reports:reportNotifications}} metrics={liveMetrics}/>
 
       </main>
 
@@ -1948,19 +2020,21 @@ export default function App({ path, navigate }) {
 
   const [accounts, setAccounts] = useState(() => {
     const saved = readDemoAccounts();
-    const stored = !window.localStorage.getItem("dqa-report-level3-migration-v1")&&!saved.some(row=>row.role==="三階主管")?[...saved,{id:"DEMO-LEVEL3",name:"示範三階主管",email:"level3@example.com",role:"三階主管",department:"DQA 實驗室",status:"啟用中",lastLogin:"尚未登入"}]:saved;
-    return window.localStorage.getItem("dqa-admin-huang-migration-v1") ? stored : stored.map(a => a.id === "U001" && a.email === "huangxm@example.com" && a.name === "黃小明" ? { ...a, role: "系統管理員" } : a);
+    if(originalBusinessEnabled())return saved;
+    const stored = !appStorage().getItem("dqa-report-level3-migration-v1")&&!saved.some(row=>row.role==="三階主管")?[...saved,{id:"DEMO-LEVEL3",name:"示範三階主管",email:"level3@example.com",role:"三階主管",department:"DQA 實驗室",status:"啟用中",lastLogin:"尚未登入"}]:saved;
+    return appStorage().getItem("dqa-admin-huang-migration-v1") ? stored : stored.map(a => a.id === "U001" && a.email === "huangxm@example.com" && a.name === "黃小明" ? { ...a, role: "系統管理員" } : a);
   });
-  useEffect(() => { window.localStorage.setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); window.localStorage.setItem("dqa-admin-huang-migration-v1", "1"); window.localStorage.setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
+  useEffect(() => { if(originalBusinessEnabled())return;appStorage().setItem("dqa-shared-demo-accounts-v1", JSON.stringify(accounts)); appStorage().setItem("dqa-admin-huang-migration-v1", "1"); appStorage().setItem("dqa-report-level3-migration-v1","1"); }, [accounts]);
 
-  const [,refreshRoles]=useState(0);useEffect(()=>{const refresh=event=>{if(event.type==='storage'&&event.key==='dqa-shared-demo-accounts-v1')setAccounts(readDemoAccounts());refreshRoles(value=>value+1);};window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
+  const [,refreshRoles]=useState(0);useEffect(()=>{const refresh=event=>{if(originalBusinessEnabled()||event.type==='storage'&&event.key==='dqa-shared-demo-accounts-v1')setAccounts(readDemoAccounts());refreshRoles(value=>value+1);};window.addEventListener('dqa:roles-updated',refresh);window.addEventListener('storage',refresh);return()=>{window.removeEventListener('dqa:roles-updated',refresh);window.removeEventListener('storage',refresh);};},[]);
   const [currentUserId, setCurrentUserId] = useState(() => {
+    if(originalBusinessEnabled())return originalBusinessAccount('lms')?.id||'';
     try { return window.sessionStorage.getItem('dqa-lms-account-id') || ''; } catch { return ''; }
   });
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
     const valid=['/lms/accounts',...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
-    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path);
+    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path)||/^\/lms\/settings\/ai\/[A-Za-z0-9_-]+$/.test(path);
     if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
     else if (validRoute && !currentUser) navigate('/lms/login', true);
     else if(path==='/lms/accounts'&&currentUser)navigate('/lms/settings/accounts',true);
@@ -2045,7 +2119,8 @@ export default function App({ path, navigate }) {
 
 
 
-  function handleLogin(email, password, setError) {
+  async function handleLogin(email, password, setError) {
+    if(originalBusinessEnabled()){try{await loginOriginalBusiness(email,password);const account=originalBusinessAccount('lms');setAccounts(readDemoAccounts());startSession('lms',account.id);setCurrentUserId(account.id);navigate('/lms/dashboard');}catch(error){setError(originalBusinessError(error));}return;}
 
     const account = accounts.find(
 
@@ -2104,7 +2179,8 @@ export default function App({ path, navigate }) {
 
 
 
-  function logout() {
+  async function logout() {
+    if(originalBusinessEnabled()){try{await logoutOriginalBusiness();}catch(error){window.alert(originalBusinessError(error));}}
 
     try { endSession('lms'); } catch { /* State still clears in this tab. */ }
     setCurrentUserId('');

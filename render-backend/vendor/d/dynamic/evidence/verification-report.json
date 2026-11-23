@@ -1,0 +1,29 @@
+{
+  "status": "PASS_ISOLATED_DYNAMIC_VALIDATION",
+  "dataset_reused": "/workspace/d-comp-1111-ai4-data-p02/data/competition_ai4_demo_dataset_v1.json",
+  "dataset_sha256": "4be05ab363d94926ec74783e551dde567576a87a575d6b5800f5b16434d46100",
+  "source_requests": 15,
+  "new_request_report_dataset_created": false,
+  "test_results": {
+    "tests_run": 110,
+    "pass": 110,
+    "fail": 0,
+    "error": 0,
+    "skip": 0,
+    "dynamic_cases": 88,
+    "observed_actual_core_calls": 142,
+    "calls_by_engine": {
+      "E1": 38,
+      "E2": 34,
+      "E3": 32,
+      "E4": 38
+    }
+  },
+  "legacy_numeric_gaps": 12,
+  "original_files_unchanged": 47,
+  "original_HEAD_index_status_unchanged": true,
+  "public_projection": "BLOCKED",
+  "provider": "NOT_RUN",
+  "full_report_generation": "NOT_IMPLEMENTED",
+  "Git_mutations": "NONE"
+}

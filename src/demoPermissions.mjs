@@ -1,9 +1,11 @@
+import {originalBusinessEnabled,businessIdentity} from './originalBusiness.mjs';
 import {customRole} from './customRoles.mjs';
 // Client-side competition demonstration rules; not an authorization boundary.
 export const ROLE = Object.freeze({ REQUESTER:'委託者', REQUEST_MANAGER:'委託者主管', LAB:'實驗室工程師', LAB_ASSISTANT:'實驗室副工程師', LEVEL1:'一階主管', LEVEL2:'二階主管', LEVEL3:'三階主管', ADMIN:'系統管理員', VIEWER:'檢視者' });
 const LEVELS = new Map([[ROLE.LEVEL1,1],[ROLE.LEVEL2,2],[ROLE.LEVEL3,3]]);
 export function accessSystem(account, system, storage) {
  if (!account?.id || account.status !== '啟用中') return false;
+ if(originalBusinessEnabled()&&account.id===businessIdentity()?.member.id)return (businessIdentity().member.systems||['lms','request','lab']).includes(system);
  const custom=customRole(account,storage);
  if(custom)return custom.builtin?custom.systems.includes(system):system==='lms';
  if (system === 'request') return [ROLE.REQUESTER,ROLE.REQUEST_MANAGER].includes(account.role);
@@ -11,17 +13,19 @@ export function accessSystem(account, system, storage) {
  if (system === 'lms') return [ROLE.LEVEL1,ROLE.LEVEL2,ROLE.LEVEL3,ROLE.ADMIN].includes(account.role);
  return false;
 }
-export function canManageAccounts(account,storage) {if(account?.status!=='啟用中')return false;const role=customRole(account,storage);return role?role.manageAccounts===true:[ROLE.ADMIN,ROLE.LEVEL2].includes(account.role);}
+export function canManageAccounts(account,storage) {if(account?.status!=='啟用中')return false;if(account.businessIdentity)return account.businessAdmin===true;const role=customRole(account,storage);return role?role.manageAccounts===true:[ROLE.ADMIN,ROLE.LEVEL2].includes(account.role);}
 export function canApproveOperationalRequest(account,applicantId,storage){
  if(!account?.id||account.status!=='啟用中'||account.id===applicantId)return false;
  return account.role===ROLE.ADMIN||canReview(account,{status:'待審查',approval:0,participantIds:[applicantId]},storage);
 }
 export function canApproveRequestManager(account, request) {
- return account?.status === '啟用中' && account.role === ROLE.REQUEST_MANAGER && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
+ return account?.status === '啟用中' && (account.businessIdentity?(account.businessAdmin||account.businessPermissions?.includes('requests.review_manager')):account.role === ROLE.REQUEST_MANAGER) && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
 }
 export function canReview(account, request, storage) {
+ if(request?.readOnly)return false;
  const custom=customRole(account,storage);
- const level=custom?custom.level:LEVELS.get(account?.role);
+ const level=account?.businessIdentity?account.businessReviewLevel:custom?custom.level:LEVELS.get(account?.role);
+ if(account?.businessIdentity&&!account.businessAdmin&&!account.businessPermissions?.includes('requests.review_lms'))return false;
  if (!accessSystem(account,'lms',storage) || !level || (custom&&!custom.pages.includes('requests')) || request?.status !== '待審查') return false;
  if (level !== (request.approval ?? 0) + 1 || reviewedAtOtherLevel(account.id,level,request)) return false;
  const id=account.id;

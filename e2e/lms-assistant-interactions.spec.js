@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
+import {installMockE4Transport} from './mockE4Transport.mjs';
 
 test.beforeEach(async({page})=>{
  await page.addInitScript(accounts=>{
@@ -46,6 +47,7 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed 
 });
 
 test('FAQ focuses the newest turn; replies append and scroll down without moving the workspace',async({page})=>{
+ await installMockE4Transport(page);await page.addInitScript(()=>sessionStorage.setItem('dqa-lms-account-id','DEMO-LEVEL1'));
  await page.setViewportSize({width:1366,height:768});await page.goto('/lms/dashboard');
  await page.getByRole('button',{name:'展開AI智能助理'}).click();
  const questions=['如何安排新的試驗日程？','發生排程衝突時怎麼辦？','如何新增帳號並設定角色權限？'];

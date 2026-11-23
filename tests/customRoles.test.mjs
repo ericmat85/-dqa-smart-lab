@@ -13,7 +13,7 @@ test('custom roles persist, retain IDs on edit and reject duplicate built-in nam
 });
 test('custom role permissions control LMS access, page access, account management and exact review stage',()=>{
  const store=storage();saveCustomRole([],{name:'審查專員',level:1,pages:['requests','reports'],manageAccounts:false},store);
- const before=globalThis.window;globalThis.window={localStorage:store};
+ const before=globalThis.window,oldStorage=globalThis.localStorage;globalThis.window={localStorage:store};globalThis.localStorage=store;
  try{const actor={id:'CUSTOM',role:'審查專員',status:'啟用中'};
  assert.equal(accessSystem(actor,'lms'),true);assert.equal(accessSystem(actor,'request'),false);
  assert.equal(canAccessLmsPage(actor,'reports'),true);assert.equal(canAccessLmsPage(actor,'equipment'),false);assert.equal(canManageAccounts(actor),false);
@@ -22,6 +22,6 @@ test('custom role permissions control LMS access, page access, account managemen
  assert.equal(accessSystem({...actor,status:'停用'},'lms'),false);
  const rows=readCustomRoles(store);saveCustomRole(rows,{...rows[0],manageAccounts:true},store);assert.equal(canManageAccounts(actor),true);
  store.setItem(ROLE_KEY,'[]');assert.equal(accessSystem(actor,'lms'),false);
- }finally{if(before===undefined)delete globalThis.window;else globalThis.window=before;}
+ }finally{if(oldStorage===undefined)delete globalThis.localStorage;else globalThis.localStorage=oldStorage;if(before===undefined)delete globalThis.window;else globalThis.window=before;}
 });
 test('storage failures do not claim a role was saved',()=>{assert.throws(()=>saveCustomRole([],{name:'測試',level:0,pages:[]},{setItem(){throw Error('quota');}}),/quota/);});

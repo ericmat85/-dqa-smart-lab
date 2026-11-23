@@ -25,3 +25,4 @@
 .dqa-signature-record img{height:56px;margin-top:8px}
 .rq-theme-dark .dqa-signature-record{border-color:#33445d}
 @media(max-width:620px){.dqa-signature-history{padding:12px}.dqa-signature-record{padding:10px 12px}}
+@media(max-width:900px){.dqa-signature-input .signature-upload-clear{display:inline-flex;align-items:center;justify-content:center;margin-block-start:14px;min-height:36px;box-sizing:border-box}}

@@ -1,3 +1,7 @@
+import PageLoadingIndicator from './PageLoadingIndicator.jsx';
+import BusinessPasswordRecovery from './BusinessPasswordRecovery.jsx';
+import {originalBusinessEnabled,businessIdentity,startOriginalBusinessSync} from './originalBusiness.mjs';
+import BusinessAccountActivation from './BusinessAccountActivation.jsx';
 import ProductTour from './ProductTour.jsx';
 import EnterpriseBotIcon from './EnterpriseBotIcon.jsx';
 import useIdleSessions from './useIdleSessions.js';
@@ -21,6 +25,8 @@ function getPath() {
 
 export default function App() {
   const [path, setPath] = useState(getPath());
+  const [businessVersion,setBusinessVersion]=useState(0);
+  useEffect(()=>{if(!originalBusinessEnabled())return;const stop=startOriginalBusinessSync();const changed=()=>{if(!businessIdentity())setBusinessVersion(v=>v+1);};window.addEventListener('dqa:business-change',changed);return()=>{stop();window.removeEventListener('dqa:business-change',changed);};},[]);
   useEffect(()=>{
     const refresh=event=>{if(event.key!==CASE_RESET_KEY)return;try{if(JSON.parse(event.newValue||'{}').phase==='done')window.location.reload();}catch{/* Ignore unrelated malformed reset notices. */}};
     window.addEventListener('storage',refresh);return()=>window.removeEventListener('storage',refresh);
@@ -41,13 +47,15 @@ export default function App() {
 
   const idle=useIdleSessions(path,navigate);
   let content;
-  if(path==='/tour')content=<ProductTour navigate={navigate}/>;
-  else if(path.startsWith('/request/')||path==='/request')content=<RequestApp key={`request-${idle.version}`}/>;
-  else if(path==='/lms'||path.startsWith('/lms/'))content=<LmsApp key={`lms-${idle.version}`} path={path} navigate={navigate}/>;
-  else if(path.startsWith('/lab/')||path==='/lab')content=<LabApp key={`lab-${idle.version}`} path={path} navigate={navigate}/>;
+  if(path==='/account/forgot-password'&&originalBusinessEnabled())content=<BusinessPasswordRecovery navigate={navigate}/>;
+  else if((path==='/account/activate'||path==='/account/reset-password')&&originalBusinessEnabled())content=<BusinessAccountActivation navigate={navigate}/>;
+  else if(path==='/tour')content=<ProductTour navigate={navigate}/>;
+  else if(path.startsWith('/request/')||path==='/request')content=<RequestApp key={`request-${idle.version}-${businessVersion}`}/>;
+  else if(path==='/lms'||path.startsWith('/lms/'))content=<LmsApp key={`lms-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;
+  else if(path.startsWith('/lab/')||path==='/lab')content=<LabApp key={`lab-${idle.version}-${businessVersion}`} path={path} navigate={navigate}/>;
   else if(path.startsWith('/validation/')||path==='/validation')content=<ValidationLogin onBack={()=>navigate('/')}/>;
   else content=<PortalHome navigate={navigate}/>;
-  return <>{content}{idle.notice.length>0&&<SessionTimeoutDialog systems={idle.notice} onClose={idle.dismiss}/>}</>;
+  return <><PageLoadingIndicator/>{content}{idle.notice.length>0&&<SessionTimeoutDialog systems={idle.notice} onClose={idle.dismiss}/>}</>;
 
 }
 

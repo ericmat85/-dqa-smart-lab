@@ -1,0 +1,6 @@
+import {businessIdentity} from './originalBusiness.mjs';
+const uuid=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
+function key(identity){return identity?.user?.id&&identity?.member?.id?'dqa-account-pending-v1:'+identity.user.id+':'+identity.member.id:null;}
+export function readPendingAccount({identity=businessIdentity(),storage}={}){try{storage??=globalThis.sessionStorage;const k=key(identity),raw=k&&storage.getItem(k);if(!raw||raw.length>150)return null;const value=JSON.parse(raw);return uuid.test(value?.id||'')?{id:value.id}:null;}catch{return null;}}
+export function rememberPendingAccount(id,{identity=businessIdentity(),storage}={}){const k=key(identity);if(!k||!uuid.test(id))throw Object.assign(Error('ACCESS_PENDING_STORAGE_REQUIRED'),{code:'ACCESS_PENDING_STORAGE_REQUIRED'});try{storage??=globalThis.sessionStorage;storage.setItem(k,JSON.stringify({id}));if(readPendingAccount({identity,storage})?.id!==id)throw Error();}catch{throw Object.assign(Error('ACCESS_PENDING_STORAGE_REQUIRED'),{code:'ACCESS_PENDING_STORAGE_REQUIRED'});}}
+export function clearPendingAccount({identity=businessIdentity(),storage}={}){const k=key(identity);if(k){storage??=globalThis.sessionStorage;storage.removeItem(k);}}

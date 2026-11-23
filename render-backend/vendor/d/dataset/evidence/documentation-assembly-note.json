@@ -1,0 +1,5 @@
+{
+  "first_assembly": "KeyError pageCount in crosswalk summary; actual key is pages",
+  "resolution": "Use existing pages key; no dataset/test/source mutation",
+  "tests_rerun_for_documentation": "NONE"
+}

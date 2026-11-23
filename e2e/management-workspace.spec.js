@@ -45,11 +45,11 @@ test('accounts and roles share a workspace, assign custom permissions and preser
 });
 test('report export settings persist preferences while system settings retain appearance and health controls',async({page})=>{
  await nav(page,'系統管理');const settings=page.locator('.settings-management');
- await expect(settings.locator('.management-fold')).toHaveCount(6);await expect(settings.getByText('資料來源健檢',{exact:false}).first()).toBeVisible();
+ await expect(settings.locator('.management-fold')).toHaveCount(0);await expect(settings.getByText('資料來源健檢',{exact:true})).toHaveCount(0);
  await expect(settings.getByLabel('報表預設日期範圍')).toHaveCount(0);await nav(page,'報表分析');await page.getByText('報表顯示與匯出設定',{exact:true}).click();const preferences=page.locator('.report-preferences');await preferences.getByLabel('報表預設日期範圍').selectOption('month');await preferences.locator('.settings-checkbox input').uncheck();await preferences.getByRole('button',{name:'儲存偏好'}).click();await expect(preferences.getByRole('status')).toContainText('偏好已儲存');
  await nav(page,'報表分析');await expect(page.getByLabel('日期範圍',{exact:true})).toHaveValue('month');
  await nav(page,'系統管理');await page.getByRole('button',{name:'切換深色或淺色模式'}).click();await expect(page.locator('.dashboard-shell')).toHaveClass(/theme-dark/);
- await settings.locator('.management-fold').filter({has:page.locator('summary').filter({hasText:'資料來源健檢'})}).locator('summary').first().click();await expect(settings.getByRole('columnheader',{name:'資料來源',exact:true})).toBeVisible();
+ await settings.getByRole('button',{name:'開啟系統監控',exact:true}).click();await expect(page.getByRole('region',{name:'資料來源健檢',exact:true})).toBeVisible();await page.getByRole('button',{name:'返回系統管理',exact:true}).click();
  await settings.getByRole('button',{name:'重新檢查',exact:true}).click();await expect(settings.getByText(/重新讀取本機資料/)).toBeVisible();
  await expect(settings.locator('.settings-home-footer')).toHaveCount(0);await page.locator('.sidebar').getByRole('button',{name:'回到首頁',exact:true}).click();await expect(page).toHaveURL(/\/$/);expect(await page.evaluate(()=>sessionStorage.getItem('dqa-lms-account-id'))).toBe('U001');
  await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'回到首頁',exact:true}).click();await expect(page).toHaveURL(/\/$/);

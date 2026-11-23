@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
-import {accelerateTrial,setTrialPaused} from '../src/trialControls.mjs';
+import {accelerateTrial,setTrialPaused,trialAcceleratorAvailability} from '../src/trialControls.mjs';
 import {scheduleProgress} from '../src/scheduleProgress.mjs';
 import {reservationWindow} from '../src/scheduleResources.mjs';
 import {syncScheduleLifecycle} from '../src/scheduleLifecycle.mjs';
@@ -59,12 +59,11 @@ test('accelerator never creates cases for orphaned or empty data',()=>{
  const before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s),/不會建立新案件/);assert.deepEqual([...s.data],before);
  for(const key of ['dqa-request-demo-v2','dqa-schedules-demo-v1','dqa_lab_demo_requests_v1'])s.setItem(key,'[]');const empty=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s),/等待開始/);assert.deepEqual([...s.data],empty);
 });
-test('only a current accepted future reservation can start acceleration; excluded cases remain unchanged',()=>{
+test('only a current accepted reservation can start acceleration; excluded cases remain unchanged',()=>{
  const mutations=[
   s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].status='待確認';delete rows[0].acceptedAt;s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
   s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].scheduledStart='CHANGED';s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
   s=>{const rows=read(s,'dqa_lab_demo_requests_v1');rows[0].reservationId='OLD';s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(rows));},
-  s=>{const rows=read(s,'dqa-schedules-demo-v1'),lab=read(s,'dqa_lab_demo_requests_v1');rows[0].time=new Date(now-3600000).toISOString();rows[0].end=new Date(now+3600000).toISOString();rows[0].status='試驗中';lab[0]={...lab[0],status:'試驗中',scheduledStart:rows[0].time,scheduledEnd:rows[0].end};s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(lab));},
   s=>s.setItem('dqa-lab-operations-v1',JSON.stringify([{requestId:'EXISTING-TRIAL',status:'待審核'}])),
   s=>{const rows=read(s,'dqa-schedules-demo-v1');rows[0].reportInfo={stage:'level2'};s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));},
   ...['已完成','取消','已結案','待審核','待查閱'].map(status=>s=>{const rows=read(s,'dqa-request-demo-v2');rows[0].status=status;s.setItem('dqa-request-demo-v2',JSON.stringify(rows));}),
@@ -100,4 +99,26 @@ test('legacy support still rejects unapproved, cancelled, stale and conflicted t
   if(state==='conflict')rows.push({...rows[0],id:'OTHER',requestId:'OTHER',time:new Date(now-3600000).toISOString(),end:new Date(now+3600000).toISOString()});
   s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));const before=[...s.data];assert.throws(()=>accelerateTrial({actorId:engineer.id,signature:sig,now},s));assert.deepEqual([...s.data],before);
  }
+});
+
+test('accelerator orders existing trials by nearest start and advances one trial 50 then 100 before the next',()=>{
+ const s=fixture(),request=read(s,'dqa-request-demo-v2')[0],schedule=read(s,'dqa-schedules-demo-v1')[0],receipt=read(s,'dqa_lab_demo_requests_v1')[0];
+ const secondSchedule={...schedule,id:'LATER-SCHEDULE',requestId:'LATER-TRIAL',reservationId:'LATER-RESERVATION',time:new Date(now+5*86400000).toISOString(),end:new Date(now+6*86400000).toISOString()};
+ s.setItem('dqa-request-demo-v2',JSON.stringify([{...request,id:'LATER-TRIAL'},request]));
+ s.setItem('dqa-schedules-demo-v1',JSON.stringify([secondSchedule,schedule]));
+ s.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{...receipt,id:'LATER-TRIAL',scheduleId:secondSchedule.id,reservationId:secondSchedule.reservationId,scheduledStart:secondSchedule.time,scheduledEnd:secondSchedule.end},receipt]));
+ const options={actorId:engineer.id,signature:sig,now};
+ assert.equal(trialAcceleratorAvailability(options,s).id,'EXISTING-TRIAL');
+ for(const [id,percent] of [['EXISTING-TRIAL',50],['EXISTING-TRIAL',100],['LATER-TRIAL',50],['LATER-TRIAL',100]]){
+  const result=accelerateTrial(options,s);assert.equal(result.id,id);assert.equal(result.percent,percent);
+  const row=read(s,'dqa-schedules-demo-v1').find(x=>x.requestId===id);assert.equal(scheduleProgress(row,now).fraction,percent/100);
+  assert.equal(read(s,'dqa-request-demo-v2').length,2);assert.equal(read(s,'dqa-schedules-demo-v1').length,2);
+ }
+ assert.equal(trialAcceleratorAvailability(options,s).enabled,false);
+ const before=[...s.data];assert.throws(()=>accelerateTrial(options,s),/不會建立新案件/);assert.deepEqual([...s.data],before);
+});
+test('availability is read-only, empty trials are disabled and an accepted running trial can enter the Demo half-step',()=>{
+ const s=fixture(),options={actorId:engineer.id,signature:sig,now};const before=[...s.data];assert.equal(trialAcceleratorAvailability(options,s).enabled,true);assert.deepEqual([...s.data],before);
+ const rows=read(s,'dqa-schedules-demo-v1'),lab=read(s,'dqa_lab_demo_requests_v1');rows[0].time=new Date(now-3600000).toISOString();rows[0].end=new Date(now+3*3600000).toISOString();rows[0].status='試驗中';lab[0]={...lab[0],status:'試驗中',scheduledStart:rows[0].time,scheduledEnd:rows[0].end};s.setItem('dqa-schedules-demo-v1',JSON.stringify(rows));s.setItem('dqa_lab_demo_requests_v1',JSON.stringify(lab));assert.equal(accelerateTrial(options,s).percent,50);assert.equal(accelerateTrial(options,s).percent,100);
+ const finished=[...s.data];assert.equal(trialAcceleratorAvailability(options,s).enabled,false);assert.deepEqual([...s.data],finished);
 });

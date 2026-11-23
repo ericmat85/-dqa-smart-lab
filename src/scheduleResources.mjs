@@ -1,8 +1,10 @@
+import {isVirtualRequest} from './requestExecutionKind.mjs';
 import {scheduleProgress} from './scheduleProgress.mjs';
 export function equipmentIds(row){return [...new Set([row.equipmentId,...(row.equipmentIds||[])].filter(Boolean))];}
 export function usesEquipment(row,machine){const ids=equipmentIds(row);return ids.length?ids.includes(machine.id):row.eq===machine.name;}
 export function bufferMinutes(value){const number=Number(value??0);if(!Number.isInteger(number)||number<0||number>1440)throw Error('準備／清理時間須為 0～1440 分鐘整數。');return number;}
 export function reservationWindow(row,now=Date.now()){
+ if(row.businessDatabase&&isVirtualRequest(row))return null;
  const bounds=scheduleProgress({...row,status:'已排程'},now);
  if(bounds.start===undefined)return null;
  const completed=Date.parse(row.completedAt);

@@ -41,3 +41,5 @@
 :is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row .login-help-button{padding:6px 0;min-height:36px}
 :is(.entry-login,.lab-login-shell,.rq-login-shell) .login-options-row .login-help-notice{text-align:left;font-size:12px;max-width:240px}
 .login-remember-error{font-size:12px;line-height:1.6;color:#b42318}.theme-dark .login-remember-error,.lab-login-dark .login-remember-error,.rq-theme-dark .login-remember-error{color:#fda4af}
+
+.account-entry-explanation{font-size:12px;line-height:1.7;color:var(--enterprise-secondary,#657892);margin:8px 0 0}.account-entry-control button:disabled{opacity:.5;cursor:not-allowed}

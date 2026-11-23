@@ -1,0 +1,693 @@
+{
+  "requests": {
+    "REQ-2026-001": {
+      "title": "高溫儲存試驗",
+      "specification": "高溫儲存試驗：依客戶規格及內部試驗計畫執行。",
+      "judgment": "試驗後功能正常，外觀無異常。"
+    },
+    "REQ-2026-002": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗規範執行。",
+      "judgment": "試驗後功能正常。"
+    },
+    "REQ-2026-003": {
+      "title": "振動耐久試驗",
+      "specification": "依振動耐久試驗規範執行。",
+      "judgment": "需補充測試條件與樣品數量依據。"
+    },
+    "REQ-2026-004": {
+      "title": "IPX6 防水試驗",
+      "specification": "依 IPX6 防水試驗規範執行。",
+      "judgment": "依試驗規格判定。"
+    },
+    "REQ-2026-005": {
+      "title": "接插件插拔試驗",
+      "specification": "依接插件插拔試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-006": {
+      "title": "接插件插拔試驗",
+      "specification": "依接插件插拔試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-007": {
+      "title": "接插件插拔試驗",
+      "specification": "依接插件插拔試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-008": {
+      "title": "耐久振動試驗",
+      "specification": "依耐久振動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-009": {
+      "title": "高溫高濕試驗",
+      "specification": "依高溫高濕試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-010": {
+      "title": "鹽霧腐蝕試驗",
+      "specification": "依鹽霧腐蝕試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-011": {
+      "title": "日照耐候試驗",
+      "specification": "依日照耐候試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-012": {
+      "title": "電壓變動試驗",
+      "specification": "依電壓變動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-013": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-014": {
+      "title": "跌落試驗",
+      "specification": "依跌落試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-015": {
+      "title": "鹽霧腐蝕試驗",
+      "specification": "依鹽霧腐蝕試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-016": {
+      "title": "跌落試驗",
+      "specification": "依跌落試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-017": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-018": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-019": {
+      "title": "低溫啟動試驗",
+      "specification": "依低溫啟動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-020": {
+      "title": "鹽霧腐蝕試驗",
+      "specification": "依鹽霧腐蝕試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-021": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-022": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-023": {
+      "title": "IPX6 防水試驗",
+      "specification": "依IPX6 防水試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-024": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-025": {
+      "title": "鹽霧腐蝕試驗",
+      "specification": "依鹽霧腐蝕試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-026": {
+      "title": "接插件插拔試驗",
+      "specification": "依接插件插拔試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-027": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-028": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-029": {
+      "title": "ESD 靜電試驗",
+      "specification": "依ESD 靜電試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-030": {
+      "title": "IPX6 防水試驗",
+      "specification": "依IPX6 防水試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-031": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-032": {
+      "title": "電壓變動試驗",
+      "specification": "依電壓變動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-033": {
+      "title": "日照耐候試驗",
+      "specification": "依日照耐候試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-034": {
+      "title": "ESD 靜電試驗",
+      "specification": "依ESD 靜電試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-035": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-036": {
+      "title": "低溫啟動試驗",
+      "specification": "依低溫啟動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-037": {
+      "title": "電壓變動試驗",
+      "specification": "依電壓變動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-038": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-039": {
+      "title": "電壓變動試驗",
+      "specification": "依電壓變動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-040": {
+      "title": "低溫啟動試驗",
+      "specification": "依低溫啟動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-041": {
+      "title": "溫濕度循環試驗",
+      "specification": "依溫濕度循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-042": {
+      "title": "高低溫循環試驗",
+      "specification": "依高低溫循環試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-043": {
+      "title": "低溫啟動試驗",
+      "specification": "依低溫啟動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-044": {
+      "title": "IPX6 防水試驗",
+      "specification": "依IPX6 防水試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-045": {
+      "title": "跌落試驗",
+      "specification": "依跌落試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-046": {
+      "title": "耐久振動試驗",
+      "specification": "依耐久振動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-047": {
+      "title": "IPX6 防水試驗",
+      "specification": "依IPX6 防水試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-048": {
+      "title": "日照耐候試驗",
+      "specification": "依日照耐候試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-049": {
+      "title": "低溫啟動試驗",
+      "specification": "依低溫啟動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-050": {
+      "title": "耐久振動試驗",
+      "specification": "依耐久振動試驗相關客戶規格及內部試驗計畫執行。",
+      "judgment": "依核准之試驗規格判定。"
+    },
+    "REQ-2026-1028": {},
+    "REQ-2026-1027": {},
+    "REQ-2026-1026": {}
+  },
+  "schedules": {
+    "SCH-026-01": {
+      "title": "高溫儲存試驗",
+      "testSpec": "高溫儲存試驗規範",
+      "judgment": "需作判定"
+    },
+    "SCH-026-02": {
+      "title": "溫濕度循環",
+      "testSpec": "溫濕度循環試驗規範",
+      "judgment": "需作判定"
+    },
+    "SCH-026-03": {
+      "title": "振動耐久試驗",
+      "testSpec": "振動耐久試驗規範",
+      "judgment": "需作判定"
+    },
+    "SCH-026-04": {
+      "title": "鹽霧試驗",
+      "testSpec": "鹽霧試驗規範",
+      "judgment": "不作判定"
+    },
+    "SCH-026-05": {
+      "title": "高低溫循環試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-06": {
+      "title": "高溫運作試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-07": {
+      "title": "低溫啟動試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-08": {
+      "title": "溫濕度儲存試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-09": {
+      "title": "熱衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-10": {
+      "title": "振動耐久試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-11": {
+      "title": "機械衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-12": {
+      "title": "鹽霧腐蝕試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-13": {
+      "title": "防水 IPX6 試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-14": {
+      "title": "ESD 靜電放電試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-15": {
+      "title": "高低溫循環試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-16": {
+      "title": "高溫運作試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-17": {
+      "title": "低溫啟動試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-18": {
+      "title": "溫濕度儲存試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-19": {
+      "title": "熱衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-20": {
+      "title": "振動耐久試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-21": {
+      "title": "機械衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-22": {
+      "title": "鹽霧腐蝕試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-23": {
+      "title": "防水 IPX6 試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-24": {
+      "title": "ESD 靜電放電試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-25": {
+      "title": "高低溫循環試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-26": {
+      "title": "高溫運作試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-27": {
+      "title": "低溫啟動試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-28": {
+      "title": "溫濕度儲存試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-29": {
+      "title": "熱衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-30": {
+      "title": "振動耐久試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-31": {
+      "title": "機械衝擊試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-32": {
+      "title": "鹽霧腐蝕試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-33": {
+      "title": "防水 IPX6 試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    },
+    "SCH-026-34": {
+      "title": "ESD 靜電放電試驗",
+      "testSpec": "依示範試驗規範執行",
+      "judgment": "需作判定"
+    }
+  },
+  "equipment": {
+    "EQ-001": {
+      "name": "環境試驗箱 #01",
+      "category": "溫度試驗",
+      "model": "ENV-600",
+      "specification": "-40～150°C；升降溫 3°C/min；600 L"
+    },
+    "EQ-002": {
+      "name": "環境試驗箱 #02",
+      "category": "溫度試驗",
+      "model": "ENV-600",
+      "specification": "-40～150°C；升降溫 3°C/min；600 L"
+    },
+    "EQ-003": {
+      "name": "環境試驗箱 #03",
+      "category": "溫度試驗",
+      "model": "ENV-1000",
+      "specification": "-70～180°C；升降溫 5°C/min；1,000 L"
+    },
+    "EQ-004": {
+      "name": "環境試驗箱 #04",
+      "category": "溫度試驗",
+      "model": "ENV-300",
+      "specification": "-20～150°C；升降溫 2°C/min；300 L"
+    },
+    "EQ-005": {
+      "name": "恆溫恆濕機 A",
+      "category": "溫濕度試驗",
+      "model": "HUM-800",
+      "specification": "-40～150°C；20～98%RH；800 L"
+    },
+    "EQ-006": {
+      "name": "恆溫恆濕機 B",
+      "category": "溫濕度試驗",
+      "model": "HUM-800",
+      "specification": "-40～150°C；20～98%RH；800 L"
+    },
+    "EQ-007": {
+      "name": "恆溫恆濕機 C",
+      "category": "溫濕度試驗",
+      "model": "HUM-400",
+      "specification": "-20～150°C；30～95%RH；400 L"
+    },
+    "EQ-008": {
+      "name": "恆溫恆濕機 D",
+      "category": "溫濕度試驗",
+      "model": "HUM-1200",
+      "specification": "-70～150°C；20～98%RH；1,200 L"
+    },
+    "EQ-009": {
+      "name": "振動試驗機 #01",
+      "category": "機械試驗",
+      "model": "VIB-10K",
+      "specification": "5～2,000 Hz；額定推力 10 kN；最大負載 100 kg"
+    },
+    "EQ-010": {
+      "name": "振動試驗機 #02",
+      "category": "機械試驗",
+      "model": "VIB-20K",
+      "specification": "5～2,500 Hz；額定推力 20 kN；最大負載 200 kg"
+    },
+    "EQ-011": {
+      "name": "鹽霧試驗機 #01",
+      "category": "腐蝕試驗",
+      "model": "SALT-600",
+      "specification": "35～60°C；箱體 600 L；噴霧量可調"
+    },
+    "EQ-012": {
+      "name": "鹽霧試驗機 #02",
+      "category": "腐蝕試驗",
+      "model": "SALT-1000",
+      "specification": "35～60°C；箱體 1,000 L；連續／間歇噴霧"
+    },
+    "EQ-013": {
+      "name": "拉力試驗機 #01",
+      "category": "機械試驗",
+      "model": "TENS-5K",
+      "specification": "荷重 5 kN；速度 0.1～500 mm/min"
+    },
+    "EQ-014": {
+      "name": "防水試驗機 #01",
+      "category": "防護試驗",
+      "model": "WATER-X6",
+      "specification": "IPX5／IPX6 示範配置；流量 12.5～100 L/min"
+    },
+    "EQ-015": {
+      "name": "ESD 試驗設備 #01",
+      "category": "電性試驗",
+      "model": "ESD-30",
+      "specification": "接觸放電 ±8 kV；空氣放電 ±15 kV；最高設定 ±30 kV"
+    },
+    "EQ-016": {
+      "name": "冷熱衝擊機",
+      "category": "溫度試驗",
+      "model": "SHOCK-100",
+      "specification": "低溫槽 -70°C；高溫槽 200°C；測試區 100 L"
+    },
+    "EQ-017": {
+      "name": "耐候機",
+      "category": "耐候試驗",
+      "model": "UV-500",
+      "specification": "UV 光源；輻照度可調；黑板溫度 35～85°C"
+    },
+    "EQ-018": {
+      "name": "高溫爐 #01",
+      "category": "溫度試驗",
+      "model": "OVEN-250",
+      "specification": "室溫＋10～250°C；強制熱風循環；250 L"
+    },
+    "EQ-019": {
+      "name": "數位顯微鏡 #01",
+      "category": "量測觀察",
+      "model": "MICRO-200",
+      "specification": "放大倍率 20～200×；影像尺寸量測"
+    },
+    "EQ-020": {
+      "name": "防塵試驗箱 #01",
+      "category": "防護試驗",
+      "model": "DUST-800",
+      "specification": "IP5X／IP6X 示範配置；800 L；負壓可調"
+    }
+  },
+  "materials": {
+    "MAT-001": {
+      "name": "耐熱膠帶",
+      "category": "物料耗材",
+      "model": "TAPE-25",
+      "specification": "25 mm × 33 m；耐熱固定用途",
+      "unit": "卷"
+    },
+    "MAT-002": {
+      "name": "無塵擦拭布",
+      "category": "物料耗材",
+      "model": "WIPE-100",
+      "specification": "100 張／包；儀器外觀清潔",
+      "unit": "包"
+    },
+    "MAT-003": {
+      "name": "防靜電手套",
+      "category": "物料耗材",
+      "model": "ESD-GLOVE-M",
+      "specification": "M 號；無塵包裝；防靜電作業",
+      "unit": "雙"
+    },
+    "MAT-004": {
+      "name": "導熱矽脂",
+      "category": "物料耗材",
+      "model": "THERMAL-100",
+      "specification": "100 g／罐；測試治具導熱介面",
+      "unit": "罐"
+    },
+    "MAT-005": {
+      "name": "扭力起子 #01",
+      "category": "工具",
+      "model": "TORQUE-05",
+      "specification": "可調範圍 0.5～5 N·m",
+      "unit": "支"
+    },
+    "MAT-006": {
+      "name": "扭力起子 #02",
+      "category": "工具",
+      "model": "TORQUE-05",
+      "specification": "可調範圍 0.5～5 N·m",
+      "unit": "支"
+    },
+    "MAT-007": {
+      "name": "數位電表 #01",
+      "category": "工具",
+      "model": "DMM-6000",
+      "specification": "6,000 counts；電壓／電阻／導通量測",
+      "unit": "台"
+    },
+    "MAT-008": {
+      "name": "數位游標卡尺",
+      "category": "工具",
+      "model": "CALIPER-150",
+      "specification": "量測範圍 0～150 mm；解析度 0.01 mm",
+      "unit": "支"
+    },
+    "MAT-009": {
+      "name": "恆溫焊台",
+      "category": "工具",
+      "model": "SOLDER-90",
+      "specification": "設定溫度 200～450°C；額定 90 W",
+      "unit": "台"
+    },
+    "MAT-010": {
+      "name": "儀表固定治具 A",
+      "category": "治具配件",
+      "model": "FIX-METER-A",
+      "specification": "TFT／LCD 儀表固定；可調孔距",
+      "unit": "組"
+    },
+    "MAT-011": {
+      "name": "防水接線治具",
+      "category": "治具配件",
+      "model": "FIX-WATER-01",
+      "specification": "防水試驗線束固定；含轉接端子",
+      "unit": "組"
+    },
+    "MAT-012": {
+      "name": "振動固定底板",
+      "category": "治具配件",
+      "model": "FIX-VIB-300",
+      "specification": "300 × 300 mm；鋁合金底板",
+      "unit": "片"
+    },
+    "MAT-013": {
+      "name": "儀表完檢機 #01",
+      "category": "完檢機",
+      "model": "EOL-METER-01",
+      "specification": "儀表顯示、指示燈及按鍵功能檢查",
+      "unit": "台"
+    },
+    "MAT-014": {
+      "name": "儀表完檢機 #02",
+      "category": "完檢機",
+      "model": "EOL-METER-01",
+      "specification": "儀表顯示、指示燈及按鍵功能檢查",
+      "unit": "台"
+    },
+    "MAT-015": {
+      "name": "控制器完檢機",
+      "category": "完檢機",
+      "model": "EOL-VCU-02",
+      "specification": "控制器 I/O、通訊與基本功能檢查",
+      "unit": "台"
+    },
+    "MAT-016": {
+      "name": "直流電源供應器 #01",
+      "category": "輔助儀器",
+      "model": "PSU-30-10",
+      "specification": "輸出 0～30 V／0～10 A；單通道",
+      "unit": "台"
+    },
+    "MAT-017": {
+      "name": "直流電源供應器 #02",
+      "category": "輔助儀器",
+      "model": "PSU-30-10",
+      "specification": "輸出 0～30 V／0～10 A；單通道",
+      "unit": "台"
+    },
+    "MAT-018": {
+      "name": "溫度記錄器",
+      "category": "輔助儀器",
+      "model": "LOGGER-8CH",
+      "specification": "8 通道；K 型熱電偶輸入",
+      "unit": "台"
+    },
+    "MAT-019": {
+      "name": "防靜電工作墊",
+      "category": "治具配件",
+      "model": "MAT-ESD-120",
+      "specification": "1,200 × 600 mm；附接地線",
+      "unit": "張"
+    },
+    "MAT-020": {
+      "name": "端子連接器備品盒",
+      "category": "物料耗材",
+      "model": "CONN-KIT-A",
+      "specification": "常用端子、接頭與防水塞備品套組",
+      "unit": "盒"
+    }
+  }
+}
