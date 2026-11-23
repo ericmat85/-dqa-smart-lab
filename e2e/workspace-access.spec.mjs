@@ -100,3 +100,10 @@ test('role create and edit use a compact horizontal workspace with a visible exi
  const overflow=await d.evaluate(e=>e.scrollWidth-e.clientWidth);expect(overflow).toBeLessThanOrEqual(1);await d.getByRole('button',{name:'關閉編輯角色',exact:true}).click();
  await expect(page.getByRole('cell',{name:'工作區管理者',exact:true})).toBeVisible();expect(s.writes).toHaveLength(0);if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);expect(s.errors).toEqual([]);
 });
+
+test('cloud organization profile keeps shared persistence and hides the Demo editor',async({page})=>{
+ const s=await setup(page);let profile={configuration:{workspaceName:'合成共用工作區',dateFormat:'YYYY/MM/DD',timeZone:'Asia/Taipei',labName:'',address:'',phone:'',email:'',website:'',identifier:'',qualityLead:'',technicalLead:''},revision:0,can_manage:true};const writes=[];
+ await page.route('**/api/business/access**',async route=>{const req=route.request(),url=new URL(req.url()),body=req.postDataJSON();if(url.searchParams.get('section')==='profile')return route.fulfill({json:{data:profile}});if(body?.action==='save_profile'){writes.push(body);profile={...profile,configuration:body.configuration,revision:profile.revision+1};return route.fulfill({json:{data:profile}});}return route.fallback();});
+ await page.goto('/lms/settings/organization');await expect(page.getByRole('button',{name:'編輯設定',exact:true})).toHaveCount(0);await page.getByRole('button',{name:'編輯共用設定'}).click();await page.getByLabel('實驗室名稱',{exact:true}).fill('合成共用實驗室');await page.getByRole('button',{name:'儲存共用設定'}).click();await expect(page.getByRole('status')).toContainText('工作區共用資料已儲存');await page.reload();await expect(page.getByText('合成共用實驗室',{exact:true})).toBeVisible();
+ await page.goto('/lms/settings/documents');await expect(page.getByRole('article',{name:'合成報告預覽'})).toContainText('合成共用實驗室');expect(writes).toHaveLength(1);expect(s.writes).toHaveLength(0);expect(s.errors).toEqual([]);
+});
