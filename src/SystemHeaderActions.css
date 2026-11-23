@@ -30,4 +30,4 @@ html body .shared-personal-settings[data-system] .email-notification-switch.is-e
 html body .shared-personal-settings[data-system] .email-notification-switch:focus-visible{outline-color:#8bbcff}
 @media(max-width:480px){html body .shared-personal-settings .personal-signature-button{width:100%}}
 
-.personal-mail-test{display:flex;align-items:center;gap:12px;margin:12px 0}.personal-mail-test p{margin:0}.shared-personal-settings button:disabled{opacity:.55;cursor:not-allowed}
+.shared-personal-settings button:disabled{opacity:.55;cursor:not-allowed}
