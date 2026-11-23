@@ -1,0 +1,20 @@
+{
+  "E1": {
+    "focus":{"label":"審查重點","type":"select","default":"balanced","options":{"balanced":"全面核對","requirements":"試驗需求與規範","signatures":"簽名紀錄完整性","reports":"報告欄位與來源"}},
+    "detail":{"label":"審查說明程度","type":"select","default":"standard","options":{"concise":"精簡","standard":"標準","detailed":"詳細"}},
+    "findings_limit":{"label":"建議事項上限","type":"number","default":8,"min":3,"max":8}
+  },
+  "E2": {
+    "ranking":{"label":"候選方案比較重點","type":"select","default":"balanced","options":{"balanced":"綜合比較","earliest_finish":"優先較早完成","fewer_devices":"優先較少設備"}},
+    "detail":{"label":"建議理由說明程度","type":"select","default":"standard","options":{"concise":"精簡","standard":"標準","detailed":"詳細"}}
+  },
+  "E3": {
+    "tone":{"label":"報告草稿閱讀對象","type":"select","default":"technical","options":{"technical":"工程技術人員","management":"主管摘要","customer":"客戶說明"}},
+    "detail":{"label":"草稿敘述程度","type":"select","default":"standard","options":{"concise":"精簡","standard":"標準","detailed":"詳細"}}
+  },
+  "E4": {
+    "detail":{"label":"回答詳細程度","type":"select","default":"standard","options":{"concise":"精簡","standard":"標準","detailed":"詳細"}},
+    "vocabulary":{"label":"用詞風格","type":"select","default":"plain","options":{"plain":"容易理解","technical":"工程技術用語"}},
+    "reference_limit":{"label":"引用來源數量上限","type":"number","default":30,"min":3,"max":30}
+  }
+}

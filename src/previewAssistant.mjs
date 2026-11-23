@@ -1,6 +1,8 @@
 import {businessClient} from './businessClient.mjs';
 import {businessAIEnabled,askBusinessAI,renderBusinessAI} from './businessAIClient.mjs';
-import {appStorage} from './originalBusiness.mjs';
+import {answerBusinessFAQ} from './businessFAQ.mjs';
+import {findCommonQuestion,commonQuestionReply} from './assistantDemo.mjs';
+import {appStorage,originalBusinessEnabled} from './originalBusiness.mjs';
 import {readUiPreferences} from './uiPreferences.mjs';
 import {assistantLanguage} from './assistantLanguage.mjs';
 import {clearE2Activity} from './e2Activity.mjs';
@@ -44,6 +46,10 @@ export async function establishSession(system,accountId,fetchImpl,signal){
 }
 
 export async function askPreviewAssistant(question,system,{snapshot,metrics,fetchImpl=globalThis.fetch,storage=globalThis.sessionStorage,signal,idempotencyKey=globalThis.crypto.randomUUID(),contextHint=[],onReportDraft=()=>{},language=readUiPreferences().language}={}){
+ if(findCommonQuestion(question)){
+  if(originalBusinessEnabled())return answerBusinessFAQ(question,{system,language,signal});
+  return commonQuestionReply(question,snapshot,metrics,system,language);
+ }
  if(businessAIEnabled()){
   if(['/clear','清除對話'].includes(question.trim())){await businessClient.request('/ai/clear',{method:'POST',body:{system}});return language==='en'?'Conversation cleared; no model call.':'對話已清除；未呼叫模型。';}
   const selected=selectE4ChatMode(question),q=selected.mode==='DOCUMENT_QA'?'文件問答：'+selected.question:selected.question;

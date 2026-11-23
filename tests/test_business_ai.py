@@ -11,7 +11,7 @@ from gateway.e4_preview_provider import E4Service,Settings,E4Error
 from gateway.e4_preview_ledger import Ledger
 class Tests(unittest.TestCase):
  def setUp(self):
-  self.tmp=tempfile.TemporaryDirectory();self.now=[1795449600.0];self.calls=[];self.mode='ok';self.key='FAKE_TEST_CREDENTIAL_NOT_REAL';self.services=[];self.states=[]
+  self.tmp=tempfile.TemporaryDirectory();self.now=[1795449600.0];self.calls=[];self.mode='ok';self.metadata_calls=[];self.key='FAKE_TEST_CREDENTIAL_NOT_REAL';self.services=[];self.states=[]
   for group in ['E4','E2']:
    cfg=Settings('gpt-6-luna',Decimal('.10'),Decimal('.50'),Decimal('.05'),Decimal('1'),1809187140.0,group,max_output=768,max_input=16384 if group=='E2' else 8192,request_timeout=.15)
    p=Path(self.tmp.name)/(group+'.sqlite');Ledger.initialize_local_or_operator(p,cfg.identity(),cfg.total_cap,cfg.expires);ledger=Ledger(p,cfg.identity());ledger.require_unknown_reconciliation=True
@@ -22,8 +22,14 @@ class Tests(unittest.TestCase):
   for x in self.services:x.executor.shutdown(wait=True);x.client.close()
   self.tmp.cleanup()
  def payload(self,engine='E4',**kw):
-  p={'engine':engine,'operation_id':str(uuid.uuid4()),'subject':'a'*64,'session_nonce':'b'*64,'language':'zh-TW','question':'實驗室設備與試驗資料','context':{'references':['SUMMARY'],'records':[],'candidates':[{'id':'C1'}]}};p.update(kw);return p
+  p={'engine':engine,'workspace':'c'*64,'operation_id':str(uuid.uuid4()),'subject':'a'*64,'session_nonce':'b'*64,'language':'zh-TW','question':'實驗室設備與試驗資料','context':{'references':['SUMMARY'],'records':[],'candidates':[{'id':'C1'}]}};p.update(kw);return p
  def provider(self,req):
+  if req.method=='GET':
+   self.metadata_calls.append(req)
+   from gateway.business_model_catalog import CATALOG
+   if self.mode=='metadata-error':return httpx.Response(403)
+   ids=getattr(self,'model_ids',[r['id'] for r in CATALOG['models']])
+   return httpx.Response(200,json={'object':'list','data':[{'id':model} for model in ids]})
   self.calls.append(req);body=json.loads(req.content);e=body['text']['format']['schema']['properties']['engine']['enum'][0];self.assertEqual(str(req.url),E4Service.ENDPOINT);self.assertFalse(body['store']);self.assertIn('untrusted',body['instructions']);self.assertNotIn('tools',body)
   if self.mode=='timeout':time.sleep(.22)
   if self.mode=='auth':return httpx.Response(401)
@@ -31,7 +37,7 @@ class Tests(unittest.TestCase):
   if self.mode=='invented_ref':result['references']=['secret:foreign']
   if self.mode=='invented_candidate':result['selected_candidate_id']='FORGED'
   if self.mode=='write_claim':result['summary']='我已刪除所有資料'
-  return httpx.Response(200,headers={'x-request-id':'req_MOCK_TEST'},json={'id':'resp_MOCK_TEST','model':'gpt-6-luna','status':'incomplete' if self.mode=='incomplete' else 'completed','usage':{'input_tokens':80,'output_tokens':40},'output':[{'type':'message','content':[{'type':'output_text','text':json.dumps(result)}]}]})
+  return httpx.Response(200,headers={'x-request-id':'req_MOCK_TEST'},json={'id':'resp_MOCK_TEST','model':body['model'],'status':'incomplete' if self.mode=='incomplete' else 'completed','usage':{'input_tokens':80,'output_tokens':40},'output':[{'type':'message','content':[{'type':'output_text','text':json.dumps(result)}]}]})
  def generate(self,p=None):return self.app.generate(p or self.payload(),'I-'+'a'*32)
  def test_all_four_routes_are_explicitly_mock_in_transport_tests(self):
   for e in ['E1','E2','E3','E4']:

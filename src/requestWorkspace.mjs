@@ -32,8 +32,8 @@ export function orderWork(items,now=new Date()){
  return [...items].sort((a,b)=>{const x=rank(a),y=rank(b);for(let i=0;i<x.length;i++){if(x[i]<y[i])return -1;if(x[i]>y[i])return 1;}return String(a.id).localeCompare(String(b.id));});
 }
 export function filterRequestRows(items,{search='',field='all',status='全部狀態',from='',to='',sort='updated-desc',collection='all'},now=new Date()){
- const keyfields={id:r=>r.id,product:r=>[r.productCode,r.product,r.project].join(' '),testItems:r=>(r.testItems||[]).join(' '),requester:r=>r.requester,dueDate:r=>r.dueDate};
- const text=r=>keyfields[field]?.(r)||[r.id,r.productCode,r.product,r.project,...(r.testItems||[]),r.requester,r.status].join(' ');
+ const keyfields={id:r=>r.id,product:r=>[r.productCode,r.product,r.project,r.projectCode].join(' '),testItems:r=>(r.testItems||[]).join(' '),requester:r=>r.requester,dueDate:r=>r.dueDate};
+ const text=r=>keyfields[field]?.(r)||[r.id,r.productCode,r.product,r.project,r.projectCode,...(r.testItems||[]),r.requester,r.status].join(' ');
  const [key,direction]=sort.split('-');
  const rows=items.filter(r=>(status==='全部狀態'||r.status===status)&&requestMatchesCollection(r,collection,now)&&String(text(r)||'').toLowerCase().includes(search.trim().toLowerCase())&&(!from||(isCalendarDate(r.dueDate)&&r.dueDate>=from))&&(!to||(isCalendarDate(r.dueDate)&&r.dueDate<=to)));
  if(sort==='work')return orderWork(rows,now);

@@ -1,0 +1,863 @@
+{
+  "version": "2026-11-24.1",
+  "checked_at": "2026-11-24",
+  "metadata_source": "GET /v1/models using existing runtime key; no inference",
+  "models": [
+    {
+      "id": "chat-latest",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "chat-latest"
+      ]
+    },
+    {
+      "id": "chatgpt-image-latest",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "chatgpt-image-latest"
+      ]
+    },
+    {
+      "id": "gpt-4.1",
+      "compatible": false,
+      "reason": "官方文件已標示 Deprecated，暫不開放新增選用",
+      "response_models": [
+        "gpt-4.1"
+      ],
+      "input_usd_per_million": "2.00",
+      "output_usd_per_million": "8.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-4.1",
+      "source_sha256": "d78a318cdbca92814690b561854cde699e8f650310febbdb63ebb9ac9efde438",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-4.1-2025-04-14",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4.1-2025-04-14"
+      ]
+    },
+    {
+      "id": "gpt-4.1-mini",
+      "compatible": false,
+      "reason": "官方文件已標示 Deprecated，暫不開放新增選用",
+      "response_models": [
+        "gpt-4.1-mini"
+      ],
+      "input_usd_per_million": "0.40",
+      "output_usd_per_million": "1.60",
+      "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+      "source_sha256": "978fb3001ed0f059465815c2676cabb766ea26277081fd79c59de17aae9ccb9d",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-4.1-mini-2025-04-14",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4.1-mini-2025-04-14"
+      ]
+    },
+    {
+      "id": "gpt-4o",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4o"
+      ]
+    },
+    {
+      "id": "gpt-4o-2024-08-06",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4o-2024-08-06"
+      ]
+    },
+    {
+      "id": "gpt-4o-2024-11-20",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4o-2024-11-20"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini",
+      "compatible": false,
+      "reason": "官方文件已標示 Deprecated，暫不開放新增選用",
+      "response_models": [
+        "gpt-4o-mini"
+      ],
+      "input_usd_per_million": "0.15",
+      "output_usd_per_million": "0.60",
+      "source": "https://developers.openai.com/api/docs/models/gpt-4o-mini",
+      "source_sha256": "f695a39196b37e5c5edfd5a21146b58747397afe6bbba232041122a928fcd7ac",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-4o-mini-2024-07-18",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-4o-mini-2024-07-18"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-transcribe",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-transcribe"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-transcribe-2025-03-20",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-transcribe-2025-03-20"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-transcribe-2025-12-15",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-transcribe-2025-12-15"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-tts",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-tts"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-tts-2025-03-20",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-tts-2025-03-20"
+      ]
+    },
+    {
+      "id": "gpt-4o-mini-tts-2025-12-15",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-mini-tts-2025-12-15"
+      ]
+    },
+    {
+      "id": "gpt-4o-transcribe",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-transcribe"
+      ]
+    },
+    {
+      "id": "gpt-4o-transcribe-diarize",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-4o-transcribe-diarize"
+      ]
+    },
+    {
+      "id": "gpt-5",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5"
+      ]
+    },
+    {
+      "id": "gpt-5-2025-08-07",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-2025-08-07"
+      ]
+    },
+    {
+      "id": "gpt-5-mini",
+      "compatible": false,
+      "reason": "官方文件已標示 Deprecated，暫不開放新增選用",
+      "response_models": [
+        "gpt-5-mini"
+      ],
+      "input_usd_per_million": "0.25",
+      "output_usd_per_million": "2.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5-mini",
+      "source_sha256": "9802e67c1d777300b7993a30a98638273102649c5fff2ca6429e9bce99300c0a",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-5-mini-2025-08-07",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-mini-2025-08-07"
+      ]
+    },
+    {
+      "id": "gpt-5-nano",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-nano"
+      ]
+    },
+    {
+      "id": "gpt-5-nano-2025-08-07",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-nano-2025-08-07"
+      ]
+    },
+    {
+      "id": "gpt-5-pro",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-pro"
+      ]
+    },
+    {
+      "id": "gpt-5-pro-2025-10-06",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5-pro-2025-10-06"
+      ]
+    },
+    {
+      "id": "gpt-5-search-api",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-5-search-api"
+      ]
+    },
+    {
+      "id": "gpt-5-search-api-2025-10-14",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-5-search-api-2025-10-14"
+      ]
+    },
+    {
+      "id": "gpt-5.1",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.1"
+      ]
+    },
+    {
+      "id": "gpt-5.1-2025-11-13",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.1-2025-11-13"
+      ]
+    },
+    {
+      "id": "gpt-5.2",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.2"
+      ]
+    },
+    {
+      "id": "gpt-5.2-2025-12-11",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.2-2025-12-11"
+      ]
+    },
+    {
+      "id": "gpt-5.2-pro",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.2-pro"
+      ]
+    },
+    {
+      "id": "gpt-5.2-pro-2025-12-11",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.2-pro-2025-12-11"
+      ]
+    },
+    {
+      "id": "gpt-5.3-codex",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.3-codex"
+      ]
+    },
+    {
+      "id": "gpt-5.4",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4"
+      ]
+    },
+    {
+      "id": "gpt-5.4-2026-03-05",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-2026-03-05"
+      ]
+    },
+    {
+      "id": "gpt-5.4-mini",
+      "compatible": false,
+      "reason": "推理參數與短輸出合約尚待驗證",
+      "response_models": [
+        "gpt-5.4-mini"
+      ],
+      "input_usd_per_million": "0.75",
+      "output_usd_per_million": "4.50",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.4-mini",
+      "source_sha256": "ea190cd848848e16d61d9dfe08ec9634051a88af052aad23053b032d4037a1eb",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-5.4-mini-2026-03-17",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-mini-2026-03-17"
+      ]
+    },
+    {
+      "id": "gpt-5.4-nano",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-nano"
+      ]
+    },
+    {
+      "id": "gpt-5.4-nano-2026-03-17",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-nano-2026-03-17"
+      ]
+    },
+    {
+      "id": "gpt-5.4-pro",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-pro"
+      ]
+    },
+    {
+      "id": "gpt-5.4-pro-2026-03-05",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.4-pro-2026-03-05"
+      ]
+    },
+    {
+      "id": "gpt-5.5",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.5"
+      ]
+    },
+    {
+      "id": "gpt-5.5-2026-04-23",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.5-2026-04-23"
+      ]
+    },
+    {
+      "id": "gpt-5.5-pro",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.5-pro"
+      ]
+    },
+    {
+      "id": "gpt-5.5-pro-2026-04-23",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.5-pro-2026-04-23"
+      ]
+    },
+    {
+      "id": "gpt-5.6-luna",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.6-luna"
+      ]
+    },
+    {
+      "id": "gpt-5.6-sol",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.6-sol"
+      ]
+    },
+    {
+      "id": "gpt-5.6-terra",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "gpt-5.6-terra"
+      ]
+    },
+    {
+      "id": "gpt-6-astra",
+      "compatible": false,
+      "reason": "推理 Token、輸出上限及費用相容性尚待驗證",
+      "response_models": [
+        "gpt-6-astra"
+      ],
+      "input_usd_per_million": "10.00",
+      "output_usd_per_million": "50.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "source_sha256": "7e2568c52b3a2e17910d0d60f19ce6755fea52eed9aa4b6721a96275c1596095",
+      "reasoning_effort": "low",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6-luna",
+      "compatible": true,
+      "reason": "已核對 Responses／JSON Schema、價格與請求參數；未執行付費推論",
+      "response_models": [
+        "gpt-6-luna"
+      ],
+      "input_usd_per_million": "0.10",
+      "output_usd_per_million": "0.50",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "source_sha256": "db11074d8173e9bcc2bd9e852b129aa89ee76341399a7a1ccac91a135c7a8d04",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6-sol",
+      "compatible": true,
+      "reason": "已核對 Responses／JSON Schema、價格與請求參數；未執行付費推論",
+      "response_models": [
+        "gpt-6-sol"
+      ],
+      "input_usd_per_million": "2.00",
+      "output_usd_per_million": "10.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6-sol",
+      "source_sha256": "2f99a7fe8816ef72fc1e3cdb2dc5cc9258d6988a499c86bad647cdc9eafcde43",
+      "reasoning_effort": "none",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6.1-sol",
+      "compatible": false,
+      "reason": "推理 Token 與目前輸出上限的相容性尚待驗證",
+      "response_models": [
+        "gpt-6.1-sol"
+      ],
+      "input_usd_per_million": "2.00",
+      "output_usd_per_million": "10.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "source_sha256": "9ed306505c11dc22fbe8c8c2c644f5e2ee5a6de482b36e704c64391d73908f5f",
+      "reasoning_effort": "low",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6.1-terra",
+      "compatible": true,
+      "reason": "已核對 Responses／JSON Schema、價格與請求參數；未執行付費推論",
+      "response_models": [
+        "gpt-6.1-terra"
+      ],
+      "input_usd_per_million": "1.00",
+      "output_usd_per_million": "5.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.1-terra",
+      "source_sha256": "18ac46e0df9f6122edc8862df2f35c3cbab42cfd8b7457f3985dd92a7183c69f",
+      "reasoning_effort": "none",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6.2-astra",
+      "compatible": false,
+      "reason": "推理參數、短輸出及費用相容性尚待驗證",
+      "response_models": [
+        "gpt-6.2-astra"
+      ],
+      "input_usd_per_million": "8.00",
+      "output_usd_per_million": "40.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.2-astra",
+      "source_sha256": "13cc7baa53434d3e07c26857ff30e017d26113c6e4ea161a6e957478aa6906d6",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-6.2-sol",
+      "compatible": false,
+      "reason": "推理參數與短輸出合約尚待驗證",
+      "response_models": [
+        "gpt-6.2-sol"
+      ],
+      "input_usd_per_million": "2.00",
+      "output_usd_per_million": "10.00",
+      "source": "https://developers.openai.com/api/docs/models/gpt-6.2-sol",
+      "source_sha256": "89a951a93996dadbe9a62b49bcd99bd02c390cf71d42263bdf842ff8172998b8",
+      "verification": "DOCUMENTED_CONTRACT_MOCK_TESTS_ONLY"
+    },
+    {
+      "id": "gpt-audio",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-audio"
+      ]
+    },
+    {
+      "id": "gpt-audio-1.5",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-audio-1.5"
+      ]
+    },
+    {
+      "id": "gpt-audio-2025-08-28",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-audio-2025-08-28"
+      ]
+    },
+    {
+      "id": "gpt-audio-mini",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-audio-mini"
+      ]
+    },
+    {
+      "id": "gpt-audio-mini-2025-12-15",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-audio-mini-2025-12-15"
+      ]
+    },
+    {
+      "id": "gpt-image-1-mini",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-1-mini"
+      ]
+    },
+    {
+      "id": "gpt-image-1.5",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-1.5"
+      ]
+    },
+    {
+      "id": "gpt-image-2",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2"
+      ]
+    },
+    {
+      "id": "gpt-image-2-2026-04-21",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2-2026-04-21"
+      ]
+    },
+    {
+      "id": "gpt-image-2.5-flare",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.5-flare"
+      ]
+    },
+    {
+      "id": "gpt-image-2.5-flare-2026-09-08",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.5-flare-2026-09-08"
+      ]
+    },
+    {
+      "id": "gpt-image-2.5-sunburst",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.5-sunburst"
+      ]
+    },
+    {
+      "id": "gpt-image-2.5-sunburst-2026-09-08",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.5-sunburst-2026-09-08"
+      ]
+    },
+    {
+      "id": "gpt-image-2.6-flare",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.6-flare"
+      ]
+    },
+    {
+      "id": "gpt-image-2.6-sunburst",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-image-2.6-sunburst"
+      ]
+    },
+    {
+      "id": "gpt-live-1",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-live-1"
+      ]
+    },
+    {
+      "id": "gpt-live-1.1",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-live-1.1"
+      ]
+    },
+    {
+      "id": "gpt-live-transcribe",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-live-transcribe"
+      ]
+    },
+    {
+      "id": "gpt-realtime",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime"
+      ]
+    },
+    {
+      "id": "gpt-realtime-1.5",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-1.5"
+      ]
+    },
+    {
+      "id": "gpt-realtime-2",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-2"
+      ]
+    },
+    {
+      "id": "gpt-realtime-2.1",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-2.1"
+      ]
+    },
+    {
+      "id": "gpt-realtime-2.1-mini",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-2.1-mini"
+      ]
+    },
+    {
+      "id": "gpt-realtime-2025-08-28",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-2025-08-28"
+      ]
+    },
+    {
+      "id": "gpt-realtime-mini",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-mini"
+      ]
+    },
+    {
+      "id": "gpt-realtime-mini-2025-12-15",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-mini-2025-12-15"
+      ]
+    },
+    {
+      "id": "gpt-realtime-translate",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-translate"
+      ]
+    },
+    {
+      "id": "gpt-realtime-whisper",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-realtime-whisper"
+      ]
+    },
+    {
+      "id": "gpt-transcribe",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "gpt-transcribe"
+      ]
+    },
+    {
+      "id": "o3",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "o3"
+      ]
+    },
+    {
+      "id": "o3-2025-04-16",
+      "compatible": false,
+      "reason": "模型價格、Responses 與 JSON Schema 合約尚未核對",
+      "response_models": [
+        "o3-2025-04-16"
+      ]
+    },
+    {
+      "id": "omni-moderation-2024-09-26",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "omni-moderation-2024-09-26"
+      ]
+    },
+    {
+      "id": "omni-moderation-latest",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "omni-moderation-latest"
+      ]
+    },
+    {
+      "id": "text-embedding-3-large",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "text-embedding-3-large"
+      ]
+    },
+    {
+      "id": "text-embedding-3-small",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "text-embedding-3-small"
+      ]
+    },
+    {
+      "id": "text-embedding-ada-002",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "text-embedding-ada-002"
+      ]
+    },
+    {
+      "id": "tts-1",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "tts-1"
+      ]
+    },
+    {
+      "id": "tts-1-1106",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "tts-1-1106"
+      ]
+    },
+    {
+      "id": "tts-1-hd",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "tts-1-hd"
+      ]
+    },
+    {
+      "id": "tts-1-hd-1106",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "tts-1-hd-1106"
+      ]
+    },
+    {
+      "id": "whisper-1",
+      "compatible": false,
+      "reason": "用途不符合 E1–E4 的文字 JSON 回應合約",
+      "response_models": [
+        "whisper-1"
+      ]
+    }
+  ]
+}

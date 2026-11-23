@@ -69,7 +69,7 @@ class Ledger:
   row=c.execute('SELECT account,system,actor,expires,generation,revoked FROM sessions WHERE sid=?',(binding['sid'],)).fetchone()
   if not row or row[:4]!=(binding['accountId'],binding['system'],binding['actor'],binding['exp']) or row[5] or now*1000>=row[3]:raise ValueError('SESSION_REVOKED_OR_EXPIRED')
   if row[4]!=generation:raise ValueError('SESSION_CONTEXT_CHANGED')
- def authorize_dispatch(self,operation,binding,generation,now,cancelled=False):
+ def authorize_dispatch(self,operation,binding,generation,now,cancelled=False,dispatch_guard=None):
   error=None
   with self.connect() as c:
    c.execute('BEGIN IMMEDIATE')
@@ -81,6 +81,7 @@ class Ledger:
     self._authorize_session(c,binding,now,generation)
     if now>=c.execute('SELECT expires FROM budget WHERE id=1').fetchone()[0]:raise ValueError('BUDGET_EXPIRED')
     if cancelled:raise ValueError('REQUEST_CANCELLED_NOT_SENT')
+    if dispatch_guard is not None:dispatch_guard(c)
    except ValueError as exc:error=str(exc)
    if error:
     seq=self._event(c,now,'DISPATCH_REJECTED',operation,binding['sid'],{'error_code':error})
@@ -106,7 +107,7 @@ class Ledger:
  def denied(self,trace,session_hash,request_hash,code,now):
   with self.connect() as c:
    c.execute('INSERT OR IGNORE INTO attempts VALUES(?,?,?,?,?,?,?,?,?)',(trace,session_hash,request_hash,now,0,'REJECTED_NOT_SENT',json.dumps({'error_code':code,'outcome':'NOT_SENT','at':now}),0,0))
- def reserve(self,trace,session_hash,amount,now,rate,request_hash='',lease_seconds=25,trace_id=None,binding=None,generation=None):
+ def reserve(self,trace,session_hash,amount,now,rate,request_hash='',lease_seconds=25,trace_id=None,binding=None,generation=None,reservation_guard=None):
   self.recover_unknown(now)
   n=nanos(amount)
   if n<=0:raise ValueError('INVALID_RESERVATION')
@@ -125,6 +126,7 @@ class Ledger:
    if c.execute('SELECT COUNT(*) FROM attempts WHERE active=1').fetchone()[0]>=maximum:raise ValueError('SERVICE_BUSY')
    if c.execute('SELECT COUNT(*) FROM attempts WHERE created>? AND reserved>0',(now-60,)).fetchone()[0]>=rate:raise ValueError('RATE_LIMIT')
    if held+spent+n>cap:raise ValueError('TOTAL_BUDGET_LIMIT')
+   if reservation_guard is not None:reservation_guard(c,n)
    c.execute('INSERT INTO attempts VALUES(?,?,?,?,?,?,?,?,?)',(trace,session_hash,request_hash,now,n,'RESERVED_INFLIGHT',json.dumps({'trace_id':trace_id or trace,'outcome':'INFLIGHT'}),1,now+lease_seconds))
    c.execute('UPDATE budget SET held=held+? WHERE id=1',(n,))
    if binding is not None:
