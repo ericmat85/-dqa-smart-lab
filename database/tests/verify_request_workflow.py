@@ -41,7 +41,7 @@ class Tests(unittest.TestCase):
  def test_closed_release_does_not_prepare_or_change_state(self):self.deny(f"UPDATE dqa_private.request_workflow_policy SET enabled=false WHERE tenant_id='{T}';"+submitted(),'WORKFLOW_RELEASE_REQUIRED')
  def test_no_signature_cannot_submit(self):self.deny(run_action(2,command(signature_data=''),1),'WORKFLOW_SIGNATURE_REQUIRED')
  def test_invalid_signature_rejected(self):self.deny(run_action(2,command(signature_data='data:text/plain;base64,YQ=='),1),'DRAFT_SIGNATURE_INVALID')
- def test_missing_u_blocks_submit(self):self.deny(f"UPDATE dqa_business.requests SET sample_space_units=NULL WHERE id='{REQ}';"+run_action(2,command(revision=2),1),'WORKFLOW_REQUEST_INCOMPLETE')
+ def test_missing_u_no_longer_blocks_submit(self):self.ok(f"UPDATE dqa_business.requests SET sample_space_units=NULL WHERE id='{REQ}';"+run_action(2,command(revision=2),1)+f"SELECT status,(SELECT payload ? 'sample_space_units' FROM dqa_business.request_document_versions WHERE request_id='{REQ}') FROM dqa_business.requests WHERE id='{REQ}'",'AWAITING_REQUEST_MANAGER|f')
  def test_missing_real_supervisor_blocks_submit(self):self.deny(f"UPDATE dqa_business.memberships SET supervisor_member_id=NULL WHERE id='{OWN}';"+submitted(),'WORKFLOW_SUPERVISOR_REQUIRED')
  def test_disabled_supervisor_blocks_submit(self):self.deny(f"UPDATE dqa_business.memberships SET enabled=false WHERE id='{MAN}';"+submitted(),'WORKFLOW_SUPERVISOR_REQUIRED')
  def test_other_person_cannot_submit_owner_draft(self):self.deny(run_action(1,command(),1),'WORKFLOW_ACCESS_DENIED')

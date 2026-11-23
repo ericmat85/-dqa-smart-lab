@@ -19,7 +19,7 @@ def fixture(kind='HIGH_HUMIDITY'):
 
 def plan(kind='HIGH_HUMIDITY',**kw):
  end=END if kind=='HIGH_HUMIDITY' else START+timedelta(days=4)
- c=dict(request_id=REQ,expected_request_revision=6,expected_draft_revision=0,data=dict(equipment_ids=[EQ],equipment_revisions={EQ:1},executor_id=EX,executor_revision=1,start_date=str(START),end_date=str(end),sample_code='SYNTHETIC-SAMPLE',note='合成排程草稿',preparation_minutes=0,cleanup_minutes=0));c.update(kw);return c
+ c=dict(request_id=REQ,expected_request_revision=6,expected_draft_revision=0,data=dict(sample_space_units=1,equipment_ids=[EQ],equipment_revisions={EQ:1},executor_id=EX,executor_revision=1,start_date=str(START),end_date=str(end),sample_code='SYNTHETIC-SAMPLE',note='合成排程草稿',preparation_minutes=0,cleanup_minutes=0));c.update(kw);return c
 
 def run_plan(c=None,operation=OP):
  q=literal(c or plan());return 'RESET ROLE;'+auth(1)+f"SELECT dqa_business.prepare_schedule_draft('{T}','{operation}',{q});SELECT dqa_business.execute_schedule_draft('{T}','{operation}',{q});"
@@ -35,7 +35,8 @@ class Tests(unittest.TestCase):
  def test_read_only_actor_denied(self):
   q=literal(plan());r=execute('RESET ROLE;'+auth(3)+f"SELECT dqa_business.prepare_schedule_draft('{T}','{OP}',{q})");self.assertIn('PLANNING_ACCESS_DENIED',r.stderr)
  def test_request_revision_is_captured(self):self.deny(plan(expected_request_revision=5),'REVISION_CONFLICT')
- def test_missing_units_not_invented(self):self.deny(plan(expected_request_revision=7),'PLANNING_SOURCE_INCOMPLETE',prefix=f"UPDATE dqa_business.requests SET sample_space_units=NULL WHERE id='{REQ}';".replace('NULL','NULL')+ 'SELECT 1;')
+ def test_missing_units_not_invented(self):
+  c=plan();del c['data']['sample_space_units'];self.deny(c,'PLANNING_FIELDS_INVALID')
  def test_unknown_fields_rejected(self):self.deny({**plan(),'status':'BOOKED'},'PLANNING_FIELDS_INVALID')
  def test_equipment_type_checked(self):self.deny(plan(),'PLANNING_EQUIPMENT_REQUIRED',prefix=f"UPDATE dqa_business.equipment SET name='振動機' WHERE id='{EQ}';")
  def test_disabled_equipment_checked(self):self.deny(plan(),'PLANNING_EQUIPMENT_REQUIRED',prefix=f"UPDATE dqa_business.equipment SET operational_status='MAINTENANCE' WHERE id='{EQ}';")

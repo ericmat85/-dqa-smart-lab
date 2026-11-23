@@ -1,0 +1,15 @@
+# Sample space U: existing scheduling field owns the value
+
+The requester form and request information no longer ask for/display a per-sample U value. Draft saving omits `sample_space_units`. Submission still requires the original product/customer/trial/specification/acceptance/date, supervisor and signature checks, but no U value. New immutable submission payloads omit this scheduling property; existing signed versions and their hashes are never rewritten.
+
+The existing LMS schedule arrangement field is editable for the existing authorized scheduling role. No duplicate field, page, category or role is added. A positive integer from 1 to 100000 must be explicitly supplied when scheduling. The same value travels through the draft command, `schedule_drafts.plan.sample_space_units`, refreshed form, E2 candidate validation, formal booking and `schedules.plan.sample_space_units`. Equipment capacity and reservations use that plan value. Changing it does not alter the signed request or its revision. Existing scheduling permission/resource/revision/conflict checks remain enforced by SQL.
+
+The legacy request column is retained for historical records. Old drafts/formal schedules can display their legacy value if their historical plan has none; all newly saved plans explicitly own the value. Booking can revalidate an old draft using the old request value when that old plan has none. No old record is bulk rewritten or deleted. Request review AI context omits the legacy request U field, E2 receives the planner's input, and schedule queries for AI project the stored plan's U value.
+
+Migration `023_planner_sample_space.sql` replaces four existing functions while preserving permissions and notification triggers. It has been applied only to the isolated local PostgreSQL clone recorded in the task's LOCAL_DATABASE.json. Migration 022 from the previous change remains a separate pending release change. Neither cloud migration was run by this task.
+
+The fixed physical `/api/business/data/requests` entry covers draft creation, reading and editing. The client uses `?id=<uuid>` for row operations, which the existing secured business handler validates and maps to its existing row operation. Anonymous requests, foreign origins, duplicate IDs and malformed IDs are rejected. Unknown write results remain unknown and are never automatically resent.
+
+Account management no longer renders the “查詢操作結果” button. It performs one automatic read-only receipt lookup for an unresolved operation, including one restored from session storage. Existing “重新讀取” can check again if needed. An unresolved operation continues to block duplicate writes; explicit cancellation/recovery still uses the original idempotent server contract. Receipt queries never resend activation email, creation or deletion.
+
+Changes are local and unstaged on the same checkout until the user gives a PR command. The review artifact contains desktop/mobile screenshots from isolated browser tests, not a deployment or connection to production data.
