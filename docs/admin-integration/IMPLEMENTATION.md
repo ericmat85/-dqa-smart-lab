@@ -15,7 +15,7 @@
 - GET `/api/business/access?section=profile`；POST `/api/business/access` 的 action `save_profile`、configuration、expected_revision。租戶取自加密 Session，不接受 browser tenant/actor/role。沿用 cookie、same-origin、session validation、refresh 與 user JWT RPC，無 service-role。
 - RPC 先驗證既有成員，寫入再驗證管理員；鎖定同租戶設定、檢查修訂號，避免併發覆寫。固定 schema、字數、日期格式、時區與聯絡資料檢查同時存在 server 與 SQL。主管欄不影響授權。設定表原觸發器提供修訂號與最小欄位稽核，不寫設定內容至 log。
 - UI 不以 localStorage 假裝共享保存。未連線僅告知未連線，讀取失敗不覆寫空預設；儲存結果不明時清除可重送狀態，要求重入讀回，不自動重送。取消只丟棄未儲存草稿。每次重入與重新登入取服務端設定。
-- 日期格式／時區僅作用於新增設定更新日期與合成預覽，既有各頁日期顯示與排程計算尚未整體套用；不寫時間或改既有編碼。套件版本 0.0.0 唯讀，非臆造產品發行號。
+- Cloud 管理總覽也讀取同一 profile 顯示名稱與時區，失敗時不回退 Demo 名稱；日期格式／時區僅作用於新增設定更新日期、總覽時區標示與合成預覽，既有各頁日期顯示與排程計算尚未整體套用；不寫時間或改既有編碼。套件版本 0.0.0 唯讀，非臆造產品發行號。
 - 文件頁的合成稿 v1 直接使用同份實驗室抬頭；強調色／頁尾只在當頁記憶體，無外部 URL 圖片、SVG、下載、正式報告變更或預填認證。正式新草稿的明確採用、快照與版本封存是下一階段，不把預覽當成已採用範本。
 
 ## 分類矩陣
