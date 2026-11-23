@@ -6,7 +6,10 @@ async function setup(page,{signed=false}={}){
  await page.route('**/api/**',async route=>{
  const request=route.request(),path=new URL(request.url()).pathname,body=request.postDataJSON(),send=(data,status=200)=>route.fulfill({status,json:{...data,trace_id:'I-SYNTHETIC'}});
  if(!path.startsWith('/api/business/'))return send({error:{code:'LIVE_PROVIDER_DISABLED'}},403);
- const endpoint=path.slice('/api/business'.length);
+ let endpoint=path.slice('/api/business'.length);
+ // The existing client uses the fixed endpoint for request detail and edits.
+ const requestId=new URL(request.url()).searchParams.get('id');
+ if(endpoint==='/data/requests'&&requestId&&['GET','PATCH'].includes(request.method()))endpoint+='/'+requestId;
  if(endpoint==='/me')return state.signed?send({member,user:{id:'synthetic-user',email:'synthetic@example.invalid'}}):send({error:{code:'AUTHENTICATION_REQUIRED'}},401);
  if(endpoint==='/login'){state.signed=true;return send({authenticated:true,member});}
  if(endpoint==='/logout'){state.signed=false;return send({signed_out:true,server_session_revoked:true});}
