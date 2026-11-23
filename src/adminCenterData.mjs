@@ -55,3 +55,16 @@ export function adminSeed(){return {version:1,settings:{
 export const QUALITY_EXAMPLES=[{id:'DEMO-CAPA-01',category:'文件缺漏',correction:'補齊示範檢查清單',prevention:'教育訓練及複核（展示）',status:'Demo 待評估，非正式 CAPA'},{id:'DEMO-AUDIT-01',category:'設備異常',correction:'示範設備重新確認',prevention:'檢查週期建議（展示）',status:'Demo 追溯至案件／樣品／設備／報告版本'}];
 export const AI_USAGE=AI_ENGINES.map((e,i)=>({id:e.id,name:e.name,model:'Demo 規則模擬器（未接模型）',rules:'DEMO-RULES-1.0（展示）',tokens:`${(i+1)*1200}（Demo 示例）`,cost:`USD ${((i+1)*0.012).toFixed(3)}（Demo 示例）`}));
 export const QUALIFICATION_EXAMPLE={id:'DEMO-STAFF-B',person:'Demo 工程師乙',equipment:'DEMO-EQUIPMENT-B（非真實設備）',test:'Demo 振動試驗',training:'Demo 複訓待完成',expires:'2020-01-01'};
+
+// Reference classification: descriptive evidence only, never a configuration switch.
+export const ADMIN_INTEGRATION_NOTES={
+ parameters:[['系統參數','共用資料庫設定','工作區名稱、顯示格式與時區；貨幣、樣本前綴及引導開關尚無已確認消費者，待做。']],
+ organization:[['實驗室資訊','共用資料庫設定','名稱、地址及聯絡資訊由同一份工作區共用設定提供；主管資訊不授權。']],
+ documents:[['報告品牌','合成預覽','抬頭共用實驗室資訊；強調色與頁尾僅本頁預覽。新版範本明確採用及版本保存待做。'],['SOP 與文件','既有來源','沿用文件與範本管理；SOP 訓練事件串接待做。']],
+ notifications:[['委託／報告待審','既有事件','資料庫狀態變更事件及既有通知服務；沿用原收件人與偏好。'],['校正／庫存／品質／訓練／維護／SOP','待做','既有業務資料可查閱，但未確認這些事件有共用寄送來源；不新增通知開關。'],['每日摘要／發票提醒','待做','尚無事件服務；帳號驗證郵件屬獨立登入流程。']],
+ interface:[['SMTP','既有通知服務','由通知與提醒設定查詢服務狀態；本頁不測試連線或寄信。'],['儀器匯入','部分實作','設備端口設定與測點存在；跨儀器通用匯入整合待做。'],['ERP／客戶入口 API／條碼與 QR','待做','未提供這些對外整合或金鑰設定。'],['備份目的地','待做','管理設定 JSON 匯出不是資料庫備份。'],['外部 AI Provider','既有 AI 引擎','請至 AI 引擎管理檢視現況。']],
+ security:[['審核與稽核','既有規則','沿用九階、禁止自審與同人跨階；不更動登入政策、帳號鎖定與資料保留。不是法規符合性認證。']],
+ quality:[['品質保證','既有來源','沿用品質紀錄與稽核來源；獨立 OOS 紀錄待規劃，不自動變更流程。']],
+ qualifications:[['訓練與資格','既有來源','沿用人員資格管理，SOP 訓練事件串接待做。']],
+ backup:[['備份與資料維護','既有設定工具','本機設定匯出不等於資料庫備份；遠端備份目的地待做。']],
+};

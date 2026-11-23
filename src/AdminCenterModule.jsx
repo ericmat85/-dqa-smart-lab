@@ -1,3 +1,4 @@
+import WorkspaceProfileSettings from './WorkspaceProfileSettings.jsx';
 import SignatureMethodSettings from './SignatureMethodSettings.jsx';
 import BusinessNotificationDelivery from './BusinessNotificationDelivery.jsx';
 import DataMaintenance from './DataMaintenance.jsx';
@@ -17,7 +18,7 @@ import SignatureSettingsDialog from './SignatureSettingsDialog.jsx';
 import AdminEngineWorkspace from './AdminEngineWorkspace.jsx';
 import {canAccessLmsPage} from './customRoles.mjs';
 import {canManageAccounts} from './demoPermissions.mjs';
-import {ADMIN_FIELDS,ADMIN_MODULES,WORKFLOW_RULES,AI_ENGINE_PAGES} from './adminCenterData.mjs';
+import {ADMIN_INTEGRATION_NOTES,ADMIN_FIELDS,ADMIN_MODULES,WORKFLOW_RULES,AI_ENGINE_PAGES} from './adminCenterData.mjs';
 import {canViewAdmin,canEditAdmin,saveAdminSection,resetAdminSettings} from './adminCenterStore.mjs';
 import useAdminSettings from './useAdminSettings.js';
 import useLabView from './useLabView.js';
@@ -42,9 +43,11 @@ export default function AdminCenterModule({module,engine,account,onOpen,onNaviga
  const reset=()=>{if(window.confirm('只重設管理中心設定與其歷程；不會清除委託單、排程、報告、帳號或簽名。確定繼續？'))act(()=>{resetAdminSettings(account);setNotice('已重設管理中心設定，案件資料未變更。');});};
  if(!item||!allowed||(engine&&!enginePage))return <section className="panel generic-page admin-module"><h2>系統管理中心</h2><p role="alert">{engine&&!enginePage?'找不到此 AI 引擎頁面。':item?'此角色無權開啟此管理模組。':'找不到此管理模組。'}</p></section>;
  const settings=data?.settings[module];
- return <section className="panel generic-page management-page admin-module"><div className="template-page"><AdminModuleNav account={account} active={module} onOpen={onOpen}/><div id="admin-module-panel" role="tabpanel" aria-labelledby={`admin-module-tab-${module}`}><header className="template-heading management-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name={item.icon}/>{enginePage?enginePage.name:item.title}</h2><span className="admin-badge implemented">{item.status}</span></div><p>{enginePage?enginePage.description:item.description}</p></div><div className="admin-actions">{enginePage&&<button type="button" className="template-btn" onClick={()=>onOpen('ai')}><LmsHeaderActionLabel icon="back">返回 AI 引擎管理</LmsHeaderActionLabel></button>}{settings&&editable&&['backup','documents','organization'].includes(module)&&<button type="button" className="management-primary" onClick={()=>setEditing(true)}><LmsHeaderActionLabel icon="edit">編輯設定</LmsHeaderActionLabel></button>}</div></header>
+ return <section className="panel generic-page management-page admin-module"><div className="template-page"><AdminModuleNav account={account} active={module} onOpen={onOpen}/><div id="admin-module-panel" role="tabpanel" aria-labelledby={`admin-module-tab-${module}`}><header className="template-heading management-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name={item.icon}/>{enginePage?enginePage.name:item.title}</h2><span className="admin-badge implemented">{item.status}</span></div><p>{enginePage?enginePage.description:item.description}</p></div><div className="admin-actions">{enginePage&&<button type="button" className="template-btn" onClick={()=>onOpen('ai')}><LmsHeaderActionLabel icon="back">返回 AI 引擎管理</LmsHeaderActionLabel></button>}{settings&&editable&&['backup','documents'].includes(module)&&<button type="button" className="management-primary" onClick={()=>setEditing(true)}><LmsHeaderActionLabel icon="edit">編輯設定</LmsHeaderActionLabel></button>}</div></header>
  {snapshot.sources.some(s=>s.error)&&<p role="alert" className="management-error">部分業務來源無法讀取，相關統計可能不完整；請至系統監控查核，原始資料未覆寫。</p>}
  {error&&<p role="alert" className="management-error">{error}</p>}{operationError&&<p role="alert" className="management-error">{operationError}</p>}{notice&&<p role="status" className="management-notice">{notice}</p>}
+ {ADMIN_INTEGRATION_NOTES[module]&&<Table label="整合分類與現況（唯讀）" columns={[["name","分類"],["state","狀態"],["detail","資料來源與限制"]]} rows={ADMIN_INTEGRATION_NOTES[module].map(([name,state,detail])=>({id:name,name,state,detail}))}/>}
+ {['parameters','organization','documents'].includes(module)&&<WorkspaceProfileSettings key={`${account?.id}-${module}`} module={module} account={account}/>}
  {module==='notifications'&&<BusinessNotificationDelivery/>}
  {OPERATION_MODULES.includes(module)&&<AdminOperations key={module} {...{module,account,snapshot,metrics,now,data}} onRefresh={()=>{refresh();setNotice('');}} onNavigate={onNavigate} onOpen={onOpen}/>}
  {module==='workflow'&&<><section className="admin-surface" aria-label="日期與排程規則"><h3>日期與排程規則</h3><p>以 Asia / Taipei（台灣時間）顯示日期、排程時間與匯出摘要；依已儲存日程及接收紀錄推進狀態。本週統計採週一至週日。</p><p>連續型試驗與操作型試驗的工作日限制，仍依試驗目錄及原有排程檢查執行。</p></section><p className="admin-note">唯讀規則說明；沒有修改狀態機的控制。待確認在既有電子委託資料可仍顯示待排程，以實驗室接收紀錄區分；接收後等待排程開始，再進入試驗中。</p><ol className="admin-flow-strip">{WORKFLOW_RULES.map(r=><li key={r.id}><b>{r.id}</b>{r.stage}<small>{snapshot.sources.some(s=>s.error)?'來源待確認':`${snapshot.requests.filter(row=>row.status===r.stage).length} 件`}</small></li>)}</ol><div className="admin-workflow-rules">{WORKFLOW_RULES.map(r=><article key={r.id}><h3>{r.id}. {r.stage}</h3><Info items={[["負責角色",r.role],["允許操作",r.actions],["下一階段",r.next],["退回目的地",r.returned],["必要文件與簽核",r.conditions]]}/></article>)}</div></>}
