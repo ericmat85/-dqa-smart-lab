@@ -14,6 +14,8 @@ import './WorkspaceLayoutPolish.css'
 import './WorkspaceRefresh.css'
 import './WorkspaceRefinements.css'
 import './ArchiveWorkspace.css'
+import './SearchStandards.css'
+import './AdminUiStandards.css'
 
 const finishBootstrap=beginPageLoading();
 function BootReady({children}){useEffect(()=>{finishBootstrap();},[]);return children;}

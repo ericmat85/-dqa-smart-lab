@@ -1,0 +1,1338 @@
+{
+  "date": "2026-11-25",
+  "data": "synthetic local fixtures, no production account login or writes",
+  "reruns": "Final results supersede earlier same-name cases; initial timeouts and stale assertions were rechecked.",
+  "browser": {
+    "management": {
+      "counts": {
+        "passed": 66
+      },
+      "cases": [
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit overview",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "final-overview-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit accounts",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit qualifications",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit organization",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit workflow",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit parameters",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit quality",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit documents",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit interface",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit notifications",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit security",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit monitoring",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E1",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E2",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E3",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E4",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=branding",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=backup",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=maintenance",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management categories have stable order and keyboard navigation",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit overview",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "final-overview-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit accounts",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit documents",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit interface",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit backup",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit security",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit ai/E2",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit overview",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "final-overview-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit accounts",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit qualifications",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit organization",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit workflow",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit parameters",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit quality",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit documents",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit interface",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit notifications",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit security",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit monitoring",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E1",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E2",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E3",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit ai/E4",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=branding",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=backup",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management audit backup?section=maintenance",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "management categories have stable order and keyboard navigation",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit overview",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "final-overview-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit accounts",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit documents",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit interface",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit backup",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit security",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "dark management audit ai/E2",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "after-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit trial and equipment categories light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit data maintenance and account roles light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit trial and equipment categories dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit data maintenance and account roles dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit trial and equipment categories light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit data maintenance and account roles light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit trial and equipment categories dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "inner-results.json"
+        },
+        {
+          "file": "management-ui-standards.spec.mjs",
+          "name": "inner management audit data maintenance and account roles dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "inner-results.json"
+        }
+      ]
+    },
+    "search": {
+      "counts": {
+        "passed": 32
+      },
+      "cases": [
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/equipment",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/maintenance",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/schedule",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/requests",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/archive",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /request/archive",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lab/dashboard",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/accounts",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/parameters",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/quality",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/qualifications",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/requests",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/reviews",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/history",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "reference reports, finance and function button height light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "reference reports, finance and function button height dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/equipment",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/maintenance",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/schedule",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/requests",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/archive",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /request/archive",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lab/dashboard",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/accounts",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/parameters",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/quality",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "inline full-width search /lms/settings/qualifications",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/requests",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/reviews",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "request filters expand into the complete row /request/history",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "reference reports, finance and function button height light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        },
+        {
+          "file": "search-standards.spec.mjs",
+          "name": "reference reports, finance and function button height dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "search-results.json"
+        }
+      ]
+    },
+    "existing_regressions": {
+      "counts": {
+        "passed": 86,
+        "skipped": 2
+      },
+      "cases": [
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "saved upload survives switching to handwriting and back without reopening",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "handwriting draft and saved upload stay separate across mode switches",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "explicit clear remains clear across mode switches; unsaved close preserves stored signature",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "uploaded replacement remains after mode changes and saves without approving any case",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "signature method stays in existing documents settings and rejects activation before certificates",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "document signature controls obey current server management permission",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "port configuration saves through existing documents page, survives reload and never activates signing",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "port form rejects credential values and URL tokens before submitting configuration",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "provider capability does not unlock digital signing or runtime-disabled report verification",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "an unsuccessful recheck clears old connection evidence and disables report verification",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "unauthenticated connection checks never enable document submission",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "portable development preview needs no network requests after initial document delivery",
+          "project": "business-desktop",
+          "status": "skipped",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "saved upload survives switching to handwriting and back without reopening",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "handwriting draft and saved upload stay separate across mode switches",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "explicit clear remains clear across mode switches; unsaved close preserves stored signature",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "uploaded replacement remains after mode changes and saves without approving any case",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "signature method stays in existing documents settings and rejects activation before certificates",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "document signature controls obey current server management permission",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "port configuration saves through existing documents page, survives reload and never activates signing",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "port form rejects credential values and URL tokens before submitting configuration",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "provider capability does not unlock digital signing or runtime-disabled report verification",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "an unsuccessful recheck clears old connection evidence and disables report verification",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "unauthenticated connection checks never enable document submission",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "signature-settings.spec.mjs",
+          "name": "portable development preview needs no network requests after initial document delivery",
+          "project": "business-mobile",
+          "status": "skipped",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "admin frame, compact totals, light search and merged modules light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "admin frame, compact totals, light search and merged modules dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/equipment",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/maintenance",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/archive",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /request/archive",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "reports bands touch, finance header matches, request history uses list frame",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "breadcrumb header color saves and follows all three systems",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "admin frame, compact totals, light search and merged modules light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-heading-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "admin frame, compact totals, light search and merged modules dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-heading-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/equipment",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/maintenance",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /lms/archive",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "collapsed list search works /request/archive",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "reports bands touch, finance header matches, request history uses list frame",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-admin-refresh.spec.mjs",
+          "name": "breadcrumb header color saves and follows all three systems",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance editor previews without applying, cancels, saves and survives all three systems",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance custom colors validate hex and automatic text contrast, without changing global preview",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance load failure and read-only roles never offer default saves",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance revision conflict preserves draft until explicit readback",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance unknown save is not replayed and readback confirms stored colors",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance is cleared on logout and a late read cannot restore another session colors",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance editor previews without applying, cancels, saves and survives all three systems",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance custom colors validate hex and automatic text contrast, without changing global preview",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance load failure and read-only roles never offer default saves",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance revision conflict preserves draft until explicit readback",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance unknown save is not replayed and readback confirms stored colors",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-appearance.spec.mjs",
+          "name": "appearance is cleared on logout and a late read cannot restore another session colors",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "排程管理圖表 shares flush frame and working controls light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史排程 shares flush frame and working controls light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史委託 shares flush frame and working controls light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "排程管理圖表 shares flush frame and working controls dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史排程 shares flush frame and working controls dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史委託 shares flush frame and working controls dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "account statistics display only; compact inner tabs search filters and edit remain usable light",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "account statistics display only; compact inner tabs search filters and edit remain usable dark",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "排程管理圖表 shares flush frame and working controls light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史排程 shares flush frame and working controls light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史委託 shares flush frame and working controls light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "排程管理圖表 shares flush frame and working controls dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史排程 shares flush frame and working controls dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "歷史委託 shares flush frame and working controls dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-final-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "account statistics display only; compact inner tabs search filters and edit remain usable light",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-child-pages.spec.mjs",
+          "name": "account statistics display only; compact inner tabs search filters and edit remain usable dark",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "finance filters and pagination collapse as one region; server filter, amounts and annual scope stay separate",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "report tiles removed, search collapses on desktop and mobile, compact settings control real exported columns",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in lms",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in request",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in lab",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "finance filters and pagination collapse as one region; server filter, amounts and annual scope stay separate",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "report tiles removed, search collapses on desktop and mobile, compact settings control real exported columns",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in lms",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in request",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-layout.spec.mjs",
+          "name": "shared template list is edge-aligned and uses icon actions in lab",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "shared settings persist across reentry/login, cancel and synthetic report uses same source",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "failed read does not offer saving defaults; unknown write requires reentry",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "a stalled profile read ends its loading state at the request deadline",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "a save whose response stalls is not replayed and can be read back on reentry",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "leaving shared settings cancels its orphaned read and releases the page indicator",
+          "project": "business-desktop",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "shared settings persist across reentry/login, cancel and synthetic report uses same source",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "failed read does not offer saving defaults; unknown write requires reentry",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "a stalled profile read ends its loading state at the request deadline",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "a save whose response stalls is not replayed and can be read back on reentry",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        },
+        {
+          "file": "workspace-profile.spec.js",
+          "name": "leaving shared settings cancels its orphaned read and releases the page indicator",
+          "project": "business-mobile",
+          "status": "passed",
+          "source": "regression-results.json"
+        }
+      ]
+    }
+  },
+  "node": {
+    "passed": 37,
+    "failed": 0
+  },
+  "build": "passed",
+  "lint": "passed with existing warnings",
+  "diff_check": "passed"
+}

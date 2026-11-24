@@ -1,0 +1,44 @@
+/* The report page is the standard: a complete inline row beneath its search icon. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr) 44px;width:100%!important;max-width:none!important;min-width:0!important;flex:1 1 auto!important;gap:0!important;padding:0!important;margin:0!important;position:static!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.account-access-toolbar,.trial-catalog-searchbar):has(>.catalog-search-toolbar){display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:0!important;align-items:center;min-width:0;overflow:visible!important;padding:0!important}
+html body #root :is(.workspace-tab-toolbar,.account-access-toolbar,.trial-catalog-searchbar)>.catalog-search-toolbar{display:contents!important}
+html body #root :is(.workspace-tab-toolbar,.account-access-toolbar)>.workspace-primary-tabs,html body #root .account-access-toolbar>.account-access-tabs{grid-column:1;grid-row:1;min-width:0;width:100%!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toggle{grid-column:2;grid-row:1;justify-self:center;margin:3px 0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-search-panel,.workspace-filter-body,.rq-filter-row){position:static!important;inset:auto!important;grid-column:1/-1;grid-row:2;display:flex;align-items:center;flex-wrap:wrap;gap:10px!important;max-width:none!important;width:100%!important;min-width:0;margin:0!important;padding:12px 16px!important;box-sizing:border-box;background:var(--enterprise-card,#FFF)!important;color:var(--enterprise-text,#17365D)!important;border:0!important;border-bottom:1px solid var(--enterprise-border,#D6DEEA)!important;border-radius:0!important;box-shadow:none!important;z-index:auto!important}
+html body #root .catalog-search-panel[hidden],html body #root .workspace-filter-body[hidden]{display:none!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-panel>.schedule-search-wrap{flex:1 1 300px!important;min-width:0!important;width:auto!important;height:36px!important;max-height:36px!important;background:transparent!important;border:0!important;margin:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-search-panel,.workspace-filter-body,.rq-filter-row) :is(input:not([type=checkbox]),select){height:36px!important;min-height:36px!important;max-height:36px!important;padding:6px 10px!important;background:var(--enterprise-card,#FFF)!important;color:var(--enterprise-text,#17365D)!important;border:1px solid var(--enterprise-border,#D6DEEA)!important;border-radius:4px!important;box-shadow:none!important;outline:none!important;box-sizing:border-box;font-size:13px!important;line-height:22px!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-panel select{flex:0 1 180px!important;min-width:140px!important;max-width:none!important;width:auto!important;margin:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-search-panel,.workspace-filter-body,.rq-filter-row) input::placeholder{color:var(--enterprise-secondary,#6E7F94)!important}
+html body #root .trial-catalog-searchbar{min-height:42px;margin:0!important;border-bottom:1px solid var(--enterprise-border)}
+html body #root .trial-catalog-searchbar>p{grid-column:1;grid-row:1;margin:0!important;padding:0 12px}
+/* Request lists use the same full-width row, including date and status filters. */
+html body #root .rq-enterprise :is(.workspace-tab-toolbar,.rq-panel-head):has(>.rq-filter-disclosure){display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:0!important;padding:0!important;align-items:center}
+html body #root .rq-enterprise .rq-filter-disclosure{display:contents!important}
+html body #root .rq-enterprise .rq-filter-disclosure>summary{grid-column:2;grid-row:1;justify-self:center;margin:3px 0!important}
+html body #root .rq-enterprise .rq-filter-disclosure:not([open])>.rq-filter-row{display:none!important}
+html body #root .rq-enterprise .rq-filter-row>label{flex:0 1 180px!important;min-width:140px;width:auto!important;margin:0!important;display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--enterprise-secondary)}
+html body #root .rq-enterprise .rq-filter-row>.mobile-clearable-search{flex:1 1 260px!important;min-width:200px!important;width:auto!important;margin:0!important}
+html body #root .rq-enterprise .rq-panel-head:has(>.rq-filter-disclosure)>div:first-child{padding:8px 16px}
+/* The source lookup inside the compact cost form follows the same expansion rule. */
+.finance-form-section>header:has(>.finance-source-disclosure){display:grid!important;grid-template-columns:minmax(0,1fr) 32px}
+.finance-source-disclosure{display:contents}.finance-source-disclosure>summary{grid-column:2;grid-row:1}.finance-source-disclosure .finance-source-search{grid-column:1/-1;grid-row:2;width:100%;max-width:none;margin:0;padding:12px 0 0;box-sizing:border-box}.finance-source-search>label{flex:1;min-width:0}
+@media(max-width:650px){html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-search-panel,.workspace-filter-body,.rq-filter-row){padding:12px!important}html body #root .catalog-search-panel>.schedule-search-wrap{flex-basis:100%!important}html body #root .catalog-search-panel select{flex:1 1 120px!important;min-width:0!important}html body #root .rq-enterprise .rq-filter-row>label{flex:1 1 140px!important;min-width:0!important}html body #root .rq-enterprise .rq-filter-row>.mobile-clearable-search{flex-basis:100%!important}}
+/* These selectors replace earlier per-page popup overrides as well. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.account-access-toolbar,.admin-module) .catalog-search-toolbar .catalog-search-panel input{padding:6px 10px!important;background:var(--enterprise-card)!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel :is(.schedule-search-wrap,input,select){background:var(--enterprise-card)!important}
+html body #root .lms-enterprise .panel.account-management .account-access-toolbar{padding:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) 44px;gap:0!important}
+html body #root .lms-enterprise .panel.account-management .account-access-tabs{padding:0 16px!important}
+html body #root .rq-enterprise :is(.rq-history-list,.rq-list-tab-toolbar,.rq-panel-head) .rq-filter-disclosure[open]>.rq-filter-row{position:static!important;inset:auto!important;display:flex!important;grid-column:1/-1;grid-row:2;width:100%!important;max-width:none!important;max-height:none!important;padding:12px 16px!important;border:0!important;border-bottom:1px solid var(--enterprise-border)!important;box-shadow:none!important;border-radius:0!important;background:var(--enterprise-card)!important}
+html body #root .rq-enterprise .rq-filter-row .mobile-clearable-search input{max-width:none!important;width:100%!important}
+.workspace-history-label{grid-column:1;grid-row:1;display:flex;align-items:center;height:42px;padding:0 16px;font-size:13px;font-weight:600;color:var(--workspace-tab-text)}
+html body #root .rq-enterprise .rq-filter-disclosure::details-content{display:contents!important}
+html body #root .rq-enterprise .rq-filter-row>.request-search-field{display:flex;flex-direction:column;gap:5px;flex:1 1 280px!important;min-width:200px;width:auto!important;margin:0;font-size:12px;color:var(--enterprise-secondary)}
+html body #root .rq-enterprise .rq-filter-row>.request-search-field input{width:100%;max-width:none}
+@media(max-width:650px){html body #root .rq-enterprise .rq-filter-row>.request-search-field{flex-basis:100%!important;min-width:0}}
+.finance-source-disclosure::details-content{display:contents!important}
+.finance-form-section>header:has(>.finance-source-disclosure){grid-template-columns:minmax(0,1fr) 36px}
+.finance-source-disclosure>summary{width:36px;height:36px}
+.finance-source-disclosure .finance-source-search{padding:12px 16px;gap:10px;background:var(--enterprise-card);border-bottom:1px solid var(--enterprise-border)}
+.finance-cost-dialog .finance-source-search input{height:36px;min-height:36px}
+html body #root .finance-source-search .source-search-button{height:36px!important;min-height:36px!important;max-height:36px!important}

@@ -1,0 +1,68 @@
+:root{--workspace-function-height:32px;--admin-section-gap:16px;--admin-content-inset:16px}
+/* Ordinary functional actions match History Schedule; icon actions, tiles and search retain their sizes. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button.template-btn,a.template-btn,button.rq-btn,a.rq-btn,button.lab-primary,button.lab-secondary,button.management-primary,button.management-secondary,button.report-primary,button.report-secondary,button.primary-button,button.secondary-button,button.role-primary,button.role-secondary,button.btn-primary,button.btn-outline,.finance-actions>button,.account-form-actions>button,.role-dialog footer>button,.management-export-menu>summary,.personal-settings-cancel,.personal-photo-upload-button,.personal-photo-remove-button):not(:is(.icon-action,.catalog-search-toggle,.workspace-filter-toggle,.source-search-button,.rq-mobile-menu,[role=tab],[role=switch],[class*='-card'],[class*='-tile'],.workspace-shortcut)){height:var(--workspace-function-height)!important;min-height:var(--workspace-function-height)!important;max-height:var(--workspace-function-height)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding-top:0!important;padding-bottom:0!important;box-sizing:border-box;line-height:1.3!important}
+html body #root .lms-enterprise .admin-module-nav .admin-nav-group-start{box-shadow:inset 1px 0 0 #FFFFFF38}
+.admin-module-category{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;font-size:11px;color:var(--enterprise-secondary);background:var(--soft);border-radius:4px;white-space:nowrap}
+html body #root .lms-enterprise .admin-module-content{display:grid;gap:var(--admin-section-gap);padding:0 0 16px;min-width:0}
+html body #root .lms-enterprise .admin-module-content>*{min-width:0;margin:0 var(--admin-content-inset)!important}
+html body #root .lms-enterprise .admin-module-content>:is(.admin-operations,.admin-table-wrap){margin:0!important;width:100%}
+html body #root .lms-enterprise .admin-module-content .admin-operations{display:grid;gap:var(--admin-section-gap);padding:0;min-width:0}
+html body #root .lms-enterprise .admin-module-content .admin-operations>*{margin:0 16px!important;min-width:0}
+html body #root .lms-enterprise .admin-module-content .admin-operations>.admin-table-wrap{margin:0!important;width:100%}
+html body #root .lms-enterprise .admin-module-content :is(.admin-surface,.admin-interface-panel,.workspace-appearance-settings,.equipment-activity-preferences,.business-ai-settings){border-radius:4px!important;box-shadow:none!important}
+html body #root .lms-enterprise .admin-module-content :is(.admin-surface,.admin-interface-panel){padding:16px!important;border:1px solid var(--enterprise-border);background:var(--enterprise-card);margin-top:0}
+html body #root .lms-enterprise .admin-module-content :is(h3,h4){line-height:1.5}
+html body #root .lms-enterprise .admin-module-content :is(.admin-surface,.admin-interface-panel)>h3{margin:0 0 12px!important;font-size:15px}
+html body #root .lms-enterprise .admin-module-content :is(.admin-section-top,.trial-catalog-heading){display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px!important}
+html body #root .lms-enterprise .admin-module-content .admin-section-top h3{margin:0!important;font-size:15px}
+html body #root .lms-enterprise .admin-module-content :is(.admin-actions,footer){display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+html body #root .lms-enterprise .admin-module-content .admin-actions{margin:12px 0 0}
+html body #root .lms-enterprise .admin-module-content :is(.admin-form-grid,.business-ai-form,.appearance-controls){gap:12px 16px}
+html body #root .lms-enterprise .admin-module-content .admin-form-grid :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select){height:36px;min-height:36px;box-sizing:border-box}
+html body #root .lms-enterprise .admin-module-content .admin-stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+html body #root .lms-enterprise .admin-module-content .admin-stat-grid>article{padding:12px;border-radius:4px;min-width:0}
+html body #root .lms-enterprise .admin-module-content .admin-stat-grid strong{font-size:24px;line-height:30px}
+html body #root .lms-enterprise .admin-module-content .admin-table-wrap{border-radius:0!important;border:0;border-top:1px solid var(--enterprise-border);margin-bottom:0;max-height:480px}
+html body #root .lms-enterprise .admin-module-content .admin-table caption{padding:10px 16px;background:var(--soft);line-height:22px}
+html body #root .lms-enterprise .admin-module-content .admin-table :is(th,td){padding:8px 14px;font-size:13px;line-height:20px;vertical-align:middle}
+html body #root .lms-enterprise .admin-module-content .admin-info-grid{gap:0 16px;margin:0}
+html body #root .lms-enterprise .admin-module-content :is(.admin-note,.admin-feature-callout){border-radius:4px;margin-top:0;margin-bottom:0;padding:12px 16px}
+html body #root .lms-enterprise .admin-module-content .admin-engine-grid{gap:12px}
+html body #root .lms-enterprise .admin-module-content .admin-engine-grid>article{padding:16px;border-radius:4px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+html body #root .lms-enterprise .admin-module-content .admin-engine-grid :is(h3,p){margin:0}
+html body #root .lms-enterprise .admin-module-content .admin-engine-grid .template-btn{margin-top:auto}
+html body #root .lms-enterprise .admin-module-content .admin-engine-tabs{margin:0!important}
+html body #root .lms-enterprise .admin-module-content #admin-engine-panel{display:grid;gap:16px;min-width:0}
+html body #root .lms-enterprise .admin-module-content .system-data-workspace{margin:0!important}
+html body #root .lms-enterprise .admin-module-content .system-data-tabs{padding:0 16px!important;gap:20px}
+html body #root .lms-enterprise .admin-module-content .system-data-content{padding:16px 16px 0}
+html body #root .lms-enterprise .admin-module-content .system-data-content>.admin-operations{margin:0 -16px;width:calc(100% + 32px)}
+.admin-integration-details{border:1px solid var(--enterprise-border);border-radius:4px;background:var(--enterprise-card);min-width:0}.admin-integration-details>summary{padding:10px 14px;font-size:13px;line-height:20px;cursor:pointer;color:var(--enterprise-secondary)}
+html body #root .admin-integration-details>.admin-table-wrap{margin:0!important;border:0;border-top:1px solid var(--enterprise-border)}
+html body #root .lms-enterprise .admin-module-content .admin-reset{padding:0;border:1px solid var(--enterprise-border);border-radius:4px}
+html body #root .lms-enterprise .admin-module-content .admin-reset>summary{padding:10px 14px;line-height:20px}.admin-reset>p,.admin-reset>button{margin:0 14px 12px}
+html body #root .lms-enterprise .settings-management .admin-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html body #root .lms-enterprise .settings-management .admin-workspace-hero{padding:16px 24px!important;margin-bottom:16px}
+html body #root .lms-enterprise .settings-management .admin-workspace-hero h3{font-size:24px;margin:8px 0}
+html body #root .lms-enterprise .settings-management .admin-hero-decoration{width:68px;height:68px}
+html body #root .lms-enterprise .settings-management .admin-module-card{gap:6px 12px!important;align-content:start}
+html body #root .lms-enterprise .settings-management .admin-card-open{margin-top:6px!important}
+@media(max-width:1050px){html body #root .lms-enterprise .admin-module-content .admin-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}html body #root .lms-enterprise .settings-management .admin-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){html body #root .lms-enterprise .settings-management .admin-card-grid{grid-template-columns:1fr}.admin-module-category{font-size:10px}html body #root .lms-enterprise .admin-module-content :is(.admin-section-top,.trial-catalog-heading){flex-wrap:wrap}html body #root .lms-enterprise .admin-module-content .admin-engine-grid{grid-template-columns:1fr}}
+html body #root .lms-enterprise .admin-module-content .admin-interface-settings{display:grid;gap:16px}
+html body #root .lms-enterprise .admin-module-content .admin-interface-settings>*{margin:0!important}
+/* Portaled personal settings use the same ordinary action height. */
+html body>:is(dialog,.personal-settings-modal) :is(.template-btn,.management-primary,.personal-settings-cancel,.personal-photo-upload-button,.personal-photo-remove-button):not(:is(.icon-action,.catalog-search-toggle,.workspace-filter-toggle,.source-search-button,[role=tab],[role=switch])){height:var(--workspace-function-height,32px)!important;min-height:var(--workspace-function-height,32px)!important;max-height:var(--workspace-function-height,32px)!important;padding-top:0!important;padding-bottom:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box}
+.admin-brand-preview{margin-top:12px;border-top:1px solid var(--enterprise-border)}.admin-brand-preview>summary{padding:10px 0 0;cursor:pointer;color:var(--enterprise-secondary);font-size:13px}.admin-brand-preview>article{margin-top:12px;background:var(--soft);border-radius:4px}
+html body #root .lms-enterprise .admin-module-content .admin-operations>.catalog-search-toolbar{margin:0!important;width:100%!important}
+html body #root .lms-enterprise .admin-module-content :is(.template-blank-card,.template-upload-panel){border-radius:4px}
+/* Secondary management categories retain one underline style, including on phones. */
+html body #root .lms-enterprise .admin-module-content :is(.trial-parameter-tabs,.data-maintenance-tabs,.admin-engine-tabs,.system-data-tabs){display:flex!important;flex-wrap:nowrap!important;align-items:stretch;gap:20px!important;overflow-x:auto;max-width:100%;min-width:0;min-height:42px;margin-top:0!important;margin-bottom:16px!important;padding:0!important;border:0;border-bottom:1px solid var(--enterprise-border);border-radius:0;scrollbar-width:thin;background:transparent!important}
+html body #root .lms-enterprise .admin-module-content :is(.trial-parameter-tabs,.data-maintenance-tabs,.admin-engine-tabs,.system-data-tabs)>button{display:inline-flex!important;flex:none;align-items:center;justify-content:center;gap:8px;white-space:nowrap;min-height:42px!important;height:42px!important;margin:0!important;padding:0 2px!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;color:var(--enterprise-secondary)!important;font-size:13px;line-height:20px}
+html body #root .lms-enterprise .admin-module-content :is(.trial-parameter-tabs,.data-maintenance-tabs,.admin-engine-tabs,.system-data-tabs)>button[aria-selected=true]{border-bottom-color:var(--enterprise-primary)!important;color:var(--enterprise-primary)!important}
+html body #root .lms-enterprise .admin-module-content .trial-parameter-tabs button>span{display:inline-flex;align-items:center;justify-content:center;height:20px;min-width:20px;padding:0 5px;border-radius:4px;background:var(--soft);font-size:11px;line-height:20px}
+html body #root .lms-enterprise .admin-module-content .system-data-tabs{padding:0 16px!important;margin-bottom:0!important}
+
+@media(max-width:650px){html body #root .lms-enterprise .settings-management .admin-card-open{position:absolute;inset:0;grid-column:auto;width:100%;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;font-size:0!important}html body #root .lms-enterprise .settings-management .admin-module-card{grid-template-columns:32px minmax(0,1fr) 24px}}
+/* Phones keep the title centered; category remains available in the navigation tooltip. */
+@media(max-width:650px){html body #root .lms-enterprise .admin-module-category{display:none}}

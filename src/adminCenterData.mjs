@@ -1,20 +1,20 @@
 // Administration configuration only. Business sources and server security policies remain independent.
-export const ADMIN_GROUPS=['基礎與流程管理','安全與維運','智慧與品質管理','組織管理'];
+export const ADMIN_GROUPS=['人員與組織','流程與試驗','文件與資料','介面與通知','安全與系統服務'];
 export const ADMIN_MODULES=[
  ['accounts','帳號與權限管理','accounts',0,'資料連動','集中管理帳號、部門及內建／自訂角色權限。','accounts'],
- ['workflow','工作流程','history',0,'已實作','唯讀檢視既有階段、角色與簽核條件。'],
- ['parameters','試驗與設備參數','equipment',0,'已實作','查閱共用試驗目錄、設備規格及排程參數。','equipment'],
- ['documents','文件與報告設定','reports',0,'資料連動','管理 Excel 範本、文件保存政策與個人簽名。','archive'],
- ['backup','系統與資料設定','archive',1,'設定備份','管理系統參數、設定備份、資料回收與 Demo 維護。'],
- ['security','資訊安全設定','review',1,'稽核紀錄','檢視既有安全邊界、管理與實驗室操作紀錄。'],
- ['monitoring','系統監控','equipment',1,'服務檢查','來源健康、儲存狀態與受保護的後端健康檢查。'],
- ['data-maintenance','資料維護與 Demo 工具','archive',1,'資料庫回收區','集中委託清理、資料還原與 Demo 資料維護。'],
- ['interface','介面設定','settings',1,'已實作','調整字體、語言與列表每頁顯示筆數。'],
- ['ai','AI 引擎管理','ai',2,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
- ['notifications','通知與提醒設定','notifications',2,'資料連動','管理案件通知、站內提醒與電子郵件寄送狀態。'],
- ['quality','品質與稽核設定','review',2,'資料連動','建立改善追蹤，連結案件、設備與試驗來源。'],
- ['qualifications','人員資格管理','accounts',2,'資料連動','管理訓練與資格到期紀錄，對照現有人員。'],
- ['organization','組織與租戶設定','maintenance',3,'資料連動','工作區設定與現有人員、部門及據點概況。'],
+ ['workflow','工作流程','history',1,'已實作','唯讀檢視既有階段、角色與簽核條件。'],
+ ['parameters','試驗與設備參數','equipment',1,'已實作','查閱共用試驗目錄、設備規格及排程參數。','equipment'],
+ ['documents','文件與報告設定','reports',2,'資料連動','管理 Excel 範本、文件保存政策與個人簽名。','archive'],
+ ['backup','系統與資料設定','archive',2,'設定備份','管理系統參數、設定備份、資料回收與 Demo 維護。'],
+ ['security','資訊安全設定','review',4,'稽核紀錄','檢視既有安全邊界、管理與實驗室操作紀錄。'],
+ ['monitoring','系統監控','equipment',4,'服務檢查','來源健康、儲存狀態與受保護的後端健康檢查。'],
+ ['data-maintenance','資料維護與 Demo 工具','archive',2,'資料庫回收區','集中委託清理、資料還原與 Demo 資料維護。'],
+ ['interface','介面設定','settings',3,'已實作','調整字體、語言與列表每頁顯示筆數。'],
+ ['ai','AI 引擎管理','ai',4,'E2／E4 請求監控','AI 排程偏好、排程與助理的實際請求監控。'],
+ ['notifications','通知與提醒設定','notifications',3,'資料連動','管理案件通知、站內提醒與電子郵件寄送狀態。'],
+ ['quality','品質與稽核設定','review',1,'資料連動','建立改善追蹤，連結案件、設備與試驗來源。'],
+ ['qualifications','人員資格管理','accounts',0,'資料連動','管理訓練與資格到期紀錄，對照現有人員。'],
+ ['organization','組織與租戶設定','maintenance',0,'資料連動','工作區設定與現有人員、部門及據點概況。'],
 ].map(([id,title,icon,group,status,description,page])=>({id,title,icon,group,status,description,page}));
 export const WORKFLOW_RULES=[
  ['待簽核','指定委託者主管','核准、退回補正','待審查','原委託者補件／重新送簽','委託必填資料、委託者簽名；核准需主管簽名，退回需原因。'],
@@ -70,4 +70,4 @@ export const ADMIN_INTEGRATION_NOTES={
 };
 
 // Preserve metadata/permissions for legacy links while merging the navigation entry.
-export const ADMIN_NAV_MODULES=ADMIN_MODULES.filter(module=>module.id!=='data-maintenance');
+export const ADMIN_NAV_MODULES=ADMIN_MODULES.filter(module=>module.id!=='data-maintenance').sort((a,b)=>a.group-b.group);

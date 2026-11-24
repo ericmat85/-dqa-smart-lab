@@ -33,7 +33,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  await first.locator('summary').click();await expect(first.getByText('試驗規範／試驗手法',{exact:true})).toBeVisible();
  await first.locator('summary').focus();await page.keyboard.press('Enter');await expect(first.getByText('試驗規範／試驗手法',{exact:true})).toBeHidden();
  await revealListSearch(page);const search=trials.getByRole('searchbox',{name:'搜尋試驗項目與規範'}),bounds=await search.boundingBox();
- expect(bounds.width).toBeGreaterThan(120);expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(page.viewportSize().width);const toolbar=await trials.locator('.catalog-search-toolbar').boundingBox();expect(toolbar.width).toBe(36);await revealListSearch(page);await search.fill('高溫高濕');await expect(cards).toHaveCount(1);
+ expect(bounds.width).toBeGreaterThan(120);expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(page.viewportSize().width);const toolbar=await trials.locator('.catalog-search-toggle').boundingBox();expect(toolbar.width).toBe(36);await revealListSearch(page);await search.fill('高溫高濕');await expect(cards).toHaveCount(1);
  await cards.locator('summary').click();await expect(cards).toContainText('250 小時');
  await captureBrowserEvidence(page,{path:test.info().outputPath(`parameters-${width}-${theme}.png`),fullPage:true});
  const equipmentTab=tabs.getByRole('tab',{name:'設備可用空間與規格',exact:true});await equipmentTab.click();
