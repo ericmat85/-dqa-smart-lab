@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -15,7 +16,7 @@ for(const width of [1920,1366,390])for(const theme of ['light','dark'])test(`lab
  await expect(domains.locator('.workspace-shortcut-arrow,.rq-kpi-arrow')).toHaveCount(0);await expect(page.getByRole('heading',{name:'實驗室報表',exact:true})).toBeVisible();
  const tabs=page.getByRole('tablist',{name:'報表分類'});await expect(tabs.getByRole('tab')).toHaveCount(6);await expect(tabs.getByRole('tab',{name:'試驗執行統計',exact:true})).toContainText('25 筆');await expect(tabs.getByRole('tab',{name:'設備概況',exact:true})).toContainText(`${DEMO_EQUIPMENT.length} 台`);await expect(page.locator('.lab-report-scope')).toContainText('顯示 25／25 筆');await expect(page.locator('.live-record-table tbody tr')).toHaveCount(20);
  if(width>1000){const boxes=await domains.getByRole('button').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().top));expect(new Set(boxes).size).toBe(1);}
- await page.mouse.move(0,0);await page.screenshot({path:test.info().outputPath(`laboratory-reports-${width}-${theme}.png`)});
+ await page.mouse.move(0,0);await captureBrowserEvidence(page,{path:test.info().outputPath(`laboratory-reports-${width}-${theme}.png`)});
  const search=page.getByRole('searchbox',{name:'搜尋報表'});await search.fill('REQ-REPORT-24');await expect(page.locator('.live-record-table tbody tr')).toHaveCount(1);await lab.click();await expect(page.getByRole('heading',{name:'實驗室報表',exact:true})).toBeFocused();await expect(search).toHaveValue('REQ-REPORT-24');await expect(tabs.getByRole('tab',{name:'試驗執行統計',exact:true})).toContainText('25 筆');await page.getByRole('button',{name:'清除篩選',exact:true}).click();
  await tabs.getByRole('tab',{name:'試驗執行統計',exact:true}).focus();await page.keyboard.press('ArrowRight');await expect(tabs.getByRole('tab',{name:'異常與延遲追蹤',exact:true})).toHaveAttribute('aria-selected','true');await tabs.getByRole('tab',{name:'試驗結果明細',exact:true}).click();await expect(page.locator('.lab-report-category-description')).toHaveCount(0);await tabs.getByRole('tab',{name:'設備概況',exact:true}).click();await expect(tabs.getByRole('tab',{name:'設備概況',exact:true})).toHaveAttribute('aria-selected','true');await expect(page.locator('.live-record-table thead')).toContainText('設備編號');await expect(page.getByLabel('日期範圍',{exact:true})).toHaveCount(0);
  await tabs.getByRole('tab',{name:'物料庫存',exact:true}).click();await expect(page.locator('.live-record-table thead')).toContainText('可用數量');await tabs.getByRole('tab',{name:'委託收件與排程',exact:true}).click();await expect(page.locator('.live-record-table thead')).toContainText('審查狀態');

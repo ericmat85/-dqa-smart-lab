@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {PDFDocument} from 'pdf-lib';
@@ -61,7 +62,7 @@ for(const width of [1366,375])test(`management pages fit ${width}px in both them
   if(dark)await page.locator('.system-header-actions .theme-toggle').click();
   for(const name of ['報表分析','帳號管理','系統管理']){
    await nav(page,name);if(name==='報表分析')await page.locator('.report-config>summary').click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-   await page.screenshot({path:test.info().outputPath(`management-${name}-${width}-${dark?'dark':'light'}.png`),fullPage:true});
+   await captureBrowserEvidence(page,{path:test.info().outputPath(`management-${name}-${width}-${dark?'dark':'light'}.png`),fullPage:true});
   }
  }
 });

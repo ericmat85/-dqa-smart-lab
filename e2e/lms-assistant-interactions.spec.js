@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {installMockE4Transport} from './mockE4Transport.mjs';
@@ -29,13 +30,13 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS fixed 
  }
  const chart=page.getByRole('link',{name:'排程管理圖表',exact:true});
  await expect(chart).toHaveCSS('background-color','rgb(8, 102, 232)');await expect(chart).toHaveCSS('color','rgb(255, 255, 255)');
- await expect(chart.locator('svg')).toHaveCSS('stroke','rgb(255, 255, 255)');
+ await expect(chart.locator('.schedule-chart-button-icon')).toHaveCSS('stroke','rgb(255, 255, 255)');
  const headers=page.locator('.schedule-table thead th');
  await headers.nth(0).click();await expect(headers.nth(0)).toHaveAttribute('aria-sort','ascending');
  await expect(headers.nth(0)).toHaveCSS('color','rgb(8, 102, 232)');
  await headers.nth(1).click();await expect(headers.nth(0)).not.toHaveAttribute('aria-sort');
  await expect(headers.nth(1)).toHaveCSS('background-color','rgb(233, 242, 255)');
- await page.screenshot({path:test.info().outputPath(`lms-schedule-${width}x${height}.png`)});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`lms-schedule-${width}x${height}.png`)});
  await page.locator('.system-header-actions .theme-toggle').click();
  await expect(avatar).toHaveCSS('background-color','rgb(22, 58, 97)');
  await expect(chart).toHaveCSS('background-color','rgb(8, 102, 232)');
@@ -50,7 +51,7 @@ test('FAQ focuses the newest turn; replies append and scroll down without moving
  await installMockE4Transport(page);await page.addInitScript(()=>sessionStorage.setItem('dqa-lms-account-id','DEMO-LEVEL1'));
  await page.setViewportSize({width:1366,height:768});await page.goto('/lms/dashboard');
  await page.getByRole('button',{name:'展開AI智能助理'}).click();
- const questions=['如何安排新的試驗日程？','發生排程衝突時怎麼辦？','如何新增帳號並設定角色權限？'];
+ const questions=['如何安排新的試驗日程？','發生排程衝突時怎麼辦？','資料會自動同步嗎？重新整理會不會不見？'];
  const articles=page.locator('.intelligent-conversation article'),body=page.locator('.intelligent-body');
  const originalScroll=await page.locator('.dashboard-content').evaluate(el=>el.scrollTop);
  for(const [index,question] of questions.entries()){

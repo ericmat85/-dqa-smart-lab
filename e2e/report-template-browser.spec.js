@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {readFile} from 'node:fs/promises';
@@ -20,7 +21,7 @@ for(const system of ['lms','request','lab'])test(`${system} database uses compac
  await page.getByRole('searchbox',{name:'搜尋報告範本'}).fill('');await tabs.getByRole('tab',{name:/^上傳版本/}).click();await expect(center.getByText('尚無上傳範本',{exact:true})).toBeVisible();
  await tabs.getByRole('tab',{name:/^全部範本/}).click();await page.getByRole('button',{name:'切換深色或淺色模式',exact:true}).click();
  const colors=await center.locator('.rtb-row').first().evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color}));expect(colors.background).not.toBe('rgb(255, 255, 255)');expect(colors.background).not.toBe(colors.color);
- await page.screenshot({path:test.info().outputPath(`${system}-templates-dark.png`),fullPage:true});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`${system}-templates-dark.png`),fullPage:true});
  await tabs.getByRole('tab',{name:/^全部範本/}).focus();await page.keyboard.press('End');await expect(tabs.getByRole('tab',{name:/^上傳版本/})).toBeFocused();await expect(tabs.getByRole('tab',{name:/^上傳版本/})).toHaveAttribute('aria-selected','true');
 });
 for(const width of [320,390,768])test(`mobile ${width} keeps rows contained and inline X clears category as well as search`,async({page})=>{
@@ -29,7 +30,7 @@ for(const width of [320,390,768])test(`mobile ${width} keeps rows contained and 
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const boxes=await center.locator('.rtb-row').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right};}));expect(boxes.every(r=>r.left>=0&&r.right<=width)).toBe(true);
  await expect(page.getByRole('button',{name:'清除篩選',exact:true})).toBeHidden();
- await page.screenshot({path:test.info().outputPath(`templates-mobile-${width}.png`),fullPage:true});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`templates-mobile-${width}.png`),fullPage:true});
 });
 test('trial, blank and general previews and downloads remain usable with no model requests',async({page})=>{
  test.setTimeout(90000);let apiRequests=0;page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiRequests++;});await page.setViewportSize({width:1366,height:900});const center=await open(page,'lms');

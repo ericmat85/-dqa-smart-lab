@@ -1,3 +1,4 @@
+import {withRequestDeadline} from './requestDeadline.mjs';
 import {assertReportFileSize,reportDownloadURL,readReportResponseBytes} from './reportFilePolicy.mjs';
 import {businessClient,businessErrorMessage} from './businessClient.mjs';
 import {businessIdentity,businessSessionVersion,originalHumanSource,originalReportIndex,appStorage,refreshOriginalBusiness} from './originalBusiness.mjs';
@@ -33,7 +34,7 @@ export async function getBusinessReport(requestId){
 async function uploadHuman(kind,requestId,bytes,name,source){
  assertReportFileSize(bytes.byteLength);const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(n=>n.toString(16).padStart(2,'0')).join(''),id=crypto.randomUUID();
  const {data}=await businessClient.request('/execution/upload',{method:'POST',body:{id,request_id:source.request.id,kind,file_name:name,byte_size:bytes.byteLength,sha256:sha,request_revision:source.request.revision,report_revision:source.report?.revision||0}});
- const response=await fetch(data.url,{method:'PUT',headers:{'Content-Type':data.mime_type,'x-upsert':'false'},body:bytes,redirect:'error'});if(!response.ok)throw Error('檔案尚未成功上傳，未提交報告。');return id;
+ const response=await withRequestDeadline(signal=>fetch(data.url,{method:'PUT',headers:{'Content-Type':data.mime_type,'x-upsert':'false'},body:bytes,redirect:'error',signal}),{timeoutMs:120000}).catch(()=>{throw Error('檔案上傳回應尚未確認，未提交報告；請重新讀取後確認。');});if(!response.ok)throw Error('檔案尚未成功上傳，未提交報告。');return id;
 }
 export async function submitBusinessReport({requestId,file,signature,onProgress=()=>{},source:expectedSource}){
  if(!signature)throw Error('請先完成執行人簽名。');assertReportFileSize(file.size);if(pendingHumanOperation())throw Error('請先查詢上一筆操作。');const source=expectedSource||originalHumanSource(requestId);onProgress(10,'核對已完成試驗與報告');const bytes=new Uint8Array(await file.arrayBuffer());const {inspectReport}=await import('./reportWorkbook.mjs'),request=JSON.parse(appStorage().getItem('dqa-request-demo-v2')||'[]').find(r=>r.id===requestId),check=await inspectReport(bytes,requestId,file.name,request);if(!check.ok)throw Object.assign(Error('報告欄位尚未完成，未送簽。'),{check});onProgress(40,'上傳不可覆寫的報告版本');const uploadId=await uploadHuman('REPORT',requestId,bytes,file.name,source);onProgress(70,'後端驗證檔案與委託關聯');await executeHuman(humanCommand('REPORT_SUBMIT',requestId,{signature,uploadId,source}));onProgress(100,'報告已送交二階主管審查');return originalReportIndex().find(r=>r.requestId===requestId);}

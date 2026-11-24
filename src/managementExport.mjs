@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {pdfTextLayout} from './pdfTextLayout.mjs';
 const text=value=>Array.from(String(value??'—')).filter(char=>char==='\n'||char==='\t'||char.charCodeAt(0)>=32&&char.charCodeAt(0)!==127).join('');
@@ -14,7 +15,7 @@ export async function buildManagementExport({type,title,columns,rows,summary='',
   return new Uint8Array(await book.xlsx.writeBuffer());
  }
  const [{PDFDocument,StandardFonts,rgb},kit]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit')]);
- if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('中文字型載入失敗，請稍後再試。');fontBytes=await response.arrayBuffer();}
+ if(!fontBytes){fontBytes=await assetBytes(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`,{message:'中文字型載入失敗，請稍後再試。'});}
  const doc=await PDFDocument.create();doc.registerFontkit(kit.default);const cjk=await doc.embedFont(fontBytes,{subset:true}),latin=await doc.embedFont(StandardFonts.Helvetica),layout=pdfTextLayout(cjk,latin);
  doc.setTitle(title);const W=842,H=595,margin=30,size=9,lineHeight=14,width=(W-margin*2)/columns.length;
  function wrap(value,maxWidth){const lines=[];let line='';for(const char of text(value)){if(char==='\n'||line&&layout.width(line+char,size)>maxWidth){lines.push(line);line=char==='\n'?'':char;}else line+=char;}lines.push(line);return lines;}

@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -14,18 +15,18 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
  await page.setViewportSize({width:1366,height:900});await page.goto('/lms/dashboard');await page.locator('.sidebar').getByRole('button',{name:'排程管理',exact:true}).click();await showAllSchedules(page);
  const tab=page.getByRole('tab',{name:/依設備排程/});await tab.click();
  const panel=page.getByRole('tabpanel',{name:/依設備排程/}),cards=panel.locator('.equipment-schedule-card');
- await expect(cards).toHaveCount(3);await expect(cards.first().locator('.equipment-schedule-header')).toHaveAttribute('aria-expanded','false');await expect(cards.first().locator('.schedule-table-region')).toBeHidden();await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.equipment-schedule-count')).toHaveText('2 件委託 · 2 筆試驗');
+ await expect(cards).toHaveCount(3);await expect(cards.first().locator('.equipment-schedule-header')).toHaveAttribute('aria-expanded','false');await expect(cards.first().locator('.schedule-table-region')).toBeHidden();await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().getByRole('button',{name:'編輯排程',exact:true}).first()).toBeEnabled();await expect(cards.first().locator('.equipment-schedule-count')).toHaveText('2 件委託 · 2 筆試驗');
  await expect(panel.locator('.equipment-schedule-kpis')).toHaveCount(0);await expect(panel.getByRole('button',{name:/全部展開|全部收合/})).toHaveCount(0);
  await expect(cards.first().locator('tbody tr').first()).toContainText('REQ-NEAR');await expect(cards.first().locator('tbody tr').last()).toContainText('REQ-LATE');
  await page.setViewportSize({width,height:900});
- await expect(tab).toHaveCSS('color','rgb(8, 102, 232)');
+ await expect(tab).toHaveCSS('color','rgb(15, 23, 42)');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeHidden();
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeVisible();
  await page.getByRole('searchbox',{name:'搜尋排程'}).fill('REQ-LATE');await expect(cards).toHaveCount(1);await expect(cards.first().locator('tbody tr')).toHaveCount(1);
  await page.getByRole('searchbox',{name:'搜尋排程'}).fill(DEMO_EQUIPMENT[1].name);await expect(cards).toHaveCount(1);await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('tbody tr')).toContainText('REQ-NEAR');
  await page.getByRole('searchbox',{name:'搜尋排程'}).fill('不存在設備');await expect(panel.getByText('沒有符合篩選條件的設備排程')).toBeVisible();
- await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');await page.screenshot({path:test.info().outputPath(`equipment-schedules-${width}.png`),fullPage:true});
+ await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');await captureBrowserEvidence(page,{path:test.info().outputPath(`equipment-schedules-${width}.png`),fullPage:true});
  await tab.focus();await tab.press('Home');await expect(page.getByRole('tab',{name:/全部排程/})).toBeFocused();await page.getByRole('tab',{name:/全部排程/}).press('End');await expect(tab).toBeFocused();
  expect(await page.pageErrors()).toEqual([]);
 });

@@ -1,0 +1,12 @@
+export const CATEGORIES={LABOR:'人工',EQUIPMENT:'設備',MATERIAL:'耗材',SUBCONTRACT:'外包試驗',OTHER:'其他'};
+export const EQUIPMENT_KINDS={USE:'使用',CALIBRATION:'校驗',MAINTENANCE:'保養',REPAIR:'維修'};
+export const PHASES={ESTIMATE:'預估',ACTUAL:'實際'};
+export const NATURES={INTERNAL:'內部使用',EXTERNAL:'外部支出'};
+export const COST_FIELDS=['occurred_on','phase','category','equipment_kind','scope','request_id','project_id','equipment_id','service_event_id','iteration','nature','currency','pricing','amount','rate','rate_label','quantity','planned_test_hours','reserved_hours','confirmed_run_hours','labor_hours','includes_service','note'];
+export const VOUCHER_FIELDS=['supplier','kind','number','occurred_on','currency','amount','finance_number','note','cost_ids'];
+const NUMBERS=new Set(['amount','rate','quantity','planned_test_hours','reserved_hours','confirmed_run_hours','labor_hours']);
+const REFS=new Set(['request_id','project_id','equipment_id','service_event_id','equipment_kind']);
+export function financeData(kind,row){return Object.fromEntries((kind==='cost'?COST_FIELDS:VOUCHER_FIELDS).map(k=>[k,k==='cost_ids'?(Array.isArray(row[k])?row[k]:String(row[k]||'').split(/[\s,]+/).filter(Boolean)):NUMBERS.has(k)?(row[k]==null||row[k]===''?null:row[k]):REFS.has(k)?row[k]||null:row[k]]));}
+export function newFinanceRow(kind){const date=new Date();const occurred_on=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;return kind==='cost'?{occurred_on,phase:'ESTIMATE',category:'OTHER',scope:'WORKSPACE',iteration:1,nature:'INTERNAL',currency:'TWD',pricing:'FIXED',rate_label:'',note:'',includes_service:false}:{occurred_on,kind:'INVOICE',currency:'TWD',supplier:'',number:'',finance_number:'',note:'',cost_ids:[]};}
+export function money(value){if(value===null||value===undefined||value==='')return '未估';const [whole,decimal='00']=String(value).split('.');return whole.replace(/\B(?=(\d{3})+(?!\d))/g,',')+'.'+decimal.padEnd(2,'0');}
+export const financeError=e=>({FINANCE_ACCESS_DENIED:'此帳號沒有財務權限。',FINANCE_PROJECT_MISMATCH:'委託所屬專案不符。',FINANCE_LINKED_COST:'此成本已關聯憑證，請先更正憑證關聯。',FINANCE_LINKS_INVALID:'只能連結同工作區、同幣別、尚未連結其他憑證的外部實際成本。',FINANCE_LINK_TOTAL_INVALID:'關聯成本合計不能超過憑證金額。',FINANCE_FILE_EXISTS:'此憑證已有附件，不能覆寫；如有錯誤請作廢原憑證另建紀錄。',FINANCE_FILE_INVALID:'請選擇 256 KiB 內的 PDF、PNG 或 JPEG。',FINANCE_VOIDED:'此紀錄已作廢，請重新讀取。',REVISION_CONFLICT:'資料已變更，請取消後重新讀取。'}[e.code]||`操作尚未完成（${e.code||'連線異常'}），請檢查欄位與權限。`);

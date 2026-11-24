@@ -1,3 +1,4 @@
+import {ActionTable} from './tableActionIcons.jsx';
 import {originalBusinessEnabled} from './originalBusiness.mjs';
 import WorkspaceProfileSettings from './WorkspaceProfileSettings.jsx';
 import SignatureMethodSettings from './SignatureMethodSettings.jsx';
@@ -9,6 +10,7 @@ import {OPERATION_MODULES} from './adminOperations.mjs';
 import {AdminModuleNav} from './AdminCenterCards.jsx';
 import ReportTemplateCenter from './ReportTemplateCenter.jsx';
 import InterfaceSettings from './InterfaceSettings.jsx';
+import EquipmentActivityPreferences from './EquipmentActivityPreferences.jsx';
 import ReportPreferences from './ReportPreferences.jsx';
 import TrialCatalogManagement from './TrialCatalogManagement.jsx';
 import './AdminCenter.css';
@@ -26,7 +28,7 @@ import useLabView from './useLabView.js';
 import {createReportTemplate} from './reportWorkbook.mjs';
 const date=value=>value?new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'—';
 const text=value=>value===undefined||value===null||value===''?'未設定':String(value);
-function Table({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><table className="template-table admin-table"><caption>{label}</caption><thead><tr>{columns.map(([id,label])=><th key={id} scope="col">{label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,i)=><tr key={row.id||i}>{columns.map(([id])=><td key={id}>{text(row[id])}</td>)}</tr>):<tr><td colSpan={columns.length}>尚無紀錄</td></tr>}</tbody></table></div>;}
+function Table({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><ActionTable className="template-table admin-table"><caption>{label}</caption><thead><tr>{columns.map(([id,label])=><th key={id} scope="col">{label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,i)=><tr key={row.id||i}>{columns.map(([id])=><td key={id}>{text(row[id])}</td>)}</tr>):<tr><td colSpan={columns.length}>尚無紀錄</td></tr>}</tbody></ActionTable></div>;}
 function Info({items}){return <dl className="admin-info-grid">{items.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;}
 function SettingDialog({module,value,onSave,onClose}){
  const [draft,setDraft]=useState(()=>({...value})),[error,setError]=useState('');
@@ -52,7 +54,7 @@ export default function AdminCenterModule({module,engine,account,onOpen,onNaviga
  {module==='notifications'&&<BusinessNotificationDelivery/>}
  {OPERATION_MODULES.includes(module)&&<AdminOperations key={module} {...{module,account,snapshot,metrics,now,data}} onRefresh={()=>{refresh();setNotice('');}} onNavigate={onNavigate} onOpen={onOpen}/>}
  {module==='workflow'&&<><section className="admin-surface" aria-label="日期與排程規則"><h3>日期與排程規則</h3><p>以 Asia / Taipei（台灣時間）顯示日期、排程時間與匯出摘要；依已儲存日程及接收紀錄推進狀態。本週統計採週一至週日。</p><p>連續型試驗與操作型試驗的工作日限制，仍依試驗目錄及原有排程檢查執行。</p></section><p className="admin-note">唯讀規則說明；沒有修改狀態機的控制。待確認在既有電子委託資料可仍顯示待排程，以實驗室接收紀錄區分；接收後等待排程開始，再進入試驗中。</p><ol className="admin-flow-strip">{WORKFLOW_RULES.map(r=><li key={r.id}><b>{r.id}</b>{r.stage}<small>{snapshot.sources.some(s=>s.error)?'來源待確認':`${snapshot.requests.filter(row=>row.status===r.stage).length} 件`}</small></li>)}</ol><div className="admin-workflow-rules">{WORKFLOW_RULES.map(r=><article key={r.id}><h3>{r.id}. {r.stage}</h3><Info items={[["負責角色",r.role],["允許操作",r.actions],["下一階段",r.next],["退回目的地",r.returned],["必要文件與簽核",r.conditions]]}/></article>)}</div></>}
- {module==='parameters'&&<><div id="equipment-activity-settings" className="admin-activity-settings"><ReportPreferences kind="activity"/></div><TrialCatalogManagement account={account} equipment={snapshot.equipment} schedules={snapshot.schedules} equipmentAction={go('equipment','設備管理')}/></>}
+ {module==='parameters'&&<><div id="equipment-activity-settings" className="admin-activity-settings">{originalBusinessEnabled()?<EquipmentActivityPreferences account={account}/>:<ReportPreferences kind="activity"/>}</div><TrialCatalogManagement account={account} equipment={snapshot.equipment} schedules={snapshot.schedules} equipmentAction={go('equipment','設備管理')}/></>}
  {module==='interface'&&<InterfaceSettings/>}
  {module==='data-maintenance'&&<DataMaintenance account={account}/>}
  {module==='documents'&&<><SignatureMethodSettings account={account}/><div className="admin-actions"><button className="template-btn" type="button" onClick={()=>setSignatureOpen(true)}>開啟本帳號電子簽名設定</button></div><ReportTemplateCenter actorId={account.id} system="lms" manage={editable}/><Table label="既有 Excel 報告範本" columns={[["name","範本"],["category","文件分類"],["version","版本依據"]]} rows={[{id:'ordinary',name:'通常試驗報告（程式產生 .xlsx）',category:'試驗報告',version:'未提供獨立版號，沿用現有產生器'},{id:'general',name:'一般性能試驗 .xlsx',category:'一般性能試驗報告',version:'general-performance-v1（辨識設定 ID，非核准版號）'}]}/><div className="admin-actions">{['通常試驗報告','一般性能試驗'].map(name=><button className="template-btn" type="button" key={name} onClick={()=>{setOperationError('');createReportTemplate({id:'DEMO-TEMPLATE',testItems:[name]},false).then(bytes=>{const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const a=document.createElement('a');a.href=url;a.download=`DEMO-${name}-範本.xlsx`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}).catch(e=>setOperationError(e.message));}}>下載{name}範本</button>)}</div><Info items={[["PDF 合併規則","指定主管確認後，委託單 → 簽核報告；僅 Demo 文件，不具正式認證效力。"],["報告審核階層","二階主管 → 三階主管 → 指定委託者主管查閱；沿用禁止自審與跨階規則。"],["文件保存期限",settings?`${settings.retentionDays} 天（Demo 政策草稿；不執行刪除）`:'設定無法讀取'],["正式保存與版本服務","規劃中；沒有後端保存期限或正式文件版本管控服務。"]]}/></>}
