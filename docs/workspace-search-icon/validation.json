@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-25",
+  "browser": {
+    "passed": 32,
+    "failed": 0,
+    "coverage": "LMS, request and lab; desktop/mobile; normal/hover/focus/open; light/dark reports and finance including source lookup"
+  },
+  "build": "passed",
+  "lint": "passed with existing warnings",
+  "data": "synthetic local fixtures; no live accounts or database writes"
+}
