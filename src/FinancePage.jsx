@@ -14,7 +14,7 @@ function Summary({rows,annual=false}){
 }
 export default function FinancePage({account}){
  const [tab,setTab]=useState('cost'),[context,setContext]=useState(null),[snapshot,setSnapshot]=useState(null),[filters,setFilters]=useState(()=>({year:String(new Date().getFullYear()),page:'0'})),[error,setError]=useState(''),[busy,setBusy]=useState(false),[editor,setEditor]=useState(null),[audit,setAudit]=useState(null),[lookup,setLookup]=useState(''),[pending,setPending]=useState(null);
- const [filtersOpen,setFiltersOpen]=useState(true),[filterDraft,setFilterDraft]=useState({from:'',to:'',project_id:'',request_id:'',category:'',nature:''}),filterId=useId();
+ const [filtersOpen,setFiltersOpen]=useState(false),[filterDraft,setFilterDraft]=useState({from:'',to:'',project_id:'',request_id:'',category:'',nature:''}),filterId=useId();
  const pendingKey=`dqa.finance.pending.${account.businessIdentity?.tenant_id||account.id}`;
  useEffect(()=>{try{const x=JSON.parse(sessionStorage.getItem(pendingKey)||'null');if(x?.operation_id)setPending(x);}catch{setError('無法讀取操作識別；請先確認瀏覽器工作階段儲存可用。');}},[pendingKey]);
  async function reload(){setBusy(true);setError('');try{const [c,s]=await Promise.all([api('/context?search='+encodeURIComponent(lookup)),api('/snapshot?'+new URLSearchParams(filters))]);setContext(c);setSnapshot(s);}catch(e){setContext(null);setSnapshot(null);setError(financeError(e));}finally{setBusy(false);}}

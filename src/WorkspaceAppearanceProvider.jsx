@@ -15,7 +15,7 @@ export default function WorkspaceAppearanceProvider({children,client=businessCli
  useLayoutEffect(()=>{currentScope.current=scope;},[scope]);
  const load=useCallback(async(signal)=>{
   if(!scope)return;const sequence=++readSequence.current;setState(s=>({...s,scope,data:s.scope===scope?s.data:null,loading:true,error:'',saving:s.scope===scope?s.saving:false,uncertain:s.scope===scope?s.uncertain:false}));
-  try{const data=connected?packet((await client.request('/access?section=appearance',{signal,background:true})).data):demoRead(demoCanManage);if(currentScope.current!==scope||sequence!==readSequence.current||signal?.aborted)return;setState(s=>({...s,scope,data,loading:false,error:'',uncertain:false}));return data;}
+  try{const data=connected?packet((await client.request('/access?section=appearance&version=2',{signal,background:true})).data):demoRead(demoCanManage);if(currentScope.current!==scope||sequence!==readSequence.current||signal?.aborted)return;setState(s=>({...s,scope,data,loading:false,error:'',uncertain:false}));return data;}
   catch(error){if(currentScope.current!==scope||sequence!==readSequence.current||signal?.aborted)return;setState(s=>({...s,scope,loading:false,error:businessErrorMessage(error)}));}
  },[scope,connected,client,demoCanManage]);
  useEffect(()=>{working.current=false;const controller=new AbortController();if(scope)void load(controller.signal);return()=>controller.abort();},[scope,load]);

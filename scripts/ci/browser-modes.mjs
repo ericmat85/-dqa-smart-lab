@@ -2,7 +2,7 @@
 export const BROWSER_MODES={
  demo:{port:5350,files:null,original:false,ai:false,preview:false},
  preview:{port:5351,files:['admin-center.spec.js','assistant-language.spec.js','demo.spec.js','e2-management.spec.js','e3-e4-local.spec.js','lab-catalog-units.spec.js','lms-assistant-interactions.spec.js','product-tour.spec.js','report-template-design.spec.js','trial-library-engines.spec.js','trial-profile-scheduling.spec.js','workspace-expansion.spec.js'],original:false,ai:false,preview:true},
- business:{port:5352,files:['finance.spec.mjs','workspace-layout.spec.mjs','workspace-child-pages.spec.mjs','workspace-appearance.spec.mjs','approved-design.spec.mjs','data-maintenance.spec.mjs','human-flow.spec.mjs','login-recovery.spec.mjs','original-business.spec.mjs','request-workflow.spec.mjs','resource-management.spec.mjs','shared-schedule.spec.mjs','virtual-requests.spec.mjs','workspace-access.spec.mjs','workspace-profile.spec.js'],original:true,ai:false,preview:false},
+ business:{port:5352,files:['finance.spec.mjs','workspace-layout.spec.mjs','workspace-admin-refresh.spec.mjs','workspace-child-pages.spec.mjs','workspace-appearance.spec.mjs','approved-design.spec.mjs','data-maintenance.spec.mjs','human-flow.spec.mjs','login-recovery.spec.mjs','original-business.spec.mjs','request-workflow.spec.mjs','resource-management.spec.mjs','shared-schedule.spec.mjs','virtual-requests.spec.mjs','workspace-access.spec.mjs','workspace-profile.spec.js'],original:true,ai:false,preview:false},
  'business-ai':{port:5353,files:['business-ai.spec.mjs','business-notifications.spec.mjs','signature-settings.spec.mjs'],original:true,ai:true,preview:false},
 };
 export const modeFiles=Object.values(BROWSER_MODES).flatMap(mode=>mode.files||[]);

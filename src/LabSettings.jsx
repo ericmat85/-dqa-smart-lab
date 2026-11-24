@@ -1,10 +1,9 @@
 import {originalBusinessEnabled} from './originalBusiness.mjs';
 import {businessClient} from './businessClient.mjs';
-import useSidebarMobile from './useSidebarMobile.js';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
 import {deriveAdminReminders} from './adminOperations.mjs';
 import useAdminSettings from './useAdminSettings.js';
-import AdminCenterCards from './AdminCenterCards.jsx';
+import AdminCenterCards,{AdminModuleNav} from './AdminCenterCards.jsx';
 import './SettingsCompact.css';
 import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import HelpTip from './HelpTip.jsx';
@@ -14,7 +13,6 @@ import useLabView from './useLabView.js';
 import {refreshLabSnapshot} from './useLabSnapshot.js';
 export default function LabSettings({onNavigate,focusSection,account,onOpenModule}){
  const {snapshot,metrics,now}=useLabView();
- const mobile=useSidebarMobile(900);
  const {data:adminData}=useAdminSettings();
  const connected=originalBusinessEnabled();
  const [sharedProfile,setSharedProfile]=useState(null);
@@ -29,8 +27,8 @@ export default function LabSettings({onNavigate,focusSection,account,onOpenModul
  const heading=(<div className="template-heading management-heading admin-home-heading"><div><div className="help-title-row"><h2><LmsSidebarIcon name="settings"/>系統管理</h2><HelpTip>調整介面外觀、確認資料健康狀態，集中查看需要處理的提醒。</HelpTip></div></div><button type="button" className="management-primary" onClick={()=>{refreshLabSnapshot();setChecked(new Date().toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}));}}><LmsHeaderActionLabel icon="refresh"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 7v5h-5 M4 17v-5h5 M6 7a7 7 0 0 1 12-1l2 3 M18 17a7 7 0 0 1-12 1l-2-3"/></svg>重新檢查</LmsHeaderActionLabel></button></div>);
  const checkedNotice=(checked&&<p className="management-notice" role="status">已於 {checked}（台灣時間）重新讀取本機資料。</p>);
  const hero=(<section className="admin-workspace-hero"><div><span className="admin-eyebrow">LABORATORY CONTROL CENTER</span><h3>{workspace}</h3><p>從日常管理到服務監控，讓每一項設定都有資料依據。</p><div className="admin-actions"><span className="admin-hero-pill">{connected?'目前登入工作區':'目前瀏覽器工作區'}</span><span className="admin-hero-pill">{connected?(profile?.timeZone||'顯示時區待確認'):'Asia / Taipei'}</span></div></div><div className="admin-hero-decoration" aria-hidden="true"><LmsSidebarIcon name="settings"/></div></section>);
- const content=(<>{backupDue&&<div className="admin-feature-callout"><div><span className="admin-eyebrow">BACKUP REMINDER</span><h3>已到管理設定備份提醒時間</h3><p>前往下載設定檔並保存在安全位置；此提醒不代表已執行自動備份。</p></div><button className="template-btn" onClick={()=>onOpenModule('backup')}>前往設定備份</button></div>}
+ const content=(<>{backupDue&&<div className="admin-feature-callout"><div><span className="admin-eyebrow">BACKUP REMINDER</span><h3>已到管理設定備份提醒時間</h3><p>前往下載設定檔並保存在安全位置；此提醒不代表已執行自動備份。</p></div><button className="template-btn" onClick={()=>onOpenModule('backup?section=backup')}>前往設定備份</button></div>}
   {reminders.length>0&&<section className="admin-home-reminders" aria-label="已啟用的站內提醒"><h3>需要留意的工作</h3><div className="admin-actions">{reminders.map(r=><button className="template-btn" type="button" key={r.id} onClick={()=>r.target==='ai'?onOpenModule('ai'):onNavigate(r.target)}>{r.label} · {r.count===null?'請查核':r.count+' 項'}</button>)}</div></section>}
   <AdminCenterCards account={account} onOpen={onOpenModule}/></>);
- return <section className="panel generic-page management-page settings-management"><div className="template-page">{mobile?<>{hero}<div className="admin-home-content">{heading}{checkedNotice}{content}</div></>:<>{heading}{checkedNotice}{hero}{content}</>}</div></section>;
+ return <section className="panel generic-page management-page settings-management"><div className="template-page"><AdminModuleNav account={account} active="overview" onOpen={onOpenModule}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-overview">{heading}{checkedNotice}<div className="admin-home-content">{hero}{content}</div></div></div></section>;
 }

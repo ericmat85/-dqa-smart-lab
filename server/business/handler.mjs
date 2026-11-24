@@ -287,8 +287,8 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_resource_operation':'execute_resource_operation',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path==='/access'&&req.method==='GET'&&parsed.searchParams.get('section')==='appearance'){
-    if(parsed.searchParams.size!==1||parsed.searchParams.getAll('section').length!==1)throw new ApiError(422,'QUERY_INVALID');
-    return reply(200,{data:await rpc('workspace_appearance',{p_tenant:session.tenant},session.access)});
+    if([...parsed.searchParams.keys()].some(key=>!['section','version'].includes(key))||parsed.searchParams.getAll('section').length!==1||parsed.searchParams.getAll('version').length>1||parsed.searchParams.has('version')&&parsed.searchParams.get('version')!=='2')throw new ApiError(422,'QUERY_INVALID');
+    return reply(200,{data:await rpc(parsed.searchParams.get('version')==='2'?'workspace_appearance_v2':'workspace_appearance',{p_tenant:session.tenant},session.access)});
    }
    if(path==='/access'&&req.method==='GET'&&parsed.searchParams.get('section')==='profile'){
     if(parsed.searchParams.size!==1)throw new ApiError(422,'QUERY_INVALID');
@@ -309,7 +309,8 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
      fields(body,['action','configuration','expected_revision']);
      if(!Number.isSafeInteger(body.expected_revision)||body.expected_revision<0)throw new ApiError(422,'WORKSPACE_APPEARANCE_FIELDS_INVALID');
      let configuration;try{configuration=validateWorkspaceAppearance(body.configuration);}catch{throw new ApiError(422,'WORKSPACE_APPEARANCE_FIELDS_INVALID');}
-     dispatchedWrite=true;return reply(200,{data:await rpc('save_workspace_appearance',{p_tenant:session.tenant,p_configuration:configuration,p_expected_revision:body.expected_revision},session.access)});
+     const version2=Object.hasOwn(body.configuration,'headerColor');if(!version2){const {headerColor:_headerColor,...legacy}=configuration;configuration=legacy;}
+     dispatchedWrite=true;return reply(200,{data:await rpc(version2?'save_workspace_appearance_v2':'save_workspace_appearance',{p_tenant:session.tenant,p_configuration:configuration,p_expected_revision:body.expected_revision},session.access)});
     }
     if(path==='/access'&&body.action==='save_profile'){
      if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');

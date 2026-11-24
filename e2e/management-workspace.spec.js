@@ -1,4 +1,4 @@
-import {resetVisibleListFilters} from './list-filter-controls.mjs';
+import {resetVisibleListFilters,revealListSearch} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
@@ -29,7 +29,7 @@ test('report export downloads valid complete Excel and Chinese PDF with column s
  let waiting=page.waitForEvent('download');await page.getByRole('button',{name:/Excel 活頁簿/}).click();let download=await waiting;expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
  const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(await readFile(await download.path()));expect(book.worksheets[0].rowCount).toBe(26);expect(book.worksheets[1].name).toBe('匯出摘要');
  await page.locator('.management-export-menu>summary').click();waiting=page.waitForEvent('download');await page.getByRole('button',{name:/PDF 文件/}).click();download=await waiting;expect(download.suggestedFilename()).toMatch(/\.pdf$/);const pdf=await PDFDocument.load(await readFile(await download.path()));expect(pdf.getPageCount()).toBeGreaterThan(0);expect(pdf.getTitle()).toBe('試驗執行統計');
- await page.getByRole('searchbox',{name:'搜尋報表'}).fill('REQ-EXPORT-24');await expect(page.locator('.lab-report-scope')).toContainText('顯示 1／25 筆');
+ await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋報表'}).fill('REQ-EXPORT-24');await expect(page.locator('.lab-report-scope')).toContainText('顯示 1／25 筆');
  await page.locator('.management-fold>summary').click();await page.locator('.management-column-options').getByLabel('設備',{exact:true}).uncheck();
  await expect(page.locator('.live-record-table thead')).not.toContainText('設備');
  await resetVisibleListFilters(page);await expect(page.locator('.lab-report-scope')).toContainText('顯示 25／25 筆');

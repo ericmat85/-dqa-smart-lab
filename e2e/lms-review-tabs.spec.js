@@ -1,3 +1,4 @@
+import {revealListSearch} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -29,9 +30,9 @@ test('review tabs combine classification, counts, search, pagination and keyboar
  await expect(all).toHaveAttribute('aria-selected','true');await expect(table.locator('tbody tr')).toHaveCount(20);
  await review.click();await table.getByRole('button',{name:'第 2 頁',exact:true}).click();await expect(table.locator('tbody tr')).toHaveCount(4);
  const search=page.getByPlaceholder('搜尋委託編號、產品代碼、試驗項目、部門…');
- await search.fill('REVIEW-24');await expect(table.locator('tbody tr')).toHaveCount(1);await expect(table).toContainText('REVIEW-24');
+ await revealListSearch(page);await search.fill('REVIEW-24');await expect(table.locator('tbody tr')).toHaveCount(1);await expect(table).toContainText('REVIEW-24');
  await expect(table.getByRole('navigation',{name:'列表分頁'})).toHaveCount(0);
- await search.fill('');await expect(table.locator('tbody tr')).toHaveCount(20);
+ await revealListSearch(page);await search.fill('');await expect(table.locator('tbody tr')).toHaveCount(20);
  await approval.click();await expect(table.locator('tbody tr')).toHaveCount(2);await expect(table).toContainText('BOR-DEMO');await expect(table).not.toContainText('REPORT-DEMO');
  await report.click();await expect(table.locator('tbody tr')).toHaveCount(1);await expect(table).toContainText('REPORT-DEMO');
  await report.press('Home');await expect(all).toBeFocused();await expect(all).toHaveAttribute('aria-selected','true');await expect(all).toHaveCSS('outline-style','solid');await expect(all).toHaveCSS('outline-width','2px');
@@ -39,7 +40,7 @@ test('review tabs combine classification, counts, search, pagination and keyboar
  await review.press('End');await expect(report).toBeFocused();await expect(report).toHaveAttribute('aria-selected','true');
  await report.press('ArrowLeft');await expect(approval).toBeFocused();await expect(approval).toHaveAttribute('aria-selected','true');
  await expect(page.getByRole('tabpanel',{name:/待核准/})).toBeVisible();
- await search.fill('not-found');await expect(page.getByText('沒有符合條件的委託',{exact:true})).toBeVisible();
+ await revealListSearch(page);await search.fill('not-found');await expect(page.getByText('沒有符合條件的委託',{exact:true})).toBeVisible();
  expect(await page.pageErrors()).toEqual([]);
 });
 

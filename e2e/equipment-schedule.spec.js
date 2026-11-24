@@ -1,3 +1,4 @@
+import {revealListSearch} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
@@ -23,10 +24,10 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeHidden();
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeVisible();
- await page.getByRole('searchbox',{name:'搜尋排程'}).fill('REQ-LATE');await expect(cards).toHaveCount(1);await expect(cards.first().locator('tbody tr')).toHaveCount(1);
- await page.getByRole('searchbox',{name:'搜尋排程'}).fill(DEMO_EQUIPMENT[1].name);await expect(cards).toHaveCount(1);await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('tbody tr')).toContainText('REQ-NEAR');
- await page.getByRole('searchbox',{name:'搜尋排程'}).fill('不存在設備');await expect(panel.getByText('沒有符合篩選條件的設備排程')).toBeVisible();
- await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');await captureBrowserEvidence(page,{path:test.info().outputPath(`equipment-schedules-${width}.png`),fullPage:true});
+ await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('REQ-LATE');await expect(cards).toHaveCount(1);await expect(cards.first().locator('tbody tr')).toHaveCount(1);
+ await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill(DEMO_EQUIPMENT[1].name);await expect(cards).toHaveCount(1);await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('tbody tr')).toContainText('REQ-NEAR');
+ await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('不存在設備');await expect(panel.getByText('沒有符合篩選條件的設備排程')).toBeVisible();
+ await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');await captureBrowserEvidence(page,{path:test.info().outputPath(`equipment-schedules-${width}.png`),fullPage:true});
  await tab.focus();await tab.press('Home');await expect(page.getByRole('tab',{name:/全部排程/})).toBeFocused();await page.getByRole('tab',{name:/全部排程/}).press('End');await expect(tab).toBeFocused();
  expect(await page.pageErrors()).toEqual([]);
 });
@@ -49,7 +50,7 @@ test('device schedule cards match catalog category colors across filtering and b
    const card=page.locator('.equipment-schedule-card').filter({hasText:machine.name});
    await expect(card.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await expect(card.locator('.equipment-schedule-count')).toHaveCSS('color',palette[machine.category]);await expect(card).toHaveCSS('border-left-color',palette[machine.category]);
   }
-  const machine=equipment[2];await page.getByRole('searchbox',{name:'搜尋排程'}).fill(machine.name);await expect(page.locator('.equipment-schedule-card')).toHaveCount(1);await expect(page.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');
+  const machine=equipment[2];await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill(machine.name);await expect(page.locator('.equipment-schedule-card')).toHaveCount(1);await expect(page.locator('.equipment-schedule-name strong')).toHaveCSS('color',palette[machine.category]);await revealListSearch(page);await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');
  }
  expect(await page.pageErrors()).toEqual([]);
 });

@@ -1,3 +1,4 @@
+import {revealListSearch} from './list-filter-controls.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 for(const width of [1366,390])test(`archive aligns with management pages at ${width}px in both themes`,async({page})=>{
@@ -11,8 +12,8 @@ for(const width of [1366,390])test(`archive aligns with management pages at ${wi
   await nav('資料庫');const archive=page.locator('.dashboard-content > .archive-page'),box=await archive.boundingBox(),heading=await page.getByRole('heading',{name:'資料庫',exact:true}).boundingBox();
   for(const key of ['x','y','width'])expect(Math.abs(frame[key]-box[key])).toBeLessThan(1);
   expect(Math.abs(title.x-heading.x)).toBeLessThan(1);expect(Math.abs(title.y-heading.y)).toBeLessThan(1);
-  await expect(archive.getByRole('searchbox',{name:'搜尋已結案報告'})).toBeVisible();
+  await revealListSearch(page);await revealListSearch(page);await expect(archive.getByRole('searchbox',{name:'搜尋已結案報告'})).toBeVisible();
   await expect(archive.locator('.template-table')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await archive.getByRole('searchbox',{name:'搜尋已結案報告'}).fill('NO-ARCHIVED-MATCH');await expect(archive).toContainText('目前沒有您可查閱的已封存報告');
+  await revealListSearch(page);await archive.getByRole('searchbox',{name:'搜尋已結案報告'}).fill('NO-ARCHIVED-MATCH');await expect(archive).toContainText('目前沒有您可查閱的已封存報告');
  }
 });
