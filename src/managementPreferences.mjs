@@ -1,10 +1,11 @@
-import {appStorage} from './originalBusiness.mjs';
+import {appStorage,originalBusinessEnabled,equipmentActivityData} from './originalBusiness.mjs';
 import {isCalendarDate} from './requestDate.mjs';
 export const MANAGEMENT_PREFERENCES_KEY='dqa-management-preferences-v1';
 export const DEFAULT_MANAGEMENT_PREFERENCES={reportPeriod:'all',exportSummary:true,equipmentDays:14,equipmentStart:''};
 function normalize(value){return {reportPeriod:['all','week','month'].includes(value.reportPeriod)?value.reportPeriod:'all',exportSummary:value.exportSummary!==false,equipmentDays:[7,14,30,60,90].includes(Number(value.equipmentDays))?Number(value.equipmentDays):14,equipmentStart:isCalendarDate(value.equipmentStart)?value.equipmentStart:''};}
 export function readManagementPreferences(storage=appStorage()){
- try{return normalize(JSON.parse(storage.getItem(MANAGEMENT_PREFERENCES_KEY)||'{}'));}catch{return {...DEFAULT_MANAGEMENT_PREFERENCES};}
+ let value;try{value=normalize(JSON.parse(storage.getItem(MANAGEMENT_PREFERENCES_KEY)||'{}'));}catch{value={...DEFAULT_MANAGEMENT_PREFERENCES};}
+ const shared=originalBusinessEnabled()&&storage===appStorage()?equipmentActivityData()?.configuration:null;return shared?{...value,...shared}:value;
 }
 export function saveManagementPreferences(value,storage=appStorage()){
  if(value.equipmentStart&&!isCalendarDate(value.equipmentStart))throw Error('設備稼動率的起始日期無效。');
