@@ -1,0 +1,14 @@
+/* All three portals use the LMS database frame and report list. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .archive-page[data-system]{padding:0!important;margin:0!important;min-width:0;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;color:var(--enterprise-text)}
+html body #root .archive-page[data-system]>.template-page{padding:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
+html body #root .archive-page[data-system] .archive-table-wrap{padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--enterprise-card);width:100%;max-width:100%;overflow-x:auto}
+html body #root .archive-page[data-system] .template-table{width:100%;margin:0;border:0;border-collapse:collapse;table-layout:auto;font-size:13px;color:var(--enterprise-text);background:var(--enterprise-card)}
+html body #root .archive-page[data-system] .template-table :is(th,td){padding:8px 14px!important;line-height:20px!important;vertical-align:middle!important;text-align:left;border:0;border-bottom:1px solid var(--enterprise-border);box-sizing:border-box}
+html body #root .archive-page[data-system] .template-table th{height:40px!important;font-size:13px!important;font-weight:600;background:var(--workspace-table-head)!important;color:var(--workspace-table-label)!important}
+html body #root .archive-page[data-system] .template-table tbody tr:last-child td{border-bottom:0}
+html body #root .archive-page[data-system] .archive-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+html body #root .archive-page[data-system] .archive-actions .icon-action{display:inline-flex;align-items:center;justify-content:center;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0!important;border:1px solid var(--enterprise-border)!important;border-radius:5px!important;background:var(--enterprise-card)!important;color:var(--enterprise-primary)!important;box-sizing:border-box;cursor:pointer}
+html body #root .archive-page[data-system] .archive-actions .icon-action>svg{width:18px;height:18px;flex:none}
+html body #root .archive-page[data-system] .archive-actions .icon-action:disabled{opacity:.5;cursor:wait}
+html body #root .archive-page[data-system] .archive-empty{margin:0;padding:32px 16px;border:0;border-radius:0;background:var(--enterprise-card);color:var(--enterprise-secondary);text-align:center}
+html body #root .archive-page[data-system] [role=alert]{margin:0;padding:12px 14px;color:#B42318}
