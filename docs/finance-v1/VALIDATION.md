@@ -77,3 +77,9 @@ PR 準備補充：財務瀏覽器案例明確要求專用設定的 financeBusine
 本次 PR 補充驗證：專用財務設定 7/7 通過；預設 Demo 設定 7 項依設計略過。初次平行執行因共用 Playwright 輸出目錄造成 trace 檔案競爭，改用獨立輸出目錄後 7 項全部重跑通過，未變更應用程式行為。
 
 PR 使用既有 `preview/i-render-backend-*` 禁止 Vercel 自動部署規則涵蓋的分支；未變更部署規則或 GitHub workflow。依 Vercel 官方 [Git Configuration](https://vercel.com/docs/project-configuration/git-configuration)，deploymentEnabled 支援分支 minimatch 規則。此規則不是所有外部 webhook 的盤點證明。資料庫仍未接線或執行任何雲端 migration；須先確認獨立資料庫、Auth、Storage 及 API 目的地，不能把 dqa-smart-lab-dev 當作隔離環境。
+
+## PR49 財務與共用版面追加驗證
+
+財務 7 項瀏覽器流程通過：新增／取消、更正、重測、未估金額、工時分離、回應遺失後恢復、權限拒絕、憑證連結／附件及手機版。另以原生模式檢查收合、伺服器費用性質條件、分頁／全量合計／年度範圍及圖示操作。全系統桌面、手機、深色與配色、報表、範本、接收及設備資訊共 138 個不同瀏覽器案例最終通過；部分本機並行載入超時案例分開重驗通過。
+
+18 項 Node／HTTP／模式分流檢查、55 項隔離 PostgreSQL 檢查、Lint（既有警告）與原生建置通過。037 先完成共用資料庫交易回滾探測，再一次提交並讀回驗證；只變更費用性質讀取條件，既有業務／私人資料、無關函式及 public 定義均通過交易內比對。未建立正式財務測試紀錄。瀏覽器使用示意 API，不宣稱為真人遠端登入驗收；遠端 CI 狀態以 PR checks 為準。

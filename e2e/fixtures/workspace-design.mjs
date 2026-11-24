@@ -3,7 +3,7 @@ import {BUSINESS_MODEL_CATALOG} from '../../src/businessModelCatalog.mjs';
 import {defaultTrialCatalog} from '../../src/trialCatalogStore.mjs';
 const id=n=>'ad000000-0000-4000-8000-'+String(n).padStart(12,'0');
 export async function workspaceFixture(page,{dark=false,requester=false}={}){
- const state={errors:[],writes:[]};page.on('pageerror',e=>state.errors.push(e.message));await page.addInitScript(dark=>{localStorage.setItem('dqa-global-theme',dark?'dark':'light');},dark);
+ const state={errors:[],writes:[]};page.on('pageerror',e=>state.errors.push(e.message));page.on('console',message=>{if(message.type()==='error'&&/two children with the same key/.test(message.text()))state.errors.push(message.text());});await page.addInitScript(dark=>{localStorage.setItem('dqa-global-theme',dark?'dark':'light');},dark);
  const role={id:id(50),code:'preview-admin',name:'工作區管理者',is_tenant_admin:true,enabled:true,revision:1,review_level:0,permissions:[],systems:['lms','lab','request'],pages:['dashboard','requests','schedule','equipment','maintenance','finance','reports','archive','settings']};
  const member={id:id(1),display_name:'設計預覽管理者',name:'設計預覽管理者',login_email:'preview@example.invalid',email:'preview@example.invalid',enabled:true,role_id:role.id,department:'研發部',activation:'ACTIVE',revision:1};
  const equipment={id:id(2),legacy_id:'EQ-014',name:'防水試驗機 #01',category:'防護試驗',model:'WATER-X6',space_units:6,daily_hours:24,operational_status:'IDLE',revision:1,display_details:{location:'合成實驗室',owner:'合成工程師'}};

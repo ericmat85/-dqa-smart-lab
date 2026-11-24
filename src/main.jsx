@@ -10,6 +10,7 @@ import './ControlAlignment.css'
 import './SummaryTiles.css'
 import './UnifiedButtons.css'
 import './ApprovedWorkspaceDesign.css'
+import './WorkspaceLayoutPolish.css'
 
 const finishBootstrap=beginPageLoading();
 function BootReady({children}){useEffect(()=>{finishBootstrap();},[]);return children;}

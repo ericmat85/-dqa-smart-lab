@@ -123,3 +123,9 @@ python database/tools/verify_restore.py \
 設定表僅供非秘密資料；目前 CHECK 攔截已知的頂層秘密欄位名稱，不能代替後續 API 的欄位白名單與秘密儲存服務。不要在設定 JSON、匯入原始檔或設備端口中保存 API Key／密碼。
 
 後續 004 的正式登入、Session 與自有草稿 RPC 接線，請見 [共用業務資料庫接線 Preview](../docs/BUSINESS_CONNECTION.md)。本文件保留第一階段的建置邊界。
+
+### Finance read filter (037)
+
+`037_finance_nature_filter.sql` extends only `finance_snapshot` with optional `nature=INTERNAL|EXTERNAL`. Filtering happens before the 50-row page, result count and grouped totals. Annual totals retain the existing year/project scope and ignore nature/date/request/category filters; vouchers retain their existing date scope. Currency and estimated/actual/internal/external groups remain separate. Existing write commands, amounts, role/tenant checks and function grants are unchanged.
+
+Run `database/tests/verify_finance_nature.py` against an isolated database already migrated through 037, alongside `verify_finance.py`. All fixture writes roll back. The optional rollback restores the 035 read function and must be paired with a frontend rollback; it does not remove data or rewrite the migration journal.
