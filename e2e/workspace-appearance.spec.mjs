@@ -1,0 +1,43 @@
+import {test,expect} from '@playwright/test';
+import {workspaceFixture} from './fixtures/workspace-design.mjs';
+import {APPEARANCE_DEFAULTS} from '../src/workspaceAppearance.mjs';
+const color=hex=>'rgb('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(', ')+')';
+async function setup(page,{canManage=true,failRead=false}={}){
+ const effects=await workspaceFixture(page);const state={data:{configuration:{...APPEARANCE_DEFAULTS},revision:0,can_manage:canManage},writes:[],failRead,unknown:false,conflict:false,reads:0};
+ await page.route('**/api/business/access**',async route=>{const req=route.request(),url=new URL(req.url());const body=req.method()==='POST'?req.postDataJSON():null;if(url.searchParams.get('section')!=='appearance'&&body?.action!=='save_appearance')return route.fallback();
+ if(req.method()==='GET'){state.reads++;return route.fulfill(state.failRead?{status:503,json:{error:{code:'UPSTREAM_UNAVAILABLE'}}}:{json:{data:state.data}});}
+ state.writes.push(body);if(state.conflict)return route.fulfill({status:409,json:{error:{code:'REVISION_CONFLICT'}}});if(!state.data.can_manage)return route.fulfill({status:403,json:{error:{code:'WORKSPACE_APPEARANCE_ACCESS_DENIED'}}});state.data={...state.data,configuration:body.configuration,revision:state.data.revision+1};return route.fulfill(state.unknown?{status:503,json:{error:{code:'WRITE_OUTCOME_UNKNOWN'},outcome_unknown:true}}:{json:{data:state.data}});
+ });return {state,effects};
+}
+const settings=page=>page.getByRole('region',{name:'頁籤與列表配色',exact:true});
+async function open(page){await page.goto('/lms/settings/interface');await expect(settings(page).getByRole('button',{name:'霧藍灰',exact:true})).toBeEnabled();}
+
+test('appearance editor previews without applying, cancels, saves and survives all three systems',async({page,isMobile},info)=>{
+ const {state,effects}=await setup(page);if(!isMobile)await page.setViewportSize({width:1920,height:1080});await open(page);const editor=settings(page),bar=page.locator('.workspace-primary-tabs').first();await expect(bar).toHaveCSS('background-color',color('#142D48'));
+ await page.screenshot({path:info.outputPath('介面設定-霧藍灰.png'),fullPage:true});await editor.getByRole('button',{name:'岩石灰',exact:true}).click();await expect(editor.locator('.appearance-example th').first()).toHaveCSS('background-color',color('#D9DDE2'));await expect(bar).toHaveCSS('background-color',color('#142D48'));expect(state.writes).toHaveLength(0);await editor.getByRole('button',{name:'取消',exact:true}).click();await expect(editor.getByLabel('列表表頭底色色碼')).toHaveValue('#D2DCE8');
+ await editor.getByRole('button',{name:'淡靛藍',exact:true}).click();await editor.getByRole('button',{name:'儲存設定',exact:true}).click();await expect(editor.getByRole('status')).toContainText('配色已儲存至工作區');expect(state.writes).toHaveLength(1);expect(state.writes[0]).toEqual({action:'save_appearance',configuration:{tabBarColor:'#263456',tableHeaderColor:'#DCE2F4'},expected_revision:0});
+ for(const url of ['/lms/schedule','/request/requests']){await page.goto(url);await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#263456'));await expect(page.locator('main table thead th').first()).toHaveCSS('background-color',color('#DCE2F4'));}
+ await page.goto('/lab/dashboard');if(isMobile)await page.getByRole('button',{name:'切換功能選單',exact:true}).click();await page.locator('.lab-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#263456'));await expect(page.locator('main table thead th').first()).toHaveCSS('background-color',color('#DCE2F4'));
+ await open(page);await expect(settings(page).getByLabel('列表表頭底色色碼')).toHaveValue('#DCE2F4');await settings(page).getByRole('button',{name:'還原預設',exact:true}).click();expect(state.writes).toHaveLength(1);await settings(page).getByRole('button',{name:'儲存設定',exact:true}).click();await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#142D48'));expect(state.writes).toHaveLength(2);expect(effects.errors).toEqual([]);expect(effects.writes).toEqual([]);
+ if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});
+
+test('appearance custom colors validate hex and automatic text contrast, without changing global preview',async({page},info)=>{
+ const {state}=await setup(page);await open(page);const editor=settings(page);await editor.getByLabel('頁籤列底色色碼').fill('#FFF');await expect(editor.getByRole('button',{name:'儲存設定',exact:true})).toBeDisabled();await expect(editor.getByRole('alert')).toContainText('完整的六位色碼');await editor.getByLabel('頁籤列底色色碼').fill('#FFFFFF');await editor.getByLabel('列表表頭底色色碼').fill('#000000');await expect(editor.locator('.appearance-example th').first()).toHaveCSS('color','rgb(255, 255, 255)');await expect(editor.locator('.appearance-example-toolbar')).toHaveCSS('color','rgb(0, 0, 0)');await editor.getByRole('button',{name:'深色',exact:true}).click();await page.screenshot({path:info.outputPath('介面設定-自訂深色預覽.png'),fullPage:true});expect(state.writes).toHaveLength(0);await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#142D48'));
+});
+
+test('appearance load failure and read-only roles never offer default saves',async({page})=>{
+ const {state}=await setup(page,{failRead:true});await page.goto('/lms/settings/interface');const editor=settings(page);await expect(editor.getByRole('alert')).toBeVisible();await expect(editor.getByRole('button',{name:'還原預設',exact:true})).toBeDisabled();state.failRead=false;state.data.can_manage=false;await editor.getByRole('button',{name:'重新讀取設定'}).click();await expect(editor.getByText('目前為唯讀，配色由工作區管理者統一設定。')).toBeVisible();await expect(editor.getByRole('button',{name:'霧藍灰',exact:true})).toBeDisabled();await expect(editor.getByRole('button',{name:'儲存設定',exact:true})).toBeDisabled();expect(state.writes).toHaveLength(0);
+});
+
+test('appearance revision conflict preserves draft until explicit readback',async({page})=>{
+ const {state}=await setup(page);await open(page);const editor=settings(page);await editor.getByRole('button',{name:'暖灰',exact:true}).click();state.conflict=true;state.data={...state.data,revision:3,configuration:{tabBarColor:'#263456',tableHeaderColor:'#DCE2F4'}};await editor.getByRole('button',{name:'儲存設定',exact:true}).click();await expect(editor.getByRole('alert')).toContainText('資料已被其他使用者更新');await expect(editor.getByLabel('列表表頭底色色碼')).toHaveValue('#E3DFDA');expect(state.writes).toHaveLength(1);await editor.getByRole('button',{name:'重新讀取設定'}).click();await expect(editor.getByLabel('列表表頭底色色碼')).toHaveValue('#DCE2F4');state.conflict=false;await editor.getByRole('button',{name:'暖灰',exact:true}).click();await editor.getByRole('button',{name:'儲存設定',exact:true}).click();await expect(editor.getByRole('status')).toContainText('配色已儲存');expect(state.writes[1].expected_revision).toBe(3);
+});
+
+test('appearance unknown save is not replayed and readback confirms stored colors',async({page})=>{
+ const {state}=await setup(page);await open(page);const editor=settings(page);state.unknown=true;await editor.getByRole('button',{name:'岩石灰',exact:true}).click();await editor.getByRole('button',{name:'儲存設定',exact:true}).click();await expect(editor.getByRole('alert')).toContainText('儲存結果待確認');await expect(editor.getByRole('button',{name:'儲存設定',exact:true})).toBeDisabled();expect(state.writes).toHaveLength(1);await editor.getByRole('button',{name:'重新讀取設定'}).click();await expect(editor.getByLabel('列表表頭底色色碼')).toHaveValue('#D9DDE2');await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#263447'));expect(state.writes).toHaveLength(1);
+});
+
+test('appearance is cleared on logout and a late read cannot restore another session colors',async({page})=>{
+ const {state}=await setup(page);state.data.configuration={tabBarColor:'#263447',tableHeaderColor:'#D9DDE2'};await open(page);await expect(page.locator('.workspace-primary-tabs').first()).toHaveCSS('background-color',color('#263447'));let lateRead;await page.route('**/api/business/access?section=appearance',route=>{lateRead=route;});await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect.poll(()=>!!lateRead).toBe(true);await page.evaluate(async()=>{const m=await import('/src/originalBusiness.mjs');m.clearOriginalIdentity();});await lateRead.fulfill({json:{data:state.data}}).catch(()=>{});await expect.poll(()=>page.evaluate(()=>document.documentElement.style.getPropertyValue('--workspace-color-tab-light'))).toBe('#142D48');expect(state.writes).toHaveLength(0);
+});
