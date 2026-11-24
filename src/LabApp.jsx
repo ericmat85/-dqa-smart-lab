@@ -1,3 +1,4 @@
+import './LabTraditionalTypography.css';
 import {canConfirmLabCompletion} from './trialCompletion.mjs';
 import {REPORT_FILE_MAX_MB} from './reportFilePolicy.mjs';
 import {isVirtualRequest} from './requestExecutionKind.mjs';
@@ -54,7 +55,7 @@ import SignatureHistory from './SignatureHistory.jsx';
 import { auditSignatures } from './signatureHistory.mjs';
 import useDemoPersistence from './useDemoPersistence.js';
 import { readDemoAccounts } from "./demoAccounts.mjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./LabApp.css";
 import './LoginEntry.css';
 import './LabLoginDetails.css';
@@ -80,6 +81,11 @@ const now = () => new Date().toLocaleString("zh-TW", { hour12: false });
 
 
 export default function LabApp({ path, navigate }) {
+  useLayoutEffect(()=>{
+    if(!/^\/lab(?:\/|$)/.test(path))return;
+    document.body.dataset.labTypography="tc";
+    return()=>{delete document.body.dataset.labTypography;};
+  },[path]);
   const formalLoginPending=useRef(false);
   const humanPending=useHumanPending();
   const lifecycleError=useScheduleLifecycle();
