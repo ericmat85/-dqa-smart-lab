@@ -19,7 +19,7 @@ export default function EquipmentInfoModal({ equipment, onClose, onEdit, onStatu
   const closeRef=useRef(null);
   const eq=equipment;
   const records=eq.records || [];
-  const utilization=Math.max(0,Math.min(100,Number(eq.utilization)||0));
+  const actual=Object.hasOwn(eq,'actualUsage'),utilization=actual?(eq.actualUsage?.rate??null):Math.max(0,Math.min(100,Number(eq.utilization)||0));
   const prefix=`equipment-${eq.id.replace(/[^a-zA-Z0-9-]/g,'')}`;
   useEffect(()=>{
     const previous=document.activeElement;
@@ -52,7 +52,7 @@ export default function EquipmentInfoModal({ equipment, onClose, onEdit, onStatu
       <div className="eq-profile-tabs" role="tablist" aria-label="設備資訊分類">{tabs.map(([key,label],index)=><button type="button" key={key} id={`${prefix}-tab-${key}`} role="tab" aria-selected={tab===key} aria-controls={`${prefix}-panel-${key}`} tabIndex={tab===key?0:-1} onClick={()=>setTab(key)} onKeyDown={event=>tabKeys(event,index)}>{label}{key==='history' && <span>{records.length}</span>}</button>)}</div>
       <div className="eq-profile-body" role="tabpanel" id={`${prefix}-panel-${tab}`} aria-labelledby={`${prefix}-tab-${tab}`} tabIndex={0}>
         {tab==='overview' && <>
-          <div className="eq-profile-metrics"><div><span>可用空間 U</span><strong>{show(equipmentSpaceUnits(eq))}<small>U</small></strong></div><div><span>每日可用時間</span><strong>{show(eq.dailyHours)}<small>小時</small></strong></div><div><span>本月使用率 <small>DEMO</small></span><strong>{utilization}<small>%</small></strong><div className="eq-profile-meter" role="meter" aria-label="本月使用率（示範）" aria-valuemin={0} aria-valuemax={100} aria-valuenow={utilization}><span style={{width:`${utilization}%`}} /></div></div></div>
+          <div className="eq-profile-metrics"><div><span>可用空間 U</span><strong>{show(equipmentSpaceUnits(eq))}<small>U</small></strong></div><div><span>每日可用時間</span><strong>{show(eq.dailyHours)}<small>小時</small></strong></div><div><span>{actual?`過去 ${eq.actualUsage?.days||30} 天使用率`:<>本月使用率 <small>DEMO</small></>}</span><strong>{utilization??'—'}{utilization!==null&&<small>%</small>}</strong>{utilization!==null&&<div className="eq-profile-meter" role="meter" aria-label={actual?'實際試驗使用率':'本月使用率（示範）'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={utilization}><span style={{width:`${utilization}%`}} /></div>}</div></div>
           <section className="eq-profile-section"><div className="eq-profile-section-title"><h3>設備基本資料</h3><span>獨立設備台帳</span></div><Fields rows={[
             ['設備編號',eq.id],['設備名稱',eq.name],['設備分類',eq.category],['型號',eq.model],['製造商',eq.manufacturer],['設備序號',eq.serial],['購置日期',eq.purchasedAt],['目前委託',eq.currentRequest],['借用單號',eq.activeBorrowId],['借用人',eq.borrower],['預計歸還',eq.borrowReturnDate],['預估結束時間',eq.estimatedEnd?new Date(eq.estimatedEnd).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'—'],
           ]}/></section>

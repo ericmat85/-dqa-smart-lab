@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 async function login(page){
@@ -21,7 +22,7 @@ test('requester has no review entry; request uses a standalone editor and borrow
   await expect(request.getByRole('button',{name:'送出主管簽核 →',exact:true})).toBeVisible();await page.keyboard.press('Escape');await expect(request).toHaveCount(0);expect(await page.locator('#root').evaluate(el=>el.inert)).toBe(false);
   if(width<1000)await page.getByRole('button',{name:'切換功能選單'}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'申請借用',exact:false}).click();await page.getByRole('button',{name:'＋申請借用',exact:true}).click();
   const borrow=page.getByRole('dialog',{name:'申請借用',exact:true});await expect(borrow).toBeVisible();const br=await borrow.boundingBox();expect(br.width).toBeLessThan(width);expect(br.y).toBeGreaterThan(0);expect(br.y+br.height).toBeLessThanOrEqual(height);
-  await expect(borrow.getByRole('button',{name:'送出借用申請 →',exact:true})).toBeVisible();await page.screenshot({path:test.info().outputPath(`borrow-modal-${width}.png`)});await page.keyboard.press('Escape');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await expect(borrow.getByRole('button',{name:'送出借用申請 →',exact:true})).toBeVisible();await captureBrowserEvidence(page,{path:test.info().outputPath(`borrow-modal-${width}.png`)});await page.keyboard.press('Escape');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
 });
 test('my request and borrow tabs preserve submit/approval flow and do not expose another account borrowing',async({page})=>{

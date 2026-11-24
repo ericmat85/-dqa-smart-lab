@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -32,7 +33,7 @@ for(const theme of ['light','dark'])test(`lab information layout ${theme}: compa
  expect(await modal.locator('.rq-demo-flow-section').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft))).toBeGreaterThanOrEqual(14);
  const history=modal.locator('.dqa-signature-history').first();
  expect(await history.evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft))).toBeGreaterThanOrEqual(12);
- await modal.screenshot({path:test.info().outputPath(`request-information-${theme}.png`)});
+ await captureBrowserEvidence(modal,{path:test.info().outputPath(`request-information-${theme}.png`)});
  await page.keyboard.press('Escape');await expect(modal).toHaveCount(0);
  await expect(row.getByRole('button',{name:'DEMO-LAYOUT-001',exact:true})).toBeFocused();
  await page.evaluate(async()=>{

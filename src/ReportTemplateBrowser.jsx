@@ -1,3 +1,5 @@
+import './ResourceActions.css';
+import {assetBytes} from './assetBytes.mjs';
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
 import {PaginatedList} from './Pagination.jsx';
 import TemplatePreview,{downloadTemplate} from './TemplatePreview.jsx';
@@ -34,9 +36,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
   if(row.kind==='trial')return readTrialTemplateFile({...access,templateId:row.id,expectedRevision:row.revision});
   if(row.kind==='upload')return readUploadedTemplate(row.id,access);
   if(row.id==='BLANK'){const bytes=await requestWorkbookBytes({});assertTemplateAccess(access);return {name:'空白電子委託單.xlsx',bytes};}
-  const response=await fetch(generalPath,{signal:lifetime.current?.signal});
-  if(!response.ok)throw Error('一般性能報告範本無法讀取，請稍後再試。');
-  const bytes=new Uint8Array(await response.arrayBuffer());assertTemplateAccess(access);
+  const bytes=new Uint8Array(await assetBytes(generalPath,{signal:lifetime.current?.signal,message:'一般性能報告範本無法讀取，請稍後再試。'}));assertTemplateAccess(access);
   return {name:'一般性能試驗報告範本.xlsx',bytes};
  },[actorId,system]);
  const readSelected=useCallback(()=>readFile(selected),[readFile,selected]);
@@ -64,7 +64,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
    {rows.length?<PaginatedList items={rows} resetKey={`${category}:${search}`}>{page=><ul className="rtb-list">{page.map(row=><li key={`${row.kind}-${row.id}`} className="rtb-row">
     <div className="rtb-document"><span className={`rtb-document-icon rtb-${row.kind}`}><Icon/></span><div><h4>{row.name}</h4><span className="rtb-kind">{row.kind==='trial'?'試驗範本':row.kind==='upload'?'上傳版本':'通用文件'}</span></div></div>
     <div className="rtb-metadata"><span><small>版本</small>{row.version}</span>{row.kind==='trial'?<span><small>試驗工時</small>{row.durationHours} 小時</span>:row.kind==='upload'?<span><small>對應項目</small>{row.trialName}</span>:null}</div>
-    <div className="rtb-actions"><button type="button" disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.previewLabel} title={row.previewLabel} onClick={()=>{setError('');setSelected(row);}}><Icon kind="eye"/><span>預覽</span></button>{row.id==='GENERAL'?<a href={generalPath} download="一般性能試驗報告範本.xlsx" aria-label="下載範本" title="下載一般性能報告範本"><Icon kind="download"/><span>下載 Excel</span></a>:<button type="button" disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.downloadLabel} title={row.downloadLabel} onClick={()=>download(row)}><Icon kind="download"/><span>{busy===row.id?'準備中…':'下載 Excel'}</span></button>}</div>
+    <div className={`rtb-actions ${system==='lms'?'resource-row-actions':''}`}><button type="button" className={system==='lms'?'icon-action':undefined} disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.previewLabel} title={row.previewLabel} onClick={()=>{setError('');setSelected(row);}}><Icon kind="eye"/>{system!=='lms'&&<span>預覽</span>}</button>{row.id==='GENERAL'?<a className={system==='lms'?'icon-action':undefined} href={generalPath} download="一般性能試驗報告範本.xlsx" aria-label="下載範本" title="下載一般性能報告範本"><Icon kind="download"/>{system!=='lms'&&<span>下載 Excel</span>}</a>:<button type="button" className={system==='lms'?'icon-action':undefined} disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.downloadLabel} title={row.downloadLabel} onClick={()=>download(row)}><Icon kind="download"/>{system!=='lms'&&<span>{busy===row.id?'準備中…':'下載 Excel'}</span>}</button>}</div>
     <details className="rtb-details"><summary><Icon kind="chevron"/>範本內容與對應資料</summary><div>{row.kind==='trial'?<><p className="rtb-contents">包含委託單、報告首頁、試驗過程、結果與照片；量測結果、判定與簽名留白。</p><dl><div><dt>適用設備</dt><dd>{row.equipment||'尚未設定'}</dd></div>{row.aliases.length>0&&<div><dt>亦對應試驗</dt><dd>{row.aliases.join('、')}</dd></div>}<div><dt>試驗規範／手法</dt><dd>{row.specification||'尚未設定'}</dd></div></dl></>:row.kind==='upload'?<p>{row.trialBinding?.status==='VERIFIED'?'試驗對應已核對。':row.trialId==='CUSTOM'?'自訂版本，不自動套用案件。':row.trialId==='BLANK'?'空白委託單。':'既有版本，預覽／下載時核對試驗。'}此版本保留在目前瀏覽器，可於文件與報告設定管理。</p>:<p>{row.description}</p>}</div></details>
    </li>)}</ul>}</PaginatedList>:<div className="rtb-empty"><Icon/><strong>{needle?'沒有符合搜尋條件的報告範本':category==='upload'?'尚無上傳範本':'目前沒有這類範本'}</strong><p>{needle?'請調整關鍵字、切換分類，或清除篩選。':'上傳版本可在系統管理的「文件與報告設定」新增。'}</p></div>}
   </div>

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 const member={id:'member-1',tenant_id:'a0000000-0000-0000-0000-000000000001',tenant_name:'Synthetic Lab',display_name:'Synthetic Manager',permissions:[],is_admin:true};
-async function setup(page){const state={signed:false,rows:[],writes:[],conflict:false};await page.route('**/api/business/**',async route=>{const r=route.request(),path=new URL(r.url()).pathname.replace('/api/business',''),body=r.postDataJSON(),send=(json,status=200)=>route.fulfill({status,json:{...json,trace_id:'I-SYNTHETIC'}});
+async function setup(page){const state={signed:false,rows:[],writes:[],conflict:false};await page.route('**/api/business/**',async route=>{const r=route.request(),url=new URL(r.url());let path=url.pathname.replace('/api/business','');if(path==='/data/requests'&&url.searchParams.has('id'))path+='/'+url.searchParams.get('id');const body=r.postDataJSON(),send=(json,status=200)=>route.fulfill({status,json:{...json,trace_id:'I-SYNTHETIC'}});
  if(path==='/me')return state.signed?send({member,user:{id:'u',email:'synthetic@example.invalid'}}):send({error:{code:'AUTHENTICATION_REQUIRED'}},401);
  if(path==='/login'){state.signed=true;return send({authenticated:true,member});}
  if(path==='/logout'){state.signed=false;return send({signed_out:true});}

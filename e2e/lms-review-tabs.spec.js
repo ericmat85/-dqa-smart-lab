@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 
@@ -86,11 +87,11 @@ for(const [width,height] of [[1920,1080],[1366,768],[1280,720]])test(`LMS enterp
  await expect(launcher).toHaveCSS('background-color','rgb(8, 102, 232)');
  const icons=page.locator('.sidebar .lms-sidebar-icon');expect(await icons.count()).toBeGreaterThanOrEqual(9);
  for(const icon of await icons.all()){await expect(icon).toHaveCSS('stroke','rgb(255, 255, 255)');await expect(icon).toHaveAttribute('fill','none');}
- await page.screenshot({path:test.info().outputPath(`dashboard-${width}x${height}.png`)});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`dashboard-${width}x${height}.png`)});
  await page.locator('.sidebar').getByRole('button',{name:'試驗委託',exact:true}).click();
  await expect(content).toHaveCSS('background-color','rgb(245, 247, 250)');
  await page.getByRole('tab',{name:/待審查/}).click();
- await page.screenshot({path:test.info().outputPath(`request-tabs-${width}x${height}.png`)});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`request-tabs-${width}x${height}.png`)});
  await page.locator('.system-header-actions .theme-toggle').click();
  await expect(launcher).toHaveCSS('background-color','rgb(8, 102, 232)');
  await expect(content).not.toHaveCSS('background-color','rgb(245, 247, 250)');

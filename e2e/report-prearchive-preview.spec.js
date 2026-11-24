@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 for(const theme of ['light','dark'])test(`supervisor PDF layout preview ${theme} does not generate or archive files`,async({page})=>{
@@ -15,6 +16,6 @@ for(const theme of ['light','dark'])test(`supervisor PDF layout preview ${theme}
  const preview=page.getByRole('region',{name:'PDF 版面預覽',exact:true});await expect(preview).toBeVisible();await expect(preview).toHaveCSS('border-left-width','0px');await expect(preview).toHaveCSS('border-top-width','1px');await expect(preview.locator('.workbook-view').first()).toHaveCSS('border-radius','8px');await expect(preview).toContainText('此處不產生或儲存 PDF，不提供下載');await expect(preview.getByRole('cell',{name:'DEMO-PRODUCT',exact:true})).toBeVisible();await expect(preview.getByRole('cell',{name:'DEMO 測試結果 PASS',exact:true})).toBeVisible();
  await expect(preview.getByRole('button',{name:/下載/})).toHaveCount(0);await expect(page.getByRole('button',{name:'下載結案 PDF（委託單＋報告）',exact:true})).toHaveCount(0);
  expect(await state()).toEqual(before);expect(downloads).toHaveLength(0);
- await preview.screenshot({path:test.info().outputPath(`prearchive-${theme}.png`)});
+ await captureBrowserEvidence(preview,{path:test.info().outputPath(`prearchive-${theme}.png`)});
  await page.getByRole('button',{name:'收合 PDF 預覽',exact:true}).click();await expect(preview).toHaveCount(0);expect(await state()).toEqual(before);expect(await page.pageErrors()).toEqual([]);
 });

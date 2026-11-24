@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import {assertReportFileSize} from './reportFilePolicy.mjs';
 import {markVirtualWorkbook,validateWorkbookPurpose,VIRTUAL_SHEET} from './virtualDocuments.mjs';
 import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
@@ -90,7 +91,7 @@ export async function stampReport(bytes,{sheetName,cells=DEFAULT_SIGNATURE_CELLS
 
 async function createGeneralTemplate(request,demo,{templateBytes,specimenImages}={}){
  const Excel=await excelModule(),book=new Excel.Workbook();
- if(!templateBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}templates/general-performance-v1.xlsx`);if(!response.ok)throw Error('一般性能試驗範本載入失敗，請稍後重試。');templateBytes=await response.arrayBuffer();}
+ if(!templateBytes){templateBytes=await assetBytes(`${import.meta.env?.BASE_URL||'/'}templates/general-performance-v1.xlsx`,{message:'一般性能試驗範本載入失敗，請稍後重試。'});}
  await book.xlsx.load(templateBytes);normalizeReportMerges(book);
  if(!generalProfile(book))throw Error('一般性能試驗範本版本不正確。');
  const sheet=book.getWorksheet(GENERAL_COVER),detail=book.getWorksheet(GENERAL_DETAIL);

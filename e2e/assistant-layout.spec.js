@@ -35,5 +35,6 @@ test('AI scheduling chip is retained, schedule dates are left aligned and button
   for(const name of ['開始日期 *','預計完成日期 *']){const input=editor.getByLabel(name,{exact:true});await input.fill(name.startsWith('開始')?'2099-11-07':'2099-11-08');await expect(input).toHaveCSS('text-align','left');await expect(input).toHaveCSS('direction','ltr');}
   for(const name of ['儲存排程','中止排程']){const button=editor.getByRole('button',{name,exact:true});await expect(button).toHaveCSS('align-items','center');await expect(button).toHaveCSS('justify-content','center');}
  }
- await editor.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).toBeVisible();expect(await page.locator('.schedule-ai-symbol svg').innerHTML()).toBe(chip);await page.getByRole('button',{name:'取消分析'}).click();expect(await page.pageErrors()).toEqual([]);
+ // Valid in-flight scheduling is covered by the native E2 fixture; this case checks layout only.
+ expect(await editor.locator('.schedule-ai-button-icon svg').innerHTML()).toBe(chip);expect(await page.pageErrors()).toEqual([]);
 });

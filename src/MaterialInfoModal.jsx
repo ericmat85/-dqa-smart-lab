@@ -5,7 +5,7 @@ import './MaterialsPage.css';
 
 const tabs=[['overview','基本資料'],['specification','規格與庫存'],['history','操作紀錄']];
 const show=value=>value===undefined || value===null || value===''?'—':value;
-export default function MaterialInfoModal({material,onClose,onEdit,onStatusChange}) {
+export default function MaterialInfoModal({material,onClose,onEdit,onStatusChange,statusActionLabel='狀態變更'}) {
   const [tab,setTab]=useState('overview');
   const ref=useRef(null),close=useRef(null);
   const records=material.records || [];
@@ -27,6 +27,6 @@ export default function MaterialInfoModal({material,onClose,onEdit,onStatusChang
       {tab!=='history' && <><div className="eq-profile-metrics"><div><span>總數量</span><strong>{material.quantity}<small>{material.unit}</small></strong></div><div><span>可用數量</span><strong>{material.available}<small>{material.unit}</small></strong></div><div><span>安全庫存</span><strong>{material.minStock}<small>{material.unit}</small></strong></div></div><section className="eq-profile-section"><h3>{tab==='overview'?'物料基本資料':'庫存資訊'}</h3><dl className="eq-profile-fields">{fields.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{show(value)}</dd></div>)}</dl></section>{tab==='specification' && <section className="eq-profile-section"><h3>規格說明</h3><p className="eq-profile-text">{show(material.specification)}</p></section>}<div className="eq-profile-note"><strong>{tab==='overview'?'使用備註':'庫存提示'}</strong><p>{tab==='overview'?show(material.notes):material.available<material.minStock?'可用數量低於安全庫存，請確認補料需求。':'可用數量未低於安全庫存。'}</p></div></>}
       {tab==='history' && <section className="eq-profile-section"><h3>物料操作紀錄</h3>{material.historyLimited&&<p>此處顯示最近異動，完整紀錄保留於資料庫。</p>}{records.length?<PaginatedList items={records} resetKey={material.id}>{page=><ol className="eq-profile-timeline">{page.map((record,index)=><li key={record.id||index}><div className="eq-profile-record-top"><strong>{record.type}</strong><time>{record.date}</time></div><p className="eq-profile-record-result">{record.result}</p><p>{record.detail}</p><small>操作者：{record.actor}</small></li>)}</ol>}</PaginatedList>:<p>尚無紀錄</p>}</section>}
     </div>
-    <footer className="eq-profile-footer"><span>物料台帳 · {material.id}</span><div><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{onStatusChange&&<button type="button" className="template-btn secondary" onClick={onStatusChange}>狀態變更</button>}{onEdit&&<button type="button" className="template-btn" onClick={onEdit}>編輯物料資料</button>}</div></footer>
+    <footer className="eq-profile-footer"><span>物料台帳 · {material.id}</span><div><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{onStatusChange&&<button type="button" className="template-btn secondary" onClick={onStatusChange}>{statusActionLabel}</button>}{onEdit&&<button type="button" className="template-btn" onClick={onEdit}>編輯物料資料</button>}</div></footer>
   </section></div>;
 }
