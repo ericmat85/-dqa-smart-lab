@@ -1,1 +1,3 @@
 .catalog-category-views .catalog-tab-icon{padding:0;background:transparent;color:inherit;font-size:13px}.catalog-category-summary{flex-wrap:wrap;justify-content:flex-end;gap:7px 12px;max-width:55%}.catalog-category-views>.template-toolbar{margin-bottom:16px}.catalog-category-views>.schedule-view-top{margin-bottom:16px}.catalog-category-views .template-table td{white-space:nowrap}
+
+.catalog-category-views .schedule-person-avatar>svg{display:block;width:20px;height:20px;flex:none}

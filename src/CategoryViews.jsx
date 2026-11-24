@@ -1,3 +1,4 @@
+import ResourceCategoryIcon from './ResourceCategoryIcon.jsx';
 import {PaginatedList} from './Pagination.jsx';
 import {useId,useState} from 'react';
 import './ScheduleViews.css';
@@ -30,7 +31,7 @@ export default function CategoryViews({rows,visibleRows,renderTable,kind,toolbar
         const closed=isClosed(group.name);
         const panel=`${id}-category-${index}`;
         const statuses=[...new Set(group.items.map(row=>row.status))];
-        return <section key={group.name} className="schedule-person-group" style={{'--group-color':categoryColors.get(group.name)}}><button type="button" className="schedule-person-header" aria-expanded={!closed} aria-controls={panel} onClick={()=>setCollapsed(previous=>({...previous,[group.name]:!closed}))}><span className={`schedule-person-chevron ${closed?'closed':''}`} aria-hidden="true">⌄</span><span className="schedule-person-avatar" aria-hidden="true">▧</span><span className="schedule-person-identity"><strong>{group.name}</strong><small>{kind}分類</small></span><span className="schedule-person-count">{group.items.length}／{group.total} 筆</span><span className="schedule-person-summary catalog-category-summary">{statuses.map(status=><span key={status}>{status} {group.items.filter(row=>row.status===status).length}</span>)}</span></button><div id={panel} hidden={closed}>{group.items.length?renderTable(group.items):<div className="schedule-person-empty">目前篩選條件下沒有符合的{kind}</div>}</div></section>;
+        return <section key={group.name} className="schedule-person-group" style={{'--group-color':categoryColors.get(group.name)}}><button type="button" className="schedule-person-header" aria-expanded={!closed} aria-controls={panel} onClick={()=>setCollapsed(previous=>({...previous,[group.name]:!closed}))}><span className={`schedule-person-chevron ${closed?'closed':''}`} aria-hidden="true">⌄</span><span className="schedule-person-avatar" aria-hidden="true"><ResourceCategoryIcon name={group.name} kind={kind}/></span><span className="schedule-person-identity"><strong>{group.name}</strong><small>{kind}分類</small></span><span className="schedule-person-count">{group.items.length}／{group.total} 筆</span><span className="schedule-person-summary catalog-category-summary">{statuses.map(status=><span key={status}>{status} {group.items.filter(row=>row.status===status).length}</span>)}</span></button><div id={panel} hidden={closed}>{group.items.length?renderTable(group.items):<div className="schedule-person-empty">目前篩選條件下沒有符合的{kind}</div>}</div></section>;
       })}</PaginatedList>{!groups.length&&<div className="schedule-view-empty">尚無{kind}分類資料</div>}</div>}
     </div><p className="schedule-view-summary">顯示 {visibleRows.length}／{rows.length} 筆{kind} · {groups.length} 個分類</p>
   </section>;
