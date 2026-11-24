@@ -1,4 +1,6 @@
 import {test,expect} from '@playwright/test';
+// This suite needs the original-business bootstrap; the default suite serves Demo mode.
+test.beforeEach(()=>{test.skip(test.info().config.metadata.financeBusinessMode!==true,'Run with playwright.finance.config.mjs (synthetic business API).');});
 const id=n=>'fa000000-0000-4000-8000-'+String(n).padStart(12,'0');
 async function install(page,{read=true,write=true,lost=false,theme='light'}={}){
  const s={costs:[],vouchers:[],writes:[],calls:[],errors:[],ops:new Map(),lost};page.on('pageerror',e=>s.errors.push(e.message));await page.addInitScript(theme=>{localStorage.setItem('dqa-global-theme',theme);},theme);

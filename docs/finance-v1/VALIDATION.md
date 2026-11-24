@@ -55,3 +55,9 @@ PostgreSQL 測試合計 **251 項通過**。832 項 Node 測試已包含 8 項 f
 - 其他未列出的完整 E2E 套件未全部執行；沒有更改 CI、寄信、付款、會計介接或正式報告。
 
 原始 logs、JSON 結果與截圖：`/workspace/artifacts/finance-v1-20261124/`。本機 PostgreSQL 狀態：`/workspace/work/finance-db-final-20261124/LOCAL_DATABASE.json`（只有本機容器資訊，沒有雲端憑證）。
+
+PR 準備補充：財務瀏覽器案例明確要求專用設定的 financeBusinessMode 標記。預設 Demo E2E 會略過這 7 項，請用 `npx playwright test --config playwright.finance.config.mjs` 驗證。這避免把財務登入模式誤跑成 Demo；未修改 GitHub workflow。
+
+本次 PR 補充驗證：專用財務設定 7/7 通過；預設 Demo 設定 7 項依設計略過。初次平行執行因共用 Playwright 輸出目錄造成 trace 檔案競爭，改用獨立輸出目錄後 7 項全部重跑通過，未變更應用程式行為。
+
+PR 使用既有 `preview/i-render-backend-*` 禁止 Vercel 自動部署規則涵蓋的分支；未變更部署規則或 GitHub workflow。依 Vercel 官方 [Git Configuration](https://vercel.com/docs/project-configuration/git-configuration)，deploymentEnabled 支援分支 minimatch 規則。此規則不是所有外部 webhook 的盤點證明。資料庫仍未接線或執行任何雲端 migration；須先確認獨立資料庫、Auth、Storage 及 API 目的地，不能把 dqa-smart-lab-dev 當作隔離環境。
