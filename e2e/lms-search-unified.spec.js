@@ -1,3 +1,4 @@
+import {resetVisibleListFilters} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -5,8 +6,8 @@ for(const width of [1366,390])for(const theme of ['light','dark'])test(`LMS unif
  await page.setViewportSize({width,height:width===390?844:768});await page.addInitScript(({accounts,theme})=>{if(!localStorage.getItem('search-unified-seeded')){localStorage.setItem('search-unified-seeded','1');localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));localStorage.setItem('dqa-global-theme',theme);localStorage.setItem('dqa-completed-flow-provisioned-v1',JSON.stringify({created:false}));}sessionStorage.setItem('dqa-lms-account-id','U001');},{accounts:INITIAL_ACCOUNTS,theme});
  let icon;
  for(const path of ['equipment','maintenance','requests','schedule','archive','accounts','requests/history','schedule/history']){
-  await page.goto(`/lms/${path}`);const toolbar=page.locator('.catalog-search-toolbar').filter({visible:true}).first(),input=toolbar.getByRole('searchbox');await expect(input).toBeVisible();await expect(input).toHaveCSS('height','36px');await expect(input).toHaveCSS('font-size','12px');const svg=await toolbar.locator('.schedule-search-wrap svg').evaluate(el=>el.outerHTML);if(icon)expect(svg).toBe(icon);else icon=svg;
-  await input.fill('SEARCH-NO-MATCH-TEST');await expect(input).toHaveValue('SEARCH-NO-MATCH-TEST');await toolbar.getByRole('button',{name:'清除篩選',exact:true}).click();await expect(input).toHaveValue('');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.goto(`/lms/${path}`);const toolbar=page.locator('.catalog-search-toolbar').filter({visible:true}).first(),input=toolbar.getByRole('searchbox');await expect(input).toBeVisible();await expect(input).toHaveCSS('height',await input.evaluate(e=>e.closest('.workspace-tab-toolbar')?'32px':'36px'));await expect(input).toHaveCSS('font-size','12px');const svg=await toolbar.locator('.schedule-search-wrap svg').evaluate(el=>el.outerHTML);if(icon)expect(svg).toBe(icon);else icon=svg;
+  await input.fill('SEARCH-NO-MATCH-TEST');await expect(input).toHaveValue('SEARCH-NO-MATCH-TEST');await resetVisibleListFilters(page);await expect(input).toHaveValue('');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   if(['requests','archive','accounts','requests/history'].includes(path))await captureBrowserEvidence(page,{animations:'disabled',path:test.info().outputPath(`search-${path.replace('/','-')}-${width}-${theme}.png`)});
  }
  await page.goto('/lms/reports');await expect(page.locator('.lab-report-category-description')).toHaveCount(0);await expect(page.locator('.lab-report-controls .schedule-search-wrap')).toHaveCount(0);await expect(page.getByRole('searchbox',{name:'搜尋報表',exact:true})).toBeVisible();await captureBrowserEvidence(page,{animations:'disabled',path:test.info().outputPath(`reports-clean-${width}-${theme}.png`)});

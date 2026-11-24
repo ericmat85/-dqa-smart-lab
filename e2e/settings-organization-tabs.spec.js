@@ -1,3 +1,4 @@
+import {resetVisibleListFilters} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -39,7 +40,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  const equipment=p.getByRole('tabpanel',{name:'設備可用空間與規格',exact:true});await expect(equipment).toBeVisible();await expect(equipment.getByRole('columnheader',{name:'可用空間 U',exact:true})).toBeVisible();await expect(equipment.locator('tbody tr')).toHaveCount(20);
  await equipmentTab.press('ArrowRight');await expect(p.getByRole('tabpanel',{name:'既有排程空間與保留時間'})).toBeVisible();
  await tabs.getByRole('tab',{name:'既有排程空間與保留時間'}).press('Home');await expect(search).toHaveValue('高溫高濕');await expect(search).toBeVisible();
- await trials.getByRole('button',{name:width<=900?'清除搜尋與篩選':'清除篩選',exact:true}).click();await expect(cards).toHaveCount(20);
+ await resetVisibleListFilters(page);await expect(cards).toHaveCount(20);
  expect(await business(page)).toEqual(before);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  expect(calls).toEqual([]);expect(await page.pageErrors()).toEqual([]);
 });

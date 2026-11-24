@@ -1,3 +1,4 @@
+import {resetVisibleListFilters} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -12,7 +13,7 @@ for(const width of [1920,1366,390])for(const theme of ['light','dark'])test(`inv
   const cards=page.locator('.equipment-counts>.summary-tile');await expect(cards).toHaveCount(count);const paths=await cards.locator('svg path').evaluateAll(es=>es.map(e=>e.getAttribute('d')));expect(new Set(paths).size).toBe(count);
   for(const card of await cards.all()){const icon=card.locator('.workspace-summary-icon'),svg=icon.locator('svg');await expect(svg).toHaveCSS('width','20px');await expect(svg).toHaveCSS('height','20px');await expect(svg).toHaveAttribute('stroke','currentColor');const colors=await icon.evaluate(el=>({fg:getComputedStyle(el).color,bg:getComputedStyle(el).backgroundColor}));expect(contrast(colors.fg,colors.bg)).toBeGreaterThanOrEqual(3);await expect(card.locator('.workspace-shortcut-arrow,.rq-kpi-arrow')).toHaveCount(0);}
   await page.mouse.move(0,0);await captureBrowserEvidence(page,{path:test.info().outputPath(`${kind}-icons-${width}-${theme}.png`)});
-  if(width===390){await page.getByRole('searchbox').first().focus();await page.getByRole('button',{name:'清除搜尋與篩選',exact:true}).click();}else await page.getByRole('button',{name:'清除篩選',exact:true}).click();for(const card of await cards.all()){const expected=Number(await card.locator(':scope>strong').innerText());await card.click();await expect(card).toHaveAttribute('aria-pressed','true');await expect(page.locator('.catalog-category-views .template-table tbody tr')).toHaveCount(Math.min(expected,20));await card.click();await expect(card).toHaveAttribute('aria-pressed','false');await expect(page.locator('.catalog-category-views .template-table tbody tr')).toHaveCount(20);}
+  if(width===390){await page.getByRole('searchbox').first().focus();await page.getByRole('button',{name:'清除搜尋與篩選',exact:true}).click();}else await resetVisibleListFilters(page);for(const card of await cards.all()){const expected=Number(await card.locator(':scope>strong').innerText());await card.click();await expect(card).toHaveAttribute('aria-pressed','true');await expect(page.locator('.catalog-category-views .template-table tbody tr')).toHaveCount(Math.min(expected,20));await card.click();await expect(card).toHaveAttribute('aria-pressed','false');await expect(page.locator('.catalog-category-views .template-table tbody tr')).toHaveCount(20);}
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
  expect(await data()).toEqual(before);expect(await page.pageErrors()).toEqual([]);

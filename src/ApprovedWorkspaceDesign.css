@@ -119,7 +119,7 @@ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-t
  flex-basis:34px;width:34px;min-height:32px;background:transparent;border:0;color:var(--workspace-search-text)
 }
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-toolbar .catalog-search-icon svg{color:var(--workspace-search-text)!important}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap input{
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-toolbar .schedule-search-wrap input{
  height:32px!important;min-height:32px!important;padding:5px 10px 5px 0!important;background:transparent!important;color:var(--workspace-search-text)!important;caret-color:var(--workspace-search-text)
 }
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap input::placeholder{color:var(--workspace-search-placeholder)!important;opacity:1}

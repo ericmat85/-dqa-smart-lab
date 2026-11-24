@@ -1,3 +1,4 @@
+import {resetVisibleListFilters} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {fillVirtualRequest} from './requestDemoCommand.mjs';
 import {getRequestDate} from '../src/requestDate.mjs';
@@ -20,8 +21,8 @@ test('standalone editor guards unsaved changes, preserves custom references and 
 });
 test('URL filters, pagination and dashboard collections agree; roles reject direct supervisor URLs',async({page})=>{
  await login(page);const card=page.locator('.rq-kpis>button').filter({hasText:'待補件'});expect(Number(await card.locator('strong').innerText())).toBe(rows.filter(r=>['退件','補件中'].includes(r.status)).length);await card.click();await expect(page).toHaveURL(/collection=returned/);await expect(page.locator('.rq-result-count')).toContainText(`${rows.filter(r=>['退件','補件中'].includes(r.status)).length} 筆`);
- await page.locator('.rq-filter-disclosure>summary').click();await page.getByRole('button',{name:'清除篩選',exact:true}).first().click();await page.getByRole('button',{name:'下一頁',exact:true}).click();await expect(page).toHaveURL(/p=2/);await page.reload();await expect(page.getByRole('button',{name:'第 2 頁',exact:true})).toHaveAttribute('aria-current','page');
- await page.locator('.rq-filter-disclosure>summary').click();await page.getByLabel('搜尋',{exact:true}).fill('NOT-FOUND');await expect(page.locator('.rq-empty')).toContainText('沒有符合搜尋');await expect(page).not.toHaveURL(/p=2/);await page.getByRole('button',{name:'清除篩選',exact:true}).first().click();await page.getByLabel('排序',{exact:true}).selectOption('id-desc');await page.getByLabel('需求日期自（YYYY-MM-DD）').fill('2099-01-01');await page.getByLabel('需求日期至（YYYY-MM-DD）').fill('2099-12-31');await page.reload();await expect(page.getByLabel('排序',{exact:true})).toHaveValue('id-desc');await expect(page.locator('.rq-table tbody')).not.toContainText('2020/01/01');
+ await page.locator('.rq-filter-disclosure>summary').click();await resetVisibleListFilters(page);await page.getByRole('button',{name:'下一頁',exact:true}).click();await expect(page).toHaveURL(/p=2/);await page.reload();await expect(page.getByRole('button',{name:'第 2 頁',exact:true})).toHaveAttribute('aria-current','page');
+ await page.locator('.rq-filter-disclosure>summary').click();await page.getByLabel('搜尋',{exact:true}).fill('NOT-FOUND');await expect(page.locator('.rq-empty')).toContainText('沒有符合搜尋');await expect(page).not.toHaveURL(/p=2/);await resetVisibleListFilters(page);await page.getByLabel('排序',{exact:true}).selectOption('id-desc');await page.getByLabel('需求日期自（YYYY-MM-DD）').fill('2099-01-01');await page.getByLabel('需求日期至（YYYY-MM-DD）').fill('2099-12-31');await page.reload();await expect(page.getByLabel('排序',{exact:true})).toHaveValue('id-desc');await expect(page.locator('.rq-table tbody')).not.toContainText('2020/01/01');
  await page.goto('/request/reviews');await expect(page.getByRole('alert')).toContainText('沒有此頁');await page.goto('/request/edit/UX-001');await expect(page.getByRole('alert')).toContainText('不可編輯');
 });
 test('supervisor can reject then approve a case and time is displayed in Taipei',async({page})=>{
