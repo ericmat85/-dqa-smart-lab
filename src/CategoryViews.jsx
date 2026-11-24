@@ -24,7 +24,7 @@ export default function CategoryViews({rows,visibleRows,renderTable,kind,toolbar
     if(next){event.preventDefault();setView(next);document.getElementById(`${id}-tab-${next}`)?.focus();}
   };
   return <section className="schedule-views catalog-category-views" aria-label={`${kind}分類檢視`}>
-    <div className="schedule-view-top workspace-tab-toolbar"><div className="schedule-view-tabs" role="tablist" aria-label={`${kind}檢視方式`}>{[['all',`全部${kind}`,rows.length],['category','依分類',groups.length]].map(([key,label,count],index)=><button type="button" key={key} id={`${id}-tab-${key}`} role="tab" aria-selected={view===key} aria-controls={`${id}-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>changeTab(event,index)}><strong>{label}</strong><span>{count}</span></button>)}</div>{toolbar}</div>
+    <div className="schedule-view-top workspace-tab-toolbar"><div className="schedule-view-tabs workspace-primary-tabs" role="tablist" aria-label={`${kind}檢視方式`}>{[['all',`全部${kind}`,rows.length],['category','依分類',groups.length]].map(([key,label,count],index)=><button type="button" key={key} id={`${id}-tab-${key}`} role="tab" aria-selected={view===key} aria-controls={`${id}-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>changeTab(event,index)}><strong>{label}</strong><span>{count}</span></button>)}</div>{toolbar}</div>
     <div role="tabpanel" id={`${id}-panel-${view}`} aria-labelledby={`${id}-tab-${view}`} tabIndex={0}>
       {view==='all'?renderTable(visibleRows):<div className="schedule-people-board"><PaginatedList items={groups} resetKey={filterKey}>{(pageGroups,offset)=>pageGroups.map((group,pageIndex)=>{const index=offset+pageIndex;
         const closed=isClosed(group.name);
