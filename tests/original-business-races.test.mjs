@@ -19,3 +19,9 @@ test('a background snapshot started before a saved draft cannot overwrite its ac
  businessClient.request=async(path)=>{if(path==='/me')return structuredClone(identity);if(path==='/snapshot'){snapshotStarted();return pending.promise;}return {data:{...row,revision:2,product_code:'ACKNOWLEDGED'}};};
  try{const background=refreshOriginalBusiness();await entered;await saveOriginalDraft({id:row.id,existingId:row.legacy_id,form:{productCode:'ACKNOWLEDGED',purpose:['合成'],testItems:[],quantity:'1'}});pending.resolve({data:structuredClone(snapshot)});await background;const saved=JSON.parse(appStorage().getItem('dqa-request-demo-v2')).find(r=>r.id===row.legacy_id);assert.equal(saved.sourceRevision,2);assert.equal(saved.productCode,'ACKNOWLEDGED');}finally{businessClient.request=original;clearOriginalIdentity();}
 });
+
+test('routine sync reads are background-only while explicit refreshes remain foreground',async()=>{
+ const original=businessClient.request,calls=[];
+ businessClient.request=async(path,options)=>{calls.push({path,options});return path==='/me'?structuredClone(identity):{data:structuredClone(snapshot)};};
+ try{configureOriginalBusiness({identity:structuredClone(identity),snapshot,storage});await refreshOriginalBusiness({background:true});assert.deepEqual(calls.map(c=>c.options.background),[true,true]);calls.length=0;await refreshOriginalBusiness();assert.deepEqual(calls.map(c=>c.options.background),[false,false]);}finally{businessClient.request=original;clearOriginalIdentity();}
+});

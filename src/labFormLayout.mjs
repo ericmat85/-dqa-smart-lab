@@ -1,13 +1,14 @@
+import {assetBytes} from './assetBytes.mjs';
 // PDF-reference layout. Template signatures and measured results start empty.
 import {getTestReference} from './trialCatalogData.mjs';
 export const LAB_FORM_VERSION='lab-reference-20261116-v1';
 export const LAB_SIGNATURE_CELLS=Object.freeze({level3:'C55',level2:'F55',executor:'I55'});
 export const LAB_REPORT_SHEETS=['報告首頁','試驗過程','結果與照片'];
 const ink='FF172B42',line='FF617180',tint='FFEAF5F6';
-export async function formAssets(fetchImpl=globalThis.fetch,{photos=true}={}){
+export async function formAssets(fetchImpl=globalThis.fetch,{photos=true,timeoutMs=60000}={}){
  const base=import.meta.env?.BASE_URL||'/';
  const paths={logo:'branding/colong-ie-transparent.png',footer:'branding/colong-intellienergy-logo.jpg',sample:'demo-report-images/synthetic-sample.png',placement:'demo-report-images/synthetic-placement.png'};
- const entries=await Promise.all(Object.entries(paths).filter(([key])=>photos||key==='logo'||key==='footer').map(async([key,path])=>{const r=await fetchImpl(base+path);if(!r.ok)throw Error('範本圖片載入失敗，請稍後再試。');return [key,new Uint8Array(await r.arrayBuffer())];}));return Object.fromEntries(entries);
+ const entries=await Promise.all(Object.entries(paths).filter(([key])=>photos||key==='logo'||key==='footer').map(async([key,path])=>{return [key,new Uint8Array(await assetBytes(base+path,{fetchImpl,timeoutMs,message:'範本圖片載入失敗，請稍後再試。'}))];}));return Object.fromEntries(entries);
 }
 function area(s,range,value='',{fill=false,bold=false,size=9,center=false}={}){
  s.mergeCells(range);const c=s.getCell(range.split(':')[0]);c.value=String(value??'');c.font={name:'Microsoft JhengHei',size,bold,color:{argb:ink}};c.alignment={vertical:'middle',horizontal:center?'center':'left',wrapText:true};

@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 const systems={lms:{sidebar:'.sidebar',header:'.dashboard-topbar'},request:{sidebar:'.rq-sidebar',header:'.rq-topbar'},lab:{sidebar:'.lab-sidebar',header:'.lab-global-header'}};
@@ -9,7 +10,7 @@ for(const theme of ['light','dark'])for(const [system,selectors] of Object.entri
  const sidebar=page.locator(selectors.sidebar);await expect(sidebar).toBeVisible();const box=await sidebar.boundingBox();expect(box.x).toBe(0);expect(box.y).toBe(0);expect(box.width).toBe(232);expect(box.height).toBe(900);
  const logo=sidebar.locator('.company-brand-logo');await expect(logo).toBeVisible();expect((await logo.boundingBox()).width).toBe(170);await expect(page.locator(selectors.header).locator('.company-brand-logo')).toBeHidden();expect((await page.locator(selectors.header).boundingBox()).x).toBe(232);
  const home=sidebar.getByRole('button',{name:'回到首頁',exact:true});await expect(home).toBeVisible();await expect(home.locator('svg')).toHaveCount(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(await page.pageErrors()).toEqual([]);
- await page.screenshot({path:test.info().outputPath(`sidebar-${system}-${theme}.png`),fullPage:true});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`sidebar-${system}-${theme}.png`),fullPage:true});
  await home.click();await expect(page).toHaveURL(/\/$/);
 });
 for(const system of ['request','lab'])test(`${system} mobile sidebar keeps navigation accessible`,async({page})=>{

@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import {markVirtualPdf,virtualWorkbookId,VIRTUAL_SHEET} from './virtualDocuments.mjs';
 import {labTemplateProfile,LAB_FORM_VERSION,LAB_REPORT_SHEETS} from './labFormLayout.mjs';
 import {drawLabForms} from './labFormPdf.mjs';
@@ -10,7 +11,7 @@ import {excelModule} from './reportWorkbook.mjs';
 const clean=value=>Array.from(String(value??'')).filter(char=>char.charCodeAt(0)>=32||char==='\n'||char==='\t').join('');
 export async function reportToPdf(bytes,{fontBytes,requestId='',templatePreview=false,fontSubset=false}={}){
  const [{PDFDocument,rgb,StandardFonts},kit,Excel]=await Promise.all([import('pdf-lib'),import('@pdf-lib/fontkit'),excelModule()]);
- if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('PDF 中文字型載入失敗，尚未封存。');fontBytes=await response.arrayBuffer();}
+ if(!fontBytes){fontBytes=await assetBytes(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`,{message:'PDF 中文字型載入失敗，尚未封存。'});}
  const document=await PDFDocument.create();document.registerFontkit(kit.default);const font=await document.embedFont(fontBytes,{subset:fontSubset}),latin=await document.embedFont(StandardFonts.Helvetica),textLayout=pdfTextLayout(font,latin);const book=new Excel.Workbook();await book.xlsx.load(bytes);normalizeReportMerges(book);applyReportPresentation(book);
  const virtualId=virtualWorkbookId(book);async function finish(){if(virtualId)await markVirtualPdf(document,{executionKind:'VIRTUAL',id:virtualId});return new Uint8Array(await document.save());}
  const lab=labTemplateProfile(book),requestForm=book.getWorksheet('委託單');

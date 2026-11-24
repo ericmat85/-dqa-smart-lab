@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {testOptions,buildSpecification} from '../src/requestTestCatalog.mjs';
@@ -26,7 +27,7 @@ for(const [theme,width,height] of [['light',1600,1000],['dark',1366,900],['light
  await open();await picker.getByRole('radio',{name:'振動試驗',exact:true}).check();await expect(reference).toContainText('20 小時');await expect(reference).toContainText('週末不作業');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const box=await picker.boundingBox();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(width+1);await expect(picker.getByRole('button',{name:'確認選擇',exact:true})).toBeVisible();
- await page.screenshot({path:test.info().outputPath(`catalog-reference-${theme}-${width}.png`)});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`catalog-reference-${theme}-${width}.png`)});
  page.once('dialog',dialog=>dialog.accept());await picker.getByRole('button',{name:'確認選擇',exact:true}).click();await expect(specification).toHaveValue(buildSpecification(['振動試驗']));
  await page.getByPlaceholder('例如：VCU-2026-A01').fill('CATALOG-SYNTHETIC');await page.getByRole('button',{name:'儲存草稿',exact:true}).click();
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.productCode==='CATALOG-SYNTHETIC'));

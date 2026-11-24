@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from './demoEquipment.mjs';
 import {DEMO_MATERIALS} from './demoMaterials.mjs';
@@ -45,7 +46,7 @@ export async function buildNineStageSeed({signature,now=Date.now(),fontBytes,onP
  const equipment=read(storage,'dqa-equipment-demo-v1',DEMO_EQUIPMENT);for(const machine of fixtures){const old=equipment.find(r=>r.id===machine.id);if(old&&!old.demoSeed)throw Error('Demo設備編號衝突，未清除資料。');}
  write(storage,'dqa-equipment-demo-v1',[...equipment.filter(r=>!fixtures.some(m=>m.id===r.id)),...fixtures]);
  if(!storage.getItem('dqa-materials-demo-v1'))write(storage,'dqa-materials-demo-v1',DEMO_MATERIALS);
- if(!fontBytes){const response=await fetch(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`);if(!response.ok)throw Error('Demo PDF字型載入失敗，未清除原案件。');fontBytes=await response.arrayBuffer();}
+ if(!fontBytes){fontBytes=await assetBytes(`${import.meta.env?.BASE_URL||'/'}fonts/NotoSansCJKtc-Regular.otf`,{message:'Demo PDF字型載入失敗，未清除原案件。'});}
  const records=new Map(),repository={get:async id=>records.get(id)||null,list:async()=>[...records.values()].map(reportMetadata),save:async(report,revision)=>{if((records.get(report.requestId)?.revision??null)!==revision)throw Error('Demo報告版本衝突');records.set(report.requestId,report);}};
  const account=id=>accounts.find(r=>r.id===id);
  for(let index=1;index<=18;index++){

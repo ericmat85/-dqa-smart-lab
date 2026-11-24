@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -41,12 +42,12 @@ for(const [width,height] of [[1366,768],[1440,900],[1920,1080],[1280,640],[960,5
   }
   await checkTable();
   await page.evaluate(()=>window.scrollTo(0,0));
-  await page.screenshot({path:test.info().outputPath(`schedule-default-${width}x${height}.png`),fullPage:false});
+  await captureBrowserEvidence(page,{path:test.info().outputPath(`schedule-default-${width}x${height}.png`),fullPage:false});
   await page.getByRole('tab',{name:/依執行人員/}).click();await page.locator('.schedule-person-header').first().click();await checkTable();
   await page.getByRole('searchbox',{name:'搜尋排程'}).fill('not-found');await expect(page.getByText('目前篩選條件下沒有排程').first()).toBeVisible();
   await page.getByRole('searchbox',{name:'搜尋排程'}).fill('');
   await page.getByRole('button',{name:'切換側邊欄'}).click();await checkTable();
-  await page.screenshot({path:test.info().outputPath(`schedule-${width}x${height}.png`),fullPage:false});
+  await captureBrowserEvidence(page,{path:test.info().outputPath(`schedule-${width}x${height}.png`),fullPage:false});
   expect(await page.pageErrors()).toEqual([]);
  });
 }

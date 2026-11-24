@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {advanceDemo,expectDemoDisabled,openDemoAccelerator} from './assistantAccelerator.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -20,10 +21,10 @@ test('new synthetic request without litres saves with U and accelerates after re
  const row=page.locator('tbody tr').filter({hasText:ID});await row.getByRole('button',{name:'編輯排程',exact:true}).click();const dialog=page.getByRole('dialog',{name:new RegExp('編輯試驗排程.*'+ID)});
  await dialog.getByLabel('設備選擇',{exact:true}).selectOption('EQ-001');await dialog.getByLabel('執行人',{exact:false}).selectOption(engineer.id);await dialog.getByLabel('每件樣品使用空間 U *',{exact:true}).fill('1');await dialog.getByLabel('開始日期',{exact:false}).fill(date(2));await dialog.getByLabel('預計完成日期',{exact:false}).fill(date(6));
  await expect(dialog.getByText('6 U',{exact:true})).toBeVisible();await expect(dialog.locator('input[aria-label*="體積"]')).toHaveCount(0);
- await page.screenshot({path:test.info().outputPath('manual-u-filled-without-litres.png')});await dialog.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(dialog).not.toBeVisible();
+ await captureBrowserEvidence(page,{path:test.info().outputPath('manual-u-filled-without-litres.png')});await dialog.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(dialog).not.toBeVisible();
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).find(x=>x.requestId===id),ID);expect(Number(saved.sampleSpaceUnits)).toBe(1);expect(saved.sampleVolumeLitres).toBe('');expect(saved.capacityValidation).toEqual({basis:'DEMO_SPACE_UNITS_ONLY',physicalFeasibility:'NOT_ASSESSED'});expect(saved.allocations).toEqual([{equipmentId:'EQ-001',quantity:5}]);
  const sources=await page.evaluate(()=>localStorage.getItem('dqa-request-demo-v2'));expect(JSON.parse(sources)[0].sampleVolumeLitres).toBeUndefined();
  await page.goto('/lab/dashboard');const labRow=page.locator('.lab-table-wrap tbody tr').filter({hasText:ID});await expectDemoDisabled(page);await labRow.getByRole('button',{name:'確認接收',exact:true}).click();await page.getByRole('button',{name:'確認送出',exact:true}).click();await page.getByRole('button',{name:'關閉',exact:true}).click();
  {const control=await openDemoAccelerator(page);await expect(control.locator('[data-flow-test-action]')).toBeEnabled();await control.getByRole('button',{name:'關閉',exact:true}).click();};await advanceDemo(page);await expect(labRow.getByRole('progressbar',{name:'試驗日程',exact:true})).toHaveAttribute('aria-valuenow','50');await advanceDemo(page);await expect(labRow.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();await expectDemoDisabled(page);
- expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).map(x=>x.id))).toEqual([ID]);expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).length)).toBe(1);expect(aiCalls).toBe(0);expect(await page.pageErrors()).toEqual([]);await page.screenshot({path:test.info().outputPath('manual-u-received-and-completed.png')});
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).map(x=>x.id))).toEqual([ID]);expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).length)).toBe(1);expect(aiCalls).toBe(0);expect(await page.pageErrors()).toEqual([]);await captureBrowserEvidence(page,{path:test.info().outputPath('manual-u-received-and-completed.png')});
 });

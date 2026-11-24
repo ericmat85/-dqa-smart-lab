@@ -30,7 +30,7 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
     <div className="schedule-view-top"><div className="schedule-view-tabs" role="tablist" aria-label="排程檢視方式">{tabs.map(([key,label,count],index)=><button type="button" key={key} role="tab" id={`schedule-view-tab-${key}`} aria-selected={view===key} aria-controls={`schedule-view-panel-${key}`} tabIndex={view===key?0:-1} onClick={()=>setView(key)} onKeyDown={event=>chooseTab(event,index)}>{key==='all'?'▤':key==='people'?'◉':'▦'}<strong>{label}</strong><span>{count}</span></button>)}</div></div>
     <CatalogSearchToolbar kind="排程" value={search} onChange={onSearch} onClear={onClear||(()=>onSearch(''))}/>
     <div role="tabpanel" id={`schedule-view-panel-${view}`} aria-labelledby={`schedule-view-tab-${view}`} tabIndex={0}>
-      {view==='all'?<ScheduleTable canEdit={canEdit} resetKey={`${status}:${search}`} rows={visible} onRequest={onRequest} onEdit={onEdit}/>:view==='equipment'?<EquipmentScheduleBoard groups={deviceGroups} now={now} status={status} search={search} onRequest={onRequest} onEdit={onEdit}/>:<div className="schedule-people-board"><PaginatedList items={groups} resetKey={`${status}:${search}`}>{(pageGroups,offset)=>pageGroups.map((group,pageIndex)=>{const index=offset+pageIndex;
+      {view==='all'?<ScheduleTable canEdit={canEdit} resetKey={`${status}:${search}`} rows={visible} onRequest={onRequest} onEdit={onEdit}/>:view==='equipment'?<EquipmentScheduleBoard canEdit={canEdit} groups={deviceGroups} now={now} status={status} search={search} onRequest={onRequest} onEdit={onEdit}/>:<div className="schedule-people-board"><PaginatedList items={groups} resetKey={`${status}:${search}`}>{(pageGroups,offset)=>pageGroups.map((group,pageIndex)=>{const index=offset+pageIndex;
         const matchingName=search.trim()&&group.name.toLowerCase().includes(search.trim().toLowerCase());
         const items=filterScheduleRows(group.rows,status,matchingName?'':search);
         const closed=collapsed[group.key] ?? true;
@@ -41,7 +41,7 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
   </section>;
 }
 
-function EquipmentScheduleBoard({groups,now,status,search,onRequest,onEdit}){
+function EquipmentScheduleBoard({groups,now,status,search,onRequest,onEdit,canEdit=true}){
  const [collapsed,setCollapsed]=useState({});
  const query=search.trim().toLowerCase();
  const visible=groups.map(group=>({...group,items:filterScheduleRows(group.rows,status,`${group.name} ${group.key}`.toLowerCase().includes(query)?'':search)})).filter(group=>group.items.length||!query&&status==='全部');

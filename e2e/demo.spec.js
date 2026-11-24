@@ -1,13 +1,15 @@
+import {installMockE2Transport} from './mockE2Transport.mjs';
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {fillVirtualRequest} from './requestDemoCommand.mjs';
 import {advanceDemo,expectDemoDisabled} from './assistantAccelerator.mjs';
 import {seedAcceptedTrial} from './acceptedTrialFixture.mjs';
-import {installMockE4Transport} from './mockE4Transport.mjs';
 import {showAllSchedules} from './scheduleFilters.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
 const signature='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==';
 test.beforeEach(async({page})=>{
+ await installMockE2Transport(page);
  await page.addInitScript(({accounts,equipment,signature})=>{
   if(localStorage.getItem('e2e-seeded'))return;
   localStorage.setItem('e2e-seeded','yes');
@@ -66,16 +68,16 @@ test('LMS rejects wrong credentials, retains login on reload, switches pages and
  await page.getByRole('button',{name:'個人帳號選單'}).click();await page.getByRole('button',{name:/登出系統/}).click();await expect(page).toHaveURL(/\/lms\/login$/);
  await page.goto('/lms/dashboard');await expect(page).toHaveURL(/\/lms\/login$/);
 });
-test('requester creates, edits, deletes a draft then submits a new request',async({page})=>{
+test('requester creates and edits a draft then submits a separate request',async({page})=>{
  await requestLogin(page);await demoRequest(page);await page.getByRole('button',{name:'儲存草稿',exact:true}).click();
  await expect(page.locator('.rq-table tbody tr').filter({hasText:'MVP-DEMO-001'})).toHaveCount(1);
  await page.getByRole('button',{name:'編輯草稿',exact:true}).click();await page.getByLabel('產品代碼',{exact:false}).fill('MVP-EDITED');await page.getByRole('button',{name:'儲存草稿',exact:true}).click();
  await expect(page.locator('.rq-table')).toContainText('MVP-EDITED');
- await page.getByRole('button',{name:'刪除',exact:true}).click();await page.getByRole('button',{name:/確認刪除/}).click();
- await expect(page.locator('.rq-table')).not.toContainText('MVP-EDITED');
+ // Request-data maintenance is now centralized in System Management.
+ await expect(page.getByRole('button',{name:'刪除',exact:true})).toHaveCount(0);await expect(page.locator('.rq-table')).toContainText('MVP-EDITED');
  await demoRequest(page);await page.getByRole('button',{name:'送出主管簽核 →',exact:true}).click();
  await expect(page.locator('.rq-table')).toContainText('待簽核');await page.reload();await expect(page.locator('.rq-table')).toContainText('MVP-DEMO-001');
- expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].status)).toBe('待主管簽核');
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.productCode==='MVP-DEMO-001').status)).toBe('待主管簽核');
 });
 test('new request passes designated manager and two LMS reviews, then schedules and lab receives it',async({page})=>{
  await requestLogin(page);await demoRequest(page);await page.getByRole('button',{name:'送出主管簽核 →',exact:true}).click();
@@ -86,7 +88,7 @@ test('new request passes designated manager and two LMS reviews, then schedules 
  }
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].status)).toBe('待排程');
  await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
- await page.getByLabel('每件樣品使用空間 L *',{exact:true}).fill('1');await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});
+ await page.getByLabel('每件樣品使用空間 U *',{exact:true}).fill('1');await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});
  await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();await page.getByRole('button',{name:'確認接收',exact:true}).click();await page.getByRole('button',{name:'確認送出',exact:true}).click();
@@ -116,41 +118,42 @@ test('schedule UI requires sample space and shows a compact status above the edi
  await page.evaluate(()=>{
   localStorage.setItem('dqa-request-demo-v2',JSON.stringify([{id:'MVP-CONDITIONS',productCode:'CONDITIONS',testItems:['低溫試驗'],quantity:2,status:'待排程',lmsReview:{approval:2}}]));
   localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify([
-   {id:'SMALL',name:'環境試驗箱 小',status:'待機中',capacity:1,usableVolumeLitres:100,specification:'-70～180°C'},
-   {id:'FIT',name:'環境試驗箱 大',status:'待機中',capacity:10,usableVolumeLitres:100,specification:'-20～150°C'},
+   {id:'SMALL',name:'環境試驗箱 小',status:'待機中',capacity:1,spaceUnits:1,usableVolumeLitres:100,specification:'-70～180°C'},
+   {id:'FIT',name:'環境試驗箱 大',status:'待機中',capacity:10,spaceUnits:100,usableVolumeLitres:100,specification:'-20～150°C'},
    {id:'OVEN',name:'高溫爐',status:'待機中',capacity:10,usableVolumeLitres:100,specification:'室溫＋10～250°C'},
   ]));
  });
  await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
  await expect(page.getByRole('option',{name:/OVEN/})).toHaveAttribute('disabled','');
  await page.getByLabel('設備選擇').selectOption('SMALL');await page.getByLabel('執行人 *').selectOption('U003');
- await page.getByLabel('開始日期 *').fill('2099-11-07');await page.getByLabel('預計完成日期 *').fill('2099-11-08');
+ await page.getByLabel('開始日期 *').fill('2099-11-07');await page.getByLabel('預計完成日期 *').fill('2099-11-09');
  const editor=page.getByRole('dialog',{name:/編輯試驗排程/});
- const volume=editor.getByLabel('每件樣品使用空間 L *',{exact:true});await expect(volume).toHaveAttribute('required','');await expect(volume).toHaveAttribute('aria-required','true');
+ const volume=editor.getByLabel('每件樣品使用空間 U *',{exact:true});await expect(volume).toHaveAttribute('required','');await expect(volume).toHaveAttribute('aria-required','true');
  await expect(editor.getByLabel(/最低溫度|最高溫度|最低濕度|最高濕度/)).toHaveCount(0);
  await expect(editor.locator('header .schedule-edit-status')).toHaveText('未排程');await expect(editor.locator('header .schedule-edit-status svg')).toHaveCount(1);await expect(editor.locator('#trial-pause-hint')).toHaveCount(0);
- await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('請填寫每件樣品使用空間（L），此欄位為必填。')).toBeVisible();
- await volume.fill('1');await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('樣品數量超過設備容量（1 件）。')).toBeVisible();
- await page.getByLabel('設備選擇').selectOption('FIT');await volume.fill('0');await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('每件樣品使用空間須為正數（L）。')).toBeVisible();
+ await volume.fill('');await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('每件樣品使用空間須為正整數（U）。')).toBeVisible();
+ await volume.fill('1');await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('樣品占用空間超過設備可用空間（1 U）。')).toBeVisible();
+ await page.getByLabel('設備選擇').selectOption('FIT');await volume.fill('0');await page.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor.getByText('每件樣品使用空間須為正整數（U）。')).toBeVisible();
  await volume.fill('1');await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
  await page.getByRole('button',{name:'編輯排程',exact:true}).click();await expect(page.locator('.schedule-edit-modal header .schedule-edit-status')).toHaveText('已排程');
 });
 
 test('assistant reveals characters progressively and retains completed answers',async({page})=>{
- await installMockE4Transport(page);await lmsLogin(page,'level1@example.com');await page.getByRole('button',{name:'展開AI智能助理'}).click();
+ await lmsLogin(page,'level1@example.com');await page.getByRole('button',{name:'展開AI智能助理'}).click();
  await page.getByRole('textbox',{name:'輸入問題'}).fill('如何安排新的試驗日程？');await page.getByRole('button',{name:'送出問題'}).click();
  const reply=page.locator('.intelligent-reply');await expect(reply).toHaveAttribute('aria-busy','true');
  await expect.poll(async()=>{const text=await reply.textContent();return text.includes('前往')&&!text.includes('儲存排程');}).toBe(true);
  await expect(reply).toHaveAttribute('aria-busy','false',{timeout:12000});await expect(reply).toContainText('儲存排程');
- await expect(reply).toContainText('MOCK測試');await expect(reply).not.toContainText('人工最終決策');
+ await expect(reply).toContainText('常見問題解答');await expect(reply).not.toContainText('人工最終決策');
  await page.getByRole('button',{name:'收合AI智能助理'}).last().click();await page.getByRole('button',{name:'展開AI智能助理'}).click();await expect(reply).toContainText('儲存排程');
 });
 
 test.afterEach(async({page})=>{expect(await page.pageErrors()).toEqual([]);});
 
 test('report is returned, revised, signed by two supervisors and archived with request-first PDF',async({page})=>{
- test.setTimeout(90000);
+ // This multi-account flow reaches PDF conversion after about 85 seconds on a cold browser.
+ test.setTimeout(180000);
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
  await seedAcceptedTrial(page);await advanceDemo(page);await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();await advanceDemo(page);
  await expect(page.getByRole('button',{name:'提交報告',exact:true})).toBeVisible();
@@ -207,7 +210,7 @@ test('two-machine scheduling checks space and buffers and saves a sample allocat
   localStorage.setItem('dqa-equipment-demo-v1',JSON.stringify(['A','B'].map(id=>({id,name:`環境試驗箱 ${id}`,status:'待機中',capacity:3,usableVolumeLitres:30,specification:'-40～150°C'}))));
  });
  await lmsLogin(page);await page.locator('.sidebar').getByRole('button',{name:/排程管理/}).click();await showAllSchedules(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();
- await page.getByLabel('設備選擇').selectOption('A');await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByRole('checkbox',{name:/B · 環境試驗箱 B/}).check();await expect(page.getByRole('group',{name:'附加設備（可複選）'})).toContainText('已選 2／需 2 台');await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeInViewport();const modal=await page.locator('.schedule-edit-modal').boundingBox();expect(modal.width).toBeGreaterThan(1300);await page.screenshot({path:test.info().outputPath('multi-equipment-checkboxes.png')});await page.getByLabel('每件樣品使用空間 L *').fill('10');
+ await page.getByLabel('設備選擇').selectOption('A');await page.getByLabel('設備台數',{exact:true}).fill('2');await page.getByRole('checkbox',{name:/B · 環境試驗箱 B/}).check();await expect(page.getByRole('group',{name:'附加設備（可複選）'})).toContainText('已選 2／需 2 台');await expect(page.getByRole('button',{name:'儲存排程',exact:true})).toBeInViewport();const modal=await page.locator('.schedule-edit-modal').boundingBox();expect(modal.width).toBeGreaterThan(1300);await captureBrowserEvidence(page,{path:test.info().outputPath('multi-equipment-checkboxes.png')});await page.getByLabel('每件樣品使用空間 U *').fill('1');
  await expect(page.getByLabel('準備時間（分鐘）')).toHaveCount(0);await expect(page.getByLabel('清理時間（分鐘）')).toHaveCount(0);
  await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
@@ -226,7 +229,8 @@ test('a stale draft editor cannot overwrite a newer saved revision',async({page}
 });
 
 test('general performance upload recognizes the supplied blank template and submits filled data in its original layout',async({page})=>{
- test.setTimeout(120000);
+ // Includes multiple logins, report revisions, PDF conversion and the final download.
+ test.setTimeout(180000);
  await page.setViewportSize({width:1366,height:768});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
@@ -245,7 +249,7 @@ test('general performance upload recognizes the supplied blank template and subm
  await expect(page.getByText(id+'-DEMO.xlsx',{exact:true})).toBeVisible();
  await expect(page.locator('.report-review-status')).toContainText('通過 AI 全檢（Demo 規則模擬）');
  await page.locator('.report-quickfill-panel').scrollIntoViewIfNeeded();
- await page.screenshot({path:test.info().outputPath('quickfill-review-ready.png')});
+ await captureBrowserEvidence(page,{path:test.info().outputPath('quickfill-review-ready.png')});
  expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已完成');
  const preparedDownload=page.waitForEvent('download');await page.getByRole('button',{name:'下載目前 Excel 報告',exact:true}).click();expect((await preparedDownload).suggestedFilename()).toBe(id+'-DEMO.xlsx');
  await expect(page.locator('#lab-report-file')).toBeEnabled();
@@ -279,7 +283,7 @@ test('general performance upload recognizes the supplied blank template and subm
   await expect(workbook.locator('[data-cell="AF54"]')).toContainText('陳');
   await expect(workbook.locator('img')).toHaveCount(email==='level2@example.com'?1:2);
   await expect(page.locator('.report-review-dialog>header')).toContainText(email==='level2@example.com'?'第二階主管審核':'第三階主管審核');
-  await page.screenshot({path:test.info().outputPath(email==='level2@example.com'?'excel-cover-stage2.png':'excel-cover-stage3.png')});
+  await captureBrowserEvidence(page,{path:test.info().outputPath(email==='level2@example.com'?'excel-cover-stage2.png':'excel-cover-stage3.png')});
   if(email==='level3@example.com')await expect(workbook.locator('[data-cell="S54"]')).toContainText('二階');
   await workbook.getByRole('tab',{name:'1.1一般性能試驗-2',exact:true}).click();
   await expect(workbook.locator('[data-cell="Q147"]')).toHaveText('0～2 Ω');await expect(workbook.locator('[data-cell="Q193"]')).toHaveText('4.90');
@@ -290,7 +294,7 @@ test('general performance upload recognizes the supplied blank template and subm
   }
   await page.setViewportSize({width:1366,height:768});
   expect(await page.evaluate(async id=>{const {getReport}=await import('/src/reportStore.mjs');return Boolean((await getReport(id)).pdf);},id)).toBe(false);
-  await page.screenshot({path:test.info().outputPath(email==='level2@example.com'?'excel-review-stage2.png':'excel-review-stage3.png')});
+  await captureBrowserEvidence(page,{path:test.info().outputPath(email==='level2@example.com'?'excel-review-stage2.png':'excel-review-stage3.png')});
   await useSignature(page);await page.getByRole('button',{name:'簽名並核准報告',exact:true}).click();await expect(page.locator('.report-review-dialog')).not.toBeVisible({timeout:15000});
  }
  await requestLogin(page,true);await page.locator('.rq-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.getByText('目前沒有您可查閱的已封存報告。')).toBeVisible();
@@ -301,7 +305,7 @@ test('general performance upload recognizes the supplied blank template and subm
  await page.getByRole('button',{name:'← 返回清單',exact:true}).click();await page.locator('.rq-sidebar').getByRole('button',{name:'資料庫',exact:true}).click();await expect(page.locator('.archive-page')).toContainText(id);expect(errors).toEqual([]);
  await page.locator('.archive-page').getByRole('button',{name:id,exact:true}).click();await expect(page.getByRole('dialog',{name:id+'｜委託單資訊'})).toBeVisible();await expect(page.getByRole('list',{name:'簽核流程',exact:true})).toBeVisible();await page.getByRole('button',{name:'關閉委託單資訊',exact:true}).click();
  const archiveDownload=page.waitForEvent('download');await page.locator('.archive-page').getByRole('button',{name:'下載 PDF',exact:true}).click();await (await archiveDownload).saveAs(test.info().outputPath('general-archived-demo.pdf'));
- await page.screenshot({path:test.info().outputPath('report-archive-page.png')});
+ await captureBrowserEvidence(page,{path:test.info().outputPath('report-archive-page.png')});
 
 });
 
@@ -372,7 +376,7 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
 test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
  await page.evaluate(()=>{localStorage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{id:'LEGACY-ORPHAN',project:'舊版 Demo',test:'高溫儲存試驗',status:'已完成'}]));});await page.reload();
- await page.getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByRole('alert')).toContainText('沒有對應的電子委託資料');
+ await page.getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByRole('alert')).toContainText('找不到唯一且完整的本案電子委託資料');
  await page.getByRole('button',{name:'建立完整流程 Demo 案件',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();
  await advanceDemo(page);
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].id);

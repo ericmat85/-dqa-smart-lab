@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {spawnSync} from 'node:child_process';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -35,7 +36,7 @@ for(const type of ['humidity','vibration'])test(`${type}: original editor reads 
  expect(await page.evaluate(()=>localStorage.getItem('dqa-schedules-demo-v1'))).toBe(before);const start=await editor.getByLabel('開始日期',{exact:false}).inputValue(),end=await editor.getByLabel('預計完成日期',{exact:false}).inputValue();
  const expected=new Date(start+'T00:00:00Z');expected.setUTCDate(expected.getUTCDate()+(type==='humidity'?10:4));expect(end).toBe(expected.toISOString().slice(0,10));
  const selected=await editor.getByLabel('設備選擇',{exact:true}).inputValue();expect(type==='humidity'?['EQ-006','EQ-008']:['EQ-010']).toContain(selected);
- await page.screenshot({path:test.info().outputPath(type+'-profile-editor.png')});await editor.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor).toBeHidden();
+ await captureBrowserEvidence(page,{path:test.info().outputPath(type+'-profile-editor.png')});await editor.getByRole('button',{name:'儲存排程',exact:true}).click();await expect(editor).toBeHidden();
  const saved=await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1')).find(x=>x.requestId===id),id);expect(saved.durationHours).toBe(type==='humidity'?250:20);expect(saved.trialExecution.segments.length).toBe(type==='humidity'?1:3);expect(saved.capacityValidation).toBeUndefined();expect(upstream).toBe(1);expect(model).toBe(0);
  if(type==='vibration')expect(saved.trialExecution.segments.every(s=>{const d=new Date(s.start_ms+8*3600000).getUTCDay();return d!==0&&d!==6&&s.quantity===1;})).toBe(true);
  expect(await page.pageErrors()).toEqual([]);
@@ -50,5 +51,5 @@ test('removing the toast still requires fresh authenticated session after an unc
 test('the confirmed revocation toast is absent from request, LMS and lab pages',async({page,context})=>{
  await context.route('**/api/preview/**',route=>route.abort());
  await page.addInitScript(accounts=>{localStorage.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(accounts));sessionStorage.setItem('dqa-request-account-id','DEMO-SUPERVISOR');sessionStorage.setItem('dqa-lms-account-id','DEMO-LEVEL1');sessionStorage.setItem('dqa-lab-account-id','U003');for(const system of ['request','lms','lab'])sessionStorage.setItem('dqa-ai-revocation-v1:'+system,JSON.stringify({status:'CONFIRMED',epoch:1}));},INITIAL_ACCOUNTS);
- for(const system of ['request','lms','lab']){await page.goto('/'+system+'/dashboard');await expect(page.locator('[data-ai-session-status]')).toHaveCount(0);await expect(page.getByText('AI 對話撤銷已由後端確認。',{exact:true})).toHaveCount(0);if(system==='request')await page.screenshot({path:test.info().outputPath('request-dashboard-without-fixed-ai-toast.png')});}
+ for(const system of ['request','lms','lab']){await page.goto('/'+system+'/dashboard');await expect(page.locator('[data-ai-session-status]')).toHaveCount(0);await expect(page.getByText('AI 對話撤銷已由後端確認。',{exact:true})).toHaveCount(0);if(system==='request')await captureBrowserEvidence(page,{path:test.info().outputPath('request-dashboard-without-fixed-ai-toast.png')});}
 });

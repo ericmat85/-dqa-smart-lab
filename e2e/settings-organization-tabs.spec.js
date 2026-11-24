@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 import {DEMO_EQUIPMENT} from '../src/demoEquipment.mjs';
@@ -33,7 +34,7 @@ for(const [width,theme] of [[1440,'light'],[1440,'dark'],[390,'light'],[390,'dar
  const search=trials.getByRole('searchbox',{name:'搜尋試驗項目與規範'}),bounds=await search.boundingBox(),panel=await trials.boundingBox();
  expect(bounds.width).toBeGreaterThan(panel.width-200);const toolbar=await trials.locator('.catalog-search-toolbar').boundingBox();expect(Math.abs(toolbar.x-panel.x)).toBeLessThan(2);expect(Math.abs(toolbar.width-panel.width)).toBeLessThan(2);await search.fill('高溫高濕');await expect(cards).toHaveCount(1);
  await cards.locator('summary').click();await expect(cards).toContainText('250 小時');
- await page.screenshot({path:test.info().outputPath(`parameters-${width}-${theme}.png`),fullPage:true});
+ await captureBrowserEvidence(page,{path:test.info().outputPath(`parameters-${width}-${theme}.png`),fullPage:true});
  const equipmentTab=tabs.getByRole('tab',{name:'設備可用空間與規格',exact:true});await equipmentTab.click();
  const equipment=p.getByRole('tabpanel',{name:'設備可用空間與規格',exact:true});await expect(equipment).toBeVisible();await expect(equipment.getByRole('columnheader',{name:'可用空間 U',exact:true})).toBeVisible();await expect(equipment.locator('tbody tr')).toHaveCount(20);
  await equipmentTab.press('ArrowRight');await expect(p.getByRole('tabpanel',{name:'既有排程空間與保留時間'})).toBeVisible();

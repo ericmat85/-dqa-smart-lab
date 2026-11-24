@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import seed from './generalDemoSeed.json' with {type:'json'};
 const cols=['Q','V','AA','AF','AK'];
 const resultRows=[82,83,84,85,86,87,88,91,94,97,118,119,120,121,122,123,124,125,126,127,128,147,148,149,150,151,152,153,154,155,156,158,160,189,190,191,192,193,209,211,213,219,220,221,222,223,224,225,226,227,228];
@@ -40,7 +41,7 @@ export async function fillGeneralDemo(book,request,{specimenImages}={}){
    if(i>=count){const cell=detail.getCell(row+1,col+1);cell.value='N/A（本案未使用）';cell.style={...cell.style,font:{size:7},alignment:{horizontal:'left',vertical:'middle',wrapText:false}};continue;}
    let bytes=specimenImages?.[`${i+1}_${stage}`];
    if(!bytes&&typeof window!=='undefined'){
-    const response=await fetch(`${import.meta.env?.BASE_URL||'/'}demo-report-images/示意_${i+1}_${stage}.png`);if(!response.ok)throw Error('Demo 樣品示意圖載入失敗，請重新產生。');bytes=new Uint8Array(await response.arrayBuffer());
+    bytes=new Uint8Array(await assetBytes(`${import.meta.env?.BASE_URL||'/'}demo-report-images/示意_${i+1}_${stage}.png`,{message:'Demo 樣品示意圖載入失敗，請重新產生。'}));
    }
    if(bytes){const image=book.addImage({buffer:bytes,extension:'png'});detail.addImage(image,{tl:{col,row},ext:{width:308,height:218},editAs:'oneCell'});}
   }

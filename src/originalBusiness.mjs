@@ -77,18 +77,18 @@ function project(){
  cache.set('dqa-admin-operations-v1',JSON.stringify({version:1,revision:0,quality:[],qualifications:[],events:[]}));
 }
 export function configureOriginalBusiness({identity=null,snapshot={},storage=globalThis.localStorage}={}){identityEpoch++;enabled=true;me=identity;native=storage;raw=structuredClone(snapshot);signatureDetails.clear();project();}
-export async function refreshOriginalBusiness({afterWrite=false}={}){
+export async function refreshOriginalBusiness({afterWrite=false,background=false}={}){
  // A pre-write background read must finish before requesting the acknowledged state.
  if(afterWrite&&loading?.identity===me)await loading.promise.catch(()=>{});
  if(!enabled||!me)return;
  if(loading?.identity===me)return loading.promise;
- const identity=me,version=projectionVersion,task={identity};task.promise=businessClient.request('/me').then(current=>{if(me!==identity)return;return businessClient.request('/snapshot').then(packet=>{if(me!==identity||projectionVersion!==version)return;me=current;raw=packet.data;project();emit();});}).catch(error=>{if(me===identity&&error.status===401)clearOriginalIdentity();throw error;}).finally(()=>{if(loading===task)loading=null;});loading=task;return task.promise;
+ const identity=me,version=projectionVersion,task={identity};task.promise=businessClient.request('/me',{background}).then(current=>{if(me!==identity)return;return businessClient.request('/snapshot',{background}).then(packet=>{if(me!==identity||projectionVersion!==version)return;me=current;raw=packet.data;project();emit();});}).catch(error=>{if(me===identity&&error.status===401)clearOriginalIdentity();throw error;}).finally(()=>{if(loading===task)loading=null;});loading=task;return task.promise;
 }
 export async function initializeOriginalBusiness(){configureOriginalBusiness();try{me=await businessClient.request('/me');await refreshOriginalBusiness();}catch(error){if(error.status!==401)throw error;clearOriginalIdentity();}}
 export async function loginOriginalBusiness(email,password){identityEpoch++;await businessClient.request('/login',{method:'POST',body:{email,password}});me=await businessClient.request('/me');await refreshOriginalBusiness();emit();if(!me.member.systems?.includes(currentSystem())&&me.member.systems)throw Object.assign(Error('SYSTEM_ACCESS_DENIED'),{code:'SYSTEM_ACCESS_DENIED'});return originalBusinessAccount();}
 export function clearOriginalIdentity(){identityEpoch++;me=null;raw={};signatureDetails.clear();detailLoads.clear();project();emit();}
 export async function logoutOriginalBusiness(){const result=businessClient.request('/logout',{method:'POST',body:{}});clearOriginalIdentity();return result;}
-export function startOriginalBusinessSync(){if(!enabled)return()=>{};let stopped=false;const update=()=>{if(stopped||!me||globalThis.document?.visibilityState==='hidden')return;refreshOriginalBusiness().catch(error=>{if(error.status===401)clearOriginalIdentity();});};const timer=setInterval(update,15000);globalThis.addEventListener?.('focus',update);return()=>{stopped=true;clearInterval(timer);globalThis.removeEventListener?.('focus',update);};}
+export function startOriginalBusinessSync(){if(!enabled)return()=>{};let stopped=false;const update=()=>{if(stopped||!me||globalThis.document?.visibilityState==='hidden')return;refreshOriginalBusiness({background:true}).catch(error=>{if(error.status===401)clearOriginalIdentity();});};const timer=setInterval(update,15000);globalThis.addEventListener?.('focus',update);return()=>{stopped=true;clearInterval(timer);globalThis.removeEventListener?.('focus',update);};}
 
 export function hasOriginalDraftDetails(id){const row=(raw.requests||[]).find(r=>r.legacy_id===id);return !!row&&signatureDetails.get(row.id)?.revision===row.revision;}
 async function fetchOriginalDraft(id){const epoch=identityEpoch;const row=(raw.requests||[]).find(r=>r.legacy_id===id);if(!row)throw Error('委託草稿不存在或沒有權限。');const result=await businessClient.request('/data/requests/'+row.id);if(!result.data.length)throw Error('委託草稿不存在或沒有權限。');if(!me||identityEpoch!==epoch)throw Object.assign(Error('SESSION_REVOKED'),{code:'SESSION_REVOKED'});const full=result.data[0];projectionVersion++;signatureDetails.set(full.id,full);raw.requests=raw.requests.map(r=>r.id===full.id?full:r);project();emit();return requestRow(full);}

@@ -1,3 +1,4 @@
+import {assetBytes} from './assetBytes.mjs';
 import {useCallback,useEffect,useId,useRef,useState} from 'react';
 import {PaginatedList} from './Pagination.jsx';
 import TemplatePreview,{downloadTemplate} from './TemplatePreview.jsx';
@@ -34,9 +35,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
   if(row.kind==='trial')return readTrialTemplateFile({...access,templateId:row.id,expectedRevision:row.revision});
   if(row.kind==='upload')return readUploadedTemplate(row.id,access);
   if(row.id==='BLANK'){const bytes=await requestWorkbookBytes({});assertTemplateAccess(access);return {name:'空白電子委託單.xlsx',bytes};}
-  const response=await fetch(generalPath,{signal:lifetime.current?.signal});
-  if(!response.ok)throw Error('一般性能報告範本無法讀取，請稍後再試。');
-  const bytes=new Uint8Array(await response.arrayBuffer());assertTemplateAccess(access);
+  const bytes=new Uint8Array(await assetBytes(generalPath,{signal:lifetime.current?.signal,message:'一般性能報告範本無法讀取，請稍後再試。'}));assertTemplateAccess(access);
   return {name:'一般性能試驗報告範本.xlsx',bytes};
  },[actorId,system]);
  const readSelected=useCallback(()=>readFile(selected),[readFile,selected]);

@@ -1,3 +1,4 @@
+import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {spawnSync} from 'node:child_process';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -46,14 +47,14 @@ for(const theme of ['light','dark'])test(`E2 management settings drive the origi
  const records=panel.getByRole('region',{name:'E2 即時排程紀錄'});await expect(records).toContainText('使用者已儲存');await expect(records).toContainText('Mock 測試');await expect(records).toContainText('80／40');await expect(records).toContainText('模擬 USD 0.000028');await expect(panel).toContainText('尚無 Provider 回應');
  await records.getByText('查看 Trace／Provider',{exact:true}).click();await expect(records).toContainText('I-LOCAL-E2-MANAGEMENT');await expect(records).toContainText('req_MOCK_E2_MANAGEMENT');
  await panel.getByLabel('排程監控狀態篩選').selectOption('ERROR');await expect(records).toContainText('沒有符合篩選');await panel.getByLabel('排程監控狀態篩選').selectOption('ALL');
- await panel.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('e2-management-'+theme+'.png'),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await panel.scrollIntoViewIfNeeded();await captureBrowserEvidence(page,{path:test.info().outputPath('e2-management-'+theme+'.png'),fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await expect(management(observer).getByRole('region',{name:'E2 即時排程紀錄'})).toContainText('尚無排程請求');await observer.close();
  const saved=await page.evaluate(()=>localStorage.getItem('dqa-schedules-demo-v1'));await panel.getByRole('button',{name:'清除本分頁排程紀錄',exact:true}).click();await expect(records).toContainText('尚無排程請求');expect(await page.evaluate(()=>localStorage.getItem('dqa-schedules-demo-v1'))).toBe(saved);
  await page.reload();await expect(panel.locator('.e2-setting-values')).toContainText('30 分鐘');expect(apiCalls).toBe(1);expect(await page.pageErrors()).toEqual([]);
 });
 test('E2 management preserves the third-level read-only boundary and fits mobile',async({page,context})=>{
  await context.route('**/api/preview/**',route=>route.abort());await seed(page,{actor:'DEMO-LEVEL3',theme:'dark'});await page.setViewportSize({width:390,height:844});await page.goto('/lms/settings/ai/E2');
- const panel=management(page);await expect(panel.getByRole('button',{name:'調整排程設定'})).toBeDisabled();await expect(panel).toContainText('目前帳號為唯讀');await expect(panel.getByRole('button',{name:'還原排程預設值'})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('e2-management-mobile-readonly.png'),fullPage:true});expect(await page.pageErrors()).toEqual([]);
+ const panel=management(page);await expect(panel.getByRole('button',{name:'調整排程設定'})).toBeDisabled();await expect(panel).toContainText('目前帳號為唯讀');await expect(panel.getByRole('button',{name:'還原排程預設值'})).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.scrollIntoViewIfNeeded();await captureBrowserEvidence(page,{path:test.info().outputPath('e2-management-mobile-readonly.png'),fullPage:true});expect(await page.pageErrors()).toEqual([]);
 });
 test('a paused scheduler sends no Session or AI requests and records the actual local block',async({page,context})=>{
  await seed(page,{paused:true});let calls=0;await context.route('**/api/preview/**',route=>{calls++;return route.abort();});await page.goto('/lms/settings/ai/E2');const editor=await openSchedule(page);
