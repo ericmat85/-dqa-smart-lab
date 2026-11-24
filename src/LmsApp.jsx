@@ -1,3 +1,4 @@
+import FinancePage from './FinancePage.jsx';
 import {canStopBusinessSchedule} from './trialCompletion.mjs';
 import {humanCommand,pendingHumanOperation} from './businessHumanClient.mjs';
 import ExecutionKindBadge from './ExecutionKindBadge.jsx';
@@ -142,6 +143,7 @@ const NAV_ITEMS = [
   { id: "equipment", label: "設備管理" },
 
   { id: "maintenance", label: "物料管理" },
+  { id: "finance", label: "財務管理" },
 
   { id: "archive", label: "資料庫" },
 
@@ -1987,7 +1989,7 @@ function DashboardPage({
             <SchedulePage onExit={()=>navigate('schedule')} subPage={subPage} currentUser={currentUser} accounts={accounts} initialFilter={notificationFilter} onScheduleCountsChange={updateScheduleNotificationCounts} />
           ) : active === "equipment" ? (
             <EquipmentPage currentUser={currentUser} />
-          ) : active === "maintenance" ? (
+          ) : active === "finance" ? <FinancePage key={currentUser.id} account={currentUser}/> : active === "maintenance" ? (
             <MaterialsPage currentUser={currentUser} />
           ) : active === "dashboard" ? (
 
