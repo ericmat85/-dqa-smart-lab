@@ -1,6 +1,6 @@
-# LMS 財務管理 v1（本機交付）
+# LMS 財務管理 v1（PR48 整合交付）
 
-基準：`7beccce96eb1ffa95ff5cc7d4b4447196c6f0721`（PR #47 合併版）。分支：`local/finance-v1-20261124`。沒有混入未上線四引擎分支。未推送、合併、部署、變更雲端資料庫、讀取真實財務資料或呼叫外部模型。
+基準為 PR47 的 main，整合財務 PR48 與既有原生資料庫、四引擎、資源異動及共用設定版本。2026-11-24 依使用者指示整合共用介面並接上正式資料庫；既有模型、預算、API Key 及流程設定保留。正式部署結果以 PR48 的合併與部署紀錄為準。
 
 ## 使用入口與資料來源
 
@@ -39,7 +39,7 @@
 
 ## 遷移與回退
 
-新增 `database/migrations/035_finance_v1.sql`。基準最後是 033；034 預留給另一條未整合 AI 工作，035 不依賴 034。遷移只擴充角色允許的 permission/page 值並建立私有表、索引與 RPC，不回填財務資料、不更改既有角色內容、歷史成本或流程政策。
+新增 `database/migrations/035_finance_v1.sql`。整合基準包含 034；035 不依賴 034 的新增資料表。遷移只擴充角色允許的 permission/page 值並建立私有表、索引與 RPC，不回填財務資料、不更改既有角色內容、歷史成本或流程政策。
 
 本機準備（Python 3.12.14，無新增 Python dependencies）：
 
@@ -53,13 +53,13 @@ npx playwright test --config playwright.finance.config.mjs
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npx playwright test e2e/admin-navigation-ai-pages.spec.js
 ```
 
-準備工具只建立 Docker `network=none`、無發布連接埠、合成帳號的 PostgreSQL，套用 001–033 及 035；Supabase Auth/Storage 僅最小本機替身。沒有 DSN／雲端參數。
+準備工具只建立 Docker `network=none`、無發布連接埠、合成帳號的 PostgreSQL，套用 001–034 及 035；Supabase Auth/Storage 僅最小本機替身。沒有 DSN／雲端參數。
 
-回退採保留資料停用：`database/rollback/035_finance_disable.sql` 撤回 authenticated 的全部 finance RPC 權限；前端回到基準版本即可。私有表、附件、稽核與角色值保留，不刪財務資料。重新開放需另行審查並恢復 035 末段的函式 EXECUTE grants；不重跑整份建表遷移。任何雲端執行均不在本輪授權內。
+回退採保留資料停用：`database/rollback/035_finance_disable.sql` 撤回 authenticated 的全部 finance RPC 權限；前端回到基準版本即可。私有表、附件、稽核與角色值保留，不刪財務資料。重新開放需另行審查並恢復 035 末段的函式 EXECUTE grants；不重跑整份建表遷移。正式 Supabase 已套用 035，遷移日誌為 35；交易保護確認既有資料與無關函式保持一致。實際財務新增、讀回、憑證連結及操作回執已在雲端交易驗證後整筆 rollback，未留下財務測試資料。
 
 ## 明確限制
 
-- 未部署、未實測 Vercel／Render／真 Supabase Auth、PostgREST、雲端資料庫或正式站登入。瀏覽器測試使用合成 API；SQL 授權測試是本機 PostgreSQL 真查詢；HTTP 測試跑真 handler、合成上游。
+- 瀏覽器驗收使用合成 API；本機 SQL 測試跑真 PostgreSQL，另有正式雲端 SQL/RPC 交易驗證。未使用真使用者密碼進行正式站登入操作，不把部署成功等同完整真人驗收。
 - 附件做類型與檔頭驗證，未配置病毒掃描、OCR 或完整 PDF 解析；僅下載，不在頁內執行／預覽。256 KiB 是 v1 限制，大型附件需要後續私有物件儲存與掃描方案。
 - 不做自動分攤、會計總帳、稅額拆分、付款狀態、開票、採購簽核或外部會計服務。未估資料由授權財務人員補齊。
-- 不宣稱法規合規或雲端驗收通過。
+- 不宣稱法規合規或尚未執行的完整真人驗收通過。

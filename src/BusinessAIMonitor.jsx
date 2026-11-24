@@ -1,3 +1,4 @@
+import {ActionTable} from './tableActionIcons.jsx';
 import {useCallback,useEffect,useState} from 'react';
 import {businessClient} from './businessClient.mjs';
 import {BUSINESS_AI_EVENT,pendingBusinessAI,lookupBusinessAI,aiErrorMessage} from './businessAIClient.mjs';
@@ -17,5 +18,5 @@ export default function BusinessAIMonitor({engine,account}){
  <BusinessAISettings key={engine+':'+account?.id} engine={engine} onSaved={load}/>
  {pending.filter(p=>p.engine===engine).map(p=><div className="template-info" key={p.id}>有一筆結果待確認 <button type="button" className="template-btn" disabled={busy} onClick={()=>lookup(p.id)}>查詢原操作結果</button></div>)}
  {engine==='E2'?<E2SchedulingManagement account={account} preferencesOnly/>:['E3','E4'].includes(engine)?<EnginePreferences engine={engine} account={account}/>:<section className="admin-surface"><h4>委託、電子簽名與報告審查</h4><p>核對已授權的來源與報告關鍵欄位。電子簽名真偽、PDF 圖像內容與正式簽核結果不由模型判定。</p></section>}
- <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>時間／狀態</th><th>模型／用量</th><th>估算費用</th><th>Trace／結果</th></tr></thead><tbody>{rows.length?rows.map(r=><tr key={r.id}><td>{new Date(r.created_at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})}<small>{labels[r.state]||r.state}</small></td><td>{r.model||'—'}<small>{r.usage?`${r.usage.input_tokens}／${r.usage.output_tokens} Tokens`:'尚無可確認用量'}</small></td><td>{r.estimated_cost_usd?'USD '+r.estimated_cost_usd:'待確認'}</td><td>{r.trace_id||r.error_code||'待回應'}</td></tr>):<tr><td colSpan={4}>目前帳號尚無此引擎的資料庫請求紀錄。</td></tr>}</tbody></table></div></section>;
+ <div className="admin-table-wrap"><ActionTable className="admin-table"><thead><tr><th>時間／狀態</th><th>模型／用量</th><th>估算費用</th><th>Trace／結果</th></tr></thead><tbody>{rows.length?rows.map(r=><tr key={r.id}><td>{new Date(r.created_at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei'})}<small>{labels[r.state]||r.state}</small></td><td>{r.model||'—'}<small>{r.usage?`${r.usage.input_tokens}／${r.usage.output_tokens} Tokens`:'尚無可確認用量'}</small></td><td>{r.estimated_cost_usd?'USD '+r.estimated_cost_usd:'待確認'}</td><td>{r.trace_id||r.error_code||'待回應'}</td></tr>):<tr><td colSpan={4}>目前帳號尚無此引擎的資料庫請求紀錄。</td></tr>}</tbody></ActionTable></div></section>;
 }

@@ -9,6 +9,7 @@ import './SystemTabs.css'
 import './ControlAlignment.css'
 import './SummaryTiles.css'
 import './UnifiedButtons.css'
+import './ApprovedWorkspaceDesign.css'
 
 const finishBootstrap=beginPageLoading();
 function BootReady({children}){useEffect(()=>{finishBootstrap();},[]);return children;}

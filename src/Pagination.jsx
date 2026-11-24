@@ -1,3 +1,4 @@
+import {iconifyActionRows} from './tableActionIcons.jsx';
 import useUiPreferences from './useUiPreferences.js';
 import {Children,cloneElement,isValidElement,useState} from 'react';
 import {pageNumbers,pageSlice,listIdentity} from './pagination.mjs';
@@ -35,7 +36,9 @@ export function PaginatedTable({children,resetKey='',currentPage,onPageChange,..
   const parts=Children.toArray(children);
   const bodyIndex=parts.findIndex(part=>isValidElement(part)&&part.type==='tbody');
   if(bodyIndex<0)return <table {...tableProps}>{children}</table>;
-  const rows=Children.toArray(parts[bodyIndex].props.children);
+  const head=parts.find(part=>isValidElement(part)&&part.type==='thead');
+  const headerRow=head?Children.toArray(head.props.children).find(isValidElement):null;
+  const rows=iconifyActionRows(Children.toArray(parts[bodyIndex].props.children),headerRow?.props.children);
   // Row keys and first-cell identities reset filters/sorting, but live progress updates retain the current page.
   const identity=JSON.stringify(rows.map(row=>[row.key,plainText(Children.toArray(row.props?.children)[0])]));
   return <TablePage key={`${resetKey}:${pageSize}:${identity}`} pageSize={pageSize} parts={parts} bodyIndex={bodyIndex} rows={rows} tableProps={tableProps} currentPage={currentPage} onPageChange={onPageChange}/>;

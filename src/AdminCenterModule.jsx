@@ -1,3 +1,4 @@
+import {ActionTable} from './tableActionIcons.jsx';
 import {originalBusinessEnabled} from './originalBusiness.mjs';
 import WorkspaceProfileSettings from './WorkspaceProfileSettings.jsx';
 import SignatureMethodSettings from './SignatureMethodSettings.jsx';
@@ -27,7 +28,7 @@ import useLabView from './useLabView.js';
 import {createReportTemplate} from './reportWorkbook.mjs';
 const date=value=>value?new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'—';
 const text=value=>value===undefined||value===null||value===''?'未設定':String(value);
-function Table({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><table className="template-table admin-table"><caption>{label}</caption><thead><tr>{columns.map(([id,label])=><th key={id} scope="col">{label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,i)=><tr key={row.id||i}>{columns.map(([id])=><td key={id}>{text(row[id])}</td>)}</tr>):<tr><td colSpan={columns.length}>尚無紀錄</td></tr>}</tbody></table></div>;}
+function Table({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><ActionTable className="template-table admin-table"><caption>{label}</caption><thead><tr>{columns.map(([id,label])=><th key={id} scope="col">{label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,i)=><tr key={row.id||i}>{columns.map(([id])=><td key={id}>{text(row[id])}</td>)}</tr>):<tr><td colSpan={columns.length}>尚無紀錄</td></tr>}</tbody></ActionTable></div>;}
 function Info({items}){return <dl className="admin-info-grid">{items.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;}
 function SettingDialog({module,value,onSave,onClose}){
  const [draft,setDraft]=useState(()=>({...value})),[error,setError]=useState('');
