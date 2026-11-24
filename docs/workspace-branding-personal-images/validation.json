@@ -1,0 +1,36 @@
+{
+  "new_browser": {
+    "expected": 14,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "regression": {
+    "expected": 29,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 1
+  },
+  "node_tests": 873,
+  "node_failures": 0,
+  "sql_images": {
+    "passed": true,
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "local_only": true
+  },
+  "database_migration": {
+    "attempted_at": "2026-11-24T15:38:40.419260+00:00",
+    "migration": "039_workspace_and_personal_images.sql",
+    "sha256": "fad303e0a1ddcd1914d6d92ec870b3e294c6d5cd9c14034a05ca8342effb61fc",
+    "outcome": "COMMITTED_VERIFIED",
+    "migrations": 39,
+    "existing_records_preserved": true,
+    "new_table_empty": true
+  },
+  "build_passed": true,
+  "lint_passed": true,
+  "lint_note": "Warnings remain; no lint errors.",
+  "browser_data": "Synthetic local fixtures; no real-account login or email/model calls."
+}
