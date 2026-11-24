@@ -1,5 +1,5 @@
 /* Approved workspace design: shared presentation only. Business flows are unchanged. */
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise,.enterprise-login){--enterprise-bg:#f4f7fb;--enterprise-header:#dce7f1;--workspace-tab-band:var(--enterprise-sidebar);--workspace-tab-text:#d4e2ef;--workspace-tab-active:#fff;--workspace-card-shadow:0 2px 7px #16324f07}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise,.enterprise-login){--enterprise-bg:#e8edf3;--enterprise-header:#dce7f1;--workspace-tab-band:var(--enterprise-sidebar);--workspace-tab-text:#d4e2ef;--workspace-tab-active:#fff;--workspace-card-shadow:0 2px 7px #16324f07}
 html body #root :is(.lms-enterprise.theme-dark,.rq-enterprise.rq-theme-dark,.lab-enterprise.lab-theme-dark,.enterprise-login.enterprise-dark){--enterprise-bg:#071525;--enterprise-header:#18354b;--workspace-tab-band:var(--enterprise-sidebar);--workspace-tab-text:#bfcede;--workspace-tab-active:#10263d;--workspace-card-shadow:none}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.dashboard-topbar,.rq-topbar,.lab-global-header){background:var(--enterprise-header)!important;color:var(--enterprise-text)!important;border:0!important;box-shadow:none!important}
 /* Remove descriptive subtitles only, never validation messages, operational warnings or financial definitions. */
@@ -9,10 +9,10 @@ html body #root .finance-page>.template-info:first-of-type{display:none!importan
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.panel.generic-page,.template-page,.rq-panel,.lab-panel,.report-case-panel){border:0!important;outline:0;border-radius:4px!important;box-shadow:var(--workspace-card-shadow)!important}
 /* A single white body contains both its tab strip and its content. */
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{display:flex;gap:4px!important;align-items:flex-end!important;min-height:46px;padding:0!important;margin:0!important;max-width:100%;overflow-x:auto;overflow-y:hidden;border:0!important;border-radius:0!important;background:var(--workspace-tab-band)!important;box-shadow:none!important;scrollbar-width:thin}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{flex:none;min-height:46px;padding:10px 16px!important;gap:8px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--workspace-tab-text)!important;box-shadow:none!important;white-space:nowrap}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{display:inline-flex;align-items:center;justify-content:center;line-height:1.4;flex:none;min-height:46px;padding:10px 16px!important;gap:8px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--workspace-tab-text)!important;box-shadow:none!important;white-space:nowrap}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab][aria-selected=true]{background:var(--workspace-tab-active)!important;color:var(--enterprise-text)!important;border:0!important;box-shadow:none!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]::after{display:none!important;content:none!important;height:0!important;background:none!important}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]>span:not(.catalog-tab-icon){background:#244b65!important;color:#d8e6f2!important;border-radius:5px}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]>span:not(.catalog-tab-icon){display:inline-flex;align-items:center;justify-content:center;align-self:center;flex:none;min-width:20px;height:20px;box-sizing:border-box;padding:0 6px!important;line-height:1!important;font-size:11px;vertical-align:middle;background:#244b65!important;color:#d8e6f2!important;border-radius:5px}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab][aria-selected=true]>span:not(.catalog-tab-icon){background:var(--soft)!important;color:var(--tab-accent,#0866e8)!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]:focus-visible{outline:2px solid #86bfff!important;outline-offset:-3px}
 html body #root :is(.rq-panel,.archive-page,.account-management,.admin-module){overflow:visible}
@@ -106,3 +106,33 @@ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .template-pa
 html body #root .laboratory-report-workspace>.laboratory-report-heading{margin:0 0 10px;padding:0}
 html body #root .laboratory-report-workspace>.laboratory-report-heading p{display:none}
 html body #root .laboratory-report-workspace>[role=tabpanel]{background:var(--enterprise-card);padding:12px}
+
+/* Reviewed navy search design; kept in the preview branch until accepted. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise){--workspace-search-bg:#203d5b;--workspace-search-border:#48617c;--workspace-search-text:#eff6ff;--workspace-search-placeholder:#b7c7da}
+html body #root :is(.lms-enterprise.theme-dark,.rq-enterprise.rq-theme-dark,.lab-enterprise.lab-theme-dark){--workspace-search-bg:#162f47;--workspace-search-border:#3e5670}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar{padding-right:8px!important;gap:8px}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>.catalog-search-toolbar{flex:0 1 440px;width:38%;max-width:440px;min-width:240px}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap{
+ min-height:32px;max-height:34px;border:1px solid var(--workspace-search-border)!important;border-radius:5px;background:var(--workspace-search-bg)!important;overflow:hidden
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-icon{
+ flex-basis:34px;width:34px;min-height:32px;background:transparent;border:0;color:var(--workspace-search-text)
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-toolbar .catalog-search-icon svg{color:var(--workspace-search-text)!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap input{
+ height:32px!important;min-height:32px!important;padding:5px 10px 5px 0!important;background:transparent!important;color:var(--workspace-search-text)!important;caret-color:var(--workspace-search-text)
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap input::placeholder{color:var(--workspace-search-placeholder)!important;opacity:1}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) input[type=search]:is(:hover,:focus,:focus-visible){outline:0!important;outline-offset:0!important;box-shadow:none!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .schedule-search-wrap:is(:hover,:focus-within){outline:0!important;box-shadow:none!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .schedule-search-wrap:is(:hover,:focus-within){border-color:var(--workspace-search-border)!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .mobile-search-clear{color:var(--workspace-search-text)}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action:has(>[data-action-icon=equipment-info],>[data-action-icon=material-info]){
+ width:36px!important;min-width:36px!important;max-width:36px!important;height:36px!important;min-height:36px!important;max-height:36px!important;border-radius:6px!important
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action>[data-action-icon=equipment-info],
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action>[data-action-icon=material-info]{width:18px;height:18px}
+@media(max-width:1100px){
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar{padding-right:0!important}
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>.catalog-search-toolbar{width:100%;max-width:none;min-width:0;flex:1 1 100%;padding:6px 8px!important}
+}
