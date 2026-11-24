@@ -1,15 +1,15 @@
 /* Approved workspace design: shared presentation only. Business flows are unchanged. */
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise,.enterprise-login){--enterprise-bg:#f4f7fb;--enterprise-header:#dce7f1;--workspace-tab-band:#123d57;--workspace-tab-text:#d4e2ef;--workspace-tab-active:#fff;--workspace-card-shadow:0 2px 7px #16324f07}
-html body #root :is(.lms-enterprise.theme-dark,.rq-enterprise.rq-theme-dark,.lab-enterprise.lab-theme-dark,.enterprise-login.enterprise-dark){--enterprise-bg:#071525;--enterprise-header:#18354b;--workspace-tab-band:#0b2437;--workspace-tab-text:#bfcede;--workspace-tab-active:#10263d;--workspace-card-shadow:none}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise,.enterprise-login){--enterprise-bg:#f4f7fb;--enterprise-header:#dce7f1;--workspace-tab-band:var(--enterprise-sidebar);--workspace-tab-text:#d4e2ef;--workspace-tab-active:#fff;--workspace-card-shadow:0 2px 7px #16324f07}
+html body #root :is(.lms-enterprise.theme-dark,.rq-enterprise.rq-theme-dark,.lab-enterprise.lab-theme-dark,.enterprise-login.enterprise-dark){--enterprise-bg:#071525;--enterprise-header:#18354b;--workspace-tab-band:var(--enterprise-sidebar);--workspace-tab-text:#bfcede;--workspace-tab-active:#10263d;--workspace-card-shadow:none}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.dashboard-topbar,.rq-topbar,.lab-global-header){background:var(--enterprise-header)!important;color:var(--enterprise-text)!important;border:0!important;box-shadow:none!important}
 /* Remove descriptive subtitles only, never validation messages, operational warnings or financial definitions. */
 html body #root :is(.template-heading,.account-page-heading,.lms-dashboard-heading,.rq-workspace-heading,.lab-workspace-heading,.rq-panel-head,.lab-panel-heading,.rtb-heading)>p:not([role=alert]):not([role=status]),
 html body #root :is(.template-heading,.account-page-heading,.rq-panel-head,.lab-panel-heading,.rtb-heading)>div>p:not([role=alert]):not([role=status]){display:none!important}
 html body #root .finance-page>.template-info:first-of-type{display:none!important}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.panel.generic-page,.template-page,.rq-panel,.lab-panel,.schedule-views,.report-case-panel){border:0!important;outline:0;border-radius:4px!important;box-shadow:var(--workspace-card-shadow)!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.panel.generic-page,.template-page,.rq-panel,.lab-panel,.report-case-panel){border:0!important;outline:0;border-radius:4px!important;box-shadow:var(--workspace-card-shadow)!important}
 /* A single white body contains both its tab strip and its content. */
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{display:flex;gap:4px!important;align-items:flex-end!important;min-height:48px;padding:6px 12px 0!important;margin:0!important;max-width:100%;overflow-x:auto;overflow-y:hidden;border:0!important;border-radius:4px 4px 0 0!important;background:var(--workspace-tab-band)!important;box-shadow:none!important;scrollbar-width:thin}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{flex:none;min-height:42px;padding:10px 16px!important;gap:8px;border:0!important;border-radius:4px 4px 0 0!important;background:transparent!important;color:var(--workspace-tab-text)!important;box-shadow:none!important;white-space:nowrap}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{display:flex;gap:4px!important;align-items:flex-end!important;min-height:46px;padding:0!important;margin:0!important;max-width:100%;overflow-x:auto;overflow-y:hidden;border:0!important;border-radius:0!important;background:var(--workspace-tab-band)!important;box-shadow:none!important;scrollbar-width:thin}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{flex:none;min-height:46px;padding:10px 16px!important;gap:8px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--workspace-tab-text)!important;box-shadow:none!important;white-space:nowrap}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab][aria-selected=true]{background:var(--workspace-tab-active)!important;color:var(--enterprise-text)!important;border:0!important;box-shadow:none!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]::after{display:none!important;content:none!important;height:0!important;background:none!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]>span:not(.catalog-tab-icon){background:#244b65!important;color:#d8e6f2!important;border-radius:5px}
@@ -31,7 +31,7 @@ html body #root :is(.equipment-page,.equipment-page>.template-page){background:t
 html body #root .equipment-page .catalog-category-views{background:var(--enterprise-card);padding:0;overflow:hidden}
 html body #root :is(.catalog-category-views,.schedule-views)>.schedule-view-top{margin:0!important;padding:0!important;border:0!important;display:block}
 html body #root .catalog-category-views>.catalog-search-toolbar{padding:16px;margin:0}
-html body #root .catalog-category-views>[role=tabpanel]{padding:0 16px 16px}
+html body #root .catalog-category-views>[role=tabpanel]{padding:0}
 html body #root .archive-page>.template-page{padding-top:0}
 html body #root .archive-page .archive-tabs{margin-top:0!important}
 html body #root .icon-action-cell :is(button,a).icon-action{margin:2px 4px 2px 0}
@@ -41,7 +41,7 @@ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action.icon-action-danger{background:#dc3545!important;border-color:#dc3545!important;color:#fff!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action.icon-action-primary:hover:not(:disabled){background:#0756c5!important;border-color:#0756c5!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(button,a).icon-action.icon-action-danger:hover:not(:disabled){background:#bd2635!important;border-color:#bd2635!important}
-@media(max-width:650px){html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{padding:6px 8px 0!important;gap:2px!important}html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{padding:10px 12px!important}html body #root .rq-panel-head{gap:10px}html body #root .rq-filter-disclosure[open]>.rq-filter-row{display:grid;grid-template-columns:1fr}html body #root .catalog-category-views>[role=tabpanel]{padding:0 10px 10px}}
+@media(max-width:650px){html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{padding:0!important;gap:0!important}html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{padding:10px 12px!important}html body #root .rq-panel-head{gap:10px}html body #root .rq-filter-disclosure[open]>.rq-filter-row{display:grid;grid-template-columns:1fr}html body #root .catalog-category-views>[role=tabpanel]{padding:0}}
 
 html body #root .finance-file-icon{position:relative;border:1px solid var(--enterprise-border);border-radius:8px;background:var(--enterprise-card);cursor:pointer;overflow:hidden}
 html body #root .finance-file-icon input[type=file]{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
@@ -51,10 +51,58 @@ html body #root .rq-enterprise .rq-panel-head>.rq-filter-disclosure:not([open]){
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .icon-action-cell :is(button,a).icon-action.icon-action-danger{background:#dc3545!important;border-color:#dc3545!important;color:#fff!important}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]{width:100%!important;flex:1 1 auto}
 html body #root .lms-enterprise .finance-page{padding:0!important;background:transparent!important;box-shadow:none!important}
-html body #root .finance-content-frame{background:var(--enterprise-card);border-radius:4px;box-shadow:var(--workspace-card-shadow);padding:0 0 16px;min-width:0}
+html body #root .finance-content-frame{background:var(--enterprise-card);border-radius:0;box-shadow:var(--workspace-card-shadow);padding:0 0 16px;min-width:0}
 html body #root .finance-content-frame>.finance-fields{padding:16px}
 html body #root .finance-content-frame>:is(.finance-actions,.finance-table,.finance-summary,h3,label,p){margin-left:16px;margin-right:16px}
 
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .icon-action-cell :is(button,a).icon-action:not(.icon-action-primary):not(.icon-action-danger){background:var(--enterprise-card)!important;border:1px solid var(--enterprise-border)!important;color:var(--enterprise-primary,#0866e8)!important;text-decoration:none}
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .icon-action-cell :is(button,a).icon-action.icon-action-primary{background:#0866e8!important;border-color:#0866e8!important;color:#fff!important}
 html body #root .rq-filter-disclosure>summary>svg{width:18px;height:18px;flex:none}
+
+/* Compact tabbed workspaces: the tab frame is the only content frame. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.template-heading,.account-page-heading){margin-bottom:12px!important;padding-bottom:0!important;border-bottom:0!important;min-height:40px}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.template-heading,.account-page-heading) h2{margin-bottom:0!important}
+html body #root .equipment-counts{margin:12px 0;gap:10px}
+html body #root :is(.equipment-page,.template-page:has(>.schedule-views),.template-page:has(>.workspace-tab-toolbar),.archive-page:has(>.template-page>.workspace-tab-toolbar),.panel.generic-page:has(>.template-page>.schedule-views),.panel.generic-page:has(>.template-page>[role=tablist]),.template-page:has(>[role=tablist]),.account-management:has(>[role=tablist]),.panel.generic-page:has(>.template-page>.admin-module-nav),.template-page:has(>.admin-module-nav),.reports-management,.reports-management>.template-page,.laboratory-report-workspace){
+ padding:0!important;margin:0;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .schedule-views{margin-top:12px;padding:0!important;border:0!important;border-radius:0!important;background:var(--enterprise-card)!important;box-shadow:var(--workspace-card-shadow)}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar{
+ display:flex!important;align-items:center!important;justify-content:space-between;gap:12px;flex-wrap:nowrap;min-width:0;max-width:100%;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:var(--workspace-tab-band)
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>[role=tablist]{flex:1 1 auto;width:auto!important;min-width:0;margin:0!important;gap:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>.catalog-search-toolbar{
+ display:flex;align-items:center;flex:0 1 560px;width:40%;min-width:280px;max-width:560px;gap:8px;padding:0!important;margin:0!important;border:0;background:transparent!important;flex-wrap:nowrap
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .schedule-search-wrap{
+ display:flex;align-items:stretch;flex:1 1 auto;min-width:0;gap:0;margin:0;padding:0;border:1px solid var(--enterprise-border)!important;border-radius:0;background:var(--enterprise-input)!important;min-height:36px
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-icon{
+ display:flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;min-height:36px;background:var(--soft);border-right:1px solid var(--enterprise-border);color:var(--enterprise-text)
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-icon>svg{width:16px;height:16px;flex:none}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .schedule-search-wrap input{
+ display:block;flex:1;min-width:0;width:100%;height:36px!important;min-height:36px!important;margin:0!important;padding:6px 12px!important;border:0!important;border-radius:0!important;background:var(--enterprise-input)!important;font-size:12px!important;box-sizing:border-box
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-clear{
+ flex:none;height:38px;min-height:38px;margin:0;padding:6px 10px;border-radius:0!important;white-space:nowrap;font-size:12px
+}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .schedule-views :is(.template-table-wrap,.schedule-table-region,.schedule-table-scroll){border:0;border-radius:0!important;margin:0;box-shadow:none}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .schedule-views .template-table :is(th,td){border-radius:0!important}
+html body #root .schedule-view-summary{padding:10px 12px;margin:0!important}
+html body #root .archive-page>.template-page>[role=tabpanel]{background:var(--enterprise-card);padding:0;min-width:0}
+html body #root .workspace-tab-toolbar+.archive-empty{border-radius:0}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) [role=tablist]>[role=tab]{border-radius:0!important;margin:0!important}
+@media(max-width:1100px){
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar{flex-wrap:wrap;gap:0}
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>[role=tablist]{flex-basis:100%;width:100%!important}
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar>.catalog-search-toolbar{flex:1 1 100%;width:100%;min-width:0;max-width:none;padding:6px 8px!important}
+ html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .mobile-clearable-search{flex:1;min-width:0}
+}
+
+html body #root :is(.rq-enterprise,.lab-enterprise,.lms-enterprise) :is(.rq-panel:has(>.rq-review-top),.laboratory-report-workspace:has(>[role=tablist])){border-radius:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .template-page>[role=tabpanel]{background:var(--enterprise-card)}
+
+html body #root .laboratory-report-workspace>.laboratory-report-heading{margin:0 0 10px;padding:0}
+html body #root .laboratory-report-workspace>.laboratory-report-heading p{display:none}
+html body #root .laboratory-report-workspace>[role=tabpanel]{background:var(--enterprise-card);padding:12px}
