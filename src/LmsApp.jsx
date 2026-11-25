@@ -1,3 +1,4 @@
+import {DocumentMappingPage} from './DocumentCellMappingSettings.jsx';
 import PreapprovalReview,{PreapprovalSignedPlan} from './PreapprovalReview.jsx';
 import TemplateStageForm from './TemplateStageForm.jsx';
 import {stageCommandFields,stageFormKey} from './templateStageFormState.mjs';
@@ -1947,6 +1948,8 @@ function DashboardPage({
   const reportNotifications=useReportSnapshot();
   const baseNotificationCounts=labNotificationCounts(liveSnapshot.requests,liveMetrics.counts);
   const notificationCounts={...baseNotificationCounts,pendingReview:baseNotificationCounts.pendingReview+liveSnapshot.labOperations.filter(row=>row.status==='待審核').length+liveSnapshot.borrows.filter(row=>['待確認','待核准'].includes(row.status)).length+reportNotifications.filter(row=>['level2','level3'].includes(row.stage)).length};
+  if(path.startsWith('/lms/settings/documents/mapping/')&&originalBusinessEnabled())return <div className={`lms-enterprise document-mapping-route ${dark?'theme-dark':'theme-light'}`}>{canViewAdmin(currentUser,'documents')?<DocumentMappingPage path={path} actorId={currentUser.id} onBack={()=>appNavigate('/lms/settings/documents')}/>:<main><p role="alert">此角色無權設定文件對應。</p><button type="button" onClick={()=>appNavigate('/lms/settings/documents')}>返回文件設定</button></main>}</div>;
+
 
   return (
 
@@ -2002,7 +2005,7 @@ function DashboardPage({
 
           ) : (
 
-            active === 'reports' ? <LabReports /> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts">{originalBusinessEnabled()?<BusinessAccountManagement onBack={()=>navigate('settings')}/>:<AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/>}</div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
+            active === 'reports' ? <LabReports account={currentUser}/> : active === 'settings' ? settingsModule==='accounts' ? canViewAdmin(currentUser,'accounts') ? <div className="admin-account-workspace"><AdminModuleNav account={currentUser} active="accounts" onOpen={id=>appNavigate(id?`/lms/settings/${id}`:'/lms/settings')}/><div id="admin-module-panel" role="tabpanel" aria-labelledby="admin-module-tab-accounts">{originalBusinessEnabled()?<BusinessAccountManagement onBack={()=>navigate('settings')}/>:<AccountManagement accounts={accounts} setAccounts={setAccounts} currentUser={currentUser} onBack={()=>navigate(canAccessLmsPage(currentUser,'settings')?'settings':'dashboard')} backLabel={canAccessLmsPage(currentUser,'settings')?'返回系統管理':'返回儀表板'}/>}</div></div> : <div role="alert" className="template-info">此角色無權開啟此管理模組。帳號管理僅供系統管理員、二階主管或授權角色使用。</div> : settingsModule ? <AdminCenterModule key={settingsModule} module={settingsModule} engine={settingsEngine} account={currentUser} onOpen={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} onNavigate={navigate}/> : <LabSettings account={currentUser} onOpenModule={id=>{setNotificationFilter(null);appNavigate(id?`/lms/settings/${id}`:'/lms/settings');}} focusSection={notificationFilter} onNavigate={navigate} onHome={onHome} /> : <LiveDashboard currentUser={currentUser} onNavigate={navigate} />
 
           )}
 
@@ -2041,7 +2044,7 @@ export default function App({ path, navigate }) {
   const currentUser = accounts.find(account => account.id === currentUserId && accessSystem(account, 'lms')) || null;
   useEffect(() => {
     const valid=['/lms/accounts',...NAV_ITEMS.map(item=>'/lms/'+item.id),'/lms/requests/history','/lms/schedule/history','/lms/schedule/chart'];
-    const validRoute=valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path)||/^\/lms\/settings\/ai\/[A-Za-z0-9_-]+$/.test(path);
+    const validRoute=/^\/lms\/settings\/documents\/mapping\/(REQUEST|REPORT)\/[-a-f0-9]{36}$/i.test(path)||valid.includes(path)||/^\/lms\/settings\/[a-z-]+$/.test(path)||/^\/lms\/settings\/ai\/[A-Za-z0-9_-]+$/.test(path);
     if (path !== '/lms/login' && !validRoute) navigate('/lms/login', true);
     else if (validRoute && !currentUser) navigate('/lms/login', true);
     else if(path==='/lms/accounts'&&currentUser)navigate('/lms/settings/accounts',true);

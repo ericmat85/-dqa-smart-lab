@@ -43,3 +43,34 @@
  .mapping-field-unused td:not(:first-child){display:none}
  .mapping-field-toggle{min-height:32px}.mapping-sheet-options button{max-width:100%}
 }
+/* Dedicated route: full viewport editor with a compact, persistent action row. */
+html body #root .document-mapping-route{display:block;width:100%;height:100dvh;min-height:100dvh;overflow:hidden;background:var(--enterprise-bg,#e8edf3);--surface:var(--enterprise-card,#fff);--line:var(--enterprise-border,#dce5f1);--text:var(--enterprise-text,#172b4d);--muted:var(--enterprise-secondary,#71829a)}
+html body #root .document-mapping-page.document-mapping-dialog{display:flex;flex-direction:column;width:100%!important;max-width:none!important;height:100dvh;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;overflow:hidden;background:var(--surface);color:var(--text);font-family:var(--app-font)}
+.document-mapping-page>header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex:none;padding:12px 24px;background:var(--soft);border-bottom:1px solid var(--line)}
+.document-mapping-page>header h1{font-size:18px;line-height:1.4;margin:2px 0 0}.document-mapping-page>header small{font-size:11px;color:var(--muted)}
+html body #root .document-mapping-page>form{flex:1;min-height:0;overflow:auto;padding:12px 24px 0;scroll-padding-top:12px;scroll-padding-bottom:65px}
+.mapping-template-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:12px;margin-bottom:8px}.mapping-template-meta>span{color:var(--muted)}
+.mapping-editor-help{font-size:12px;margin-bottom:8px}.mapping-editor-help summary{cursor:pointer;color:var(--muted)}
+.document-mapping-page .mapping-simulation{padding:8px 12px;margin:8px 0}
+.document-mapping-page .mapping-list-tools{padding:8px 0;gap:14px}
+.document-mapping-page .mapping-list-tools>label:first-child{gap:4px}
+.document-mapping-page .mapping-sheet-default{padding:8px 12px;gap:8px}
+.document-mapping-page .mapping-list-categories{margin:8px 0;gap:5px}
+.document-mapping-page .mapping-field-list>p{margin:6px 0;font-size:11px}
+.document-mapping-page .mapping-field-group{margin:10px 0 16px}
+.document-mapping-page .mapping-field-group>header{padding:6px 0}
+.document-mapping-page .mapping-field-group td{padding:5px 8px}
+.document-mapping-page .mapping-field-group th{height:32px;padding:6px 8px}
+.document-mapping-page .mapping-field-group input:not([type=checkbox]),.document-mapping-page .mapping-list-tools input{height:32px;min-height:32px;padding:4px 8px;border-radius:4px}
+.document-mapping-page .mapping-field-unused input:not([type=checkbox]){border-color:transparent;background:transparent}
+.document-mapping-page .mapping-field-toggle{font-size:12px;gap:8px}
+.document-mapping-page .mapping-field-group .admin-actions{gap:5px}
+html body #root .document-mapping-page form>footer{position:sticky;bottom:0;z-index:2;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:12px -24px 0;padding:10px 24px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -3px 12px #10243d08}
+.document-mapping-page form>footer>button[type=submit]{background:#0866e8;border-color:#0866e8;color:#fff}
+.mapping-page-message{padding:16px 24px}
+@media(max-width:650px){.document-mapping-page>header{padding:10px 12px;gap:8px}.document-mapping-page>header h1{font-size:16px}html body #root .document-mapping-page>form{padding:10px 12px 0}html body #root .document-mapping-page form>footer{margin-left:-12px;margin-right:-12px;padding:10px 12px}.document-mapping-page .mapping-field-group td{padding:5px}.document-mapping-page .mapping-list-tools{gap:8px}.document-mapping-page .mapping-sheet-default small{display:none}.document-mapping-page .mapping-list-categories{gap:4px}}
+html body #root .document-mapping-route .document-mapping-page .mapping-field-group td{padding:5px 8px!important;line-height:1.4;vertical-align:middle}
+html body #root .document-mapping-route .document-mapping-page :is(.mapping-field-group td input:not([type=checkbox]),.mapping-list-tools input){height:32px!important;min-height:32px!important;max-height:32px!important;padding:4px 8px!important}
+html body #root .document-mapping-page .mapping-field-group .admin-actions{margin:0!important;padding:0!important}
+html body #root .document-mapping-page footer .mapping-preview-action{margin-right:auto}
+html body #root .document-mapping-page footer [role=alert]{flex-basis:100%;margin:0;font-size:12px}

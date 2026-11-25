@@ -1,3 +1,4 @@
+import RequestInfoModal from './RequestInfoModal.jsx';
 import WorkspaceFilterToggle from './WorkspaceFilterToggle.jsx';
 import MobileSearchInput from './MobileSearchInput.jsx';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
@@ -22,8 +23,9 @@ fields.anomalies=[['requestId','委託編號'],['title','試驗項目'],['owner'
 fields.results=[['requestId','委託編號'],['title','試驗項目'],['productCode','產品代碼'],['owner','執行人'],['end','預計完成'],['status','執行狀態'],['verdict','試驗判定']];
 const labels={requests:'委託收件與排程',schedules:'試驗執行統計',anomalies:'異常與延遲追蹤',results:'試驗結果明細',equipment:'設備概況',materials:'物料庫存'};
 
-export default function LabReports(){
+export default function LabReports({account}){
  const {snapshot,metrics,now}=useLabView();const [tab,setTab]=useState('schedules'),[query,setQuery]=useState(''),[status,setStatus]=useState(''),[period,setPeriod]=useState(()=>readManagementPreferences().reportPeriod),[from,setFrom]=useState(''),[to,setTo]=useState('');
+ const [detail,setDetail]=useState(null);
  const [filtersOpen,setFiltersOpen]=useState(false),filterId=useId();
  const [customOpen,setCustomOpen]=useState(false),[draftRequest,setDraftRequest]=useState(null);
  const [exporting,setExporting]=useState(''),[notice,setNotice]=useState(''),[error,setError]=useState(''),[hiddenColumns,setHiddenColumns]=useState({});
@@ -64,7 +66,8 @@ export default function LabReports(){
    {invalidRange&&<p role="alert" className="management-error">開始日期不可晚於結束日期。</p>}
    <details className="management-fold report-config"><summary><span className="report-config-title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg><strong>報表顯示與匯出設定</strong></span><span className="report-config-meta">{selectedColumns.length}／{columns.length} 欄<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></span></summary><div className="report-config-body"><ReportPreferences onSaved={(next,previous)=>{if(next.reportPeriod!==previous.reportPeriod)setPeriod(next.reportPeriod);}}/><section className="report-column-panel"><h3 className="report-columns-title">顯示及匯出欄位</h3><div className="management-column-options">{columns.map(column=><label key={column.key}><input type="checkbox" checked={!hiddenColumns[`${tab}:${column.key}`]} disabled={selectedColumns.length===1&&!hiddenColumns[`${tab}:${column.key}`]} onChange={event=>setHiddenColumns(previous=>({...previous,[`${tab}:${column.key}`]:!event.target.checked}))}/>{column.label}</label>)}</div><p>畫面與匯出共用所選欄位，至少保留一欄。</p></section></div></details>
 
-   <LabRecordTable columns={selectedColumns} rows={invalidRange?[]:rows} resetKey={`${tab}|${query}|${status}|${period}|${from}|${to}`}/>
+   <LabRecordTable onSelect={dated?row=>{const code=tab==='requests'?row.id:row.requestId,request=snapshot.electronic.find(r=>r.id===code)||snapshot.requests.find(r=>r.id===code);setDetail(request?{...request,id:code}: {id:code,title:row.title,status:row.status});}:undefined} selectColumn={tab==='requests'?'id':'requestId'} columns={selectedColumns} rows={invalidRange?[]:rows} resetKey={`${tab}|${query}|${status}|${period}|${from}|${to}`}/>
   </section></section><SourceNotes snapshot={snapshot}><p className="lab-report-scope">{dated?(tab!=='requests'?'依排程開始日期篩選；未設定日期的項目只列於全部日期。':'依委託送出日期篩選；審查完成與試驗完成分別統計。'):'目前台帳快照，會隨管理頁面同步。'} 顯示 {rows.length}／{source.length} 筆；匯出包含全部篩選結果，不限目前頁碼。</p></SourceNotes>
+ {detail&&<RequestInfoModal request={detail} account={account} onClose={()=>setDetail(null)}/>}
  </div></section>;
 }
