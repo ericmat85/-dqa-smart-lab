@@ -1,0 +1,822 @@
+{
+  "node": {
+    "passed": 913,
+    "failed": 0
+  },
+  "focused_api": {
+    "passed": 116,
+    "failed": 0,
+    "included_in_node": true
+  },
+  "isolated_sql": {
+    "passed": true,
+    "tests": 38,
+    "failures": 0,
+    "errors": 0,
+    "all_mutations_rolled_back": true
+  },
+  "browser": {
+    "existing_management_preview_cases": 80,
+    "final_trial_delivery_cases": 8,
+    "all_selected_cases_passed": true,
+    "source_runs": "Existing 80 from broad regression run; final 8 from targeted run after download error persistence fix. Not a single 88-case run.",
+    "cases": [
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit overview",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit accounts",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit qualifications",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit organization",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit workflow",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit parameters",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit quality",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit documents",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit interface",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit notifications",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit security",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit monitoring",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E1",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E2",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E3",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E4",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=branding",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=backup",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=maintenance",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management categories have stable order and keyboard navigation",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit overview",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit accounts",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit documents",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit interface",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit backup",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit security",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit ai/E2",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit trial and equipment categories light",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit data maintenance and account roles light",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit trial and equipment categories dark",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit data maintenance and account roles dark",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit overview",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit accounts",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit qualifications",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit organization",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit workflow",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit parameters",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit quality",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit documents",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit interface",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit notifications",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit security",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit monitoring",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E1",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E2",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E3",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit ai/E4",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=branding",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=backup",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management audit backup?section=maintenance",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "management categories have stable order and keyboard navigation",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit overview",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit accounts",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit documents",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit interface",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit backup",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit security",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "dark management audit ai/E2",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit trial and equipment categories light",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit data maintenance and account roles light",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit trial and equipment categories dark",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "management-ui-standards.spec.mjs",
+        "title": "inner management audit data maintenance and account roles dark",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lms Excel template full-window preview with zoom and without PDF light",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "request Excel template full-window preview with zoom and without PDF light",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lab Excel template full-window preview with zoom and without PDF light",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lms Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "request Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lab Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "Excel zoom keeps worksheet images aligned and recalculates fit when switching worksheets",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lms Excel template full-window preview with zoom and without PDF light",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "request Excel template full-window preview with zoom and without PDF light",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lab Excel template full-window preview with zoom and without PDF light",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lms Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "request Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "lab Excel template full-window preview with zoom and without PDF dark",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "title": "Excel zoom keeps worksheet images aligned and recalculates fit when switching worksheets",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "corrupt bound originals never start a browser download",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "an existing uploaded blank form can be copied into a trial binding without changing the source library",
+        "project": "business-desktop",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "corrupt bound originals never start a browser download",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "an existing uploaded blank form can be copied into a trial binding without changing the source library",
+        "project": "business-mobile",
+        "status": "expected",
+        "results": [
+          "passed"
+        ]
+      }
+    ]
+  },
+  "build": "passed",
+  "lint": "passed_with_project_warnings",
+  "schema_source_sha256": "fe74b40d453915afda33f2328ab92a6c8072f771b65e78c9ec634c6062fa278f",
+  "live_case_binding_and_file_mutations": false
+}

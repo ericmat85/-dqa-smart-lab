@@ -1,9 +1,11 @@
+import LabBoundTemplates from './LabBoundTemplates.jsx';
+import {requestTrialTemplate} from './trialTemplateDeliveryClient.mjs';
 import './LabTraditionalTypography.css';
 import {canConfirmLabCompletion} from './trialCompletion.mjs';
 import {REPORT_FILE_MAX_MB} from './reportFilePolicy.mjs';
 import {isVirtualRequest} from './requestExecutionKind.mjs';
 import {BusinessHumanPending,useHumanPending} from './BusinessHumanControls.jsx';
-import {originalHumanSource,humanWorkflowEnabled} from './originalBusiness.mjs';
+import {originalHumanSource,humanWorkflowEnabled,businessSessionVersion} from './originalBusiness.mjs';
 import {executeHuman,humanCommand,humanMessage,pendingHumanOperation} from './businessHumanClient.mjs';
 import {originalBusinessEnabled,originalBusinessAccount,loginOriginalBusiness,logoutOriginalBusiness,originalBusinessError} from './originalBusiness.mjs';
 import {appStorage} from './originalBusiness.mjs';
@@ -158,8 +160,8 @@ export default function LabApp({ path, navigate }) {
   useEffect(() => {
     if(!downloadJob)return;
     const controller=new AbortController();setDownloadProgress(10);setDownloadError('');setDownloadTrial('');
-    readCaseTrialTemplate({requestId:downloadJob.id,actorId:account?.id},appStorage(),{signal:controller.signal,onStage:(stage,trial)=>{if(!controller.signal.aborted){setDownloadProgress(stage==='BUILDING'?35:80);setDownloadTrial(trial.name);}}})
-      .then(file=>{if(controller.signal.aborted)return;const url=URL.createObjectURL(new Blob([file.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);setDownloadProgress(100);})
+    (async()=>{if(originalBusinessEnabled()){const doc=requests.find(r=>r.id===downloadJob.id)?.documentVersionId;if(doc){const file=await requestTrialTemplate(doc,account.id);if(controller.signal.aborted)return null;if(file){setDownloadJob(null);return null;}}}return readCaseTrialTemplate({requestId:downloadJob.id,actorId:account?.id},appStorage(),{signal:controller.signal,onStage:(stage,trial)=>{if(!controller.signal.aborted){setDownloadProgress(stage==='BUILDING'?35:80);setDownloadTrial(trial.name);}}});})()
+      .then(file=>{if(controller.signal.aborted||!file)return;const url=URL.createObjectURL(new Blob([file.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));const link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);setDownloadProgress(100);})
       .catch(error=>{if(!controller.signal.aborted){setDownloadError(error.message);setDownloadProgress(0);}});
     return()=>controller.abort();
   },[downloadJob,account?.id]);
@@ -211,10 +213,14 @@ export default function LabApp({ path, navigate }) {
     setSelected(null);
   };
   async function downloadCaseTemplate(id,demo=false){
+    const nativeDownload=originalBusinessEnabled(),downloadEpoch=businessSessionVersion();
     if(demo&&originalBusinessEnabled()&&!isVirtualRequest(sharedSnapshot.electronic.find(r=>r.id===id)))throw Error('Demo 填入只適用虛擬委託。');
     setPreparingReport(true);setModalError('');setReportCheck(null);
     try{
-    const result=await readCaseTrialTemplate({requestId:id,actorId:account.id},appStorage(),demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
+    const documentId=requests.find(row=>row.id===id)?.documentVersionId;
+    const bound=!demo&&originalBusinessEnabled()&&documentId?await requestTrialTemplate(documentId,account.id):null;
+    const result=bound?{...bound,name:`${id}_${bound.name}`.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')}:await readCaseTrialTemplate({requestId:id,actorId:account.id},appStorage(),demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
+    if(nativeDownload&&downloadEpoch!==businessSessionVersion())throw Error('登入帳號已變更，已停止下載。');
     if(demo){
       setReportFile(new File([result.bytes],result.fileName,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
       if(!originalBusinessEnabled()){setSignatureMode('upload');setLabSignature(createDemoApprovalSignature(`${account.name}（DEMO）`));}setReportCheck(result.check);return;
@@ -275,6 +281,7 @@ export default function LabApp({ path, navigate }) {
       <main className="lab-main">{!['materials','equipment'].includes(tab)&&<div className="lab-workspace-heading"><h1><LmsSidebarIcon name={tab==='materials'?'maintenance':tab==='equipment'?'equipment':tab==='audit'?'history':tab==='archive'?'archive':'requests'}/>{tab==='materials'?'物料管理':tab==='equipment'?'設備狀態':tab==='archive'?'資料庫':tab==='audit'?'操作歷程':'試驗委託'}</h1><p>{tab==='materials'?'庫存、借出與物料資訊管理':tab==='equipment'?'設備資訊與狀態查閱（唯讀）':tab==='archive'?'試驗文件與報告查閱':tab==='audit'?'查看試驗接收、操作與申請紀錄':'接收試驗、掌握執行進度與提交報告'}</p></div>}
         {!['materials','equipment'].includes(tab)&&pageNotices}
         {tab==='materials'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><div className="dashboard-content"><MaterialsPage currentUser={account} system="lab" statusContent={pageNotices}/></div></div>:tab==='equipment'?<div className={`lab-catalog-workspace lms-enterprise ${dark?'theme-dark':'theme-light'}`}><div className="dashboard-content"><EquipmentPage currentUser={account} system="lab" readOnly statusContent={pageNotices}/></div></div>:tab === "archive" ? <ReportArchive actor={account} system="lab" showHeading={false}/> : tab === "requests" ? <>
+          {originalBusinessEnabled()&&<LabBoundTemplates key={account.id} actorId={account.id} sourceKey={requests.map(r=>r.id+':'+r.status+':'+r.executorId).join('|')}/>}
           <div className="lab-stats lab-stats-with-scheduled lab-dashboard-stats">{[['待確認','clock','pending'],['已排程','flow','scheduled'],['試驗中','lab','running'],['已完成','shield','completed'],['已逾期','clock','overdue']].map(([status,icon,tone])=>{const match=item=>status==='已逾期'?labRequestOverdue(item,sharedSnapshot.schedules,labNow):item.status===status;return <button type="button" className="lab-stat-card" key={status} aria-pressed={requestFilter===status} aria-describedby={`lab-kpi-${tone}`} onClick={()=>setRequestFilter(current=>current===status?'all':status)}><span className={`lab-stat-icon lab-stat-${tone}`}><LoginSystemIcon kind={icon}/></span><div><span>{status}</span><strong>{requests.filter(match).length}</strong></div><span className="lab-kpi-arrow" aria-hidden="true"><WorkspaceDiagonalArrow/></span><small id={`lab-kpi-${tone}`} className="lab-kpi-hint">查看{status}的試驗委託；再次點擊顯示全部。</small></button>;})}</div>
           <section className="lab-panel lab-dashboard-overview"><div className="lab-panel-heading"><div><div className="help-title-row"><h2>試驗委託清單</h2><HelpTip>確認接收、試驗執行與主管審核申請</HelpTip></div></div></div>
             <div className="lab-table-wrap"><PaginatedTable><thead><tr><th>委託編號</th><th>專案／試驗</th><th>設備</th><th>樣品編號</th><th>試驗日程</th><th>狀態</th><th>操作</th></tr></thead><tbody>{requests.filter(item=>item.status!=="已結案"&&(requestFilter==='all'||(requestFilter==='已逾期'?labRequestOverdue(item,sharedSnapshot.schedules,labNow):item.status===requestFilter))).map(item => <tr key={item.id}>

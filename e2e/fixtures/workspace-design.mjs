@@ -12,6 +12,9 @@ export async function workspaceFixture(page,{dark=false,requester=false,snapshot
  const material={id:id(3),legacy_id:'MAT-019',name:'防靜電工作墊',category:'治具配件',unit:'張',total_quantity:6,available_quantity:4,min_stock:1,status:'AVAILABLE',revision:1,display_details:{owner:'合成工程師',location:'合成工具櫃'}};
  const requests=[1,2,3].map((n)=>({id:id(10+n),legacy_id:'REQ-2026-00'+n,owner_member_id:id(1),status:'AWAITING_LMS_REVIEW',revision:1,product_code:'VCU-A0'+n,customer_name:'合成客戶',quantity:1,form_details:{testItems:['高溫高濕']},created_at:'2026-11-24T00:00:00Z'}));
  await page.route('**/api/**',async route=>{const q=route.request(),path=new URL(q.url()).pathname.replace('/api/business',''),send=data=>route.fulfill({json:{data}});if(q.method()!=='GET'){state.writes.push(path);return route.fulfill({status:403,json:{error:{code:'DESIGN_PREVIEW_READ_ONLY'}}});}
+ if(path==='/trial-templates')return send({trials:defaultTrialCatalog().map((t,i)=>({id:id(100+i),legacy_id:t.id,name:t.name,aliases:t.aliases,file_id:null,revision:0})),files:[],can_manage:true});
+ if(path==='/trial-templates/inbox')return send({rows:[]});
+ if(path.startsWith('/trial-templates/request/'))return send({has_template:false});
  if(path==='/templates/blank')return send({rows:[],builtin_visible:true,revision:0,can_manage:true,source:'DATABASE'});
  if(path==='/maintenance')return send({counts:{},choices:[],runs:[]});
  if(path==='/signature-settings'){const section=new URL(q.url()).searchParams.get('section');return send(section==='port'?{can_manage:true,revision:0,configured:false,config:null,verification_approved:false,digital_ready:false,signing_enabled:false}:section==='targets'?[]:{method:'IMAGE',revision:0,digital_ready:false,can_manage:true});}
