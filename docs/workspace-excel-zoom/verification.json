@@ -1,0 +1,30 @@
+{
+  "program_and_api": {
+    "passed": 899,
+    "failed": 0
+  },
+  "native_browser": {
+    "startTime": "2026-11-25T05:38:40.254Z",
+    "duration": 240197.42,
+    "expected": 30,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "original_file_browser": {
+    "startTime": "2026-11-25T05:40:24.877Z",
+    "duration": 47461.378,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "build": true,
+  "lint": {
+    "passed": true,
+    "existing_project_warnings": true
+  },
+  "database_migrations": false,
+  "live_database_writes": false,
+  "user_workbook_committed": false
+}
