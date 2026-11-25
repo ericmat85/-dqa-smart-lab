@@ -1,0 +1,366 @@
+{
+  "date": "2026-11-25",
+  "browser": {
+    "passed": 50,
+    "failed": 0,
+    "cases": [
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lms database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "request database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lab database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lms database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "request database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lab database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "archive deny failure does not expose PDF",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "archive corrupt failure does not expose PDF",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "closing loading preview prevents late reads from reopening it",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lms database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "request database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lab database shares LMS list and opens A4 full-window PDF in light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lms database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "request database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "lab database shares LMS list and opens A4 full-window PDF in dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "archive deny failure does not expose PDF",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "archive corrupt failure does not expose PDF",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-unified.spec.mjs",
+        "name": "closing loading preview prevents late reads from reopening it",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lms Excel template full-window preview without PDF light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "request Excel template full-window preview without PDF light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lab Excel template full-window preview without PDF light",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lms Excel template full-window preview without PDF dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "request Excel template full-window preview without PDF dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lab Excel template full-window preview without PDF dark",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lms Excel template full-window preview without PDF light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "request Excel template full-window preview without PDF light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lab Excel template full-window preview without PDF light",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lms Excel template full-window preview without PDF dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "request Excel template full-window preview without PDF dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "template-full-window.spec.mjs",
+        "name": "lab Excel template full-window preview without PDF dark",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "activated account saves its own avatar and signature, reloads them and explicitly applies signature",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "avatar-final-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "image read failure and lost save never overwrite defaults or replay; explicit readback resolves",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "image revision conflicts preserve draft and read-only users cannot edit shared branding",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "logout clears account images and late image reads cannot restore previous identity",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "activated account saves its own avatar and signature, reloads them and explicitly applies signature",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "avatar-final-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "image read failure and lost save never overwrite defaults or replay; explicit readback resolves",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "image revision conflicts preserve draft and read-only users cannot edit shared branding",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "workspace-images-layout.spec.mjs",
+        "name": "logout clears account images and late image reads cannot restore previous identity",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "search-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "lms Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "request Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "lab Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "lms Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "request Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "archive-fullscreen-demo.spec.js",
+        "name": "lab Demo archive uses shared icons and full-window saved PDF",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-browser.spec.js",
+        "name": "trial, blank and general previews and downloads remain usable with no model requests",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-browser.spec.js",
+        "name": "trial, blank and general previews and downloads remain usable with no model requests",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-design.spec.js",
+        "name": "documents and archive share blank request, twenty templates, exact image preview and uploaded Excel",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-design.spec.js",
+        "name": "read-only management role cannot upload and blank preview fits mobile",
+        "project": "business-desktop",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-design.spec.js",
+        "name": "documents and archive share blank request, twenty templates, exact image preview and uploaded Excel",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      },
+      {
+        "file": "report-template-design.spec.js",
+        "name": "read-only management role cannot upload and blank preview fits mobile",
+        "project": "business-mobile",
+        "status": "passed",
+        "run": "demo-results.json"
+      }
+    ]
+  },
+  "node": {
+    "passed": 19,
+    "failed": 0
+  },
+  "build": "passed",
+  "lint": "passed with existing warnings",
+  "data": "synthetic local data and API mocks only; no live login/model/email/database writes"
+}
