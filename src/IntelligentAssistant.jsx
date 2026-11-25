@@ -1,3 +1,4 @@
+import {fillLV1Demo} from './lv1DemoCommand.mjs';
 import DemoReportDialog from './DemoReportDialog.jsx';
 import './DemoReportDialog.css';
 import {businessClient} from './businessClient.mjs';
@@ -106,6 +107,8 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms',onDe
    const command=assistantCommand(trimmed);
    const commandsFaq=findCommonQuestion(trimmed)?.id==='commands';
    if(command==='CREATE_REPORT'){if(system!=='lab'){reply='請至實驗室的「試驗委託」頁輸入 /create a demo report，選擇由你執行且已完成的虛擬委託。';}else{setDemoReportOpen(true);reply='已開啟 Demo 報告產生器，請選擇虛擬委託。產生後將以提交時相同的後端規則檢查。';}}
+   else if(command==='FILL_LV1'){reply=fillLV1Demo({system,actorId:originalBusinessEnabled()?businessIdentity()?.member.id:undefined}).message;}
+   else if(/^\/demo[ \t]+fill\b/i.test(trimmed)){reply='目前支援 /demo fill in LV1；請在虛擬委託的一階審查視窗中使用。';}
    else if(commandsFaq){reply=commandGuide(language);}
    else if(command==='SEARCH'||command==='CLEANUP'||command==='RESTART'){
     if(!originalBusinessEnabled()){reply='目前為隔離展示，這些指令只在已登入的資料庫工作區使用。';}

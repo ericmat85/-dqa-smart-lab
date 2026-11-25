@@ -17,15 +17,21 @@ const PHASE={READING:'讀取試驗資料',SESSION:'建立應用程式 Session',U
 const time=v=>new Date(v).toLocaleTimeString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
 const seconds=v=>v===null||v===undefined?'—':(v/1000).toFixed(1)+' 秒';
 const display=v=>v===null||v===undefined?'—':v;
-function SettingsEditor({snapshot,account,onClose,onSaved}){
- const [draft,setDraft]=useState({...snapshot.settings}),[error,setError]=useState('');
- return <CompactDialog title="調整 AI 排程設定" onClose={onClose} className="admin-edit-dialog"><form className="admin-edit-form" onSubmit={e=>{e.preventDefault();try{saveE2Settings(draft,account,{expectedRevision:snapshot.revision});onSaved();onClose();}catch(error){setError(error.message);}}}>
+function SettingsEditor({snapshot,account,onClose,onSaved,inline=false}){
+ const [draft,setDraft]=useState({...snapshot.settings}),[revision]=useState(snapshot.revision),[error,setError]=useState('');
+ const form=<form className="admin-edit-form" onSubmit={e=>{e.preventDefault();try{saveE2Settings(draft,account,{expectedRevision:revision});onSaved();if(!inline)onClose();}catch(error){setError(error.message);}}}>
   <p>儲存於目前瀏覽器，僅套用至之後的新排程請求；既有排程及正在處理的請求維持原內容。</p>
   <label className="admin-checkbox"><input type="checkbox" checked={draft.enabled} onChange={e=>setDraft({...draft,enabled:e.target.checked})}/><span>允許新的自動化排程請求</span></label>
   <div className="admin-form-grid">{[['searchDays','搜尋範圍上限（天）',1,14],['preparationMinutes','準備保留時間下限（分鐘）',0,120],['cleanupMinutes','清理保留時間下限（分鐘）',0,120]].map(([key,label,min,max])=><label key={key}><span>{label}</span><input type="number" aria-label={label} required min={min} max={max} step="1" value={draft[key]} onChange={e=>setDraft({...draft,[key]:e.target.value===''?'':Number(e.target.value)})}/></label>)}</div>
   <p className="e2-management-hint">搜尋不會延後委託交期；試驗工時、設備相容性、容量 U 與操作型試驗的週末限制保持有效。既有準備／清理時間較長時保留較長值。此頁不啟用模型或調高預算。</p>
-  {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" onClick={onClose}>取消</button><button type="submit" className="management-primary">儲存排程設定</button></footer>
- </form></CompactDialog>;
+  {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" onClick={onClose}>{inline?'還原未儲存變更':'取消'}</button><button type="submit" className="management-primary">儲存排程設定</button></footer>
+ </form>;
+ return inline?form:<CompactDialog title="調整 AI 排程設定" onClose={onClose} className="admin-edit-dialog">{form}</CompactDialog>;
+}
+export function E2InlinePreferences({account}){
+ const [version,setVersion]=useState(0);let snapshot,error;try{snapshot=readE2Settings();}catch(e){error=e.message;}
+ if(!canEditAdmin(account))return <p>目前帳號只能查閱排程偏好。</p>;
+ return <section className="engine-local-preferences" aria-label="E2 本瀏覽器偏好"><header><h4>本瀏覽器排程偏好</h4><small>新排程請求使用</small></header>{error?<p role="alert">{error}</p>:<><SettingsEditor key={version} inline snapshot={snapshot} account={account} onClose={()=>setVersion(v=>v+1)} onSaved={()=>setVersion(v=>v+1)}/><button type="button" className="template-btn" onClick={()=>{if(window.confirm('還原本瀏覽器的排程偏好為預設值？')){try{resetE2Settings(account);setVersion(v=>v+1);}catch(e){window.alert(e.message);}}}}>還原排程預設值</button></>}</section>;
 }
 export default function E2SchedulingManagement({account,preferencesOnly=false}){
  const [,refresh]=useState(0),[editing,setEditing]=useState(null),[notice,setNotice]=useState(''),[error,setError]=useState(''),[filter,setFilter]=useState('ALL'),[execution,setExecution]=useState('ALL');

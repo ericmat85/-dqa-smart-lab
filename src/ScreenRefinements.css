@@ -33,3 +33,40 @@ html body #root .activity-preferences .activity-reload{margin-right:auto}
 /* Account/search overrides previously carried a higher selector weight. */
 html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.panel.account-management .account-access-toolbar) :is(button.catalog-search-toggle,button.workspace-filter-toggle){color:#fff!important}
 html body #root .lms-enterprise .admin-activity-settings>.activity-preferences{padding:0;border:0;border-radius:0;background:transparent}
+/* Engine controls share one editor; connection and budget settings stay separate. */
+html body #root .lms-enterprise .admin-engine-tabs{margin:0 16px 16px!important;width:calc(100% - 32px);padding:0 4px!important;box-sizing:border-box;scroll-padding-inline:8px}
+html body #root .engine-controls-workspace{margin-top:16px}
+.engine-controls-workspace>header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.engine-controls-workspace h3{margin:3px 0;font-size:17px}.engine-controls-workspace header small{font-size:11px;color:var(--muted)}
+.engine-controls-workspace header p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.engine-control-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 0}
+.engine-control-summary>div{padding:10px 12px;background:var(--soft);border-radius:5px}
+.engine-control-summary dt{font-size:11px;color:var(--muted)}.engine-control-summary dd{margin:6px 0 0;font-size:14px;font-weight:600}
+html body #root .engine-controls-dialog{width:min(900px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:hidden;padding:0}
+.engine-controls-dialog-body{padding:16px 20px;overflow:auto;max-height:calc(100dvh - 100px);box-sizing:border-box}
+.engine-controls-dialog-body form{margin:0;padding:0;background:transparent;border:0}
+.engine-controls-dialog-body form>header,.engine-local-preferences>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.engine-controls-dialog-body h4{margin:0;font-size:14px}.engine-controls-dialog-body h5{font-size:12px;margin:0 0 10px}
+.engine-controls-dialog-body header small{font-size:11px;color:var(--muted)}
+.engine-controls-dialog-body :is(fieldset,.admin-form-grid){min-width:0}
+.engine-controls-dialog-body form>fieldset{border:0;padding:0;margin:0}
+.engine-controls-dialog-body :is(.business-ai-grid,.admin-form-grid){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.engine-controls-dialog-body :is(.business-ai-grid,.admin-form-grid)>label{display:flex;flex-direction:column;gap:6px;font-size:12px;margin:0}
+.engine-controls-dialog-body :is(input:not([type=checkbox]),select){height:36px;min-height:36px;width:100%;padding:6px 10px;border:1px solid var(--line,var(--enterprise-border));border-radius:5px;background:var(--surface);color:inherit;box-sizing:border-box;font:inherit}
+.engine-controls-dialog-body p,.engine-controls-dialog-body .business-ai-engine-controls>small{font-size:12px;line-height:1.7;color:var(--muted)}
+.engine-controls-dialog-body form>footer,.engine-controls-finish{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line,var(--enterprise-border))}
+.engine-local-preferences{border-top:1px solid var(--line,var(--enterprise-border));padding-top:18px;margin-top:20px}
+.engine-local-preferences>.template-btn{margin-top:12px}
+html body #root .lms-enterprise .equipment-page .template-heading{padding:12px 0!important;margin:0!important;min-height:60px!important;box-sizing:border-box;align-items:center!important}
+html body #root .lms-enterprise .equipment-page .template-heading h2{margin:0!important;line-height:1.4}
+html body #root .lms-enterprise .equipment-page .template-heading .help-title-row{margin:0}
+html body #root .request-info-detail-modal .request-review-close{display:inline-flex!important;flex:none}
+html body #root .request-info-detail-modal .report-case-panel{margin:0 0 16px!important;padding:0 0 12px!important;border-bottom:1px solid var(--enterprise-border)!important}
+html body #root .lms-enterprise:has(.request-info-detail-modal) .intelligent-assistant{z-index:1600}
+@media(max-width:650px){.engine-controls-workspace>header{align-items:flex-start;flex-direction:column}.engine-control-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.engine-controls-dialog-body{padding:12px}.engine-controls-dialog-body :is(.business-ai-grid,.admin-form-grid){grid-template-columns:1fr}.engine-controls-dialog-body form>footer{flex-wrap:wrap}html body #root .lms-enterprise .admin-engine-tabs{margin-left:12px!important;margin-right:12px!important;width:calc(100% - 24px)}}
+
+html body #root .request-info-detail-modal .mapped-request-document{margin:0 0 16px;padding:4px 0 12px}
+
+.engine-controls-dialog-body .admin-checkbox{display:flex!important;flex-direction:row!important;align-items:center;gap:8px}
+html body #root .lms-enterprise .admin-module-content .admin-engine-tabs[role=tablist]{margin:0 16px 16px!important;width:calc(100% - 32px)!important;padding:0 4px!important;box-sizing:border-box}
+@media(max-width:650px){html body #root .lms-enterprise .admin-module-content .admin-engine-tabs[role=tablist]{margin:0 12px 12px!important;width:calc(100% - 24px)!important}}
