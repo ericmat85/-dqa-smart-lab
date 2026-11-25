@@ -1,0 +1,4 @@
+/* Icon ink follows its surface, independent of per-page button palettes. */
+html body #root svg[data-search-icon="magnifier"]{color:#000!important;stroke:currentColor}
+html body #root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) svg[data-search-icon="magnifier"]{color:#fff!important}
+html body #root :is(.workspace-tab-toolbar,.account-access-toolbar,.workspace-primary-tabs,.appearance-example-toolbar) svg[data-search-icon="magnifier"]{color:#fff!important}

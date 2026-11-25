@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import SearchIcon from './SearchIcon.jsx';
 import {APPEARANCE_DEFAULTS,APPEARANCE_PRESETS,appearancePalette,colorContrast,isHexColor,validateWorkspaceAppearance} from './workspaceAppearance.mjs';
 import {useWorkspaceAppearance} from './workspaceAppearanceContext.mjs';
 import './WorkspaceAppearanceSettings.css';
@@ -8,7 +9,7 @@ function ColorControl({label,name,value,onChange,disabled}){
 function Preview({palette}){
  return <div className="appearance-example" style={{'--example-header':palette.header,'--example-header-text':palette.headerText,'--example-tab':palette.tab,'--example-tab-text':palette.tabText,'--example-active':palette.active,'--example-active-text':palette.activeText,'--example-head':palette.head,'--example-head-text':palette.headText,'--example-rule':palette.rule,'--example-search':palette.search,'--example-search-text':palette.searchText,'--example-search-border':palette.searchBorder}}>
   <div className="appearance-example-header">首頁<span>›</span>實驗室管理系統<span>›</span><strong>排程管理</strong></div>
-  <div className="appearance-example-toolbar"><div><span className="is-active">全部排程 <b>2</b></span><span>依執行人員 <b>2</b></span><span>依設備排程 <b>2</b></span></div><span className="appearance-example-search" aria-label="搜尋與篩選示意" title="搜尋與篩選"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></span></div>
+  <div className="appearance-example-toolbar"><div><span className="is-active">全部排程 <b>2</b></span><span>依執行人員 <b>2</b></span><span>依設備排程 <b>2</b></span></div><span className="appearance-example-search" aria-label="搜尋與篩選示意" title="搜尋與篩選"><SearchIcon/></span></div>
   <div className="appearance-example-scroll"><table><caption>示意排程列表</caption><thead><tr><th>委託編號</th><th>產品代碼</th><th>試驗項目</th><th>執行人</th><th>狀態</th><th>操作</th></tr></thead><tbody>{[['001','VCU-A01','高溫高濕','已排程'],['002','MTR-B02','振動試驗','試驗中']].map(([id,code,trial,status])=><tr key={id}><td>REQ-2026-{id}</td><td>{code}</td><td>{trial}</td><td>示範工程師</td><td>{status}</td><td><span className="appearance-example-action" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span></td></tr>)}</tbody></table></div>
  </div>;
 }
