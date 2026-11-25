@@ -2,6 +2,7 @@ import {blankTemplateSnapshot,saveBlankTemplate,readBlankTemplate,deleteBlankTem
 import {originalBusinessEnabled,appStorage,businessIdentity} from './originalBusiness.mjs';
 import {findTrialDefinition,readTrialCatalog} from './trialCatalogStore.mjs';
 import {excelModule} from './reportWorkbook.mjs';
+import {reportBounds} from './reportLayout.mjs';
 import {INITIAL_ACCOUNTS} from './demoAccounts.mjs';
 import {canOpenReportArchive} from './reportArchive.mjs';
 import {canEditAdmin} from './adminCenterStore.mjs';
@@ -47,7 +48,8 @@ export async function validateUploadedTemplate(bytes,name){
  if(!/\.xlsx$/i.test(name||''))throw Error('只接受 .xlsx 範本，不接受 .xls、.xlsm 或 PDF。');const directory=inspectTemplateZip(bytes);await verifyTemplateStreams(bytes,directory);
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('Excel 無法讀取，可能已加密或損壞。');}
  if(book.worksheets.length>16||book.worksheets.every(s=>s.state&&s.state!=='visible'))throw Error('範本沒有可預覽的工作表。');
- let cells=0;book.eachSheet(s=>{if(s.rowCount>2000||s.columnCount>48)throw Error('範本最多 2000 列、48 欄。');s.eachRow(r=>r.eachCell(c=>{cells++;if(cells>100000)throw Error('範本儲存格數量超限。');if(c.value?.formula||c.value?.sharedFormula||c.value?.hyperlink)throw Error('上傳範本不得含公式或超連結；請另存為純欄位版。');}));for(const image of s.getImages()){const media=book.getImage(image.imageId);if(!media||!['png','jpeg','jpg'].includes(media.extension))throw Error('圖片只接受內嵌 PNG／JPEG。');}});
+ // Excel dimensions also count blank formatting; use the viewer's meaningful bounds without rewriting the original workbook.
+ let cells=0;book.eachSheet(s=>{reportBounds(s,{maxRows:2000,maxColumns:48});s.eachRow(r=>r.eachCell(c=>{cells++;if(cells>100000)throw Error('範本儲存格數量超限。');if(c.value?.formula||c.value?.sharedFormula||c.value?.hyperlink)throw Error('上傳範本不得含公式或超連結；請另存為純欄位版。');}));for(const image of s.getImages()){const media=book.getImage(image.imageId);if(!media||!['png','jpeg','jpg'].includes(media.extension))throw Error('圖片只接受內嵌 PNG／JPEG。');}});
  if(book.media.length>32)throw Error('範本圖片數量超限。');
  const declared=[];const add=value=>{if(typeof value==='string'&&value.trim())declared.push(value.trim());};
  add(book.getWorksheet('報告首頁')?.getCell('C12').text);

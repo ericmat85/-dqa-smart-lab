@@ -24,7 +24,7 @@ export function emptyOutsidePrintMerges(sheet){
 export function normalizeReportMerges(book){
  book.eachSheet(sheet=>{for(const range of emptyOutsidePrintMerges(sheet))sheet.unMergeCells(range);});
 }
-export function reportBounds(sheet){
+export function reportBounds(sheet,{maxRows=2000,maxColumns=50}={}){
  let rows=1,columns=1;
  const include=(row,col)=>{rows=Math.max(rows,row);columns=Math.max(columns,col);};
  sheet.eachRow(row=>row.eachCell(cell=>{
@@ -35,6 +35,6 @@ export function reportBounds(sheet){
  const ranges=[...(sheet.model.merges||[]).filter(range=>!ignored.has(range)),...(sheet.pageSetup.printArea||'').split('&&')];
  for(const range of ranges){const box=rangeEnd(range);if(box)include(box.bottom,box.right);}
  for(const image of sheet.getImages())include(Math.ceil(image.range.br?.row??image.range.tl.row+3)+1,Math.ceil(image.range.br?.col??image.range.tl.col+3));
- if(rows>2000||columns>50)throw Error(`工作表「${sheet.name}」的實際內容或列印範圍為 ${rows.toLocaleString('en-US')} 列、${columns} 欄，超過 Demo 支援的 2,000 列、50 欄。請縮小內容或列印範圍；列印範圍外的空白格式與空白合併欄不計入限制。`);
+ if(rows>maxRows||columns>maxColumns)throw Error(`工作表「${sheet.name}」的實際內容或列印範圍為 ${rows.toLocaleString('en-US')} 列、${columns} 欄，超過支援的 ${maxRows.toLocaleString('en-US')} 列、${maxColumns} 欄。請縮小內容或列印範圍；列印範圍外的空白格式與空白合併欄不計入限制。`);
  return {rows,columns};
 }
