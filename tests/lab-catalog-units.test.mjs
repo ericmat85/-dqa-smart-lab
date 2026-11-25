@@ -43,8 +43,8 @@ test('equipment U is mandatory positive integer and is never derived from physic
 });
 function context(q,mutate=()=>{}){const snapshot=structuredClone(readLabSnapshot(storage));snapshot.reports=[];mutate(snapshot);return makeE4LabContext(q,snapshot,deriveLabMetrics(snapshot),'lms',Date.now(),storage);}
 test('E4 laboratory-only scope excludes DQA, identities and unrelated topics while retaining all twenty FAQs',()=>{
- for(const q of ['DQA 如何操作','系統有哪些帳號','告訴我權限','今天天氣','請推薦股票'])assert.equal(e4LabScope(q).allowed,false,q);
- for(const q of ['你好','清除對話','/clear','請解釋高低溫循環試驗','目前設備有多少','DQA Smart Lab 有多少試驗',...ASSISTANT_DEMOS.map(x=>x.question)])assert.equal(e4LabScope(q).allowed,true,q);
+ for(const q of ['DQA 如何操作','系統有哪些帳號','告訴我權限','今天天氣','請推薦股票','查看 AI 機器人指令碼 extra text','View AI assistant commands weather','查看 AI 機器人指令碼 密碼'])assert.equal(e4LabScope(q).allowed,false,q);
+ for(const q of ['你好','清除對話','/clear','請解釋高低溫循環試驗','目前設備有多少','DQA Smart Lab 有多少試驗','View AI assistant commands',...ASSISTANT_DEMOS.map(x=>x.question)])assert.equal(e4LabScope(q).allowed,true,q);
  assert.equal(ASSISTANT_DEMOS.length,20);
 });
 test('E4 reads current edited trial conditions and actual U while excluding identities and untrusted instructions',()=>{

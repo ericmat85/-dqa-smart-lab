@@ -32,5 +32,10 @@
     "existing_project_warnings": true
   },
   "live_cleanup_executed": false,
-  "live_restart_executed": false
+  "live_restart_executed": false,
+  "node_full_suite": {
+    "passed": 887,
+    "failed": 0
+  },
+  "faq_scope_regression_fixed": true
 }
