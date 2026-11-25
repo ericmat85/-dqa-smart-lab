@@ -2,6 +2,7 @@ import './ResourceActions.css';
 const paths={
  filter:'M3 6h18M6 12h12M9 18h6',
  upload:'M12 17V3m-4 4 4-4 4 4M4 16v5h16v-5',
+ 'report-submit':'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9L14 3ZM14 3v6h6M12 18v-6m-3 3 3-3 3 3',
  'equipment-info':'M6 3h12a1 1 0 0 1 1 1v16H5V4a1 1 0 0 1 1-1ZM5 7h14M8 10h7v6H8zM17 11v4M8 20v2m8-2v2M14 5h.01M17 5h.01',
  'material-info':'m3 6 7-4 7 4v6M3 6v9l7 4v-9m-7-4 7 4 7-4M10 2v8M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0M17 17v3m0-6h.01',
  history:'M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v6l4 2',
