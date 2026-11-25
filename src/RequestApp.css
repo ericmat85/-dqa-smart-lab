@@ -533,3 +533,6 @@ body:has(.rq-theme-dark) .rq-delete-confirm-modal .rq-btn-light{background:#2938
 .rq-demo-flow-section ol{margin:8px 0 0;padding-left:22px}
 .rq-request-detail-body>.report-case-panel:first-child{margin-top:0}
 .rq-request-detail-body .rq-detail-section>.dqa-signature-history{margin:0;border:0;border-radius:0}
+
+
+.rq-source-content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.rq-source-content-row{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:6px}.rq-source-check{display:flex;align-items:center;gap:8px}.rq-source-check input{width:18px;height:18px;flex:none}@media(max-width:650px){.rq-source-content-grid{grid-template-columns:minmax(0,1fr)}}

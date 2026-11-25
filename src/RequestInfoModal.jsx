@@ -1,3 +1,4 @@
+import {formatSampleSources} from './requestChoiceFields.mjs';
 import ExecutionKindBadge from './ExecutionKindBadge.jsx';
 import RequestCloseIcon from './RequestCloseIcon.jsx';
 import HelpTip from './HelpTip.jsx';
@@ -45,7 +46,7 @@ export default function RequestInfoModal({ request: supplied, onClose, onEdit, a
         {[
           {title:'1　委託基本資料', fields:[['產品代碼',selected.productCode || selected.product],['產品類型',selected.productType],['客戶名稱',selected.customer || selected.project],['客戶品番',selected.customerPartNo],['需求日期',selected.dueDate],['測試數量',selected.quantity ? `${selected.quantity} 件` : ''],['委託部門',selected.department],['委託者姓名',selected.requester],['委託類型',selected.priority==='專案關鍵'?'專案':selected.priority],...(selected.projectCode?[['關聯專案',selected.projectCode],['專案分項',selected.projectItemIndex],['專案名稱',selected.project]]:[]),['建立日期',selected.createdAt]]},
           {title:'2　試驗目的', fields:[['試驗目的',(Array.isArray(selected.purpose) ? selected.purpose.join('、') : (selected.purpose || ''))],['其他目的說明',selected.purposeOther]]},
-          {title:'3　樣品來源與樣品資訊', fields:[['樣品來源',(Array.isArray(selected.sampleSource) ? selected.sampleSource.join('、') : (selected.sampleSource || ''))],['來源補充說明',selected.sampleSourceOther],['製品版次',selected.productVersion],['PCBA 版次',selected.pcbaVersion],['軟體版次',selected.softwareVersion],['製造日期',selected.manufactureDate],['其他說明',selected.sampleDescription]]},
+          {title:'3　樣品來源與樣品資訊', fields:[['樣品來源',formatSampleSources(selected)],['製品版次',selected.productVersion],['PCBA 版次',selected.pcbaVersion],['軟體版次',selected.softwareVersion],['製造日期',selected.manufactureDate],['其他說明',selected.sampleDescription]]},
           {title:'4　試驗項目與試驗規範', fields:[['試驗項目',(Array.isArray(selected.testItems) ? selected.testItems.join('、') : (selected.testItems || ''))],['試驗規範／試驗手法',selected.specification]]},
           {title:'5　判定基準與備註', fields:[['判定方式',selected.judgementRequired],['判定基準',selected.judgementCriteria],['備註',selected.notes]]},
           {title:'6　委託簽名與主管簽核', fields:[['委託者簽名',selected.requester],['簽名日期',selected.requesterSignatureAt || selected.requestDate],['主管簽名',selected.approver],['簽核日期',selected.approvalDate],['主管簽核意見',selected.approvalNote]]}

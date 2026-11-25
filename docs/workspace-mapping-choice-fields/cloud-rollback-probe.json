@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "existing_rows_functions_and_public_preserved": true,
+  "existing_private_tables_preserved": true,
+  "existing_cases_not_backfilled": true,
+  "rolled_back": true,
+  "templates_deleted": false,
+  "business_records_modified": false
+}
