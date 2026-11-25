@@ -3,7 +3,7 @@ import CompactDialog from './CompactDialog.jsx';
 import {buildWorkbookView} from './reportWorkbookView.mjs';
 import './TrialTemplateLibrary.css';
 export function downloadTemplate(file){const url=URL.createObjectURL(new Blob([file.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
-export default function TemplatePreview({title,read,onClose,invalidated=''}){
+export default function TemplatePreview({title,read,onClose,invalidated='',downloadable=true,description='',onSelectCell,previewLabel='範本預覽'}){
  const lifetime=useRef(0),area=useRef(null);
  const [view,setView]=useState(null),[sheetIndex,setSheetIndex]=useState(0),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [zoom,setZoom]=useState(100),[viewport,setViewport]=useState({width:0,height:0});
@@ -22,9 +22,9 @@ export default function TemplatePreview({title,read,onClose,invalidated=''}){
  const fitPercent=sheet&&viewport.width>0&&viewport.height>0?Math.max(1,Math.min(200,Math.floor(Math.min((viewport.width-2)/sheet.width,(viewport.height-2)/sheet.height)*100))):100;
  const percent=zoom==='fit'?fitPercent:zoom,steps=[25,50,75,100,125,150,175,200];
  function zoomBy(direction){setZoom(Math.max(25,Math.min(200,(direction>0?Math.floor(percent/25)+1:Math.ceil(percent/25)-1)*25)));}
- return <CompactDialog title={title.endsWith('｜試驗')?title+'範本預覽':title+'｜範本預覽'} onClose={onClose} className="trial-template-dialog">
+ return <CompactDialog title={title.endsWith('｜試驗')?title+'範本預覽':title+'｜'+previewLabel} onClose={onClose} className="trial-template-dialog">
   <div className="trial-template-preview-body">
-   <p>範本工作表預覽；簽名區與量測欄位不預填。可切換工作表、調整顯示比例並下載 Excel 原檔。</p>
+   <p>{description||'範本工作表預覽；簽名區與量測欄位不預填。可切換工作表、調整顯示比例並下載 Excel 原檔。'}</p>
    {!view&&!error&&<p role="status">正在讀取 Excel、示範圖片與版面…</p>}
    {error&&<p role="alert">{error}</p>}{busy&&<p role="status">正在產生預覽或檔案，請稍候…</p>}
    {view&&<>
@@ -38,12 +38,12 @@ export default function TemplatePreview({title,read,onClose,invalidated=''}){
     </div>
     <div ref={area} className="trial-template-sheet" role="region" aria-label="試驗範本 Excel 預覽" tabIndex={0}>
      <div className="template-preview-paper" style={{width:sheet.width,height:sheet.height,zoom:percent/100}}>
-      <table aria-label={sheet.name} style={{width:sheet.width}}><colgroup>{sheet.widths.map((w,i)=><col style={{width:w}} key={i}/>)}</colgroup><tbody>{sheet.rows.map(r=><tr key={r.number} style={{height:r.height}}>{r.cells.map(c=><td key={c.address} data-cell={c.address} rowSpan={c.rowSpan} colSpan={c.colSpan} style={c.style}>{c.text}</td>)}</tr>)}</tbody></table>
+      <table aria-label={sheet.name} style={{width:sheet.width}}><colgroup>{sheet.widths.map((w,i)=><col style={{width:w}} key={i}/>)}</colgroup><tbody>{sheet.rows.map(r=><tr key={r.number} style={{height:r.height}}>{r.cells.map(c=><td key={c.address} data-cell={c.address} tabIndex={onSelectCell?0:undefined} onClick={()=>onSelectCell?.(sheet.name,c.address)} onKeyDown={e=>{if(onSelectCell&&['Enter',' '].includes(e.key)){e.preventDefault();onSelectCell(sheet.name,c.address);}}} rowSpan={c.rowSpan} colSpan={c.colSpan} style={c.style}>{c.text}</td>)}</tr>)}</tbody></table>
       {sheet.images.map((image,i)=><img key={i} src={image.url} alt={`${sheet.name}：合成圖片或範本品牌圖 ${i+1}`} style={{left:image.left,top:image.top,width:image.width,height:image.height}}/>)}
      </div>
     </div>
    </>}
   </div>
-  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button><button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button></footer>
+  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{downloadable&&<button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button>}</footer>
  </CompactDialog>;
 }

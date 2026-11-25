@@ -17,6 +17,7 @@ async function fixture({kind='REPORT',wrongCode=false,unmarked=false}={}){
  const handler=createBusinessHandler({env,fetchImpl:async(raw,options)=>{const u=new URL(raw),b=options.body?JSON.parse(options.body):{};calls.push(u.pathname);assert.equal(options.headers.Authorization,'Bearer SYNTHETIC_ACCESS');
   if(u.pathname==='/auth/v1/user')return Response.json({id:USER,email:'synthetic@example.invalid',email_confirmed_at:new Date().toISOString()});
   if(u.pathname.endsWith('/check_browser_session'))return Response.json(T);
+  if(u.pathname.endsWith('/document_mapping_report_context')){assert.equal(b.p_tenant,T);assert.equal(b.p_request,Q);return Response.json({has_template:false});}
   if(u.pathname.endsWith('/report_upload_intent')){assert.equal(b.p_tenant,T);assert.equal(b.p_id,UPLOAD);return Response.json(intent);}
   if(u.pathname.startsWith('/storage/v1/object/authenticated/')){assert.equal(options.redirect,'error');return new Response(bytes);}
   if(u.pathname.endsWith('/execute_human_operation')){assert.equal(b.p_tenant,T);assert.equal(b.p_attestation,fileAttestation(env.BUSINESS_COOKIE_KEY,intent));return Response.json({state:'SAVED'});}

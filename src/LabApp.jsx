@@ -219,7 +219,7 @@ export default function LabApp({ path, navigate }) {
     try{
     const documentId=requests.find(row=>row.id===id)?.documentVersionId;
     const bound=!demo&&originalBusinessEnabled()&&documentId?await requestTrialTemplate(documentId,account.id):null;
-    const result=bound?{...bound,name:`${id}_${bound.name}`.replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')}:await readCaseTrialTemplate({requestId:id,actorId:account.id},appStorage(),demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
+    const result=bound?{...bound,name:(bound.source_sha256?bound.name:`${id}_${bound.name}`).replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_')}:await readCaseTrialTemplate({requestId:id,actorId:account.id},appStorage(),demo?{build:source=>prepareDemoReport(source,{requireTrialMatch:true})}:{});
     if(nativeDownload&&downloadEpoch!==businessSessionVersion())throw Error('登入帳號已變更，已停止下載。');
     if(demo){
       setReportFile(new File([result.bytes],result.fileName,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));

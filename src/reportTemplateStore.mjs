@@ -14,7 +14,7 @@ export function assertTemplateAccess({actorId,system='lms'},storage=appStorage()
  if(!actor||!canOpenReportArchive(actor,system,storage)||write&&(system!=='lms'||!canEditAdmin(actor,storage)))throw Error(write?'目前帳號沒有上傳範本的管理權限。':'目前帳號沒有範本查閱權限。');return actor;
 }
 // Read ZIP directory bounds before ExcelJS inflates XML or embedded media.
-export function inspectTemplateZip(bytes){
+export function inspectTemplateZip(bytes,{maxSheets=16}={}){
  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);if(b.length<22||b.length>10*1024*1024)throw Error('範本須為 10 MB 以下的 .xlsx。');
  const v=new DataView(b.buffer,b.byteOffset,b.byteLength);let eocd=-1;
  for(let i=b.length-22;i>=Math.max(0,b.length-65557);i--)if(v.getUint32(i,true)===0x06054b50&&i+22+v.getUint16(i+20,true)===b.length){eocd=i;break;}
@@ -32,7 +32,7 @@ export function inspectTemplateZip(bytes){
   const dataStart=local+30+v.getUint16(local+26,true)+v.getUint16(local+28,true);if(dataStart+packed>start)throw Error('範本內容區段超界。');entries.push({name,method,packed,unpacked,dataStart});
   total+=unpacked;if(total>32*1024*1024||unpacked>16*1024*1024||unpacked>1000*Math.max(1,packed))throw Error('範本解壓縮容量超限。');p+=46+n+extra+comment;
  }
- if(p!==eocd||!names.has('[content_types].xml')||!names.has('xl/workbook.xml')||sheets<1||sheets>16)throw Error('範本須包含 1～16 張 Excel 工作表。');return {sheets,uncompressedBytes:total,entries};
+ if(p!==eocd||!names.has('[content_types].xml')||!names.has('xl/workbook.xml')||sheets<1||sheets>maxSheets)throw Error(`範本須包含 1～${maxSheets} 張 Excel 工作表。`);return {sheets,uncompressedBytes:total,entries};
 }
 async function verifyTemplateStreams(bytes,directory){
  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);let total=0;
@@ -44,10 +44,10 @@ async function verifyTemplateStreams(bytes,directory){
   if(xml){const body=await new Blob(parts).text();if(/<!DOCTYPE|<!ENTITY|TargetMode\s*=\s*["']External["']/i.test(body))throw Error('範本不得含外部 XML 來源或實體。');if(/<(?:[A-Za-z]+:)?f(?:\s|\/?>)/i.test(body))throw Error('上傳範本不得含公式；請另存為純欄位版。');}
  }
 }
-export async function validateUploadedTemplate(bytes,name){
- if(!/\.xlsx$/i.test(name||''))throw Error('只接受 .xlsx 範本，不接受 .xls、.xlsm 或 PDF。');const directory=inspectTemplateZip(bytes);await verifyTemplateStreams(bytes,directory);
+export async function validateUploadedTemplate(bytes,name,{maxSheets=16}={}){
+ if(!/\.xlsx$/i.test(name||''))throw Error('只接受 .xlsx 範本，不接受 .xls、.xlsm 或 PDF。');const directory=inspectTemplateZip(bytes,{maxSheets});await verifyTemplateStreams(bytes,directory);
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('Excel 無法讀取，可能已加密或損壞。');}
- if(book.worksheets.length>16||book.worksheets.every(s=>s.state&&s.state!=='visible'))throw Error('範本沒有可預覽的工作表。');
+ if(book.worksheets.length>maxSheets||book.worksheets.every(s=>s.state&&s.state!=='visible'))throw Error('範本沒有可預覽的工作表。');
  // Excel dimensions also count blank formatting; use the viewer's meaningful bounds without rewriting the original workbook.
  let cells=0;book.eachSheet(s=>{reportBounds(s,{maxRows:2000,maxColumns:48});s.eachRow(r=>r.eachCell(c=>{cells++;if(cells>100000)throw Error('範本儲存格數量超限。');if(c.value?.formula||c.value?.sharedFormula||c.value?.hyperlink)throw Error('上傳範本不得含公式或超連結；請另存為純欄位版。');}));for(const image of s.getImages()){const media=book.getImage(image.imageId);if(!media||!['png','jpeg','jpg'].includes(media.extension))throw Error('圖片只接受內嵌 PNG／JPEG。');}});
  if(book.media.length>32)throw Error('範本圖片數量超限。');

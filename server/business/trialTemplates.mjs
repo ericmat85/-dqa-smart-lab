@@ -1,3 +1,4 @@
+import {mappedDocument} from './documentMappings.mjs';
 import {createHash} from 'node:crypto';
 const UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 export async function handleTrialTemplates({path,req,parsed,session,rpc,bodyOf,fields,ApiError,reply,markWrite}){
@@ -6,7 +7,7 @@ export async function handleTrialTemplates({path,req,parsed,session,rpc,bodyOf,f
  if(req.method==='GET'){
   if(path==='/trial-templates')return reply(200,{data:await call('trial_template_catalog')});
   if(path==='/trial-templates/inbox')return reply(200,{data:await call('trial_template_inbox')});
-  const m=path.match(/^\/trial-templates\/(file|result|request)\/([a-f0-9-]{36})$/);if(m&&UUID.test(m[2])){const name={file:'trial_template_file',result:'trial_template_result',request:'request_trial_template_file'}[m[1]],field={file:'p_file',result:'p_operation',request:'p_document'}[m[1]];return reply(200,{data:await call(name,{[field]:m[2]})});}
+  const m=path.match(/^\/trial-templates\/(file|result|request)\/([a-f0-9-]{36})$/);if(m&&UUID.test(m[2])){const name={file:'trial_template_file',result:'trial_template_result',request:'request_trial_template_file'}[m[1]],field={file:'p_file',result:'p_operation',request:'p_document'}[m[1]];return reply(200,{data:m[1]==='request'?await mappedDocument(await call('document_mapping_case',{p_kind:'REPORT',p_document:m[2]})):await call(name,{[field]:m[2]})});}
  }
  if(req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');
  const b=await bodyOf(req,3000000);
