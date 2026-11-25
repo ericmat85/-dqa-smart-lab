@@ -45,7 +45,7 @@ async function buildReportTemplate(request={},demo=false,options={}){
  if(!mappedReportProfile(book))applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
-export async function inspectReport(bytes,requestId,fileName,request){
+export async function inspectReport(bytes,requestId,fileName,request,options={}){
  const checks=[];if(!/\.xlsx$/i.test(fileName))throw Error('請使用 .xlsx 檔案；舊 .xls 請先另存為 .xlsx。');assertReportFileSize(bytes.byteLength);
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('無法讀取 Excel，檔案可能損壞、加密或格式不正確。');}
  const sheet=book.worksheets.find(row=>row.state==='visible'||!row.state);if(!sheet)throw Error('報告沒有可讀取的工作表。');
@@ -57,7 +57,7 @@ export async function inspectReport(bytes,requestId,fileName,request){
  else if(labProfile){
   const cover=book.getWorksheet('報告首頁'),results=book.getWorksheet('結果與照片');
   checks.push({label:'委託編號一致',ok:cover.getCell('I16').text===`DQA-${requestId}`,detail:cover.getCell('I16').text});
-  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0])?.id===findTrialDefinition(cover.getCell('C12').text)?.id&&!!findTrialDefinition(cover.getCell('C12').text))),detail:cover.getCell('C12').text});
+  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0],options.storage)?.id===findTrialDefinition(cover.getCell('C12').text,options.storage)?.id&&!!findTrialDefinition(cover.getCell('C12').text,options.storage))),detail:cover.getCell('C12').text});
   checks.push({label:'試驗結果已填寫',ok:Boolean(cover.getCell('A44').text.trim())&&['C12','G12','C16','G16','C20','G20'].some(a=>Boolean(results.getCell(a).text.trim())),detail:'結果摘要與至少一筆試驗觀察須填寫；範本提示及照片不能當成量測證據。'});
   checks.push({label:'工作表皆有對應輸出',ok:book.worksheets.every(s=>[VIRTUAL_SHEET,'委託單','報告首頁','試驗過程','結果與照片','範本資訊','試驗紀錄'].includes(s.name)||/^(規範|判定)續頁\d+$/.test(s.name)),detail:'未辨識工作表不可併入簽核。'});
  }

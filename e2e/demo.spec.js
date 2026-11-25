@@ -1,3 +1,4 @@
+import {uploadDemoReport} from './manualDemoReport.mjs';
 import {installMockE2Transport} from './mockE2Transport.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {fillVirtualRequest} from './requestDemoCommand.mjs';
@@ -163,8 +164,8 @@ test('report is returned, revised, signed by two supervisors and archived with r
   if(await page.getByRole('button',{name:'登入系統'}).count())await page.getByRole('button',{name:'登入系統'}).click();
   await page.getByRole('button',{name:'提交報告',exact:true}).click();
   await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
-  await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
-  await expect(page.locator('.report-review-status')).toContainText('通過 AI 全檢（Demo 規則模擬）');
+  await uploadDemoReport(page);
+  await expect(page.locator('.report-review-status')).toContainText('通過（Demo 規則驗證）');
   await page.getByRole('button',{name:'提交',exact:true}).click();
   await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
  }
@@ -240,29 +241,25 @@ test('general performance upload recognizes the supplied blank template and subm
  });
  await page.reload();await page.getByRole('button',{name:'提交報告',exact:true}).click();
  await expect(page.getByText('主管簽名位置設定',{exact:true})).toHaveCount(0);
- const quickButton=await page.getByRole('button',{name:'DEMO 填入',exact:true}).boundingBox();
- expect(quickButton.y).toBeGreaterThan(0);expect(quickButton.y+quickButton.height).toBeLessThan(768);
- expect((await page.locator('.report-quickfill-panel').boundingBox()).height).toBeLessThan(200);
- const download=page.waitForEvent('download');await page.getByRole('button',{name:'下載本案 Excel 範本',exact:true}).click();
- expect((await download).suggestedFilename()).toContain(id);
- await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
+ await expect(page.getByRole('button',{name:'DEMO 填入',exact:true})).toHaveCount(0);await expect(page.locator('.report-quickfill-panel')).toHaveCount(0);
+ await uploadDemoReport(page);
  await expect(page.getByText(id+'-DEMO.xlsx',{exact:true})).toBeVisible();
- await expect(page.locator('.report-review-status')).toContainText('通過 AI 全檢（Demo 規則模擬）');
- await page.locator('.report-quickfill-panel').scrollIntoViewIfNeeded();
+ await expect(page.locator('.report-review-status')).toContainText('通過（Demo 規則驗證）');
+ await page.locator('.report-review-status').scrollIntoViewIfNeeded();
  await captureBrowserEvidence(page,{path:test.info().outputPath('quickfill-review-ready.png')});
  expect(await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('已完成');
- const preparedDownload=page.waitForEvent('download');await page.getByRole('button',{name:'下載目前 Excel 報告',exact:true}).click();expect((await preparedDownload).suggestedFilename()).toBe(id+'-DEMO.xlsx');
+ await expect(page.getByRole('button',{name:'下載目前 Excel 報告',exact:true})).toHaveCount(0);
  await expect(page.locator('#lab-report-file')).toBeEnabled();
  await page.locator('#lab-report-file').setInputFiles('public/templates/general-performance-v1.xlsx');
  await expect(page.locator('.report-review-status')).toContainText('尚未檢查');
  await page.getByRole('button',{name:'重新檢查報告',exact:true}).click();
- await expect(page.locator('.report-review-status')).toContainText('未通過檢查');
+ await expect(page.locator('.report-review-status')).toContainText('尚未通過');
  await page.getByRole('button',{name:'提交',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('報告未通過');
  await expect(page.locator('.report-checks')).toContainText('報告編號對應本案');
  await expect(page.locator('.report-checks')).toContainText('合格／不合格擇一勾選');
  await expect(page.getByText(/16,?384 欄/)).toHaveCount(0);
- await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();
+ await uploadDemoReport(page);
  await page.getByRole('button',{name:'提交',exact:true}).click();
  await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).status,id)).toBe('待審核');
  const meta=await page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(row=>row.id===id).reportInfo,id);
@@ -376,11 +373,11 @@ test('Demo accelerator reaches halfway, equipment can be viewed, pause survives 
 test('orphaned completed LMS case offers a complete Demo workflow and can submit the new linked report',async({page})=>{
  await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();
  await page.evaluate(()=>{localStorage.setItem('dqa_lab_demo_requests_v1',JSON.stringify([{id:'LEGACY-ORPHAN',project:'舊版 Demo',test:'高溫儲存試驗',status:'已完成'}]));});await page.reload();
- await page.getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByRole('alert')).toContainText('找不到唯一且完整的本案電子委託資料');
+ await page.getByRole('button',{name:'提交報告',exact:true}).click();await expect(page.getByRole('button',{name:'DEMO 填入',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'建立完整流程 Demo 案件',exact:true}).click();await expect(page.locator('.lab-table-wrap').getByRole('button',{name:'設備狀態',exact:true})).toBeVisible();
  await advanceDemo(page);
  const id=await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2'))[0].id);
- await page.locator('.lab-table-wrap tbody tr').filter({hasText:id}).getByRole('button',{name:'提交報告',exact:true}).click();await page.getByRole('button',{name:'DEMO 填入',exact:true}).click();await expect(page.getByText('通過 AI 全檢（Demo 規則模擬）',{exact:false})).toBeVisible();await page.getByRole('button',{name:'提交',exact:true}).click();
+ await page.locator('.lab-table-wrap tbody tr').filter({hasText:id}).getByRole('button',{name:'提交報告',exact:true}).click();await uploadDemoReport(page);await expect(page.locator('.report-review-status')).toContainText('通過（Demo 規則驗證）');await page.getByRole('button',{name:'提交',exact:true}).click();
  await expect.poll(()=>page.evaluate(id=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id===id).status,id)).toBe('待審核');
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1')).find(r=>r.id==='LEGACY-ORPHAN').status)).toBe('已完成');
 });

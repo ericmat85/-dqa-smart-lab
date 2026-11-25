@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "node": {
+    "tests": 973,
+    "failed": 0,
+    "focused_rerun": 145
+  },
+  "browser": {
+    "distinct_passed": 13,
+    "native_mark_and_real_denial": 4,
+    "native_command_download_and_submission": 2,
+    "legacy_general_and_orphan": 2,
+    "legacy_manual_and_progress": 5,
+    "repaired_obsolete_test": "Manual fixture upload now explicitly requests the historical-name template."
+  },
+  "backend_generator": {
+    "profiles": 20,
+    "general_performance": true,
+    "mapped_custom_report": true,
+    "actual_backend_verifier": true,
+    "signed_or_uploaded_cases": 0
+  },
+  "reported_case_regression": {
+    "passed": true,
+    "source_selected_trial": [
+      "高溫高濕"
+    ],
+    "generated_canonical_trial": "高溫高濕放置試驗",
+    "byteLength": 18510,
+    "actual_source_read_only": true,
+    "business_uploads": 0,
+    "approvals": 0
+  },
+  "build": true,
+  "lint": {
+    "errors": 0,
+    "existing_warnings": 107
+  },
+  "database_migrations": false,
+  "paid_model_calls": 0,
+  "production_frontend_deploy": false
+}
