@@ -42,7 +42,7 @@ async function install(page,s,{who='lab',canCreate=true}={}){
  });
  await page.route('https://synthetic-storage.invalid/**',route=>{if(route.request().method()==='PUT')s.uploadBytes=route.request().postDataBuffer();return route.fulfill({status:200,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'PUT,OPTIONS','access-control-allow-headers':'content-type,x-upsert'},json:{}});});
 }
-async function open(page){await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();await page.getByRole('textbox',{name:'輸入問題',exact:true}).fill('/accelerate');await page.getByRole('button',{name:'送出問題',exact:true}).click();return page.getByRole('dialog',{name:'流程測試加速器'});}
+async function open(page){await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();await page.getByRole('textbox',{name:'輸入問題',exact:true}).fill('/demo accelerator');await page.getByRole('button',{name:'送出問題',exact:true}).click();return page.getByRole('dialog',{name:'試驗加速器 DEMO'});}
 async function demo(page){
  if(!await page.locator('.intelligent-panel').isVisible())await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();
  const input=page.getByRole('textbox',{name:'輸入問題',exact:true});await input.fill('/demo start');await input.press('Enter');

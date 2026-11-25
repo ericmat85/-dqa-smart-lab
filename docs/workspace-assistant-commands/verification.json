@@ -1,0 +1,36 @@
+{
+  "browser_full": {
+    "startTime": "2026-11-25T01:28:58.900Z",
+    "duration": 197291.318,
+    "expected": 52,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browser_final_identity_and_recovery": {
+    "startTime": "2026-11-25T01:34:55.479Z",
+    "duration": 34763.202,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "unique_browser_cases": 54,
+  "node_api_and_unit": {
+    "passed": 131,
+    "failed": 0
+  },
+  "isolated_postgresql": {
+    "commands": 22,
+    "native_virtual_regression": 33,
+    "passed": true,
+    "all_mutations_rolled_back": true
+  },
+  "build": true,
+  "lint": {
+    "passed": true,
+    "existing_project_warnings": true
+  },
+  "live_cleanup_executed": false,
+  "live_restart_executed": false
+}

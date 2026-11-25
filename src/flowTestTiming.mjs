@@ -10,5 +10,5 @@ export function flowTestTiming({startsAt,endsAt,nominalHours,percent=0,actualSta
 // A direct command opens controls; it never authorizes a write or invokes a model.
 export function flowTestIntent(text){
  const value=String(text||'').trim();
- return /^(?:\/accelerate|\/flow-test)(?:\s|$)/i.test(value)||/^(?:請|幫我)?(?:開啟|叫出|呼叫)?(?:Demo\s*)?(?:試驗|流程)?加速(?:器|測試)?(?:\s|$|[：:])/i.test(value);
+ return /^\/demo[ \t]+accelerator$/i.test(value)||/^(?:\/accelerate|\/accelerator|\/flow-test)(?:\s|$)/i.test(value)||/^(?:請|幫我)?(?:開啟|叫出|呼叫)?(?:Demo\s*)?(?:試驗|流程)?加速(?:器|測試)?(?:\s|$|[：:])/i.test(value);
 }

@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "existing_rows_functions_and_public_preserved": true,
+  "new_private_tables_empty": true,
+  "rolled_back": true,
+  "cleanup_executed": false,
+  "restart_executed": false
+}

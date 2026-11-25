@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T01:29:34.559851+00:00",
+  "migration": "040_assistant_system_commands.sql",
+  "sha256": "c3c55ce416551e2131eb9c32bd1bf143c28c7cbad6f9b0a51e42286a2e479d54",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 40,
+  "existing_records_preserved": true,
+  "new_tables_empty": true,
+  "cleanup_executed": false,
+  "restart_executed": false
+}
