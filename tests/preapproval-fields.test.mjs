@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {preapprovalRequired,preapprovalPlanCurrent,preparationFields,preparationChecksReady} from '../src/preapprovalFields.mjs';
+import {preapprovalRequired,preapprovalPlanCurrent,preapprovalScheduleCurrent,preparationFields,preparationChecksReady} from '../src/preapprovalFields.mjs';
 import {documentValues} from '../src/documentCellMapping.mjs';
 import {requestAction} from '../src/requestWorkflowClient.mjs';
 const context={document_id:'doc',request_revision:3,sample_code:'S1',sample_revision:1,draft:{document_version_id:'doc',request_revision:3,revision:2,plan:{sample_code:'S1',sample_revision:1}}};
@@ -28,3 +28,5 @@ test('unsigned preparation renders checks but never a signature; completion cann
  const after=documentValues({...c,stages:{...c.stages,LAB_RECEIVE:{fields:{...fields,executionAbnormal:'no'},actor:'Executor',at:'2026-11-25T00:00:00Z'}}});
  assert.equal(after.labExecutionAbnormalNoCheck,'☑');assert.equal(after.labAbnormalDescription,'');assert.equal(after.labReceiptName,'Executor');
 });
+
+test('schedule confirmation is independent of number assignment; signature still needs the attached number',()=>{const c={...context,sample_code:null,sample_revision:0,draft:{...context.draft,plan:{sample_code:'',sample_revision:null}}};assert.equal(preapprovalScheduleCurrent(c),true);assert.equal(preapprovalPlanCurrent(c),false);assert.equal(preapprovalScheduleCurrent({...c,document_id:'changed'}),false);});

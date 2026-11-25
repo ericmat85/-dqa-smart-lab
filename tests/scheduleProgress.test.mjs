@@ -42,3 +42,5 @@ test('early completion displays the actual finish timestamp without changing the
  assert.equal(scheduleProgress(completed,Date.parse(at)).end,Date.parse(at));
  assert.equal(scheduleProgress({...completed,completedAt:'bad'},Date.parse(at)).end,scheduleProgress(row,Date.parse(at)).end);
 });
+
+test('virtual preflight never advertises acceleration before the receipt signature',()=>{const row={businessDatabase:true,executionKind:'VIRTUAL',preflightWorkflow:true,status:'已排程',time:'2026-11-25',end:'2026-12-01',virtualPercent:0};assert.equal(scheduleProgress(row,Date.now()).label,'請完成試驗前準備與確認簽名');assert.equal(scheduleProgress({...row,receivedAt:'2026-11-25T00:00:00Z'},Date.now()).label,'等待加速虛擬試驗');});

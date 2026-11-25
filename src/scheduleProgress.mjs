@@ -23,7 +23,7 @@ export function scheduleProgress(row,now) {
   const held=paused?Math.max(0,now-Date.parse(row.pauseStartedAt)):0;
   const end=baseEnd===null?null:baseEnd+Number(row.pauseTotalMs||0)+held;
   if(start===null||end===null||end<=start)return {phase:'invalid',label:'日期待確認'};
-  if(row.businessDatabase&&isVirtualRequest(row)){const percent=[0,50,100].includes(row.virtualPercent)?row.virtualPercent:0;return {phase:percent===100?'elapsed':percent===50?'running':'waiting',label:percent===100?'虛擬試驗已完成':percent===50?'虛擬試驗進行中':'等待加速虛擬試驗',fraction:percent/100,start,end};}
+  if(row.businessDatabase&&isVirtualRequest(row)){const percent=[0,50,100].includes(row.virtualPercent)?row.virtualPercent:0;return {phase:percent===100?'elapsed':percent===50?'running':'waiting',label:percent===100?'虛擬試驗已完成':percent===50?'虛擬試驗進行中':row.preflightWorkflow&&!row.receivedAt?'請完成試驗前準備與確認簽名':'等待加速虛擬試驗',fraction:percent/100,start,end};}
   const frozenEnd=baseEnd,clock=(paused?Date.parse(row.pauseStartedAt):now)-Number(row.pauseTotalMs||0);
   const fraction=plan?executionFraction(plan,clock):Math.max(0,Math.min(1,(clock-start)/(frozenEnd-start)));
   if(row.status==='已完成'){const actual=scheduleTimestamp(row.completedAt);return {phase:'elapsed',label:'已完成',fraction:1,start,end:actual!==null&&actual>=start&&actual<=end?actual:end};}

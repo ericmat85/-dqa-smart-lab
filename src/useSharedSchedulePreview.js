@@ -6,7 +6,7 @@ import {scheduleDraftCommand} from './sharedScheduleDrafts.mjs';
 export default function useSharedSchedulePreview({editing,form,references}){
  let key=null;
  try{
-  if(editing?.businessDatabase&&form&&/^\d{4}-\d{2}-\d{2}$/.test(form.time||'')&&String(form.sampleCode||'').trim()){
+  if(editing?.businessDatabase&&form&&/^\d{4}-\d{2}-\d{2}$/.test(form.time||'')&&(editing.preapprovalPlanning||String(form.sampleCode||'').trim())){
    const command=scheduleDraftCommand(editing,{...form,end:form.time},references);
    key=JSON.stringify(command);
   }
