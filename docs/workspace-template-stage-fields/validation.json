@@ -1,0 +1,16 @@
+{
+  "unit_tests": 956,
+  "unit_passed": 956,
+  "focused_tests": 147,
+  "focused_passed": 147,
+  "new_stage_sql_tests": 28,
+  "request_sql_tests": 40,
+  "human_sql_tests": 38,
+  "mapping_sql_tests": 40,
+  "all_sql_rollback": true,
+  "initial_new_stage_browser_cases": 8,
+  "initial_new_stage_browser_passed": 8,
+  "build": "passed",
+  "lint": "passed with existing project warnings",
+  "uploaded_template": "local synthetic fill only; original unmodified; no business case writes"
+}

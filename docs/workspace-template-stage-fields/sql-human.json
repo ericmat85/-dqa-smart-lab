@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "tests": 38,
+  "failures": 0,
+  "errors": 0,
+  "all_mutations_rolled_back": true,
+  "storage_api_tested": false,
+  "time_travel_only_in_operator_fixtures": true
+}

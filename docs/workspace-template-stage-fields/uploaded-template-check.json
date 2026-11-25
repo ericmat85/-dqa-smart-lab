@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "source_original_unchanged": true,
+  "synthetic_values_only": true,
+  "mapped_fields": 30,
+  "canonical_stage_signatures": 5,
+  "total_images": 5,
+  "date_parts_in_original_merged_regions": true,
+  "original_labels_preserved": true,
+  "generated_request_readonly": true,
+  "no_case_or_mapping_writes": true
+}

@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T10:20:05.137451+00:00",
+  "migration": "046_template_stage_fields.sql",
+  "sha256": "8362866fb71b5cc42502234513dc469f833a6ecffc110b6bdbabbc51c6912a15",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 46,
+  "existing_records_and_templates_preserved": true,
+  "trial_bindings_changed": false,
+  "templates_deleted": false,
+  "business_records_modified": false
+}
