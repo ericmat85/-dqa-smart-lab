@@ -6,8 +6,11 @@ import {generalProfile,inspectGeneralReport} from '../../src/reportProfiles.mjs'
 import {inflateRawSync} from 'node:zlib';
 import {createHash,createHmac} from 'node:crypto';
 const LIMIT=REPORT_FILE_MAX_BYTES,BUCKET='dqa-business-reports';
+// Kept for initial-policy provisioning and regression fixtures, never per-request signing.
 export const attestationKey=key=>createHmac('sha256',Buffer.from(key,'base64url')).update('dqa-human-report-attestation-v1').digest();
-export const fileAttestation=(key,intent)=>createHmac('sha256',attestationKey(key)).update(`${intent.id}:${intent.sha256}:${intent.byte_size}:${intent.mime_type}`).digest('hex');
+// The database stores a fixed report key. Session-cookie keys rotate per deployment.
+export function reportAttestationKey(env){const key=env?.BUSINESS_REPORT_ATTESTATION_KEY;if(!/^[A-Za-z0-9_-]{43}$/.test(key||'')||Buffer.from(key,'base64url').length!==32||Buffer.from(key,'base64url').toString('base64url')!==key)throw Error('REPORT_ATTESTATION_NOT_CONFIGURED');return key;}
+export const fileAttestation=(key,intent)=>createHmac('sha256',Buffer.from(reportAttestationKey({BUSINESS_REPORT_ATTESTATION_KEY:key}),'base64url')).update(`${intent.id}:${intent.sha256}:${intent.byte_size}:${intent.mime_type}`).digest('hex');
 export function safeObject(intent){if(intent?.bucket!==BUCKET||!new RegExp('^[a-f0-9-]{36}/[a-f0-9-]{36}/[a-f0-9-]{36}\\.(xlsx|pdf)$').test(intent.object_key||''))throw Error('HUMAN_FILE_INVALID');return BUCKET+'/'+intent.object_key;}
 export function zipBounds(bytes){
  const b=Buffer.from(bytes);if(b.length<22||b.readUInt32LE(0)!==0x04034b50)throw Error('HUMAN_FILE_INVALID');let end=-1;

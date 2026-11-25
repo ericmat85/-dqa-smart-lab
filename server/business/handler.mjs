@@ -16,7 +16,7 @@ import {handleBusinessAI} from './businessAI.mjs';
 import {requestPasswordRecovery} from './passwordRecovery.mjs';
 import {accountDeletionServiceKey,verifyAdministratorPassword} from './accountDeletion.mjs';
 import {deliverAccountInvitation} from './accountInvitations.mjs';
-import {fileAttestation,safeObject,validateHumanFile,readStorageBytes} from './humanReports.mjs';
+import {reportAttestationKey,fileAttestation,safeObject,validateHumanFile,readStorageBytes} from './humanReports.mjs';
 import {explicitHours,sourceConditions} from '../../src/trialSourceFacts.mjs';
 import {createCipheriv,createDecipheriv,createHash,createHmac,randomBytes,randomUUID} from 'node:crypto';
 export const COOKIE='__Host-dqa_business';
@@ -254,7 +254,8 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     if(c.action==='PREPARE'&&c.signature_data!=='')throw new ApiError(422,'HUMAN_FIELDS_INVALID');
     if(c.action==='STOP'&&(c.signature_data!==''||c.upload_id!==null))throw new ApiError(422,'HUMAN_FIELDS_INVALID');
     let attestation=null;if(path==='/execution/execute'&&['REPORT_SUBMIT','CONFIRM_ARCHIVE'].includes(c.action)){
-     const intent=await rpc('report_upload_intent',{p_tenant:session.tenant,p_id:c.upload_id},session.access);if(!intent)throw new ApiError(409,'HUMAN_UPLOAD_STALE');try{const bytes=await readStorageBytes(fetchImpl,env,session.access,intent);await validateHumanFile(bytes,intent,{loadMapping:()=>rpc('document_mapping_report_context',{p_tenant:session.tenant,p_request:intent.request_id},session.access)});attestation=fileAttestation(env.BUSINESS_COOKIE_KEY,intent);}catch(error){throw new ApiError(422,['HUMAN_VIRTUAL_MARK_REQUIRED','HUMAN_REPORT_PURPOSE_MISMATCH','HUMAN_FILE_HASH_MISMATCH','HUMAN_REPORT_BINDING_INVALID','HUMAN_FILE_UNAVAILABLE'].includes(error.message)?error.message:'HUMAN_FILE_INVALID');}
+     let reportKey;try{reportKey=reportAttestationKey(env);}catch{throw new ApiError(503,'REPORT_ATTESTATION_NOT_CONFIGURED');}
+     const intent=await rpc('report_upload_intent',{p_tenant:session.tenant,p_id:c.upload_id},session.access);if(!intent)throw new ApiError(409,'HUMAN_UPLOAD_STALE');try{const bytes=await readStorageBytes(fetchImpl,env,session.access,intent);await validateHumanFile(bytes,intent,{loadMapping:()=>rpc('document_mapping_report_context',{p_tenant:session.tenant,p_request:intent.request_id},session.access)});attestation=fileAttestation(reportKey,intent);}catch(error){throw new ApiError(422,['HUMAN_VIRTUAL_MARK_REQUIRED','HUMAN_REPORT_PURPOSE_MISMATCH','HUMAN_FILE_HASH_MISMATCH','HUMAN_REPORT_BINDING_INVALID','HUMAN_FILE_UNAVAILABLE'].includes(error.message)?error.message:'HUMAN_FILE_INVALID');}
     }
     dispatchedWrite=true;return reply(200,{data:await rpc(stageFields?(path.endsWith('/prepare')?'prepare_human_template_operation':'execute_human_template_operation'):(path.endsWith('/prepare')?'prepare_human_operation':'execute_human_operation'),{p_tenant:session.tenant,p_operation:body.operation_id,p_command:baseCommand,...(stageFields?{p_fields:template_fields}:{}),...(path.endsWith('/execute')?{p_attestation:attestation}:{})},session.access)});
    }
