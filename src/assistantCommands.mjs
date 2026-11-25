@@ -6,3 +6,5 @@ export function commandResultReply(result){return result?.state==='SAVED'?result
 
 export const assistantCommandStorageKey=identity=>`dqa-command-pending:${identity?.user?.id||'none'}:${identity?.member?.id||'none'}`;
 export function pendingAssistantCommand(identity,storage=globalThis.sessionStorage){try{return JSON.parse(storage.getItem(assistantCommandStorageKey(identity))||'null');}catch{return null;}}
+// A delayed acknowledgement must never erase a newer operation's recovery key.
+export function clearAssistantCommandReceipt(key,id,storage=globalThis.sessionStorage){try{if(JSON.parse(storage.getItem(key)||'null')?.id!==id)return false;storage.removeItem(key);return true;}catch{return false;}}

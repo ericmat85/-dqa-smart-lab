@@ -8,16 +8,16 @@
     "flaky": 0
   },
   "browser_final_identity_and_recovery": {
-    "startTime": "2026-11-25T01:34:55.479Z",
-    "duration": 34763.202,
-    "expected": 8,
+    "startTime": "2026-11-25T01:52:33.366Z",
+    "duration": 40227.112,
+    "expected": 10,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
   },
-  "unique_browser_cases": 54,
+  "unique_browser_cases": 56,
   "node_api_and_unit": {
-    "passed": 131,
+    "passed": 133,
     "failed": 0
   },
   "isolated_postgresql": {
@@ -34,7 +34,7 @@
   "live_cleanup_executed": false,
   "live_restart_executed": false,
   "node_full_suite": {
-    "passed": 887,
+    "passed": 889,
     "failed": 0
   },
   "faq_scope_regression_fixed": true
