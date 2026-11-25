@@ -18,6 +18,7 @@ import './SearchStandards.css'
 import './AdminUiStandards.css'
 import './ScreenRefinements.css'
 import './MobileRequestInformation.css'
+import './MobileAdminPolish.css'
 
 const finishBootstrap=beginPageLoading();
 function BootReady({children}){useEffect(()=>{finishBootstrap();},[]);return children;}
