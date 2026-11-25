@@ -1,0 +1,43 @@
+{
+  "program_and_api": {
+    "passed": 905,
+    "failed": 0
+  },
+  "latest_targeted_program_and_api": {
+    "passed": 117,
+    "failed": 0
+  },
+  "native_browser": {
+    "startTime": "2026-11-25T06:04:57.876Z",
+    "duration": 218737.562,
+    "expected": 34,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "demo_browser": {
+    "startTime": "2026-11-25T05:58:06.015Z",
+    "duration": 314383.516,
+    "expected": 26,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "sql": {
+    "passed": true,
+    "tests": 43,
+    "failures": 0,
+    "errors": 0,
+    "all_mutations_rolled_back": true,
+    "cloud_mutations": false
+  },
+  "build": true,
+  "lint": {
+    "passed": true,
+    "existing_project_warnings": true
+  },
+  "live_default_bindings_changed": false,
+  "live_templates_uploaded_or_deleted": false,
+  "existing_business_records_changed": false,
+  "autofill_mapping_implemented": false
+}

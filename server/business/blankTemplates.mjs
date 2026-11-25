@@ -17,6 +17,10 @@ export async function handleBlankTemplates({path,req,parsed,session,rpc,bodyOf,f
  try{const {validateUploadedTemplate}=await import('../../src/reportTemplateStore.mjs');const details=await validateUploadedTemplate(new Uint8Array(bytes),b.name);if(details.declaredTrials.length)throw Error('Blank templates cannot contain assigned trials');}catch{throw new ApiError(422,'TEMPLATE_FILE_INVALID');}
  markWrite();return reply(200,{data:await call('save_blank_request_template',{p_operation:b.operation_id,p_id:b.id,p_name:b.name,p_version:b.version,p_sha256:b.sha256,p_content:b.content})});
  }
+ if(path==='/templates/blank/default'){
+ fields(b,['operation_id','id','revision','sha256']);if(!UUID.test(b.operation_id||'')||!(b.id==='BLANK'||UUID.test(b.id||''))||!Number.isSafeInteger(b.revision)||b.revision<0||(b.id==='BLANK'?b.sha256!==null:!/^[a-f0-9]{64}$/.test(b.sha256||'')))throw new ApiError(422,'TEMPLATE_FIELDS_INVALID');
+ markWrite();return reply(200,{data:await call('set_blank_request_template_default',{p_operation:b.operation_id,p_id:b.id,p_revision:b.revision,p_sha256:b.sha256})});
+ }
  if(path==='/templates/blank/delete'){
  fields(b,['operation_id','id','revision']);if(!UUID.test(b.operation_id||'')||!(b.id==='BLANK'||UUID.test(b.id||''))||!Number.isSafeInteger(b.revision)||b.revision<0)throw new ApiError(422,'TEMPLATE_FIELDS_INVALID');markWrite();return reply(200,{data:await call('delete_blank_request_template',{p_operation:b.operation_id,p_id:b.id,p_revision:b.revision})});
  }
