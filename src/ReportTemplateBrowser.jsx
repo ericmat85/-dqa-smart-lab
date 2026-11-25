@@ -16,13 +16,13 @@ function Icon({kind='file'}){
  return <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.file}/></svg>;
 }
 
-export default function ReportTemplateBrowser({actorId,system,catalog,uploads,search,category,onCategoryChange,sourceError}){
+export default function ReportTemplateBrowser({actorId,system,catalog,uploads,search,category,onCategoryChange,sourceError,builtinVisible=true}){
  const id=useId(),lifetime=useRef(null),pending=useRef(false);
  const [selected,setSelected]=useState(null),[busy,setBusy]=useState(''),[error,setError]=useState('');
  useEffect(()=>{const controller=new AbortController();lifetime.current=controller;return()=>controller.abort();},[actorId,system]);
  const trialName=row=>catalog.rows.find(c=>c.id===row.trialId)?.name||({BLANK:'空白委託單',CUSTOM:'自訂報告範本'})[row.trialId]||'待核對試驗';
  const items=[
-  {id:'BLANK',kind:'general',name:'空白電子委託單',version:'A4 · 中英欄位',description:'含試驗規範、判定基準及簽名欄位，適合建立新委託單。',previewLabel:'預覽空白委託單',downloadLabel:'下載空白委託單'},
+  ...(builtinVisible?[{id:'BLANK',kind:'general',name:'空白電子委託單',version:'A4 · 中英欄位',description:'含試驗規範、判定基準及簽名欄位，適合建立新委託單。',previewLabel:'預覽空白委託單',downloadLabel:'下載空白委託單'}]:[]),
   {id:'GENERAL',kind:'general',name:'一般性能報告範本',version:'V1',description:'一般性能試驗報告的通用 Excel 原稿。',previewLabel:'預覽一般性能報告範本',downloadLabel:'下載範本'},
   ...catalog.rows.map(row=>({...row,kind:'trial',aliases:correspondingTrialNames(row,catalog.rows),revision:catalog.revision,previewLabel:`預覽${row.name}範本`,downloadLabel:`下載${row.name}Excel範本`})),
   ...uploads.map(row=>({...row,kind:'upload',trialName:trialName(row),previewLabel:`預覽${row.name}`,downloadLabel:`下載${row.name}Excel範本`}))
@@ -62,13 +62,13 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
    {(sourceError||catalog.error||error)&&<p role="alert">{error||catalog.error||sourceError}</p>}
    {busy&&<p className="rtb-busy" role="status">正在準備 Excel 範本…</p>}
    {rows.length?<div className="rtb-table-wrap"><PaginatedTable className="template-table rtb-table" resetKey={`${category}:${search}`}><thead><tr><th>範本名稱</th><th>分類</th><th>版本</th><th>試驗工時／對應項目</th><th>操作</th></tr></thead><tbody>{rows.map(row=><tr key={`${row.kind}-${row.id}`} className="rtb-table-row">
-    <td><div className="rtb-document"><span className={`rtb-document-icon rtb-${row.kind}`}><Icon/></span><h4>{row.name}</h4></div><details className="rtb-details"><summary><Icon kind="chevron"/>範本內容與對應資料</summary><div>{row.kind==='trial'?<><p className="rtb-contents">包含委託單、報告首頁、試驗過程、結果與照片；量測結果、判定與簽名留白。</p><dl><div><dt>適用設備</dt><dd>{row.equipment||'尚未設定'}</dd></div>{row.aliases.length>0&&<div><dt>亦對應試驗</dt><dd>{row.aliases.join('、')}</dd></div>}<div><dt>試驗規範／手法</dt><dd>{row.specification||'尚未設定'}</dd></div></dl></>:row.kind==='upload'?<p>{row.trialBinding?.status==='VERIFIED'?'試驗對應已核對。':row.trialId==='CUSTOM'?'自訂版本，不自動套用案件。':row.trialId==='BLANK'?'空白委託單。':'既有版本，預覽／下載時核對試驗。'}此版本保留在目前瀏覽器，可於文件與報告設定管理。</p>:<p>{row.description}</p>}</div></details></td>
+    <td><div className="rtb-document"><span className={`rtb-document-icon rtb-${row.kind}`}><Icon/></span><h4>{row.name}</h4></div><details className="rtb-details"><summary><Icon kind="chevron"/>範本內容與對應資料</summary><div>{row.kind==='trial'?<><p className="rtb-contents">包含委託單、報告首頁、試驗過程、結果與照片；量測結果、判定與簽名留白。</p><dl><div><dt>適用設備</dt><dd>{row.equipment||'尚未設定'}</dd></div>{row.aliases.length>0&&<div><dt>亦對應試驗</dt><dd>{row.aliases.join('、')}</dd></div>}<div><dt>試驗規範／手法</dt><dd>{row.specification||'尚未設定'}</dd></div></dl></>:row.kind==='upload'?<p>{row.trialBinding?.status==='VERIFIED'?'試驗對應已核對。':row.trialId==='CUSTOM'?'自訂版本，不自動套用案件。':row.trialId==='BLANK'?'空白委託單。':'既有版本，預覽／下載時核對試驗。'}此版本可於文件與報告設定管理。</p>:<p>{row.description}</p>}</div></details></td>
     <td><span className="rtb-category-label">{row.kind==='trial'?'試驗範本':row.kind==='upload'?'上傳版本':'通用文件'}</span></td><td>{row.version}</td><td>{row.kind==='trial'?`${row.durationHours} 小時`:row.kind==='upload'?row.trialName:'—'}</td>
     <td><div className="rtb-actions resource-row-actions"><button type="button" className="template-btn secondary icon-action" disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.previewLabel} title={row.previewLabel} onClick={()=>{setError('');setSelected(row);}}><Icon kind="eye"/></button>{row.id==='GENERAL'?<a className="template-btn secondary icon-action" href={generalPath} download="一般性能試驗報告範本.xlsx" aria-label="下載範本" title="下載一般性能報告範本"><Icon kind="download"/></a>:<button type="button" className="template-btn secondary icon-action" disabled={!!busy||row.kind==='trial'&&!!catalog.error} aria-label={row.downloadLabel} title={row.downloadLabel} onClick={()=>download(row)}><Icon kind="download"/></button>}</div></td>
    </tr>)}</tbody></PaginatedTable></div>:<div className="rtb-empty"><Icon/><strong>{needle?'沒有符合搜尋條件的報告範本':category==='upload'?'尚無上傳範本':'目前沒有這類範本'}</strong><p>{needle?'請調整關鍵字、切換分類，或清除篩選。':'上傳版本可在系統管理的「文件與報告設定」新增。'}</p></div>}
 
   </div>
-  <p className="rtb-footnote">試驗範本與試驗參數共用最新資料；上傳版本儲存在目前瀏覽器，不會覆蓋既有案件。</p>
+  <p className="rtb-footnote">試驗範本與試驗參數共用最新資料；空白委託單的保存版本可於文件與報告設定管理。</p>
   {selected&&<TemplatePreview title={selected.name+(selected.kind==='trial'?'｜試驗':'')} read={readSelected} invalidated={invalidated} onClose={()=>setSelected(null)}/>}
  </section>;
 }

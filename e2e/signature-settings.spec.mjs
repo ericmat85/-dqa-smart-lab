@@ -9,6 +9,7 @@ async function setup(page,{signed=false}={}){
  const request=route.request(),path=new URL(request.url()).pathname,body=request.postDataJSON(),send=(data,status=200)=>route.fulfill({status,json:{...data,trace_id:'I-SYNTHETIC'}});
  if(!path.startsWith('/api/business/'))return send({error:{code:'LIVE_PROVIDER_DISABLED'}},403);
  const endpoint=path.slice('/api/business'.length);
+ if(endpoint==='/templates/blank')return send({data:{rows:[],builtin_visible:true,revision:0,can_manage:member.is_admin===true,source:'DATABASE'}});
  if(endpoint==='/images'){if(request.method()==='POST'){state.imageWrites.push(body);state.images[body.kind]={image:body.image,name:body.name,revision:state.images[body.kind].revision+1};}return send({data:{member_id:member.id,can_manage:true,images:state.images}});}
  if(endpoint==='/signature-settings'){
  const section=new URL(request.url()).searchParams.get('section');

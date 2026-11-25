@@ -11,6 +11,7 @@ async function setup(page,{isAdmin=true,throughBff=false}={}){
  function resolve(id){s.resolutions++;const r=receipt(id);if(r.state==='SAVED')return r;const cancelled={operation_id:id,state:'CANCELLED_NO_WRITE'};s.receipts.set(id,cancelled);return cancelled;}
  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url()),p=u.pathname,body=req.postDataJSON();const send=(data,status=200)=>route.fulfill({status,json:{...data,trace_id:'I-SYNTHETIC'}});
  if(!p.startsWith('/api/business/'))return send({error:{code:'LIVE_PROVIDER_DISABLED'}},403);const path=p.slice('/api/business'.length);
+ if(path==='/templates/blank')return send({data:{rows:[],builtin_visible:true,revision:0,can_manage:isAdmin,source:'DATABASE'}});
  if(path==='/config')return send({activation_available:true});
  if(path==='/me'){s.meReads++;return send({member:{id:admin.id,display_name:admin.name,is_admin:isAdmin,role_name:isAdmin?'工作區管理者':'檢視者',permissions:[],systems:adminRole.systems,pages:adminRole.pages},user:{id:'synthetic-user',email:admin.email}});}
  if(path==='/snapshot')return send({data:{members:s.members.map(m=>({id:m.id,display_name:m.name,enabled:m.enabled,login_email:m.email,role_id:m.role_id})),roles:s.roles,requests:[],equipment:[],materials:[],trials:[],schedules:[],sites:[],departments:[],borrows:[],allocations:[],operations:[],quality:[],qualifications:[],reports:[],legacy_import:{metadata:{mode:'READ_ONLY_ARCHIVE'},reviews:[{id:'REQ-OLD',title:'合成高溫試驗',status:'待審查',approval:0,history:[]}],schedules:[],labAudit:[],equipment_details:[]}}});
