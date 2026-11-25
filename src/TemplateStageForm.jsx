@@ -5,9 +5,9 @@ import {STAGE_INPUTS,STAGE_LABELS,requiredStageKeys} from './templateStageFields
 import './TemplateStageForm.css';
 const choices={yes:'是',no:'否',not_applicable:'不適用',pending:'尚未執行'};
 const permits={new_product:'新產品',design_change:'設計變更',other:'其他'};
-export function StageInputFields({stage,fields={},onChange,required=[],disabled=false,prefix=''}){
+export function StageInputFields({stage,fields={},onChange,required=[],disabled=false,prefix='',excludeKeys=[]}){
  const update=(key,value)=>onChange({...fields,[key]:value});
- return <div className="template-stage-grid">{(STAGE_INPUTS[stage]||[]).map(([key,label,type,options])=>{
+ return <div className="template-stage-grid">{(STAGE_INPUTS[stage]||[]).filter(([key])=>!excludeKeys.includes(key)).map(([key,label,type,options])=>{
   const caption=<>{label}{required.includes(key)&&<small>（對應欄位）</small>}</>;
   if(type==='multi')return <fieldset key={key} className="template-stage-wide template-stage-permits" disabled={disabled}><legend>{caption}</legend><div className="template-stage-checks">{options.map(v=><label key={v}><input type="checkbox" aria-label={prefix+permits[v]} checked={fields[key]?.includes(v)||false} onChange={e=>update(key,e.target.checked?[...(fields[key]||[]),v]:(fields[key]||[]).filter(x=>x!==v))}/>{permits[v]}</label>)}</div></fieldset>;
   return <label key={key}><span>{caption}</span>{['choice','optionalChoice','pendingChoice'].includes(type)?<select aria-label={prefix+label} disabled={disabled} value={fields[key]||''} onChange={e=>update(key,e.target.value)}><option value="">請選擇</option>{['yes','no',...(type==='optionalChoice'?['not_applicable']:[]),...(type==='pendingChoice'?['pending']:[])].map(v=><option value={v} key={v}>{choices[v]}</option>)}</select>:<input aria-label={prefix+label} disabled={disabled} type={type==='date'?'date':type==='number'?'number':'text'} min={type==='number'?0:undefined} max={type==='number'?999999:undefined} step={type==='number'?1:undefined} maxLength={type==='text'?1000:undefined} value={fields[key]??''} onChange={e=>update(key,type==='number'&&e.target.value!==''?Number(e.target.value):e.target.value)}/>}</label>;

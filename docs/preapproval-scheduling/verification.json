@@ -1,0 +1,128 @@
+{
+  "passed": true,
+  "node": {
+    "passed": true,
+    "distinct_tests": 964,
+    "main_run_passed": 963,
+    "main_run_failed": 1,
+    "single_run_all_passed": false,
+    "focused_rerun_passed": 7,
+    "repair": "Registered the new native-business browser spec in the existing boot-mode catalog. No tests skipped or assertions weakened."
+  },
+  "sql": {
+    "passed": true,
+    "suites": [
+      {
+        "suite": "preapproval_scheduling",
+        "tests": 48,
+        "passed": true
+      },
+      {
+        "suite": "request_workflow",
+        "tests": 40,
+        "passed": true
+      },
+      {
+        "suite": "human_workflow",
+        "tests": 38,
+        "passed": true
+      },
+      {
+        "suite": "schedule_drafts",
+        "tests": 31,
+        "passed": true
+      },
+      {
+        "suite": "schedule_preview",
+        "tests": 13,
+        "passed": true
+      },
+      {
+        "suite": "whole_day_schedule",
+        "tests": 15,
+        "passed": true
+      },
+      {
+        "suite": "scheduled_autostart",
+        "tests": 17,
+        "passed": true
+      },
+      {
+        "suite": "virtual_request_execution",
+        "tests": 33,
+        "passed": true
+      },
+      {
+        "suite": "template_stage_fields",
+        "tests": 28,
+        "passed": true
+      },
+      {
+        "suite": "mapping_choice_fields",
+        "tests": 40,
+        "passed": true
+      },
+      {
+        "suite": "document_cell_mapping",
+        "tests": 30,
+        "passed": true
+      },
+      {
+        "suite": "trial_template_delivery",
+        "tests": 38,
+        "passed": true
+      },
+      {
+        "suite": "trial_stop",
+        "tests": 17,
+        "passed": true
+      }
+    ],
+    "test_executions": 388,
+    "all_mutations_rolled_back": true,
+    "network": "none",
+    "new_flow_tests": 48
+  },
+  "browser": {
+    "passed": true,
+    "distinct_cases": 106,
+    "single_run_all_passed": false,
+    "main_run": {
+      "startTime": "2026-11-25T12:08:00.204Z",
+      "duration": 908569.336,
+      "expected": 97,
+      "skipped": 0,
+      "unexpected": 9,
+      "flaky": 0
+    },
+    "focused_rerun": {
+      "startTime": "2026-11-25T12:23:28.903Z",
+      "duration": 77473.761,
+      "expected": 12,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "repairs": [
+      "Existing tests use the new pre-start stage labels.",
+      "Late-preview race changes an editable note instead of the removed sample-number input; original sample number remains unchanged.",
+      "Local runner AI flag aligned with the already configured server flag.",
+      "One outsourced browser login rerun after the development server refreshed during source edits."
+    ]
+  },
+  "build_lint": {
+    "passed": true,
+    "build": true,
+    "lint": true,
+    "lint_existing_warnings": 107,
+    "new_components_warning_free": true,
+    "diff_check": true
+  },
+  "migration": {
+    "name": "047_preapproval_scheduling.sql",
+    "sha256": "f14958bf3b2cada2e39a7438f3bd706b4ed20f3b7a36ba444d4bcda08e3b1bc3",
+    "cloud_rollback_probe_passed": true,
+    "existing_rows_and_templates_preserved": true
+  },
+  "scope": "Synthetic local browser and PostgreSQL verification; no real case creation, signature, start, cleanup or reset. Protected Preview only; remote CI reported separately."
+}

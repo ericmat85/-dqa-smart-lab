@@ -15,7 +15,7 @@ def run_action(i,c,number):
 
 def fixture():
  data=dict(trial_id='a3000000-0000-0000-0000-000000000001',product_code='SYNTHETIC',customer_name='SYNTHETIC',purpose='合成驗證',quantity=3,requested_date='2027-01-08',sample_space_units=1,specification='試驗時間：250 小時。',acceptance='合成判定',form_details={'testItems':['Synthetic humidity'],'purpose':['合成驗證']},draft_signature_data=SIG)
- return f"""UPDATE dqa_private.request_workflow_policy SET enabled=true WHERE tenant_id='{T}';
+ return f"""DO $legacy$ BEGIN IF to_regclass('dqa_private.preapproval_cutover') IS NOT NULL THEN EXECUTE 'UPDATE dqa_private.preapproval_cutover SET enabled=false';END IF;END $legacy$;UPDATE dqa_private.request_workflow_policy SET enabled=true WHERE tenant_id='{T}';
 UPDATE dqa_business.roles SET permissions=ARRAY(SELECT DISTINCT v FROM unnest(permissions||ARRAY['requests.draft','requests.submit']) v) WHERE id='a1000000-0000-0000-0000-000000000002';
 UPDATE dqa_business.roles SET permissions=array_append(permissions,'requests.review_lms'),review_level=1 WHERE id='a1000000-0000-0000-0000-000000000003';
 UPDATE dqa_business.memberships SET supervisor_member_id='{MAN}' WHERE id='{OWN}';

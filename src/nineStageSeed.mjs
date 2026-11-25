@@ -26,6 +26,7 @@ const source=s=>read(s,'dqa-request-demo-v2');
 const update=(s,row)=>write(s,'dqa-request-demo-v2',source(s).map(r=>r.id===row.id?row:r));
 const iso=ms=>new Date(ms).toISOString();
 export function nineStageOf(request,lab=[]){
+ if(request.preapprovalWorkflow&&request.databaseStatus==='AWAITING_LMS_REVIEW')return request.reviewLevel===1?3:2;
  if(request.status==='待主管簽核')return 1;if(request.status==='已核准')return 2;
  if(request.status==='已結案')return 9;if(request.status==='待查閱')return 8;if(request.status==='待審核')return 7;
  if(request.status==='已完成')return 6;if(request.status==='執行中')return 5;
