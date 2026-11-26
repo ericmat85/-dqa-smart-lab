@@ -1,3 +1,4 @@
+import './RequestIdentifier.css';
 import './RequestEditorCompact.css';
 import {translateText} from './i18n.mjs';
 import useUiPreferences from './useUiPreferences.js';

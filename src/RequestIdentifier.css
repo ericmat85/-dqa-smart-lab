@@ -1,0 +1,4 @@
+/* Semantic identifiers share typography across lists, reports, history and dialogs. */
+html body :is(#root,.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.request-identifier,.request-info-id,.request-id-link,.lab-request-link,.archive-request-link){font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif!important;font-weight:700!important;font-size:13px!important;font-variant-numeric:tabular-nums!important;font-style:normal;letter-spacing:0!important;line-height:1.5;overflow-wrap:anywhere;user-select:text}
+html body :is(#root,.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.request-id-link,.lab-request-link,.archive-request-link){text-underline-offset:3px;text-decoration-thickness:1px}
+html body :is(#root,.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.request-id-link,.lab-request-link,.archive-request-link):hover{text-decoration:underline}

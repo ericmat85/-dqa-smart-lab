@@ -1,3 +1,4 @@
+import './RequestIdentifier.css';
 import RequestInformation,{RequestInformationHistory} from './RequestInformation.jsx';
 import ExecutionKindBadge from './ExecutionKindBadge.jsx';
 import RequestCloseIcon from './RequestCloseIcon.jsx';

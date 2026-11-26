@@ -1,5 +1,6 @@
 import './ResourceActions.css';
 const paths={
+ link:'m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 1 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0',
  filter:'M3 6h18M6 12h12M9 18h6',
  upload:'M12 17V3m-4 4 4-4 4 4M4 16v5h16v-5',
  'report-submit':'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9L14 3ZM14 3v6h6M12 18v-6m-3 3 3-3 3 3',

@@ -1,3 +1,4 @@
+import {RequestText} from './RequestIdentifier.jsx';
 import {useId} from 'react';
 import WorkspaceDiagonalArrow from './WorkspaceDiagonalArrow.jsx';
 import {PaginatedTable} from './Pagination.jsx';
@@ -6,7 +7,7 @@ import './LiveLab.css';
 import {STATUS_COLORS} from './labColors.mjs';
 
 export function LabRecordTable({columns,rows,onSelect,selectColumn,resetKey=''}) {
-  return <div className="live-table-wrap"><PaginatedTable className="live-record-table" resetKey={resetKey}><thead><tr>{columns.map(column=><th key={column.key}>{column.label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,index)=><tr key={row.id||index}>{columns.map((column,columnIndex)=><td key={column.key}>{onSelect&&(selectColumn?column.key===selectColumn:columnIndex===0)?<button type="button" className="live-data-link" onClick={()=>onSelect(row)}>{row[column.key]??'—'}</button>:column.key==='status'?<span className="live-status" style={{'--status-color':STATUS_COLORS[row[column.key]]||'#8d91ac'}}>{row[column.key]||'—'}</span>:row[column.key]??'—'}</td>)}</tr>):<tr><td colSpan={columns.length}><div className="live-empty">目前範圍沒有資料</div></td></tr>}</tbody></PaginatedTable></div>;
+  return <div className="live-table-wrap"><PaginatedTable className="live-record-table" resetKey={resetKey}><thead><tr>{columns.map(column=><th key={column.key}>{column.label}</th>)}</tr></thead><tbody>{rows.length?rows.map((row,index)=><tr key={row.id||index}>{columns.map((column,columnIndex)=><td key={column.key}>{onSelect&&(selectColumn?column.key===selectColumn:columnIndex===0)?<button type="button" className="live-data-link" onClick={()=>onSelect(row)}><RequestText>{row[column.key]??'—'}</RequestText></button>:column.key==='status'?<span className="live-status" style={{'--status-color':STATUS_COLORS[row[column.key]]||'#8d91ac'}}>{row[column.key]||'—'}</span>:<RequestText>{row[column.key]??'—'}</RequestText>}</td>)}</tr>):<tr><td colSpan={columns.length}><div className="live-empty">目前範圍沒有資料</div></td></tr>}</tbody></PaginatedTable></div>;
 }
 export function MetricCard({label,value,detail,icon,color='blue',onClick}) {
   const detailId=useId();

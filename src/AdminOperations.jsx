@@ -1,3 +1,4 @@
+import {RequestText} from './RequestIdentifier.jsx';
 import {ActionTable} from './tableActionIcons.jsx';
 import {appStorage,originalBusinessEnabled} from './originalBusiness.mjs';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
@@ -16,7 +17,7 @@ import {SourceNotes} from './LabPanels.jsx';
 import {IDLE_TIMEOUT_MS} from './idleSessions.mjs';
 const sourceTargets={labWorkItems:'requests',labAudit:'requests',borrows:'requests',labOperations:'requests',schedules:'schedule',equipment:'equipment',materials:'maintenance',reviews:'requests',electronic:'requests',accounts:'accounts'};
 const date=v=>v?new Date(v).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false}):'尚無紀錄';
-export function AdminTable({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><ActionTable className="admin-table"><caption>{label}<small>{rows.length} 筆</small></caption><thead><tr>{columns.map(([k,l])=><th scope="col" key={k}>{l}</th>)}</tr></thead><tbody>{rows.length?rows.map((r,i)=><tr key={r.id||i}>{columns.map(([k])=><td key={k}>{r[k]??'未提供'}</td>)}</tr>):<tr><td colSpan={columns.length}><div className="admin-empty">尚無紀錄。新增後會顯示在這裡。</div></td></tr>}</tbody></ActionTable></div>;}
+export function AdminTable({label,columns,rows}){return <div className="admin-table-wrap" tabIndex={0} role="region" aria-label={label}><ActionTable className="admin-table"><caption>{label}<small>{rows.length} 筆</small></caption><thead><tr>{columns.map(([k,l])=><th scope="col" key={k}>{l}</th>)}</tr></thead><tbody>{rows.length?rows.map((r,i)=><tr key={r.id||i}>{columns.map(([k])=><td key={k}><RequestText>{r[k]??'未提供'}</RequestText></td>)}</tr>):<tr><td colSpan={columns.length}><div className="admin-empty">尚無紀錄。新增後會顯示在這裡。</div></td></tr>}</tbody></ActionTable></div>;}
 export function AdminStats({items}){return <div className="admin-stat-grid">{items.map(([label,value,note])=><article key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>)}</div>;}
 export function AdminInfo({items}){return <dl className="admin-info-grid">{items.map(([l,v])=><div key={l}><dt>{l}</dt><dd>{v}</dd></div>)}</dl>;}
 function download(name,content,type='application/json'){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
