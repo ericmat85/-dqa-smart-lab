@@ -1,0 +1,65 @@
+/* One compact, version-aware information view for review, scheduling and laboratory entry points. */
+html body #root :is(.request-info-detail-modal,.rq-request-detail-modal){width:min(920px,calc(100vw - 36px));border-radius:8px}
+html body #root .rq-request-detail-header .rq-eyebrow{display:none}
+html body #root .rq-request-detail-header{padding:18px 24px;align-items:center;gap:12px}
+html body #root .rq-request-detail-header h2{font-size:18px;line-height:1.5;margin:0}
+html body #root .rq-request-detail-header>.rq-close{width:36px;height:36px;flex:none;border-radius:8px;border:1px solid var(--enterprise-border,#dfe7f2);background:var(--enterprise-card,#fff);color:inherit}
+html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:14px 24px 18px;display:block}
+.unified-request-information{min-width:0;color:var(--enterprise-text,var(--text,#17365d))}
+.request-information-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px}
+html body #root .unified-request-information .mapped-request-document{padding:0;margin:0}
+.request-information-status{margin-left:auto;font-size:12px;color:var(--enterprise-secondary,#65768b)}
+.request-information-section{margin:0 0 10px;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:7px;background:var(--enterprise-card,#fff);min-width:0;overflow:clip}
+.request-information-section>summary{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 14px;cursor:pointer;list-style:none;user-select:none}
+.request-information-section>summary::-webkit-details-marker{display:none}
+.request-information-section>summary h3{margin:0;font-size:15px;line-height:1.5;font-weight:700}
+.request-information-number{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:none;border-radius:50%;font-size:12px;font-weight:700;color:#fff;background:#0866e8}
+.request-information-stage-state{margin-left:auto;color:var(--enterprise-secondary,#65768b);font-size:11px;line-height:1.5}
+.request-information-chevron{width:7px;height:7px;flex:none;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;transform:rotate(45deg);margin:0 3px 4px 5px}
+.request-information-section[open]>summary{border-bottom:1px solid var(--enterprise-border,#dfe7f2)}
+.request-information-section[open]>summary .request-information-chevron{transform:rotate(225deg);margin-bottom:-3px}
+.request-information-section>summary:focus-visible{outline:2px solid #0866e8;outline-offset:-3px}
+.request-information-section-body{padding:12px 14px 14px;min-width:0}
+.request-information-section-body>h4{font-size:13px;line-height:1.5;margin:14px 0 8px;font-weight:700}
+.request-information-section-body>h4:first-child{margin-top:0}
+.request-information-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0;min-width:0}
+.request-information-fields>div{min-width:0;padding:8px 10px;border-radius:5px;background:var(--enterprise-bg,var(--soft,#f3f6fa))}
+.request-information-fields>.is-wide{grid-column:1/-1}
+.request-information-fields dt{font-size:11px;line-height:1.5;margin:0 0 3px;color:var(--enterprise-secondary,#65768b)}
+.request-information-fields dd{margin:0;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;font-weight:500}
+.request-information-signatures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.request-information-signature{padding:10px;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:5px;min-width:0}
+.request-information-signature h5{font-size:12px;line-height:1.5;margin:0 0 6px}
+.request-information-signature p{font-size:12px;line-height:1.6;margin:4px 0;overflow-wrap:anywhere}
+.request-information-signature p>span{display:block;font-size:11px;color:var(--enterprise-secondary,#65768b)}
+.request-information-signature :is(a,img){display:block;max-width:100%}
+.request-information-signature img{width:100%;height:62px;object-fit:contain;object-position:left center;background:#fff;border-radius:3px}
+.request-information-signature small,.request-information-empty{font-size:12px;line-height:1.7;color:var(--enterprise-secondary,#65768b);margin:6px 0}
+.request-information-error{padding:8px 10px;border:1px solid var(--enterprise-border);font-size:12px;line-height:1.6}
+html body #root .request-information-section-body>.request-form-preview{padding:12px 0 0!important;margin:12px 0 0!important;border:0!important;border-top:1px solid var(--enterprise-border)!important;border-radius:0;background:transparent!important}
+.request-information-history{display:block!important;min-width:0;border-top:1px solid var(--enterprise-border,#dfe7f2);padding-top:12px;margin-top:14px}
+html body #root .request-information-history .report-case-panel{padding:10px 12px!important;margin:0 0 10px!important;border:1px solid var(--enterprise-border);border-radius:6px}
+.request-information-history :is(h3,h4){font-size:14px;line-height:1.5;margin:0 0 7px}
+.request-information-history .report-case-panel>p{margin:5px 0;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+.request-information-audit{margin:8px 0;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:5px;padding:9px 12px;min-width:0}
+.request-information-audit>summary{font-size:12px;line-height:1.6;font-weight:600;cursor:pointer}
+.request-information-audit .dqa-signature-history{margin:10px 0 0;border:0;padding:0}
+html body #root .request-information-history .rq-progress-section{padding:10px 0;margin:10px 0 0;border:0;background:transparent}
+html body #root .request-information-history .rq-progress-section>h3{padding:0!important;background:transparent!important;border:0}
+html body #root .request-information-history .rq-progress-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0 0;padding:0}
+html body #root .request-information-history .rq-progress-step{padding:8px;min-width:0;font-size:12px;border-radius:5px}
+@media(max-width:900px){
+ html body #root :is(.request-info-detail-modal,.rq-request-detail-modal){width:100%!important}
+ html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:10px 12px 14px!important}
+ .request-information-section>summary{padding:10px;gap:7px}
+ .request-information-section>summary h3{font-size:14px}
+ .request-information-stage-state{max-width:110px;font-size:10px;text-align:right}
+ .request-information-section-body{padding:10px}
+ .request-information-fields{gap:6px}
+ .request-information-fields>div{padding:7px 8px}
+ .request-information-fields dd{font-size:13px;line-height:1.6}
+ .request-information-signatures{gap:7px}
+ .request-information-signature{padding:8px}
+ html body #root .request-information-history .rq-progress-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:360px){.request-information-signatures{grid-template-columns:minmax(0,1fr)}}
