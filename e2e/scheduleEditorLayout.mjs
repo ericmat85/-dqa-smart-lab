@@ -8,6 +8,7 @@ export async function assertScheduleEditorLayout(page,dialog){
  expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);
  expect(box.y+box.height).toBeLessThanOrEqual(viewport.height+1);
  expect(await dialog.evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(1);
+ const details=dialog.locator(':scope>.schedule-edit-body>.template-info+.schedule-request-details');if(await details.count())expect(await details.evaluate(el=>el.getBoundingClientRect().top-el.previousElementSibling.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(12);
  const body=dialog.locator(':scope>.schedule-edit-body');await body.evaluate(el=>el.scrollTop=el.scrollHeight);
  const footer=await dialog.locator(':scope>.schedule-edit-actions').boundingBox();
  expect(footer.y+footer.height).toBeLessThanOrEqual(viewport.height+1);

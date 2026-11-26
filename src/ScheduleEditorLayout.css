@@ -4,6 +4,7 @@ html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>hea
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>header h3{margin:0;font-size:18px;line-height:1.5;overflow-wrap:anywhere}
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>header>button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;padding:0;border:1px solid var(--enterprise-border,#dce4f1);border-radius:6px;background:var(--enterprise-card,#fff);color:inherit;font-size:20px}
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>.schedule-edit-body{flex:1 1 auto;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 20px}
+html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>.schedule-edit-body>.template-info+.schedule-request-details{margin-top:12px}
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface>.schedule-edit-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;flex:none;margin:0;padding:10px 20px;border-top:1px solid var(--enterprise-border,#dce4f1);background:var(--enterprise-card,#fff)}
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface .schedule-arrangement-content{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
 html body #root .lms-enterprise .schedule-edit-modal.schedule-editor-surface .schedule-arrangement :is(input,select,textarea){min-width:0;max-width:100%}

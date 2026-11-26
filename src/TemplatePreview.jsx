@@ -32,11 +32,12 @@ export default function TemplatePreview({title,read,onClose,invalidated='',downl
    {view&&<>
     <div className="template-preview-toolbar">
      <label>工作表<select aria-label="範本預覽工作表" value={sheetIndex} onChange={e=>{setSheetIndex(Number(e.target.value));area.current?.scrollTo(0,0);}}>{view.sheets.map((s,i)=><option value={i} key={s.name}>{s.name}</option>)}</select></label>
+     <div className="template-preview-actions">{printable&&<button type="button" className="template-btn icon-action template-print-button" aria-label="列印目前工作表" title="列印目前工作表" disabled={busy||!view||!!invalidated} onClick={print}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6zM17 12h1"/></svg></button>}
      <div className="template-preview-zoom" role="group" aria-label="Excel 縮放">
       <button type="button" className="template-btn secondary" aria-label="縮小 Excel" title="縮小" disabled={percent<=25} onClick={()=>zoomBy(-1)}>−</button>
       <select aria-label="Excel 縮放比例" value={zoom} onChange={e=>setZoom(e.target.value==='fit'?'fit':Number(e.target.value))}><option value="fit">適合視窗（{fitPercent}%）</option>{steps.map(step=><option key={step} value={step}>{step}%</option>)}</select>
       <button type="button" className="template-btn secondary" aria-label="放大 Excel" title="放大" disabled={percent>=200} onClick={()=>zoomBy(1)}>＋</button>
-     </div>
+     </div></div>
     </div>
     <div ref={area} className="trial-template-sheet" role="region" aria-label="試驗範本 Excel 預覽" tabIndex={0}>
      <div className="template-preview-paper" style={{width:sheet.width,height:sheet.height,zoom:percent/100}}>
@@ -46,6 +47,6 @@ export default function TemplatePreview({title,read,onClose,invalidated='',downl
     </div>
    </>}
   </div>
-  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{printable&&<button type="button" className="template-btn template-print-button" disabled={busy||!view||!!invalidated} onClick={print}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6zM17 12h1"/></svg>列印目前工作表</button>}{downloadable&&<button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button>}</footer>
+  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{downloadable&&<button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button>}</footer>
  </CompactDialog>;
 }
