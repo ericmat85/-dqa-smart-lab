@@ -8,6 +8,8 @@ html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-r
 .unified-request-information{min-width:0;color:var(--enterprise-text,var(--text,#17365d))}
 .request-information-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px}
 html body #root .unified-request-information .mapped-request-document{padding:0;margin:0}
+html body #root .mapped-request-document .request-document-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border-radius:6px}
+.template-print-button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
 .request-information-status{--information-state:#916000;display:inline-flex;align-items:center;gap:7px;margin-left:auto;min-height:32px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--information-state) 28%,var(--enterprise-border,#dfe7f2));border-radius:6px;background:color-mix(in srgb,var(--information-state) 7%,var(--enterprise-card,#fff));color:var(--information-state);font-size:12px;line-height:1.5;white-space:nowrap}
 .request-information-status>svg{flex:none}
 .request-information-status>strong{font-weight:600}
@@ -63,6 +65,8 @@ html body #root .request-information-history .rq-progress-section{padding:10px 0
 html body #root .request-information-history .rq-progress-section>h3{padding:0!important;background:transparent!important;border:0}
 html body #root .request-information-history .rq-progress-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0 0;padding:0}
 html body #root .request-information-history .rq-progress-step{padding:8px;min-width:0;font-size:12px;border-radius:5px}
+html body #root .request-information-history .rq-progress-dot{position:relative;left:auto;top:auto;width:34px;height:34px;flex:none}
+html body #root .request-information-history .rq-progress-step:not(:last-child)::after{top:24px;left:50%;width:calc(100% + 8px);height:2px}
 @media(max-width:900px){
  html body #root :is(.request-info-detail-modal,.rq-request-detail-modal){width:100%!important}
  html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:10px 12px 14px!important}
@@ -75,6 +79,10 @@ html body #root .request-information-history .rq-progress-step{padding:8px;min-w
  .request-information-fields dd{font-size:13px;line-height:1.6}
  .request-information-signatures{gap:7px}
  .request-information-signature{padding:8px}
- html body #root .request-information-history .rq-progress-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+ html body #root .request-information-history .rq-progress-steps{grid-template-columns:minmax(0,1fr)}
+ html body #root .request-information-history .rq-progress-step{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;text-align:left;gap:3px 12px;min-height:64px}
+ html body #root .request-information-history .rq-progress-dot{grid-row:1/3;grid-column:1}
+ html body #root .request-information-history .rq-progress-label,html body #root .request-information-history .rq-progress-step>small{grid-column:2}
+ html body #root .request-information-history .rq-progress-step:not(:last-child)::after{top:50%;left:24px;width:2px;height:calc(100% + 8px)}
 }
 @media(max-width:360px){.request-information-signatures{grid-template-columns:minmax(0,1fr)}}

@@ -4,8 +4,9 @@ import {mappedCaseDocument} from './documentMappingClient.mjs';
 import {requestWorkbookBytes} from './requestDocumentWorkbook.mjs';
 import TemplatePreview from './TemplatePreview.jsx';
 export default function MappedRequestDocument({request,account}){
- const [open,setOpen]=useState(false);
- const read=useCallback(async()=>{const file=await mappedCaseDocument('REQUEST',request.documentVersionId,account?.id);return file||{name:'委託單_'+request.id+'.xlsx',bytes:await requestWorkbookBytes({...request,documentVersionId:null})};},[request,account?.id]);
+ const [open,setOpen]=useState(false),requestData=JSON.stringify(request);
+ // Keep the reader stable when the surrounding information view rerenders with identical data.
+ const read=useCallback(async()=>{const pinned=JSON.parse(requestData),file=await mappedCaseDocument('REQUEST',pinned.documentVersionId,account?.id);return file||{name:'委託單_'+pinned.id+'.xlsx',bytes:await requestWorkbookBytes({...pinned,documentVersionId:null})};},[requestData,account?.id]);
  if(!originalBusinessEnabled()||!request.documentVersionId)return null;
- return <div className="mapped-request-document"><button type="button" className="template-btn secondary" onClick={()=>setOpen(true)}>查閱委託單</button>{open&&<TemplatePreview title={request.id+'｜委託單'} read={read} downloadable={false} previewLabel="唯讀預覽" description="委託資訊與欄位位置依送簽版本固定，後續主管、執行者的填選與簽名依已完成流程顯示，僅供查閱。" onClose={()=>setOpen(false)}/>}</div>;
+ return <div className="mapped-request-document"><button type="button" className="template-btn secondary request-document-icon" aria-label="查閱委託單" title="查閱委託單" onClick={()=>setOpen(true)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M13 3v6h6M13 3l6 6v2M8 13h3m-3 4h2"/><circle cx="16" cy="16" r="4"/><path d="m19 19 3 3"/></svg></button>{open&&<TemplatePreview title={request.id+'｜委託單'} read={read} downloadable={false} printable previewLabel="唯讀預覽" description="委託資訊與欄位位置依送簽版本固定，後續主管、執行者的填選與簽名依已完成流程顯示，僅供查閱；可列印目前工作表，不提供檔案下載。" onClose={()=>setOpen(false)}/>}</div>;
 }

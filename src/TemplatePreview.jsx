@@ -1,16 +1,17 @@
 import {useEffect,useRef,useState} from 'react';
 import CompactDialog from './CompactDialog.jsx';
 import {buildWorkbookView} from './reportWorkbookView.mjs';
+import {printWorkbookSheet} from './printWorkbookSheet.mjs';
 import './TrialTemplateLibrary.css';
 export function downloadTemplate(file){const url=URL.createObjectURL(new Blob([file.bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
-export default function TemplatePreview({title,read,onClose,invalidated='',downloadable=true,description='',onSelectCell,previewLabel='範本預覽'}){
- const lifetime=useRef(0),area=useRef(null);
+export default function TemplatePreview({title,read,onClose,invalidated='',downloadable=true,printable=false,description='',onSelectCell,previewLabel='範本預覽'}){
+ const lifetime=useRef(0),area=useRef(null),printJob=useRef({controller:null});
  const [view,setView]=useState(null),[sheetIndex,setSheetIndex]=useState(0),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [zoom,setZoom]=useState(100),[viewport,setViewport]=useState({width:0,height:0});
- useEffect(()=>{const token=++lifetime.current;let cancelled=false;const urls=[];setView(null);setError('');setSheetIndex(0);setZoom(100);
+ useEffect(()=>{const token=++lifetime.current,jobs=printJob.current;let cancelled=false;const urls=[];setView(null);setError('');setSheetIndex(0);setZoom(100);
   if(invalidated){setError(invalidated);setBusy(false);return()=>{cancelled=true;if(lifetime.current===token)lifetime.current++;};}
   (async()=>{try{const file=await read(),model=await buildWorkbookView(file.bytes);await read();if(cancelled)return;for(const sheet of model.sheets)for(const image of sheet.images){image.url=URL.createObjectURL(new Blob([image.bytes],{type:image.type}));urls.push(image.url);}setView(model);}catch(e){if(!cancelled)setError(e.message);}})();
-  return()=>{cancelled=true;if(lifetime.current===token)lifetime.current++;urls.forEach(url=>URL.revokeObjectURL(url));};
+  return()=>{cancelled=true;if(lifetime.current===token)lifetime.current++;jobs.controller?.abort();urls.forEach(url=>URL.revokeObjectURL(url));};
  },[read,invalidated]);
  useEffect(()=>{
   if(!view||!area.current)return;
@@ -18,6 +19,7 @@ export default function TemplatePreview({title,read,onClose,invalidated='',downl
   observer.observe(area.current);return()=>observer.disconnect();
  },[view]);
  async function action(){if(busy)return;const token=lifetime.current;setBusy(true);setError('');try{const file=await read();if(token!==lifetime.current)return;downloadTemplate(file);}catch(e){if(token===lifetime.current)setError(e.message);}finally{if(token===lifetime.current)setBusy(false);}}
+ async function print(){if(busy||!view||invalidated)return;const token=lifetime.current,paper=area.current?.querySelector('.template-preview-paper')?.cloneNode(true),selected=view.sheets[sheetIndex];setBusy(true);setError('');printJob.current.controller?.abort();const controller=new AbortController();printJob.current.controller=controller;try{await read();if(token!==lifetime.current)return;await printWorkbookSheet(paper,{title:title+'｜'+selected.name,width:selected.width,height:selected.height,signal:controller.signal});}catch(e){if(token===lifetime.current&&e.name!=='AbortError')setError('無法列印：'+e.message);}finally{if(token===lifetime.current)setBusy(false);}}
  const sheet=view?.sheets[sheetIndex];
  const fitPercent=sheet&&viewport.width>0&&viewport.height>0?Math.max(1,Math.min(200,Math.floor(Math.min((viewport.width-2)/sheet.width,(viewport.height-2)/sheet.height)*100))):100;
  const percent=zoom==='fit'?fitPercent:zoom,steps=[25,50,75,100,125,150,175,200];
@@ -44,6 +46,6 @@ export default function TemplatePreview({title,read,onClose,invalidated='',downl
     </div>
    </>}
   </div>
-  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{downloadable&&<button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button>}</footer>
+  <footer><button type="button" className="template-btn secondary" onClick={onClose}>關閉</button>{printable&&<button type="button" className="template-btn template-print-button" disabled={busy||!view||!!invalidated} onClick={print}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6zM17 12h1"/></svg>列印目前工作表</button>}{downloadable&&<button type="button" className="template-btn" disabled={busy||!view||!!invalidated} onClick={action}>下載此範本 Excel</button>}</footer>
  </CompactDialog>;
 }
