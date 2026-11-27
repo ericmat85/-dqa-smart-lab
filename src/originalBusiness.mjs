@@ -1,3 +1,4 @@
+import {configureParameterCatalog,emitParameterCatalog} from './specificationParameters.mjs';
 import {compoundProtocol} from './compoundSchedule.mjs';
 import {projectCommand,saveProject} from './projectRequests.mjs';
 import {humanReportIndex} from './humanBusinessProjection.mjs';
@@ -55,6 +56,7 @@ function requestRow(r){
 }
 
 function project(){
+ configureParameterCatalog(raw.specification_parameters);emitParameterCatalog();
  cache=new Map();for(const key of Object.values(collections))cache.set(key,'[]');
  const archive=me?.member.is_admin&&raw.legacy_import?.metadata?.mode==='READ_ONLY_ARCHIVE'?raw.legacy_import:{};
  const archived=row=>({...row,readOnly:true,sourceKind:'LEGACY_BROWSER_ARCHIVE',sourceBatchId:archive.metadata?.batch_id});
