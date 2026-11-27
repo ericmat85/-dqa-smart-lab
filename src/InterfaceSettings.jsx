@@ -1,13 +1,14 @@
 import {useState} from 'react';
 import useUiPreferences from './useUiPreferences.js';
 import {saveUiPreferences} from './uiPreferences.mjs';
+import HeroBackgroundSettings from './HeroBackgroundSettings.jsx';
 import WorkspaceAppearanceSettings from './WorkspaceAppearanceSettings.jsx';
 
 export default function InterfaceSettings({canManage=true}){
  const ui=useUiPreferences(),[error,setError]=useState(''),[notice,setNotice]=useState('');
  function update(patch){try{saveUiPreferences(patch);setError('');setNotice('介面偏好已儲存。');}catch{setNotice('');setError('設定尚未儲存，請確認瀏覽器儲存權限。');}}
  return <div className="admin-interface-settings">
-  <WorkspaceAppearanceSettings canManage={canManage}/>
+  <WorkspaceAppearanceSettings canManage={canManage}/><HeroBackgroundSettings canManage={canManage}/>
   <p className="admin-note">下列字體、語言與分頁偏好會立即儲存於目前瀏覽器。</p>
   {error&&<p role="alert" className="management-error">{error}</p>}{notice&&<p role="status" className="management-notice">{notice}</p>}
   <section className="admin-interface-panel" aria-label="介面外觀"><h3>介面外觀</h3><div className="admin-form-grid">

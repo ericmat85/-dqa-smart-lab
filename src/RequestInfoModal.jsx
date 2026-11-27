@@ -33,7 +33,7 @@ export default function RequestInfoModal({ request: supplied, onClose, onEdit, a
         <button type="button" className="rq-close" onClick={() => onClose()} aria-label="關閉委託單資訊"><RequestCloseIcon/></button>
       </header>
       <div className="rq-request-detail-body"><RequestInformation request={selected} account={account}/><RequestInformationHistory request={selected} account={account}/></div>
-      <footer className="rq-request-detail-footer">{onEdit && ['退件','補件中'].includes(selected.status) && <button type="button" className="rq-btn rq-btn-primary" onClick={onEdit}>編輯並重新送出</button>}<button type="button" className="rq-btn rq-btn-light" onClick={() => onClose()}>關閉</button></footer>
+      {onEdit && ['退件','補件中'].includes(selected.status) && <footer className="rq-request-detail-footer"><button type="button" className="rq-btn rq-btn-primary" onClick={onEdit}>編輯並重新送出</button></footer>}
     </section>
   </div></div>;
 }

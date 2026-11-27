@@ -1,0 +1,18 @@
+/* Administration navigation meets the content frame without side gutters. */
+html body #root .lms-enterprise :is(.settings-management,.admin-module,.admin-account-workspace){margin-top:0!important}
+html body #root .lms-enterprise .admin-module-nav{gap:0!important;padding:0!important;column-gap:0!important;align-items:stretch!important;background:var(--enterprise-tab-bg,#142d48)}
+html body #root .lms-enterprise .admin-module-nav>[role=tablist]{padding:0!important;scroll-padding:0!important;gap:0!important;align-self:stretch}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll{display:flex!important;align-items:center!important;justify-content:center!important;align-self:stretch;min-height:42px;height:auto;max-height:none;line-height:0!important;opacity:1;background:var(--workspace-color-tab-light,#142d48);margin:0!important;border:0!important}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll[hidden]{display:none!important}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll:disabled{color:#ffffff5c}
+html body #root .lms-enterprise .admin-tab-scroll>svg{width:18px;height:18px;display:block;flex:none}
+html body #root .lms-enterprise .settings-management>.template-page{max-width:none!important;width:100%}
+html body #root .lms-enterprise .settings-management .admin-overview-intro{border-radius:0;padding:0 16px 16px}
+html body #root .lms-enterprise .settings-management .admin-workspace-hero{padding:26px 28px!important;min-height:210px!important;gap:24px}
+.admin-workspace-hero .admin-hero-copy{min-width:0;flex:1}.admin-workspace-hero h3{overflow-wrap:anywhere}.admin-workspace-hero .admin-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.admin-workspace-hero .admin-hero-status{display:flex;align-items:center;gap:9px;margin-top:20px;padding-top:14px;border-top:1px solid #ffffff30;color:#e5edf7;max-width:600px;min-width:0}
+.admin-workspace-hero .admin-hero-status-dot{width:7px;height:7px;border-radius:50%;background:#72e8c5;box-shadow:0 0 0 4px #72e8c517;flex:none;margin:4px}
+.admin-workspace-hero .admin-hero-status>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 14px;min-width:0}.admin-workspace-hero .admin-hero-status strong{font-size:12px;color:#fff}.admin-workspace-hero .admin-hero-status span:not(.admin-hero-status-dot){font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+@media(max-width:600px){html body #root .lms-enterprise .settings-management .admin-overview-intro{padding:0 12px 12px}html body #root .lms-enterprise .settings-management .admin-workspace-hero{padding:22px 20px!important;min-height:220px!important}.admin-workspace-hero .admin-hero-status>div{flex-direction:column;gap:3px}.admin-workspace-hero .admin-hero-meta{gap:6px}}
+
+html body #root .theme-dark.lms-enterprise .admin-module-nav button.admin-tab-scroll{background:var(--workspace-color-tab-dark,#253d58)}

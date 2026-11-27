@@ -33,3 +33,9 @@ html body #root .finance-cost-dialog .finance-fields{display:grid;grid-template-
 
 /* Stored official branding uses the same transparent framing as the portals. */
 .logo-dark-preview .company-brand-logo{width:100%;max-width:240px;margin:0;flex:none}.image-logo-state{font-size:12px;color:var(--enterprise-secondary,#6e7f94);line-height:1.6}.image-editor-logo>footer{gap:8px 12px;align-items:center;flex-wrap:wrap}
+
+/* Slightly larger shared company mark, without changing its source image. */
+html body #root .dashboard-shell.lms-enterprise .sidebar .colong-sidebar-brand .company-brand-logo,html body #root :is(.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .workspace-sidebar-brand .company-brand-logo{width:184px!important;max-width:100%;margin-left:0}
+/* Emphasize the archived PDF action while retaining its existing authorization. */
+html body #root .report-case-panel .report-actions>.report-pdf-download{background:#d92d48!important;border:1px solid #d92d48!important;color:#fff!important;font-weight:600}
+html body #root .report-case-panel .report-actions>.report-pdf-download:hover{background:#bd2039!important;border-color:#bd2039!important}
