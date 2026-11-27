@@ -32,3 +32,5 @@
 .trial-editor-fields{border:0;padding:0;margin:0;min-width:0}
 
 .trial-catalog-editor footer button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px}
+
+.trial-tolerance-hint{grid-column:1/-1;margin:0;color:var(--enterprise-muted,var(--muted));font-size:12px}.trial-condition-row>button{grid-column:5;grid-row:1}.trial-condition-row>small{grid-row:2}@media(max-width:650px){.trial-condition-row>button{grid-column:2;grid-row:auto}.trial-condition-row>small{grid-row:auto}}

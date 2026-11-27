@@ -45,7 +45,7 @@ class Tests(unittest.TestCase):
  def deny(self,sql,expected):
   r=query(sql);self.assertNotEqual(r.returncode,0);self.assertIn(expected,r.stderr[-2000:])
  def test_project_creates_one_signed_request_with_all_stages(self):self.ok(f"SELECT count(*),jsonb_array_length(min(form_details::text)::jsonb->'compoundStages') FROM dqa_business.requests WHERE project_group_id='{G}'",'1|6')
- def test_preview_keeps_exact_minutes_and_does_not_reserve(self):self.ok(planning(save=False)+f"SELECT current_setting('test.compound_plan')::jsonb->>'scheduling_unit',jsonb_array_length(current_setting('test.compound_plan')::jsonb->'segments'),(SELECT count(*) FROM dqa_business.schedule_equipment WHERE equipment_id=ANY(ARRAY{EQS}::uuid[]))",'MINUTE|6|0')
+ def test_preview_keeps_exact_minutes_and_does_not_reserve(self):self.ok(planning(save=False)+f"SELECT current_setting('test.compound_plan')::jsonb->>'scheduling_unit',jsonb_array_length(current_setting('test.compound_plan')::jsonb->'segments'),(SELECT count(*) FROM dqa_business.schedule_equipment WHERE equipment_id=ANY(ARRAY{EQS}::uuid[]))",'DAY|6|0')
  def test_six_stage_chain_has_zero_gaps_and_three_devices(self):self.ok(planning()+f"SELECT jsonb_array_length(plan->'allocations'),NOT EXISTS(SELECT 1 FROM jsonb_array_elements(plan->'segments') WITH ORDINALITY a(v,n) JOIN jsonb_array_elements(plan->'segments') WITH ORDINALITY b(v,n) ON b.n=a.n+1 WHERE a.v->>'end_ms' IS DISTINCT FROM b.v->>'start_ms') FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'3|t')
  def test_first_signature_reserves_all_three_devices_for_one_sample_atomically(self):self.ok(first()+f"RESET ROLE;SELECT status,(SELECT count(*) FROM dqa_business.schedule_equipment a WHERE a.schedule_id=s.id),(SELECT sum(sample_quantity) FROM dqa_business.schedule_equipment a WHERE a.schedule_id=s.id) FROM dqa_business.schedules s WHERE request_id='{REQ}'",'PENDING_APPROVAL|3|3')
  def test_second_signature_activates_existing_single_workflow(self):self.ok(first()+review(4,'LMS_APPROVE',13)+f"SELECT status FROM dqa_business.schedules WHERE request_id='{REQ}'",'AWAITING_RECEIPT')
@@ -60,19 +60,19 @@ class Tests(unittest.TestCase):
   self.ok(setup+attempt+f"SELECT (SELECT count(*) FROM dqa_business.schedules WHERE request_id='{REQ}'),(SELECT count(*) FROM dqa_business.approval_events WHERE request_id='{REQ}' AND stage='LMS_1')",'0|0')
  def test_old_snapshot_catalog_stays_compatible_and_new_metadata_opts_in(self):self.ok('RESET ROLE;'+auth(3)+f"SELECT EXISTS(SELECT 1 FROM jsonb_array_elements(dqa_business.original_ui_snapshot('{T}')->'trials') t WHERE t->>'profile_code'='COMPOUND_ENVIRONMENT'),jsonb_array_length(dqa_business.preapproval_snapshot('{T}')->'compound_trials')",'f|1')
  def test_old_catalog_select_does_not_include_the_new_dynamic_type(self):self.ok('RESET ROLE;'+auth(3)+f"SELECT count(*) FROM dqa_business.trial_definitions WHERE tenant_id='{T}' AND profile_code='COMPOUND_ENVIRONMENT'",'0')
- def test_weekend_start_requires_explicit_preloaded_high_temperature(self):self.deny(planning(plan_data(preloaded_weekend=False)),'COMPOUND_HANDOFF_WINDOW')
- def test_overnight_handoff_is_rejected_without_padding(self):self.deny(planning(plan_data(start_local=START+'T22:00')),'COMPOUND_HANDOFF_WINDOW')
- def test_operator_stage_cannot_cross_shift_end(self):self.deny(planning(plan_data(start_local=START+'T17:30')),'COMPOUND_OPERATOR_WINDOW')
- def test_final_operator_can_finish_at_the_workday_shift_boundary(self):
-  with final_stage(420):self.ok(planning()+f"SELECT extract(isodow FROM (plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei')::integer,to_char((plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei','HH24:MI') FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'3|18:00')
- def test_final_operator_cannot_finish_after_hours(self):
-  with final_stage(480):self.deny(planning(),'COMPOUND_OPERATOR_WINDOW')
+ def test_weekend_placement_uses_calendar_permission_not_hidden_preload_flag(self):self.ok(planning(plan_data(preloaded_weekend=False))+f"SELECT plan->>'start_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",START)
+ def test_legacy_start_clock_is_normalized_to_date_boundary(self):self.ok(planning(plan_data(start_local=START+'T22:00'))+f"SELECT to_char((plan->>'starts_at')::timestamptz AT TIME ZONE 'Asia/Taipei','HH24:MI') FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'00:00')
+ def test_legacy_shift_end_does_not_reject_a_date_only_stage(self):self.ok(planning(plan_data(start_local=START+'T17:30'))+f"SELECT (plan->>'hours_per_batch')::numeric FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'122.0000000000000000')
+ def test_final_operator_ends_at_next_date_boundary(self):
+  with final_stage(420):self.ok(planning()+f"SELECT extract(isodow FROM (plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei')::integer,to_char((plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei','HH24:MI') FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'4|00:00')
+ def test_final_operator_no_longer_has_a_hidden_eight_hour_window(self):
+  with final_stage(480):self.ok(planning()+f"SELECT plan->>'end_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",(start+timedelta(days=4)).isoformat())
  def test_final_operator_cannot_finish_on_weekend(self):
   monday=(start+timedelta(days=2)).isoformat()
-  with final_stage(1380):self.deny(planning(plan_data(start_local=monday+'T09:00')),'COMPOUND_OPERATOR_WINDOW')
- def test_final_continuous_phase_still_requires_a_workday_completion_point(self):
+  with final_stage(1380):self.deny(planning(plan_data(start_local=monday+'T09:00')),'CALENDAR_NONWORKING_DAY')
+ def test_unattended_final_stage_can_complete_on_calendar_allowed_weekend(self):
   monday=(start+timedelta(days=2)).isoformat()
-  with final_stage(1380,'continuous'):self.deny(planning(plan_data(start_local=monday+'T09:00')),'COMPOUND_HANDOFF_WINDOW')
+  with final_stage(1380,'continuous'):self.ok(planning(plan_data(start_local=monday+'T09:00'))+f"SELECT plan->>'end_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",(start+timedelta(days=7)).isoformat())
  def test_wrong_device_type_is_rejected(self):self.deny(planning(plan_data(stage_equipment_ids=[EQS[1],EQS[0],EQS[1],EQS[0],EQS[2],EQS[1]])),'PLANNING_EQUIPMENT_REQUIRED')
  def test_complete_sample_batch_must_fit_each_device(self):self.deny('RESET ROLE;'+f"UPDATE dqa_business.equipment SET space_units=1 WHERE id='{EQS[2]}';"+planning({**plan_data(), 'equipment_revisions':{EQS[0]:1,EQS[1]:1,EQS[2]:2},'sample_space_units':2}),'PLANNING_SPACE_INSUFFICIENT')
  def test_device_revision_change_before_signature_prevents_partial_booking(self):
@@ -82,13 +82,19 @@ class Tests(unittest.TestCase):
  def test_cross_tenant_draft_access_is_denied(self):self.deny(planning().replace("'"+T+"'","'b0000000-0000-0000-0000-000000000001'"),'PLANNING_ACCESS_DENIED')
  def test_discontinuous_chain_can_wait_across_weekend_without_increasing_effort(self):
   policy=dict(mode='COMPOUND_DISCONTINUOUS',weekends=True,holidays=True,work_start=540,work_end=1080,overtime=False,overtime_end=1200,substitution=True)
-  sql=f"RESET ROLE;INSERT INTO dqa_private.trial_calendar_policies VALUES('{T}','{COMPOUND}',{literal(policy)},1);"+planning()+f"SELECT (SELECT sum((x->>'end_ms')::numeric-(x->>'start_ms')::numeric)=sum((x->>'duration_minutes')::numeric)*60000 FROM jsonb_array_elements(plan->'segments') x),plan->>'start_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'"
+  sql=f"RESET ROLE;INSERT INTO dqa_private.trial_calendar_policies VALUES('{T}','{COMPOUND}',{literal(policy)},1);"+planning()+f"SELECT (SELECT sum((x->>'nominal_minutes')::numeric)*60000=sum((x->>'duration_minutes')::numeric)*60000 FROM jsonb_array_elements(plan->'segments') x),plan->>'start_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'"
   # The physical protocol's exact original effort, not any inserted waiting period.
   sql=sql.replace("sum((x->>'duration_minutes')::numeric)*60000",str(sum(minutes)*60000))
-  self.ok(sql,'t|'+(start+timedelta(days=2)).isoformat())
+  self.ok(sql,'t|'+START)
  def test_continuous_chain_rejects_a_holiday_handoff(self):
   # The first preloaded exposure ends on Monday; a closure cannot be padded away.
   monday=(start+timedelta(days=2)).isoformat()
   self.deny(f"RESET ROLE;INSERT INTO dqa_private.schedule_incidents VALUES('{op(99)}','{T}','CLOSURE',NULL,'{monday}','{monday}','合成停班','{uid(1)}',clock_timestamp(),NULL);"+planning(),'CALENDAR_NONWORKING_DAY')
+ def test_stage_conditions_use_exact_trial_source_and_reject_wrong_equipment_range(self):
+  details=dict(conditions=[dict(kind='TEMPERATURE',unit='°C',lower=98,upper=102)],equipment_ids=[],description=[dict(type='text',text=stages[0]['specification'])]);caps=[dict(kind='TEMPERATURE',unit='°C',lower=-40,upper=95)]
+  self.deny(f"RESET ROLE;INSERT INTO dqa_private.trial_editor_settings VALUES('{T}','{stages[0]['trial_id']}',{literal(details)});INSERT INTO dqa_private.equipment_capabilities VALUES('{T}','{EQS[0]}',{literal(caps)});"+planning(),'PLANNING_CONDITIONS_EXCEEDED')
+ def test_unverified_stage_cannot_borrow_capability_from_another_device(self):
+  details=dict(conditions=[dict(kind='TEMPERATURE',unit='°C',lower=98,upper=102)],equipment_ids=[],description=[dict(type='text',text=stages[0]['specification'])]);caps=[dict(kind='TEMPERATURE',unit='°C',lower=-40,upper=150)]
+  self.deny(f"RESET ROLE;INSERT INTO dqa_private.trial_editor_settings VALUES('{T}','{stages[0]['trial_id']}',{literal(details)});INSERT INTO dqa_private.equipment_capabilities VALUES('{T}','{EQS[1]}',{literal(caps)});"+planning(),'PLANNING_CONDITIONS_UNVERIFIED')
 if __name__=='__main__':
  result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Tests));Path(a.result).write_text(json.dumps({'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'passed':result.wasSuccessful(),'scope':'network-isolated local PostgreSQL, rollback-only synthetic cases'},indent=2));raise SystemExit(not result.wasSuccessful())
