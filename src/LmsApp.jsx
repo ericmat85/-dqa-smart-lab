@@ -1,3 +1,4 @@
+import AccountOverviewStats from './AccountOverviewStats.jsx';
 import RequestIdentifier from './RequestIdentifier.jsx';
 import ScheduleRequestDetails from './ScheduleRequestDetails.jsx';
 import './ScheduleEditorLayout.css';
@@ -1042,35 +1043,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
 
 
-<div className="account-summary">
-
-        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
-
-          <span>帳號總數</span>
-
-          <strong>{accounts.length}</strong>
-
-        </div>
-
-        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
-
-          <span>啟用中</span>
-
-          <strong>{enabledCount}</strong>
-
-        </div>
-
-        <div className="account-summary-card"><i className="workspace-summary-icon" aria-hidden="true"><LmsSidebarIcon name="accounts"/></i>
-
-          <span>停用帳號</span>
-
-          <strong>{disabledCount}</strong>
-
-        </div>
-
-      </div>
-
-
+<AccountOverviewStats total={accounts.length} enabled={enabledCount} disabled={disabledCount}/>
 
       <div className="workspace-tab-toolbar account-access-toolbar"><div className="schedule-view-tabs account-access-tabs" role="tablist" aria-label="帳號與權限管理">
         {[[false,'帳號清單',accounts.length],[true,'角色與權限',BUILTIN_ROLES.length+roles.length]].map(([key,label,count])=><button type="button" key={label} role="tab" id={key?'access-tab-roles':'access-tab-accounts'} aria-selected={roleSettingsOpen===key} aria-controls={key?'access-panel-roles':'access-panel-accounts'} tabIndex={roleSettingsOpen===key?0:-1} onClick={()=>setRoleSettingsOpen(key)} onKeyDown={event=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?false:event.key==='End'?true:!roleSettingsOpen;setRoleSettingsOpen(next);document.getElementById(next?'access-tab-roles':'access-tab-accounts')?.focus();}}}><strong>{label}</strong><span>{count}</span></button>)}

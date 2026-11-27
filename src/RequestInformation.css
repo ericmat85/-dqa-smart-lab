@@ -102,3 +102,9 @@ html body #root .request-information-history details.request-information-audit>s
 html body #root .request-information-history details.request-information-audit>summary::-webkit-details-marker{display:none}
 html body #root .request-information-history details.request-information-audit>summary::before{content:'›';position:absolute;left:0;top:0;width:8px;text-align:center;font-weight:700}
 html body #root .request-information-history details.request-information-audit[open]>summary::before{transform:rotate(90deg)}
+
+/* Compact the top of information dialogs; keep notice, status and action gaps. */
+html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:8px 24px 14px}
+html body #root :is(.request-modal-body,.rq-request-detail-body)>.unified-request-information:first-child{margin-top:0!important}
+html body #root .rq-request-detail-header{padding:14px 24px}
+@media(max-width:600px){html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:8px 12px 12px}html body #root .rq-request-detail-header{padding:12px}}
