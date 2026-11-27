@@ -1,3 +1,4 @@
+import {validateCalendarPolicy} from './schedulingCalendar.mjs';
 import {TRIAL_TYPES,trialType} from './trialTypes.mjs';
 import {originalBusinessEnabled,appStorage} from './originalBusiness.mjs';
 import {matchTrialDefinition} from './trialTemplateMatching.mjs';
@@ -11,8 +12,8 @@ const error=(code,message)=>{throw Object.assign(Error(message),{code});};
 const text=(value,max)=>typeof value==='string'&&value.trim().length>0&&value.length<=max&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value);
 export function defaultTrialCatalog(){return defaults.map((name,index)=>{const ref=reference(name),p=data.profiles.find(p=>p.id===ref.profileId);return {id:'TRIAL-'+String(index+1).padStart(3,'0'),name,aliases:[],profileId:ref.profileId,trialType:trialType({profileId:ref.profileId}),specification:ref.specification,acceptance:ref.acceptance,equipment:ref.equipment,version:'DEMO-1',durationHours:p.hours,builtin:true,synthetic:true};});}
 function validate(row){
- if(row&&typeof row==='object'){row={...row,trialType:trialType(row)};if(!TRIAL_TYPES.some(t=>t.id===row.trialType))error('TRIAL_CATALOG_INVALID','請選擇有效的試驗類型。');}
- const fields=['id','name','aliases','profileId','trialType','specification','acceptance','equipment','version','durationHours','builtin','synthetic'];
+ if(row&&typeof row==='object'){row={...row,trialType:trialType(row)};if(row.calendarPolicy!==undefined)validateCalendarPolicy(row.calendarPolicy);if(!TRIAL_TYPES.some(t=>t.id===row.trialType))error('TRIAL_CATALOG_INVALID','請選擇有效的試驗類型。');}
+ const fields=['id','name','aliases','profileId','trialType','calendarPolicy','specification','acceptance','equipment','version','durationHours','builtin','synthetic'];
  if(!row||typeof row!=='object'||Object.keys(row).some(k=>!fields.includes(k))||!/^TRIAL-(?:\d{3}|[a-f0-9]{32})$/.test(row.id)||!text(row.name,80)||row.name==='其他'||/[、,，;]/.test(row.name)||!Array.isArray(row.aliases)||row.aliases.length>20||row.aliases.some(x=>!text(x,80))||!text(row.specification,6000)||!text(row.acceptance,2000)||!text(row.equipment,300)||!text(row.version,80)||(!originalBusinessEnabled()&&row.synthetic!==true)||typeof row.builtin!=='boolean')error('TRIAL_CATALOG_INVALID','試驗目錄欄位不完整或格式無效。');
  if(row.profileId==='COMPOUND_ENVIRONMENT'){if(!originalBusinessEnabled()||row.builtin||row.durationHours!==0)error('TRIAL_CATALOG_INVALID','複合試驗須由專案階段提供工時。');return Object.fromEntries(fields.map(k=>[k,Array.isArray(row[k])?[...row[k]]:row[k]]));}
  const profile=data.profiles.find(p=>p.id===row.profileId);

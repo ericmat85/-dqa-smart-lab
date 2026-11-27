@@ -1,3 +1,4 @@
+import SchedulingCalendarPanel from './SchedulingCalendarPanel.jsx';
 import RequestIdentifier from './RequestIdentifier.jsx';
 import {preapprovalContext} from './preapprovalClient.mjs';
 import LabPreflightForm from './LabPreflightForm.jsx';
@@ -282,7 +283,7 @@ export default function LabApp({ path, navigate }) {
     </div>
   );
 
-  const pageNotices=<>{lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
+  const pageNotices=<><SchedulingCalendarPanel account={account} compact/>{lifecycleError&&<div className="lab-notice" role="alert">{lifecycleError}</div>}
         {(requestStorage.error || auditStorage.error) && <div role="alert" className="lab-notice">{requestStorage.error || auditStorage.error}<button onClick={() => { requestStorage.retry(); auditStorage.retry(); }}>重試儲存</button></div>}{originalBusinessEnabled()&&<BusinessHumanPending onSaved={recoveredHumanAction}/>}{notice && <div className="lab-notice" role="status">{notice}</div>}</>;
   return (
     <div className={`lab-shell lab-enterprise ${sidebarCollapsed?'lab-sidebar-collapsed':''} ${dark ? "lab-theme-dark" : "lab-theme-light"}`}>

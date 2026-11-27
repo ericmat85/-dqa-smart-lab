@@ -12,7 +12,7 @@ def fixture(priority='一般'):
 old_plan=plan
 def plan(external=False,oid=11):return old_plan(external,oid).replace('"sample_code": "SAMPLE-001"','"sample_code": ""')
 def number(code='GENERATED',revision=0,oid=10,planrevision='coalesce((SELECT revision FROM dqa_business.schedule_drafts WHERE request_id=q.id),0)'):
- return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.mutate_preapproval_sample_numbers('{T}','{op(oid)}','{REQ}',q.request_document_version_id,q.revision,{revision},{planrevision},'GENERATE') FROM dqa_business.requests q WHERE id='{REQ}';"
+ return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.save_preapproval_sample_numbers('{T}','{op(oid)}','{REQ}',q.request_document_version_id,q.revision,{revision},{planrevision},'SAVE','[\"RT-2\",\"ST-3\",\"AB-4\"]'::jsonb) FROM dqa_business.requests q WHERE id='{REQ}';"
 def first(external=False):return plan(external)+number()+review(3,'LMS_APPROVE',12,FIRST,'2')
 def second(external=False):return first(external)+review(4,'LMS_APPROVE',13)
 def prepared(fields=PREP):return second()+human('PREPARE',20,fields,'')

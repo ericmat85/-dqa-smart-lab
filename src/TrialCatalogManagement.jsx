@@ -1,3 +1,6 @@
+import TrialCalendarFields from './TrialCalendarFields.jsx';
+import {defaultCalendarPolicy} from './schedulingCalendar.mjs';
+import './SchedulingCalendarPanel.css';
 import {TRIAL_TYPES,trialType,trialTypeLabel} from './trialTypes.mjs';
 import TrialTemplateBinding,{useTrialTemplateBindings} from './TrialTemplateBinding.jsx';
 import {pendingTrialTemplate,recoverTrialTemplate} from './trialTemplateDeliveryClient.mjs';
@@ -33,6 +36,7 @@ function Editor({value,revision,account,onClose}){
   <label>試驗方法<select aria-label="試驗方法" disabled={!!value.id||operation.locked} value={draft.profileId} onChange={e=>{const row=defaultTrialCatalog().find(r=>r.profileId===e.target.value);setDraft({...draft,profileId:e.target.value,durationHours:row?.durationHours??'',specification:row?.specification??'',acceptance:row?.acceptance??'',equipment:row?.equipment??''});}}><option value="UNVERIFIED">新增類型，尚未設定排程規則</option>{TRIAL_PROFILES.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
   <label>試驗工時（小時）<input disabled={operation.locked} aria-label="試驗工時（小時）" required type="number" min="0.01" max="24000" step="any" readOnly={profile?.fixed_duration} value={draft.durationHours} onChange={e=>{const hours=e.target.value;setDraft({...draft,durationHours:hours,specification:draft.specification.replace(/試驗時間：[^。\n]*。/,'試驗時間：'+hours+' 小時（合成示範）。')});}}/>{profile?.fixed_duration&&<small>此類型固定 {profile.hours} 小時，保留既有試驗規則。</small>}</label></div>
   <p className="trial-type-description" role="note">{TRIAL_TYPES.find(t=>t.id===draft.trialType)?.description} 類型用於分類；設備、工時與階段安排依試驗方法及委託設定。</p>
+  {originalBusinessEnabled()&&<section><label className="admin-checkbox"><input type="checkbox" checked={!!draft.calendarPolicy} disabled={operation.locked} onChange={e=>setDraft({...draft,calendarPolicy:e.target.checked?defaultCalendarPolicy(draft):undefined})}/>編輯此試驗的日曆規則（未勾選時保留原設定）</label>{draft.calendarPolicy&&<TrialCalendarFields value={draft.calendarPolicy} onChange={calendarPolicy=>setDraft({...draft,calendarPolicy})} disabled={operation.locked}/>}</section>}
   {['specification','acceptance','equipment'].map((key,index)=><label className="trial-catalog-text" key={key}>{['試驗規範／試驗手法','判定參考','適用設備說明'][index]}<textarea disabled={operation.locked} aria-label={['試驗規範／試驗手法','判定參考','適用設備說明'][index]} required rows={key==='specification'?7:3} maxLength={key==='specification'?6000:key==='acceptance'?2000:300} value={draft[key]} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></label>)}
   <p>{originalBusinessEnabled()?'儲存至共用資料庫，既有委託單保留當時的試驗內容。':'保存於目前瀏覽器，供新委託單選用。既有委託單保留原內容。'}</p><ResourceOperationNotice operation={operation} onSaved={onClose}/>
   {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" disabled={operation.busy} onClick={onClose}>取消</button><button type="submit" disabled={operation.locked} className="management-primary">儲存試驗項目</button></footer>

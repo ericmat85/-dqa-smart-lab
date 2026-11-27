@@ -1,3 +1,4 @@
+import {compareSchedulePriority} from './schedulingCalendar.mjs';
 export function groupSchedulesByExecutor(rows,accounts) {
   const people=accounts.filter(account=>['實驗室工程師','實驗室副工程師'].includes(account.role));
   const groups=people.map(person=>({key:`account:${person.id}`,name:person.name,person,rows:[]}));
@@ -19,5 +20,5 @@ export function groupSchedulesByExecutor(rows,accounts) {
 }
 export function filterScheduleRows(rows,status,search) {
   const text=search.trim().toLowerCase();
-  return rows.filter(row=>(status==='全部'||row.status===status)&&[row.requestId,row.id,row.productCode,row.sampleCode,row.title,row.eq,row.owner,row.department,row.requester,row.status].some(value=>String(value||'').toLowerCase().includes(text)));
+  return rows.filter(row=>(status==='全部'||row.status===status)&&[row.requestId,row.id,row.productCode,row.sampleCode,row.title,row.eq,row.owner,row.department,row.requester,row.status].some(value=>String(value||'').toLowerCase().includes(text))).sort(compareSchedulePriority);
 }

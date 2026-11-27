@@ -30,7 +30,7 @@ def plan_data(**patch):
  return dict(equipment_ids=EQS,equipment_revisions={id:1 for id in EQS},executor_id=EX,executor_revision=1,start_date=c['start_local'][:10],end_date=c['start_local'][:10],sample_code='',note='合成連續排程',preparation_minutes=0,cleanup_minutes=0,sample_space_units=1,compound=c)
 def planning(data=None,save=True):
  return 'RESET ROLE;'+auth(3)+f"DO $t$ DECLARE c jsonb;p jsonb;BEGIN SELECT jsonb_build_object('request_id',q.id,'expected_request_revision',q.revision,'expected_draft_revision',0,'data',{literal(data or plan_data())}) INTO c FROM dqa_business.requests q WHERE id='{REQ}';p:=dqa_business.preview_schedule_draft('{T}',c);PERFORM set_config('test.compound_plan',p::text,true);c:=jsonb_set(c,'{{data,end_date}}',p->'end_date');"+(f"PERFORM dqa_business.prepare_schedule_draft('{T}','{op(11)}',c);PERFORM dqa_business.execute_schedule_draft('{T}','{op(11)}',c);" if save else '')+'END $t$;'
-def number_after():return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.save_preapproval_sample_number('{T}','{op(10)}','{REQ}',q.request_document_version_id,q.revision,0,'COMPOUND-SAMPLE',1) FROM dqa_business.requests q WHERE id='{REQ}';"
+def number_after():return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.save_preapproval_sample_numbers('{T}','{op(10)}','{REQ}',q.request_document_version_id,q.revision,0,1,'SAVE','[\"RT-2\"]'::jsonb) FROM dqa_business.requests q WHERE id='{REQ}';"
 def first():return planning()+number_after()+review(3,'LMS_APPROVE',12,FIRST,'2')
 def query(sql):return subprocess.run(cmd,input='BEGIN;'+fixture()+sql+';ROLLBACK;',text=True,capture_output=True,env=env)
 @contextmanager
@@ -80,5 +80,15 @@ class Tests(unittest.TestCase):
   self.deny(sql,'PLANNING_EQUIPMENT_REQUIRED')
  def test_tampered_stage_protocol_is_rejected(self):self.deny('RESET ROLE;'+f"SELECT dqa_private.validate_compound_protocol('{T}',jsonb_set(form_details->'compoundStages','{{0,duration_minutes}}','0')) FROM dqa_business.requests WHERE id='{REQ}'",'COMPOUND_PROTOCOL_INVALID')
  def test_cross_tenant_draft_access_is_denied(self):self.deny(planning().replace("'"+T+"'","'b0000000-0000-0000-0000-000000000001'"),'PLANNING_ACCESS_DENIED')
+ def test_discontinuous_chain_can_wait_across_weekend_without_increasing_effort(self):
+  policy=dict(mode='COMPOUND_DISCONTINUOUS',weekends=True,holidays=True,work_start=540,work_end=1080,overtime=False,overtime_end=1200,substitution=True)
+  sql=f"RESET ROLE;INSERT INTO dqa_private.trial_calendar_policies VALUES('{T}','{COMPOUND}',{literal(policy)},1);"+planning()+f"SELECT (SELECT sum((x->>'end_ms')::numeric-(x->>'start_ms')::numeric)=sum((x->>'duration_minutes')::numeric)*60000 FROM jsonb_array_elements(plan->'segments') x),plan->>'start_date' FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'"
+  # The physical protocol's exact original effort, not any inserted waiting period.
+  sql=sql.replace("sum((x->>'duration_minutes')::numeric)*60000",str(sum(minutes)*60000))
+  self.ok(sql,'t|'+(start+timedelta(days=2)).isoformat())
+ def test_continuous_chain_rejects_a_holiday_handoff(self):
+  # The first preloaded exposure ends on Monday; a closure cannot be padded away.
+  monday=(start+timedelta(days=2)).isoformat()
+  self.deny(f"RESET ROLE;INSERT INTO dqa_private.schedule_incidents VALUES('{op(99)}','{T}','CLOSURE',NULL,'{monday}','{monday}','合成停班','{uid(1)}',clock_timestamp(),NULL);"+planning(),'CALENDAR_NONWORKING_DAY')
 if __name__=='__main__':
  result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Tests));Path(a.result).write_text(json.dumps({'tests':result.testsRun,'failures':len(result.failures),'errors':len(result.errors),'passed':result.wasSuccessful(),'scope':'network-isolated local PostgreSQL, rollback-only synthetic cases'},indent=2));raise SystemExit(not result.wasSuccessful())
