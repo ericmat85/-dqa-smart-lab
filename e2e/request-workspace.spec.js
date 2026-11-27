@@ -1,3 +1,4 @@
+import {runDemoCommand} from './assistantDemoCommand.mjs';
 import {resetVisibleListFilters} from './list-filter-controls.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {fillVirtualRequest} from './requestDemoCommand.mjs';
@@ -27,7 +28,7 @@ test('URL filters, pagination and dashboard collections agree; roles reject dire
 });
 test('supervisor can reject then approve a case and time is displayed in Taipei',async({page})=>{
  await login(page,true);await page.goto('/request/cases/UX-001');await expect(page.getByRole('button',{name:'退回補正',exact:true})).toBeVisible();await page.locator('.rq-approval textarea').fill('補充條件');await page.getByRole('button',{name:'退回補正',exact:true}).click();await expect(page.getByRole('status')).toContainText('已退回');expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-request-demo-v2')).find(r=>r.id==='UX-001').status)).toBe('退件');
- await page.goto('/request/cases/UX-010');await page.getByRole('button',{name:'DEMO 填寫',exact:true}).click();await page.getByRole('button',{name:'✓ 核准委託單',exact:true}).click();await expect(page.getByRole('status')).toContainText('簽核完成');await page.goto('/request/cases/UX-010');await expect(page.locator('.dqa-signature-history')).toContainText('台灣時間');await expect(page.locator('.dqa-signature-history')).not.toContainText(/T\d\d:\d\d.*Z/);
+ await page.goto('/request/cases/UX-010');await runDemoCommand(page,'/demo fill in manager');await page.getByRole('button',{name:'✓ 核准委託單',exact:true}).click();await expect(page.getByRole('status')).toContainText('簽核完成');await page.goto('/request/cases/UX-010');await expect(page.locator('.dqa-signature-history')).toContainText('台灣時間');await expect(page.locator('.dqa-signature-history')).not.toContainText(/T\d\d:\d\d.*Z/);
 });
 for(const [width,height]of [[1920,1080],[1366,768],[1280,720],[768,1024],[390,844],[683,384]])test(`workspace responsive ${width}x${height} keyboard, forms and screenshots`,async({page})=>{
  await page.setViewportSize({width,height});await login(page);await captureBrowserEvidence(page,{path:test.info().outputPath(`requester-${width}.png`),fullPage:true});

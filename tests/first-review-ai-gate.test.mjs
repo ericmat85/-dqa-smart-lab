@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {firstReviewFingerprint,reviewGateDecision} from '../src/firstReviewAIGate.mjs';
+const base={actor:'A',enabled:true,request:{id:'R',sourceRevision:1,documentVersionId:'D'},stage:{key:'D:LMS_1',ready:true,planRevision:2,sampleRevision:1,fields:{allowed:'yes'}},signature:'SIGNATURE',comment:''};
+test('unchanged review is reused; every source/plan/group/answer/signature/actor change invalidates it',()=>{
+ const fingerprint=firstReviewFingerprint(base),result={fingerprint,findings:[]};assert.equal(reviewGateDecision({enabled:true,fingerprint,result}),'READY');
+ for(const patch of [{actor:'B'},{request:{...base.request,sourceRevision:2}},{request:{...base.request,documentVersionId:'NEW'}},{stage:{...base.stage,planRevision:3}},{stage:{...base.stage,sampleRevision:2}},{stage:{...base.stage,fields:{allowed:'no'}}},{signature:'NEW'},{comment:'NEW'}])assert.equal(reviewGateDecision({enabled:true,fingerprint:firstReviewFingerprint({...base,...patch}),result,acknowledged:fingerprint}),'CHECK');
+});
+test('findings require acknowledgement of the exact checked input; off skips AI only',()=>{const fingerprint=firstReviewFingerprint(base),result={fingerprint,findings:[{detail:'check'}]};assert.equal(reviewGateDecision({enabled:true,fingerprint,result}),'CONFIRM');assert.equal(reviewGateDecision({enabled:true,fingerprint,result,acknowledged:fingerprint}),'READY');assert.equal(reviewGateDecision({enabled:false,fingerprint,result}),'SKIP');assert.equal(reviewGateDecision({enabled:true,fingerprint,result:null}),'CHECK');});

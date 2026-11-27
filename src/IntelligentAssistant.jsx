@@ -26,7 +26,7 @@ import {observeE4Local} from './e4Activity.mjs';
 import {stageReportDraftHandoff} from './reportDraftHandoff.mjs';
 
 function viewport(){const view=window.visualViewport;return {width:view?.width||window.innerWidth,height:view?.height||window.innerHeight,top:view?.offsetTop||0,right:Math.max(0,window.innerWidth-((view?.offsetLeft||0)+(view?.width||window.innerWidth)))};}
-export default function IntelligentAssistant({snapshot,metrics,system='lms',onDemoStart,acceleratorAllowed,onDemoReportReady,bottomInset=0}){
+export default function IntelligentAssistant({snapshot,metrics,system='lms',onDemoStart,onDemoFill,onDemoApproval,onDemoCreateTrial,onLocalDemoReport,acceleratorAllowed,onDemoReportReady,bottomInset=0}){
  const {language}=useUiPreferences();
  const [flowTestOpen,setFlowTestOpen]=useState(false),[demoReportOpen,setDemoReportOpen]=useState(false);
  const [,setPreferencesTick]=useState(0);
@@ -106,9 +106,22 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms',onDe
   try{
    const command=assistantCommand(trimmed);
    const commandsFaq=findCommonQuestion(trimmed)?.id==='commands';
-   if(command==='CREATE_REPORT'){if(system!=='lab'){reply='請至實驗室的「試驗委託」頁輸入 /create a demo report，選擇由你執行且已完成的虛擬委託。';}else{setDemoReportOpen(true);reply='已開啟 Demo 報告產生器，請選擇虛擬委託。產生後將以提交時相同的後端規則檢查。';}}
+   const fillReply=result=>typeof result==='string'?result:result?.message||'目前畫面沒有可填入的 Demo 表單，請先開啟對應案件。';
+   const openReportGenerator=async()=>{
+    if(system!=='lab')return '請至實驗室的「試驗委託」頁輸入 /create a demo report，選擇由你執行且已完成的虛擬委託。';
+    if(!originalBusinessEnabled()&&onLocalDemoReport)return fillReply(await onLocalDemoReport({signal:controller.signal}));
+    setDemoReportOpen(true);return '已開啟 Demo 報告產生器，請選擇虛擬委託。產生後將以提交時相同的後端規則檢查。';
+   };
+   if(command==='CREATE_REPORT'){reply=await openReportGenerator();}
+   else if(command==='FILL'){
+    if(system==='lms')reply=fillLV1Demo({system,actorId:originalBusinessEnabled()?businessIdentity()?.member.id:undefined}).message;
+    else if(system==='lab')reply=await openReportGenerator();
+    else reply=onDemoFill?fillReply(await onDemoFill(language)):'請先開啟新增委託或主管簽核畫面，再輸入 /demo fill。';
+   }
+   else if(command==='FILL_MANAGER'){reply=system==='request'&&onDemoApproval?fillReply(await onDemoApproval()):'請在電子委託系統開啟待主管簽核案件，再輸入 /demo fill in manager。';}
+   else if(command==='CREATE_TRIAL'){reply=system==='lab'&&onDemoCreateTrial?fillReply(await onDemoCreateTrial()):'請在隔離展示的實驗室報告提交視窗使用 /demo create trial。';}
    else if(command==='FILL_LV1'){reply=fillLV1Demo({system,actorId:originalBusinessEnabled()?businessIdentity()?.member.id:undefined}).message;}
-   else if(/^\/demo[ \t]+fill\b/i.test(trimmed)){reply='目前支援 /demo fill in LV1；請在虛擬委託的一階審查視窗中使用。';}
+   else if(/^\/demo[ \t]+fill\b/i.test(trimmed)){reply='請使用 /demo fill、/demo fill in manager 或 /demo fill in LV1；輸入「查看 AI 機器人指令碼」可查閱用法。';}
    else if(commandsFaq){reply=commandGuide(language);}
    else if(command==='SEARCH'||command==='CLEANUP'||command==='RESTART'){
     if(!originalBusinessEnabled()){reply='目前為隔離展示，這些指令只在已登入的資料庫工作區使用。';}

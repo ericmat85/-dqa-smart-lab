@@ -28,8 +28,8 @@ class Tests(unittest.TestCase):
   r=ns['execute'](sql);self.assertNotEqual(r.returncode,0);self.assertIn(error,r.stderr[-2600:])
  def test_admin_owner_can_submit_and_sign_manager_and_both_lms_levels(self):
   self.ok(w,admin_requests()+f"RESET ROLE;SELECT status,request_review_level,(SELECT count(*) FROM dqa_business.approval_events WHERE request_id=q.id AND actor_member_id='{OWN}') FROM dqa_business.requests q WHERE id='{REQ}'",'AWAITING_SCHEDULING|2|4')
- def test_admin_without_assigned_supervisor_can_submit_without_forging_assignment(self):
-  self.ok(w,promote+f"UPDATE dqa_business.memberships SET supervisor_member_id=NULL WHERE id='{OWN}';"+'RESET ROLE;'+w['run_action'](2,w['command'](),1)+f"RESET ROLE;SELECT supervisor_member_id IS NULL FROM dqa_business.requests WHERE id='{REQ}'",'t')
+ def test_admin_without_assigned_supervisor_defaults_to_self(self):
+  self.ok(w,promote+f"UPDATE dqa_business.memberships SET supervisor_member_id=NULL WHERE id='{OWN}';"+'RESET ROLE;'+w['run_action'](2,w['command'](),1)+f"RESET ROLE;SELECT supervisor_member_id=owner_member_id AND (SELECT payload->>'supervisor_member_id'=submitted_by::text AND payload->'workspace_admin_self_supervisor'='true'::jsonb FROM dqa_business.request_document_versions WHERE request_id='{REQ}') FROM dqa_business.requests WHERE id='{REQ}'",'t')
  def test_admin_does_not_change_directory_supervisor_or_role_review_level(self):
   self.ok(w,admin_requests()+f"RESET ROLE;SELECT supervisor_member_id='{MAN}',(SELECT review_level FROM dqa_business.roles WHERE id='{ADMIN_ROLE}') FROM dqa_business.memberships WHERE id='{OWN}'",'t|0')
  def test_all_signatures_record_real_administrator_and_same_document(self):

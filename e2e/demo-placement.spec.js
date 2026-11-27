@@ -1,3 +1,4 @@
+import {runDemoCommand} from './assistantDemoCommand.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
@@ -11,7 +12,7 @@ for(const width of [1920,1366,390])for(const theme of ['light','dark'])test(`Dem
   await expect(page.locator('.clear-cases-control')).toHaveCount(0);await expect(page.getByRole('button',{name:'Demo 工具',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'展開AI智能助理',exact:true})).toBeVisible();
  }
  await page.goto('/request/cases/DEMO-PLACEMENT');
- const header=page.locator('.rq-case-detail>.rq-panel-head');await expect(header.getByRole('button',{name:'DEMO 填寫',exact:true})).toBeVisible();await expect(header.getByRole('button',{name:'DEMO 填寫',exact:true})).toHaveClass(/rq-btn-light/);
+ const header=page.locator('.rq-case-detail>.rq-panel-head');await expect(header.getByRole('button',{name:/demo.*填|DEMO.*填|填.*demo/i})).toHaveCount(0);await runDemoCommand(page,'/demo fill in manager',{reply:'尚未送出簽核'});await expect(page.getByAltText('主管簽名預覽')).toBeVisible();
  await expect(page.getByRole('button',{name:'Demo 工具',exact:true})).toHaveCount(0);await expect(page).toHaveURL(/\/request\/cases\/DEMO-PLACEMENT$/);
  await header.scrollIntoViewIfNeeded();await captureBrowserEvidence(page,{path:test.info().outputPath(`demo-case-header-${width}-${theme}.png`)});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(await page.pageErrors()).toEqual([]);
 });

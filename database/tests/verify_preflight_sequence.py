@@ -11,8 +11,8 @@ def fixture(priority='一般'):
  return sql+f"RESET ROLE;UPDATE dqa_business.roles SET permissions=permissions||ARRAY['schedules.book'],pages=pages||ARRAY['schedule'] WHERE id='a1000000-0000-0000-0000-000000000003';"
 old_plan=plan
 def plan(external=False,oid=11):return old_plan(external,oid).replace('"sample_code": "SAMPLE-001"','"sample_code": ""')
-def number(code='SAMPLE-001',revision=0,oid=10,planrevision='(SELECT revision FROM dqa_business.schedule_drafts WHERE request_id=q.id)'):
- return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.save_preapproval_sample_number('{T}','{op(oid)}','{REQ}',q.request_document_version_id,q.revision,{revision},'{code}',{planrevision}) FROM dqa_business.requests q WHERE id='{REQ}';"
+def number(code='GENERATED',revision=0,oid=10,planrevision='coalesce((SELECT revision FROM dqa_business.schedule_drafts WHERE request_id=q.id),0)'):
+ return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.mutate_preapproval_sample_numbers('{T}','{op(oid)}','{REQ}',q.request_document_version_id,q.revision,{revision},{planrevision},'GENERATE') FROM dqa_business.requests q WHERE id='{REQ}';"
 def first(external=False):return plan(external)+number()+review(3,'LMS_APPROVE',12,FIRST,'2')
 def second(external=False):return first(external)+review(4,'LMS_APPROVE',13)
 def prepared(fields=PREP):return second()+human('PREPARE',20,fields,'')
@@ -26,15 +26,15 @@ class Tests(unittest.TestCase):
   r=execute(sql);self.assertNotEqual(r.returncode,0);self.assertIn(error,r.stderr[-2600:])
  def test_can_plan_without_sample_number(self):self.ok(plan()+f"SELECT plan->>'sample_code'='' AND plan->>'sample_revision' IS NULL FROM dqa_business.schedule_drafts WHERE request_id='{REQ}';",'t')
  def test_number_requires_confirmed_plan(self):self.deny(number(),'PREAPPROVAL_PLAN_REQUIRED')
- def test_public_plan_cannot_assign_number_in_the_planning_request(self):self.deny(plan()+number()+old_plan(oid=18),'PREAPPROVAL_NUMBER_AFTER_PLAN')
- def test_attach_number_updates_saved_plan_atomically(self):self.ok(plan()+number()+f"SELECT plan->>'sample_code',plan->>'sample_revision',revision FROM dqa_business.schedule_drafts WHERE request_id='{REQ}';",'SAMPLE-001|1|2')
+ def test_public_plan_cannot_assign_number_in_the_planning_request(self):self.deny(plan()+number()+old_plan(oid=18),'PREAPPROVAL_SAMPLE_REQUIRED')
+ def test_attach_number_updates_saved_plan_atomically(self):self.ok(plan()+number()+f"SELECT (plan->>'sample_code' LIKE '#__-%')::text,plan->>'sample_revision',revision FROM dqa_business.schedule_drafts WHERE request_id='{REQ}';",'true|1|2')
  def test_number_rechecks_exact_plan_revision(self):self.deny(plan()+number(planrevision='2'),'PREAPPROVAL_PLAN_REQUIRED')
  def test_first_signature_requires_number_after_plan(self):self.deny(plan()+review(3,'LMS_APPROVE',12,FIRST,'1'),'PREAPPROVAL_PLAN_REQUIRED')
  def test_full_schedule_number_both_reviews(self):self.ok(second()+f"SELECT status FROM dqa_business.schedules WHERE request_id='{REQ}';",'AWAITING_RECEIPT')
- def test_renumber_rebinds_same_plan_and_invalidates_prior_revision(self):self.ok(plan()+number()+number('SAMPLE-2',1,18)+f"SELECT plan->>'sample_code',revision FROM dqa_business.schedule_drafts WHERE request_id='{REQ}';",'SAMPLE-2|3')
+ def test_saved_group_cannot_be_appended_or_overwritten(self):self.deny(plan()+number()+number(revision=1,oid=18),'PREAPPROVAL_SAMPLE_GROUP_EXISTS')
  def test_number_replay_does_not_increment_plan_twice(self):self.ok(plan()+number(planrevision='1')+number(planrevision='1')+f"SELECT revision FROM dqa_business.schedule_drafts WHERE request_id='{REQ}';",'2')
- def test_replan_requires_reconfirming_sample_number(self):self.deny(plan()+number()+plan(oid=18)+review(3,'LMS_APPROVE',12,FIRST,'3'),'PREAPPROVAL_PLAN_REQUIRED')
- def test_can_reuse_same_number_after_explicit_replan(self):self.ok(plan()+number()+plan(oid=18)+number(revision=1,oid=19)+review(3,'LMS_APPROVE',12,FIRST,'4')+f"SELECT status FROM dqa_business.schedules WHERE request_id='{REQ}';",'PENDING_APPROVAL')
+ def test_replan_preserves_saved_group_without_reconfirmation(self):self.ok(plan()+number()+plan(oid=18)+review(3,'LMS_APPROVE',12,FIRST,'3')+f"SELECT status FROM dqa_business.schedules WHERE request_id='{REQ}';",'PENDING_APPROVAL')
+ def test_existing_group_is_carried_into_replan(self):self.ok(plan()+number()+plan(oid=18)+review(3,'LMS_APPROVE',12,FIRST,'3')+f"SELECT status FROM dqa_business.schedules WHERE request_id='{REQ}';",'PENDING_APPROVAL')
  def test_virtual_preparation_is_not_an_accelerator_action(self):
   global virtual;virtual=True
   self.ok(prepared()+f"SELECT status,received_at IS NULL FROM dqa_business.schedules WHERE request_id='{REQ}';",'AWAITING_RECEIPT|t')

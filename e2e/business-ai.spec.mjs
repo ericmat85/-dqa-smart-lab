@@ -1,3 +1,4 @@
+import {upload} from './fixtures/preapproval-workflow.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 import {BUSINESS_MODEL_CATALOG} from '../src/businessModelCatalog.mjs';
@@ -14,6 +15,7 @@ async function install(page,s,{admin=true}={}){
  if(path==='/snapshot'&&s.faqSnapshotFailure)return bad('UPSTREAM_UNAVAILABLE',503);
  if(path==='/snapshot')return send({data:{requests:[s.request],trials:defaultTrialCatalog().map((t,i)=>({...s.trial,id:t.profileId==='HIGH_HUMIDITY'?s.trial.id:id(100+i),legacy_id:t.id,name:t.name,aliases:t.aliases,profile_code:t.profileId,specification:t.specification,acceptance:t.acceptance,equipment_reference:t.equipment,specification_version:t.version,duration_hours:t.durationHours})),members:[{id:id(1),display_name:'合成管理者',enabled:true},{id:id(2),display_name:'合成執行人',enabled:true}],roles:[],sites:[],departments:[],equipment:[{id:id(12),legacy_id:'EQ-SYNTHETIC',name:'恆溫恆濕機 合成',category:'溫濕度',space_units:6,daily_hours:24,operational_status:'IDLE',revision:2,specification:'-40~150°C；10~98%RH'}],materials:[],schedules:[],allocations:[],borrows:[],operations:[],reports:[],quality:[],qualifications:[],resource_events:[],workflow_versions:[{id:id(20),request_id:id(11),version:1,document_sha256:'a'.repeat(64)}],workflow_events:[],workflow_signatures:[],schedule_drafts:s.drafts,schedule_executors:[{id:id(2),display_name:'合成執行人',revision:3}],formal_booking_enabled:false}});
 
+ if(path.startsWith('/document-mappings/stage/'))return send({data:{document_id:id(20),mapping:[],stages:{}}});
  if(path==='/ai/status')return send({data:{model:'gpt-6-luna',engines:Object.fromEntries(['E1','E2','E3','E4'].map(engine=>[engine,{ready:true,code:'CONTROLLED_PROVIDER_READY',available_usd:'.98',budget_group:engine==='E2'?'E2':'E4'}])),observations:{records:[]}}});
  const settingEngine=path.match(/^\/ai\/settings\/(E[1-4])$/)?.[1];
  if(settingEngine){
@@ -153,7 +155,7 @@ test('FAQ database failure returns unavailable counts without AI fallback; ordin
 
 test('a cancelled native E1 review closes progress and preserves its pending operation without replay',async({page})=>{
  const s=state();s.request.status='AWAITING_LMS_REVIEW';s.request.request_review_level=0;s.request.owner_member_id=id(9);await install(page,s);let calls=0;await page.route('**/api/business/ai/generate',()=>{calls++;});
- await page.goto('/lms/requests');await page.getByRole('button',{name:/^LV[12]審查$/,exact:true}).first().click();await page.getByRole('button',{name:'AI 審查',exact:true}).click();const d=page.getByRole('dialog',{name:'AI 審查進度',exact:true});await expect(d).toBeVisible();await expect.poll(()=>calls).toBe(1);await d.getByRole('button',{name:'取消審查',exact:true}).click();await expect(d).toHaveCount(0);await expect(page.getByRole('progressbar',{name:'資料載入中'})).toHaveCount(0);
+ await page.goto('/lms/requests');await page.getByRole('button',{name:/^LV[12]審查$/,exact:true}).first().click();await upload(page);await page.getByRole('switch',{name:'AI 審查',exact:true}).click();await page.getByRole('button',{name:'核准第 1 階',exact:true}).click();const d=page.getByRole('dialog',{name:'AI 審查進度',exact:true});await expect(d).toBeVisible();await expect.poll(()=>calls).toBe(1);await d.getByRole('button',{name:'取消審查',exact:true}).click();await expect(d).toHaveCount(0);await expect(page.getByRole('progressbar',{name:'資料載入中'})).toHaveCount(0);
  const pending=await page.evaluate(async()=>{const {pendingBusinessAI}=await import('/src/businessAIClient.mjs');return pendingBusinessAI();});expect(pending.filter(x=>x.engine==='E1')).toHaveLength(1);expect(calls).toBe(1);expect(s.writes).toHaveLength(0);await captureBrowserEvidence(page,{path:test.info().outputPath('e1-cancel-no-replay.png'),fullPage:true});expect(s.errors).toEqual([]);
 });
 test('a stalled native E2 request times out and closes analysis without saving or replaying',async({page})=>{

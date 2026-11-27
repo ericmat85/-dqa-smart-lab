@@ -16,25 +16,30 @@
 .intelligent-ai-icon{display:block;flex:none}.intelligent-launcher-symbol{display:inline-flex;align-items:center;justify-content:center}.intelligent-panel .intelligent-panel-title{display:flex;align-items:center;gap:8px}
 
 /* Edge launcher: horizontal position stays fixed; pointer movement changes top only. */
-.dashboard-shell .dashboard-main>.intelligent-assistant,.request-shared-tools>.intelligent-assistant{right:0;bottom:auto;z-index:75}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-launcher{box-sizing:border-box;width:68px;height:40px;flex-direction:row;gap:6px;padding:8px;border-radius:12px 0 0 12px;touch-action:none;user-select:none;cursor:grab;transition:width .24s ease,background .2s ease,box-shadow .2s ease}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant.is-expanded .intelligent-launcher{width:136px;box-shadow:0 4px 18px #454cc535}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant.is-dragging .intelligent-launcher{cursor:grabbing}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-panel{position:fixed;right:148px;top:clamp(8px,var(--launcher-top),max(8px,calc(100dvh - 568px)));bottom:auto;width:min(390px,calc(100vw - 164px));max-height:calc(100dvh - 16px);height:min(560px,calc(100dvh - 16px))}
-@media(max-width:600px){:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-panel{right:12px;top:56px;width:calc(100vw - 24px);height:calc(100dvh - 72px);max-height:560px}:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-launcher{position:relative;z-index:1}}
-@media(prefers-reduced-motion:reduce){:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-launcher{transition:none}}
+.dashboard-shell .dashboard-main>.intelligent-assistant,.request-shared-tools>.intelligent-assistant,.lab-shared-tools>.intelligent-assistant{right:0;bottom:auto;z-index:75}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-launcher{box-sizing:border-box;width:68px;height:40px;flex-direction:row;gap:6px;padding:8px;border-radius:12px 0 0 12px;touch-action:none;user-select:none;cursor:grab;transition:width .24s ease,background .2s ease,box-shadow .2s ease}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant.is-expanded .intelligent-launcher{width:136px;box-shadow:0 4px 18px #454cc535}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant.is-dragging .intelligent-launcher{cursor:grabbing}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-panel{position:fixed;right:148px;top:clamp(8px,var(--launcher-top),max(8px,calc(100dvh - 568px)));bottom:auto;width:min(390px,calc(100vw - 164px));max-height:calc(100dvh - 16px);height:min(560px,calc(100dvh - 16px))}
+@media(max-width:600px){:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-panel{right:12px;top:56px;width:calc(100vw - 24px);height:calc(100dvh - 72px);max-height:560px}:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-launcher{position:relative;z-index:1}}
+@media(prefers-reduced-motion:reduce){:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-launcher{transition:none}}
 /* Preserve panel layout and fit the visual viewport when zoomed. */
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-panel{right:var(--assistant-panel-right);left:auto;top:var(--assistant-panel-top);bottom:auto;width:var(--assistant-panel-width);height:var(--assistant-panel-height);max-height:var(--assistant-panel-height);max-width:var(--assistant-panel-width);box-sizing:border-box;z-index:2}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-launcher{display:flex;align-items:center;justify-content:center;line-height:1}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-panel{right:var(--assistant-panel-right);left:auto;top:var(--assistant-panel-top);bottom:auto;width:var(--assistant-panel-width);height:var(--assistant-panel-height);max-height:var(--assistant-panel-height);max-width:var(--assistant-panel-width);box-sizing:border-box;z-index:2}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-launcher{display:flex;align-items:center;justify-content:center;line-height:1}
 .intelligent-panel>header{flex-shrink:0;min-width:0;gap:8px}.intelligent-panel>header>div{min-width:0}.intelligent-panel>header button{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
 .intelligent-panel .intelligent-panel-title{flex-wrap:wrap;font-size:14px}.intelligent-panel .intelligent-panel-title svg{flex-shrink:0}.intelligent-body{flex:1;min-height:0;overflow-wrap:anywhere}
 .intelligent-panel .intelligent-composer button{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
 
 /* Expanded launcher content aligns to its left padding; the panel stays independent. */
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant.is-expanded .intelligent-launcher{justify-content:flex-start}
-:is(.dashboard-shell,.request-shared-tools) .intelligent-assistant .intelligent-launcher{position:relative;z-index:3}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant.is-expanded .intelligent-launcher{justify-content:flex-start}
+:is(.dashboard-shell,.request-shared-tools,.lab-shared-tools) .intelligent-assistant .intelligent-launcher{position:relative;z-index:3}
 /* Compact tour entry uses the same style even when ProductTour.css is not loaded. */
 .intelligent-panel .tour-assistant-entry{display:inline-flex;align-items:center;width:auto;min-height:30px;max-width:100%;box-sizing:border-box;margin:0 0 12px;padding:4px 10px;border:1px solid #bad3f6;border-radius:6px;color:#0967ef;background:var(--surface,#fff);font-size:12px;line-height:1.5;text-decoration:none}
 .intelligent-panel .tour-assistant-entry:hover{border-color:#0967ef;background:var(--soft,#eff5ff)}
 .intelligent-panel .tour-assistant-entry:focus-visible{outline:2px solid #0967ef;outline-offset:3px}
 .assistant-command-confirm{border:1px solid #efc9cc;border-radius:10px;background:var(--surface,#fff);padding:14px;margin:12px 0;color:var(--text,#142740);font-size:13px;line-height:1.6}.assistant-command-confirm label{display:grid;gap:5px;margin:12px 0}.assistant-command-confirm label input{box-sizing:border-box;width:100%;min-height:36px;border:1px solid #ccd7e6;border-radius:6px;background:var(--surface,#fff);color:inherit;padding:6px 9px;font:inherit}.assistant-command-confirm>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.assistant-command-confirm button{border:1px solid #cad6e5;border-radius:6px;background:var(--surface,#fff);color:inherit;min-height:32px;padding:5px 10px;font:inherit;cursor:pointer}.assistant-command-confirm .assistant-command-danger{background:#b52e3c;color:white;border-color:#b52e3c}.assistant-command-confirm button:disabled{opacity:.5;cursor:default}.assistant-command-confirm small{display:block;color:var(--muted,#667891)}.assistant-command-confirm input::-ms-reveal{display:none}
+
+/* Form-fill commands remain reachable while the laboratory report form is open. */
+.lab-shell:has(.lab-modal-backdrop) .lab-shared-tools>.intelligent-assistant{z-index:1700}
+/* Keep mobile report actions clear of the edge assistant launcher. */
+@media(max-width:600px){.lab-shell:has(.lab-modal-backdrop) .lab-modal-actions{padding-right:80px}}

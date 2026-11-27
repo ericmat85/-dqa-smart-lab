@@ -9,3 +9,12 @@ test('tour return URL preserves internal page and rejects external or malformed 
 
 test('late receipt clears only its matching operation and preserves newer pending work',()=>{const data=new Map([['owner',JSON.stringify({id:'new'})],['other',JSON.stringify({id:'old'})]]),storage={getItem:k=>data.get(k)||null,removeItem:k=>data.delete(k)};assert.equal(clearAssistantCommandReceipt('owner','old',storage),false);assert.equal(JSON.parse(data.get('owner')).id,'new');assert.equal(clearAssistantCommandReceipt('other','old',storage),true);assert.ok(!data.has('other'));assert.ok(data.has('owner'));});
 test('unavailable or malformed receipt storage never authorizes replay or throws',()=>{assert.equal(clearAssistantCommandReceipt('owner','id',{getItem(){throw Error('blocked');}}),false);assert.equal(clearAssistantCommandReceipt('owner','id',{getItem:()=>'{broken'}),false);});
+
+test('demo form commands are exact, discoverable, and never parse arbitrary prose as an action',()=>{
+ for(const [text,command] of [['/demo fill','FILL'],['/demo fill in manager','FILL_MANAGER'],['/demo fill in supervisor','FILL_MANAGER'],['/demo create trial','CREATE_TRIAL']]){
+  assert.equal(assistantCommand(text.toUpperCase()),command);
+  assert.equal(assistantCommand('please '+text),null);
+  assert.equal(assistantCommand(text+' now'),null);
+ }
+ for(const language of ['zh-TW','en'])for(const command of ['/demo fill','/demo fill in manager','/demo create trial'])assert.ok(commandGuide(language).includes(command));
+});

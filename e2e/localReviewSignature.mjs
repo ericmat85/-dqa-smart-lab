@@ -1,0 +1,2 @@
+import {expect} from '@playwright/test';
+export async function upload(page){await page.getByLabel('上傳簽名檔',{exact:true}).check();await page.locator('.dqa-signature-input input[type=file]').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJ1kAAAAASUVORK5CYII=','base64')});await expect(page.getByAltText(/(?:主管簽名|本次操作簽名)預覽/)).toBeVisible();}

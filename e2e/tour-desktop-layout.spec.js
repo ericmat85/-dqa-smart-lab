@@ -1,3 +1,4 @@
+import {runDemoCommand} from './assistantDemoCommand.mjs';
 import {captureBrowserEvidence} from '../scripts/ci/capture-evidence.mjs';
 import {test,expect} from '@playwright/test';
 for(const system of ['lms','lab'])test(`assistant compact entry opens the real tour from ${system}`,async({page})=>{
@@ -17,7 +18,7 @@ test('AI robot speech types progressively, auto-plays sentences and retains the 
  const typed=coach.locator('[data-typed-text]');await expect.poll(()=>typed.textContent()).not.toBe('');const size=await coach.boundingBox();expect(size.height).toBeLessThan(300);expect(size.width).toBeLessThanOrEqual(300);
  await frame.getByRole('button',{name:'簽核',exact:true}).click();await expect(coach.locator('.tour-context-instruction')).toContainText('DEMO');await expect(coach.getByRole('button',{name:'立即顯示',exact:true})).toBeVisible();const started=Date.now();await expect(typed).toHaveText('');await page.waitForTimeout(1000);await expect(typed).toHaveText('');await expect.poll(async()=>(await typed.textContent()).length).toBeGreaterThan(0);expect(Date.now()-started).toBeGreaterThanOrEqual(1300);const initial=await typed.textContent();await page.waitForTimeout(260);expect((await typed.textContent()).length-initial.length).toBeLessThanOrEqual(6);
  await expect(coach.getByRole('button',{name:'下一句 →',exact:true})).toHaveCount(0);await expect(coach.locator('.tour-context-instruction')).toContainText('請依藍色外框繼續操作',{timeout:20000});await expect.poll(()=>typed.textContent()).toBe('請依藍色外框繼續操作，我會在下一步陪您。');await page.waitForTimeout(1700);await expect(typed).toHaveText('請依藍色外框繼續操作，我會在下一步陪您。');
- await expect(coach.getByRole('button',{name:'前往 LV1審查 →',exact:true})).toBeDisabled();await page.emulateMedia({reducedMotion:'reduce'});await frame.getByRole('button',{name:'DEMO 填寫',exact:true}).click();await expect(coach.locator('.tour-context-instruction')).toContainText('委託者主管確認需求與委託內容');await expect(coach.getByRole('button',{name:'立即顯示',exact:true})).toHaveCount(0);await captureBrowserEvidence(page,{path:test.info().outputPath('ai-tour-speech-bubble.png')});
+ await expect(coach.getByRole('button',{name:'前往 LV1審查 →',exact:true})).toBeDisabled();await page.emulateMedia({reducedMotion:'reduce'});await runDemoCommand(frame,'/demo fill in manager');await expect(coach.locator('.tour-context-instruction')).toContainText('委託者主管確認需求與委託內容');await expect(coach.getByRole('button',{name:'立即顯示',exact:true})).toHaveCount(0);await captureBrowserEvidence(page,{path:test.info().outputPath('ai-tour-speech-bubble.png')});
 });
 
 test('welcome greets visitors and restart replays the greeting without completing a business checkpoint',async({page})=>{

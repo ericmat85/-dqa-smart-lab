@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {preapprovalRequired,preapprovalPlanCurrent,preapprovalScheduleCurrent,preparationFields,preparationChecksReady} from '../src/preapprovalFields.mjs';
 import {documentValues} from '../src/documentCellMapping.mjs';
 import {requestAction} from '../src/requestWorkflowClient.mjs';
-const context={document_id:'doc',request_revision:3,sample_code:'S1',sample_revision:1,draft:{document_version_id:'doc',request_revision:3,revision:2,plan:{sample_code:'S1',sample_revision:1}}};
+const context={quantity:3,sample_numbers_valid:true,sample_numbers:['#RT-1','#DA-2','#BC-3'],document_id:'doc',request_revision:3,sample_code:'S1',sample_revision:1,draft:{document_version_id:'doc',request_revision:3,revision:2,plan:{sample_code:'S1',sample_revision:1}}};
 const fields={sampleCorrect:'yes',sampleQuantity:3,sampleReceivedDate:'2026-11-25',fixturesReady:'yes',operationFamiliar:'yes',outsourceBooked:'not_applicable'};
 test('first review requires explicit manual checks while derived fields come from the plan',()=>{
  const required=preapprovalRequired(['lms1SampleCode','lms1Equipment1','lms1PlannedOperator','lms1AllowedYesCheck'].map(field=>({field})));

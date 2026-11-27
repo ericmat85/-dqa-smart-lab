@@ -15,7 +15,7 @@ export const ASSISTANT_DEMOS=[
  {id:'history',category:'設備',question:'在哪裡查看設備維護紀錄？',keywords:['維護紀錄','設備紀錄','保養'],answer:'前往設備管理，點選設備資訊並切換至操作紀錄或校驗保養分頁。維護與校驗服務完成後，紀錄會保留起訖時間、原因與處理人員。'},
  {id:'materials',category:'物料',question:'物料會占用試驗排程嗎？',keywords:['占用','物料排程'],answer:'物料使用獨立台帳管理，不占用設備排程。可在物料管理查看耗材、完檢機、工具與治具，也可依實際狀況變更物料狀態。'},
  {id:'stock',category:'物料',question:'目前有哪些物料低於安全庫存？',keywords:['庫存','缺料','補貨'],answer:'stock'},
- {id:'commands',category:'AI 指令',question:'查看 AI 機器人指令碼',keywords:['AI 指令','指令碼'],answer:'使用 /demo fill in LV1 填入虛擬委託的一階審查表、/create a demo report 產生已完成虛擬委託的報告、/demo start 填入虛擬資料、/demo accelerator 開啟加速器、/demo search 查詢虛擬委託、/demo cleanup 刪除虛擬委託；管理員可用 /system restart 驗證密碼並初始化。'},
+ {id:'commands',category:'AI 指令',question:'查看 AI 機器人指令碼',keywords:['AI 指令','指令碼'],answer:'使用 /demo fill 依目前畫面填入資料、/demo fill in manager 填入虛擬主管簽核、/demo fill in LV1 填入虛擬委託的一階審查表、/create a demo report 產生已完成虛擬委託的報告、/demo start 填入虛擬資料、/demo accelerator 開啟加速器、/demo search 查詢虛擬委託、/demo cleanup 刪除虛擬委託；管理員可用 /system restart 驗證密碼並初始化。'},
  {id:'return',category:'簽核',question:'主管退件時需要簽名嗎？',keywords:['退件','退回','補件'],answer:'退回補正時需要填寫原因，可不簽名；核准則需要簽名。重新送出後依流程重新審查，既有簽名與退件歷程會保留。'},
  {id:'report',category:'報表',question:'如何匯出試驗排程報表？',keywords:['報表','匯出','csv'],answer:'前往報表分析，選擇試驗排程、設備概況、物料庫存或委託審查。設定搜尋、狀態與日期條件後按「匯出報表」選擇 PDF 或 Excel，會匯出全部符合條件的資料。'},
  {id:'trial-reference',category:'試驗',question:'在哪裡查看試驗規範與設備相容性？',keywords:['試驗規範','相容性'],answer:'前往系統管理的「試驗與設備參數」查看試驗目錄、版本、工時及適用設備。新增委託單選取試驗後，可查看並修改參考規範；排程仍需核對設備規格、可用空間 U 及占用時段。'},
