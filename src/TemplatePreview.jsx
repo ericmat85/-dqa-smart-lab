@@ -26,7 +26,7 @@ export default function TemplatePreview({title,read,onClose,invalidated='',downl
  function zoomBy(direction){setZoom(Math.max(25,Math.min(200,(direction>0?Math.floor(percent/25)+1:Math.ceil(percent/25)-1)*25)));}
  return <CompactDialog title={title.endsWith('｜試驗')?title+'範本預覽':title+'｜'+previewLabel} onClose={onClose} className="trial-template-dialog">
   <div className="trial-template-preview-body">
-   <p>{description||'範本工作表預覽；簽名區與量測欄位不預填。可切換工作表、調整顯示比例並下載 Excel 原檔。'}</p>
+   <p>{description||(downloadable?'範本工作表預覽；簽名區與量測欄位不預填。可切換工作表、調整顯示比例並下載 Excel 原檔。':'範本工作表預覽；可切換工作表及調整比例。下載原稿請至資料庫。')}</p>
    {!view&&!error&&<p role="status">正在讀取 Excel、示範圖片與版面…</p>}
    {error&&<p role="alert">{error}</p>}{busy&&<p role="status">正在產生預覽或檔案，請稍候…</p>}
    {view&&<>
