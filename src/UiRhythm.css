@@ -1,0 +1,24 @@
+/* Shared visual rhythm: independent cards have space, nested forms share one frame. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.rq-entry-number,.request-information-number,.preapproval-step>legend>span){box-sizing:border-box;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 24px!important;width:24px!important;min-width:24px!important;max-width:24px!important;height:24px!important;min-height:24px!important;max-height:24px!important;aspect-ratio:1;border-radius:50%!important;padding:0!important;line-height:1!important}
+html body #root :is(.avatar,.lab-avatar,.schedule-person-avatar){box-sizing:border-box;aspect-ratio:1;flex-shrink:0;overflow:hidden;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+html body #root .rq-progress-dot{box-sizing:border-box;aspect-ratio:1;flex-shrink:0;border-radius:50%!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;line-height:1!important}
+html body #root :is(.workspace-primary-tabs,[role=tablist])>[role=tab]{display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.4}
+html body #root [role=tablist]>[role=tab]>:is(span,i,b):not(.workspace-visually-hidden){align-self:center;vertical-align:middle}
+html body #root :is(.workspace-primary-tabs,[role=tablist])>[role=tab]>span:not(.catalog-tab-icon){display:inline-flex;align-items:center;justify-content:center;line-height:1!important}
+html body #root :is(.icon-action,.catalog-search-toggle,.workspace-filter-toggle,.request-modal-close,.rq-close,.compact-management-dialog>header>button)>svg{display:block;flex:none;align-self:center;vertical-align:middle;margin-top:0!important;margin-bottom:0!important}
+html body #root .compact-management-dialog>header>button>svg{width:16px;height:16px}
+html body #root .unified-request-information :is(.template-stage-form,.report-case-panel){border:0;background:transparent;border-radius:0;box-shadow:none;padding:0;margin:16px 0}
+html body #root .unified-request-information .template-stage-form+ :is(.request-information-fields,.request-information-signatures){margin-top:16px}
+html body #root .request-information-signature{border:0;background:var(--enterprise-bg,#edf3fb);border-radius:6px}
+html body #root .request-information-section-body>:last-child{margin-bottom:0}
+html body #root .request-information-history>:is(section,details)+:is(section,details){margin-top:14px}
+html body #root .schedule-edit-body>.template-info+.schedule-request-details{margin-top:12px!important}
+html body #root .rq-project-item{border:0;border-radius:0;border-top:1px solid var(--enterprise-border,#dce3ee);padding:16px 0;margin:14px 0 0;background:transparent;box-shadow:none}
+html body #root .rq-project-catalog{border:0;padding:12px;background:var(--enterprise-bg,#edf3fb);margin:14px 0;border-radius:6px}
+html body #root .rq-project-item-grid textarea{min-height:78px}
+html body #root .admin-surface+.admin-surface{margin-top:16px}
+html body #root .admin-control-grid{gap:16px}
+html body #root .admin-surface>.admin-surface{border:0;border-top:1px solid var(--enterprise-border,#dce3ee);border-radius:0;box-shadow:none;margin-top:16px;padding:16px 0 0}
+html body #root .settings-management .management-fold-content>:is(section,article,fieldset)+:is(section,article,fieldset){margin-top:14px}
+html body #root .lab-modal>.template-stage-form{border:0;padding:0;margin:8px 0 16px}
+@media(max-width:650px){html body #root .unified-request-information :is(.template-stage-form,.report-case-panel){margin:14px 0}html body #root .request-information-signatures{gap:10px}html body #root .rq-project-item{padding:14px 0}html body #root .admin-control-grid{gap:12px}}

@@ -8,7 +8,7 @@ import './TrialTemplateLibrary.css';
 export default function TrialTemplateLibrary({actorId,system,search=''}){
  const lifetime=useRef(null);useEffect(()=>{const c=new AbortController();lifetime.current=c;return()=>c.abort();},[actorId,system]);
  const catalog=useTrialCatalog(),[selected,setSelected]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const needle=search.trim().toLowerCase(),rows=catalog.rows.filter(r=>[r.name,...correspondingTrialNames(r,catalog.rows),r.version,r.equipment,r.specification,'xlsx','試驗範本'].join(' ').toLowerCase().includes(needle));
+ const needle=search.trim().toLowerCase(),rows=catalog.rows.filter(row=>row.profileId!=='COMPOUND_ENVIRONMENT').filter(r=>[r.name,...correspondingTrialNames(r,catalog.rows),r.version,r.equipment,r.specification,'xlsx','試驗範本'].join(' ').toLowerCase().includes(needle));
  const read=useCallback(()=>readTrialTemplateFile({actorId,system,templateId:selected?.id,expectedRevision:selected?.revision}),[actorId,system,selected?.id,selected?.revision]);
  async function load(row,preview){if(busy)return;if(preview){setSelected({...row,revision:catalog.revision});return;}setBusy(true);setError('');try{const signal=lifetime.current?.signal,file=await readTrialTemplateFile({actorId,system,templateId:row.id,expectedRevision:catalog.revision});if(!signal?.aborted)downloadTemplate(file);}catch(e){setError(e.message);}finally{setBusy(false);}}
  return <div className="trial-template-library"><h3>試驗範本 <small>{rows.length}／{catalog.rows.length} 項</small></h3><p>每份包含委託單、報告首頁、試驗過程、結果與照片，以及完整規範來源。量測結果、判定與簽名留白；與試驗參數共用最新版本。</p>{(catalog.error||error)&&<p role="alert">{catalog.error||error}</p>}

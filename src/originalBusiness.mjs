@@ -1,3 +1,4 @@
+import {compoundProtocol} from './compoundSchedule.mjs';
 import {projectCommand,saveProject} from './projectRequests.mjs';
 import {humanReportIndex} from './humanBusinessProjection.mjs';
 import {scheduleDraftRows} from './sharedScheduleDrafts.mjs';
@@ -99,7 +100,8 @@ export function loadOriginalDraft(id){if(!detailLoads.has(id))detailLoads.set(id
 export async function saveOriginalDraft({id,form,signature='',existingId=null,expectedRevision}){
  const source=existingId?(raw.requests||[]).find(r=>r.legacy_id===existingId):null;if(existingId&&!source)throw Error('委託草稿不存在或沒有權限。');
  const trial=(raw.trials||[]).find(t=>[t.name,...(t.aliases||[])].includes(form.testItems?.[0]));
- const details=Object.fromEntries(['product','productType','project','customerPartNo','priority','testItems','purpose','purposeOther','sampleSource','sampleSourceOther','sourceInHouseContent','sourceOverseasContent','sourceCustomerContent','sourceSupplierContent','sourceCompetitorContent','productVersion','pcbaVersion','softwareVersion','manufactureDate','sampleDescription','judgementRequired','notes'].filter(k=>!k.endsWith('Content')||Object.hasOwn(form,k)).map(k=>[k,form[k]??(['testItems','purpose','sampleSource'].includes(k)?[]:'')]));
+ const details=Object.fromEntries(['product','productType','project','customerPartNo','priority','testItems','purpose','purposeOther','sampleSource','sampleSourceOther','sourceInHouseContent','sourceOverseasContent','sourceCustomerContent','sourceSupplierContent','sourceCompetitorContent','productVersion','pcbaVersion','softwareVersion','manufactureDate','sampleDescription','judgementRequired','notes','compoundStages','compoundVersion'].filter(k=>(!k.endsWith('Content')&&!['compoundStages','compoundVersion'].includes(k))||Object.hasOwn(form,k)).map(k=>[k,form[k]??(['testItems','purpose','sampleSource'].includes(k)?[]:'')]));
+ if(Array.isArray(form.compoundStages))details.compoundStages=compoundProtocol(form.compoundStages.map(r=>({...r,quantity:form.quantity,durationHours:r.duration_minutes/60,judgementCriteria:r.acceptance})),raw.trials);
  const data={trial_id:trial?.id||null,product_code:form.productCode||form.product||'',customer_name:form.customer||'',purpose:(form.purpose||[]).join('、'),quantity:String(form.quantity??'').trim()===''?null:Number(form.quantity),requested_date:form.dueDate||null,specification:form.specification||'',acceptance:form.judgementCriteria||'',form_details:details,draft_signature_data:signature};
  const epoch=identityEpoch;
  const result=await businessClient.request('/data/requests'+(source?'/'+source.id:''),{method:source?'PATCH':'POST',body:source?{expected_revision:expectedRevision??source.revision,data}:{id,data,execution_kind:form.executionKind==='VIRTUAL'?'VIRTUAL':'REAL'}});

@@ -1,3 +1,4 @@
+import CompoundSequenceSummary from './CompoundSequenceSummary.jsx';
 import {useEffect,useState} from 'react';
 import {displayTaipei} from './requestWorkspace.mjs';
 import useLabSnapshot from './useLabSnapshot.js';
@@ -37,7 +38,7 @@ export default function RequestInformation({request:supplied,account,children,ch
  <h4>產品與委託資料</h4><Fields rows={basic}/>
  <h4>試驗需求與樣品</h4><Fields rows={[
  ['試驗目的',Array.isArray(request.purpose)?request.purpose.join('、'):request.purpose,true],['其他目的說明',request.purposeOther,true],['樣品來源',formatSampleSources(request),true],['製品版次',request.productVersion],['PCBA 版次',request.pcbaVersion],['軟體版次',request.softwareVersion],['製造日期',date(request.manufactureDate)],['試驗項目',Array.isArray(request.testItems)?request.testItems.join('、'):request.testItems,true],['試驗規範／試驗手法',request.specification,true],['判定方式',request.judgementRequired],['判定基準',request.judgementCriteria,true],['其他說明',request.sampleDescription,true],['備註',request.notes,true]]}/>
- <div className="request-information-signatures"><SignedStage request={request} stage="REQUESTER" label="委託者簽名"/><SignedStage request={request} stage="REQUEST_MANAGER" label="直屬主管簽名"/></div>{childrenStage===1&&children}
+ <CompoundSequenceSummary stages={request.compoundStages}/><div className="request-information-signatures"><SignedStage request={request} stage="REQUESTER" label="委託者簽名"/><SignedStage request={request} stage="REQUEST_MANAGER" label="直屬主管簽名"/></div>{childrenStage===1&&children}
  </FlowSection>
  {phase.confirmation&&<FlowSection key={'confirm:'+documentId+request.id} number={2} title="委託／排程確認" initialOpen={phase.active===2} badge={unsignedPlan?'排程草稿，尚未簽核':stageSignature(request,'LMS_2')?'已有二階紀錄':'主管確認'}>
  <h4>一階主管填寫資訊</h4>{unsignedPlan&&<p className="request-information-empty">以下為排程草稿，尚未完成一階簽署。</p>}<StageFields stage="LMS_1" fields={plan}/>

@@ -28,7 +28,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
   ...(defaultTemplateId!=='BLANK'&&workspaceDefault?[{id:'WORKSPACE_DEFAULT',templateRef:workspaceDefault.id,kind:'general',name:'工作區預設委託單',sourceName:workspaceDefault.name,version:workspaceDefault.version,description:`綁定：${workspaceDefault.name}。使用此版本的原始Excel檔案。`,previewLabel:'預覽工作區預設委託單',downloadLabel:'下載工作區預設委託單'}]:[]),
   ...(builtinVisible?[{id:'BLANK',kind:'general',name:'空白電子委託單',version:'A4 · 中英欄位',description:'含試驗規範、判定基準及簽名欄位，適合建立新委託單。',previewLabel:'預覽空白委託單',downloadLabel:'下載空白委託單'}]:[]),
   {id:'GENERAL',kind:'general',name:'一般性能報告範本',version:'V1',description:'一般性能試驗報告的通用 Excel 原稿。',previewLabel:'預覽一般性能報告範本',downloadLabel:'下載範本'},
-  ...catalog.rows.map(row=>({...row,kind:'trial',aliases:correspondingTrialNames(row,catalog.rows),revision:catalog.revision,previewLabel:`預覽${row.name}範本`,downloadLabel:`下載${row.name}Excel範本`})),
+  ...catalog.rows.filter(row=>row.profileId!=='COMPOUND_ENVIRONMENT').map(row=>({...row,kind:'trial',aliases:correspondingTrialNames(row,catalog.rows),revision:catalog.revision,previewLabel:`預覽${row.name}範本`,downloadLabel:`下載${row.name}Excel範本`})),
   ...(reportBindings?.files||[]).map(row=>({...row,kind:'upload',cloudReport:true,trialName:reportBindings.trials.find(t=>t.id===row.trial_id)?.name||'原試驗已停用',previewLabel:`預覽${row.name}`,downloadLabel:`下載${row.name}Excel範本`})),
   ...uploads.map(row=>({...row,kind:'upload',trialName:trialName(row),previewLabel:`預覽${row.name}`,downloadLabel:`下載${row.name}Excel範本`}))
  ];

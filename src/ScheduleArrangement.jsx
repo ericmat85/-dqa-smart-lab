@@ -1,3 +1,5 @@
+import CompoundScheduleArrangement from './CompoundScheduleArrangement.jsx';
+import {isCompoundRequest} from './compoundSchedule.mjs';
 import {businessAIEnabled} from './businessAIClient.mjs';
 import {prepareSharedDraftForm} from './sharedScheduleDrafts.mjs';
 import {equipmentSpaceUnits} from './equipmentSpace.mjs';
@@ -17,6 +19,7 @@ export default function ScheduleArrangement({editing,form,onChange,equipment,acc
   const selectedIds=[...new Set([form.equipmentId,...(form.equipmentIds||[])].filter(Boolean))],requiredCount=Number(form.equipmentCount)||1;
   const [ruleError,setRuleError]=useState(''),profile=trialProfile(editing.title);
   const update=patch=>{const next={...form,...patch};try{if(Object.hasOwn(patch,'end')&&profile?.mode==='batch'&&!profile.fixed_duration&&explicitHours(editing)===null&&next.time&&next.end){const span=(Date.parse(next.end+'T00:00:00Z')-Date.parse(next.time+'T00:00:00Z'))/86400000+1;if(Number.isInteger(span)&&span>0)next.durationHours=span*24;}onChange(editing.businessDatabase?prepareSharedDraftForm({editing,form:next,equipment,updateEnd:['time','equipmentCount','equipmentId','equipmentIds','sampleSpaceUnits'].some(k=>Object.hasOwn(patch,k))}):prepareManualTrialForm({editing,form:next,updateEnd:Object.hasOwn(patch,'time')||Object.hasOwn(patch,'equipmentCount')}));setRuleError('');}catch(error){onChange(next);setRuleError(error.message);}};
+  if(isCompoundRequest(editing))return <CompoundScheduleArrangement {...{editing,form,onChange,equipment,accounts,planningPreview,onRefresh}}/>;
   return <section className="schedule-arrangement" aria-label="設備與排程安排">
     <header className="schedule-arrangement-header"><div><span>RESOURCE & SCHEDULE</span><div className="help-title-row"><h4>設備與排程安排</h4><HelpTip>核對委託、設備、執行人與試驗日期</HelpTip></div></div><AiScheduleButton onRecommend={onRecommend} disabled={outsourced||editing.preapprovalPlanning||editing.businessDatabase&&!businessAIEnabled()} disabledReason={editing.preapprovalPlanning?"請逐項核對並確認本次排程":outsourced?"委外設備已指定，請確認人員與日期":"此版本尚未啟用 AI 模型"}/></header>
     <div className="schedule-arrangement-hint">{outsourced?<span>委外設備 · 不占用內部設備容量</span>:<span>待機設備 <b>{equipment.filter(row=>row.status==='待機中').length}</b>／{equipment.length} 台</span>}<button type="button" onClick={onRefresh}>重新讀取設備狀態 ↻</button></div>

@@ -26,7 +26,7 @@ import {observeE4Local} from './e4Activity.mjs';
 import {stageReportDraftHandoff} from './reportDraftHandoff.mjs';
 
 function viewport(){const view=window.visualViewport;return {width:view?.width||window.innerWidth,height:view?.height||window.innerHeight,top:view?.offsetTop||0,right:Math.max(0,window.innerWidth-((view?.offsetLeft||0)+(view?.width||window.innerWidth)))};}
-export default function IntelligentAssistant({snapshot,metrics,system='lms',onDemoStart,acceleratorAllowed,onDemoReportReady}){
+export default function IntelligentAssistant({snapshot,metrics,system='lms',onDemoStart,acceleratorAllowed,onDemoReportReady,bottomInset=0}){
  const {language}=useUiPreferences();
  const [flowTestOpen,setFlowTestOpen]=useState(false),[demoReportOpen,setDemoReportOpen]=useState(false);
  const [,setPreferencesTick]=useState(0);
@@ -34,11 +34,11 @@ export default function IntelligentAssistant({snapshot,metrics,system='lms',onDe
  useEffect(()=>{const update=()=>setPreferencesTick(v=>v+1),storage=e=>{if(!e.key||e.key===enginePreferenceKey('E4'))update();};window.addEventListener(ENGINE_PREFERENCES_EVENT,update);window.addEventListener('storage',storage);return()=>{window.removeEventListener(ENGINE_PREFERENCES_EVENT,update);window.removeEventListener('storage',storage);};},[]);
  const [open,setOpen]=useState(false),[question,setQuestion]=useState(''),[turns,setTurns]=useState([]),[files,setFiles]=useState([]);const input=useRef(null),fileInput=useRef(null),body=useRef(null),examples=useRef(null),focusNewTurn=useRef(false);
  const [view,setView]=useState(viewport);const inFlight=useRef(null),epoch=useRef(0),[busy,setBusy]=useState(false);
- const [launcherTop,setLauncherTop]=useState(()=>{const area=viewport();return area.top+Math.max(8,area.height-64);});
+ const [launcherTop,setLauncherTop]=useState(()=>{const area=viewport();return area.top+Math.max(8,area.height-64-bottomInset);});
  const [dragging,setDragging]=useState(false);
  const drag=useRef(null),suppressClick=useRef(false),launcher=useRef(null);
- const clampTop=top=>Math.max(view.top+8,Math.min(top,view.top+view.height-48));
- useEffect(()=>{const resize=()=>{const area=viewport();setView(area);setLauncherTop(top=>Math.max(area.top+8,Math.min(top,area.top+area.height-48)));};window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);window.visualViewport?.addEventListener('scroll',resize);return()=>{window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('scroll',resize);};},[]);
+ const clampTop=top=>Math.max(view.top+8,Math.min(top,view.top+view.height-48-bottomInset));
+ useEffect(()=>{const resize=()=>{const area=viewport();setView(area);setLauncherTop(top=>Math.max(area.top+8,Math.min(top,area.top+area.height-48-bottomInset)));};const frame=requestAnimationFrame(resize);window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);window.visualViewport?.addEventListener('scroll',resize);return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('resize',resize);window.visualViewport?.removeEventListener('scroll',resize);};},[bottomInset]);
  function dragStart(event){
   if(!event.isPrimary||event.button!==0)return;
   suppressClick.current=false;
