@@ -15,3 +15,11 @@ html body #root .template-preview-toolbar button.template-print-button>svg{displ
 @media(max-width:600px){.template-preview-actions{width:100%}}
 
 html body #root .compact-management-dialog.builtin-template-delete-dialog[open]{width:min(460px,calc(100vw - 24px))}.builtin-template-delete-body{padding:16px 20px}.builtin-template-delete-body h4{margin:0 0 10px;font-size:15px;overflow-wrap:anywhere}.builtin-template-delete-body p{font-size:13px;line-height:1.7;margin:8px 0}.builtin-template-delete-dialog>footer{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--enterprise-border,#dce4ef)}
+
+/* Shared full-window toolbar with a larger width-fit document canvas. */
+html body #root .trial-template-dialog .trial-template-preview-body{gap:8px;padding:8px 12px;flex:1;min-height:0}
+.preview-sheet-tabs{display:flex;gap:4px;overflow-x:auto;flex:none;scrollbar-width:thin;max-width:100%;padding:0 0 3px}
+.preview-sheet-tabs>[role=tab]{flex:none;padding:6px 12px;border:1px solid var(--enterprise-border,#dce5f1);background:var(--enterprise-card,#fff);color:var(--enterprise-text,#17365d);border-radius:5px;font-size:12px;line-height:1.5;cursor:pointer}
+.preview-sheet-tabs>[aria-selected=true]{background:var(--enterprise-primary,#0866e8);border-color:var(--enterprise-primary,#0866e8);color:#fff}
+html body #root .trial-template-dialog .trial-template-sheet{padding:8px;min-height:0;flex:1}
+@media(max-width:600px){.template-preview-actions{gap:6px}.template-preview-zoom select{max-width:155px}.trial-template-dialog .trial-template-preview-body>p{font-size:11px;line-height:1.4}}

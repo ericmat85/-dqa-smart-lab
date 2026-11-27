@@ -26,6 +26,6 @@ export default function TrialTemplateBinding({trial,account,files,onClose,onSave
  <p>.xlsx · 單檔 2 MB。綁定後僅套用到之後送出的委託；舊案件保留原版本。空白委託單與報告範本分開管理。請使用「試驗資訊代入自動化」完成本報告的儲存格對應；送簽後提供執行者的是已代入委託資訊的報告單。</p>
  {current&&<div className="admin-actions"><button type="button" className="template-btn secondary" disabled={busy} onClick={()=>setPreview(current)}>預覽目前範本</button><TemplateAutomationControl automation={automation} kind="REPORT" fileId={current.id} disabled={busy||source!=='file:'+current.id}/></div>}<TemplateAutomationStatus automation={automation} kind="REPORT" fileId={current?.id}/>
  {error&&<p role="alert">{error}</p>}<footer><button type="button" className="template-btn secondary" disabled={busy} onClick={onClose}>取消</button>{uncertain&&<button type="button" className="template-btn" disabled={busy} onClick={recover}>查詢綁定結果</button>}<button type="submit" className="template-btn" disabled={busy||uncertain}>{busy?'正在保存…':'儲存綁定'}</button></footer></form>
- {preview&&<TemplatePreview title={preview.name} read={readPreview} downloadable={false} onClose={()=>setPreview(null)}/>}
+ {preview&&<TemplatePreview title={preview.name} read={readPreview} onClose={()=>setPreview(null)}/>}
  </CompactDialog>;
 }

@@ -91,3 +91,14 @@ html body #root .request-information-history .rq-progress-step:not(:last-child):
 @media(max-width:360px){.request-information-signatures{grid-template-columns:minmax(0,1fr)}}
 html body #root .unified-request-information{margin-top:12px}
 html body #root .unified-request-information>.request-information-toolbar{justify-content:flex-end;gap:8px 10px;margin:0 0 12px}
+
+/* Align report content and both event summaries on the approval history inset. */
+html body #root .request-information-history .report-case-panel{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+html body #root .request-information-history .report-case-panel>.help-title-row{padding:0!important}
+html body #root .request-information-history{--history-text-inset:27px}
+html body #root .request-information-history .report-case-panel>.help-title-row{padding-left:var(--history-text-inset)!important}
+html body #root .request-information-history .report-case-panel>:is(p,.report-actions){margin-left:var(--history-text-inset)!important}
+html body #root .request-information-history details.request-information-audit>summary{position:relative;list-style:none;padding-left:14px}
+html body #root .request-information-history details.request-information-audit>summary::-webkit-details-marker{display:none}
+html body #root .request-information-history details.request-information-audit>summary::before{content:'›';position:absolute;left:0;top:0;width:8px;text-align:center;font-weight:700}
+html body #root .request-information-history details.request-information-audit[open]>summary::before{transform:rotate(90deg)}
