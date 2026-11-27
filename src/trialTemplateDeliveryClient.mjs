@@ -11,7 +11,7 @@ const pendingKey=()=>`dqa-trial-template-pending:${identity()}`;
 export function pendingTrialTemplate(){try{return JSON.parse(sessionStorage.getItem(pendingKey())||'null');}catch{return null;}}
 function clear(key,operation){try{if(JSON.parse(sessionStorage.getItem(key)||'null')?.operation===operation)sessionStorage.removeItem(key);}catch{}}
 export async function trialTemplateCatalog(actorId){const check=guard(actorId),data=await call('');if(!Array.isArray(data?.trials)||!Array.isArray(data?.files)||Object.hasOwn(data,'hidden_builtin_template_ids')&&(!Array.isArray(data.hidden_builtin_template_ids)||data.hidden_builtin_template_ids.some(id=>typeof id!=='string'||!id||id.length>160)))throw Error('範本綁定列表資料不完整。');check();return data;}
-export async function recoverTrialTemplate(actorId){const check=guard(actorId),key=pendingKey(),p=pendingTrialTemplate();if(!p)return null;const data=await call('/result/'+p.operation);if(data?.id!==p.operation||data.state!=='SAVED')throw Error('操作結果尚未確認，請稍後再查詢；未再次送出。');check();clear(key,p.operation);globalThis.dispatchEvent?.(new Event(TRIAL_TEMPLATE_EVENT));return data;}
+export async function recoverTrialTemplate(actorId){const check=guard(actorId),key=pendingKey(),p=pendingTrialTemplate();if(!p)return null;const data=await call('/result/'+p.operation);if(data?.id!==p.operation||data.state!=='SAVED'||p.action==='DELETE_FILE'&&(data.deleted!==true||data.file_id!==p.fileId))throw Error('操作結果尚未確認，請稍後再查詢；未再次送出。');check();clear(key,p.operation);globalThis.dispatchEvent?.(new Event(TRIAL_TEMPLATE_EVENT));return data;}
 export async function saveTrialTemplate({trialId,revision,fileId=null,file,version,actorId}){
  const check=guard(actorId),key=pendingKey();if(pendingTrialTemplate())throw Error('有一筆綁定結果尚未確認，請先查詢操作結果。');
  let payload={trial_id:trialId,expected_revision:revision,file_id:fileId,name:null,version:null,sha256:null,content:null};
@@ -37,4 +37,9 @@ export async function prepareTrialTemplateDownload(row,{manual=false,actorId}={}
 export async function deleteBuiltinTrialTemplate({trialId,revision,actorId}){
  const check=guard(actorId),key=pendingKey();if(pendingTrialTemplate())throw Error('有一筆範本操作尚未確認，請先查詢操作結果。');const operation=crypto.randomUUID();sessionStorage.setItem(key,JSON.stringify({operation,action:'DELETE_BUILTIN'}));
  try{const data=await call('/delete-builtin',{method:'POST',retry:false,body:{operation_id:operation,trial_id:trialId,expected_revision:revision}});if(data?.id!==operation||data.state!=='SAVED'||data.deleted!==true||data.trial_id!==trialId)throw Object.assign(Error('操作結果尚未確認。'),{outcomeUnknown:true});check();clear(key,operation);globalThis.dispatchEvent?.(new Event(TRIAL_TEMPLATE_EVENT));return data;}catch(e){if(!e.outcomeUnknown)clear(key,operation);throw e;}
+}
+
+export async function deleteReportTemplate({fileId,revision,actorId}){
+ const check=guard(actorId),key=pendingKey();if(pendingTrialTemplate())throw Error('有一筆範本操作尚未確認，請先查詢操作結果。');const operation=crypto.randomUUID();sessionStorage.setItem(key,JSON.stringify({operation,action:'DELETE_FILE',fileId}));
+ try{const data=await call('/delete-file',{method:'POST',retry:false,body:{operation_id:operation,file_id:fileId,expected_revision:revision}});if(data?.id!==operation||data.state!=='SAVED'||data.deleted!==true||data.file_id!==fileId)throw Object.assign(Error('操作結果尚未確認。'),{outcomeUnknown:true});check();clear(key,operation);globalThis.dispatchEvent?.(new Event(TRIAL_TEMPLATE_EVENT));return data;}catch(e){if(!e.outcomeUnknown)clear(key,operation);throw e;}
 }

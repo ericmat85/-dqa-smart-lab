@@ -11,6 +11,9 @@ export async function handleTrialTemplates({path,req,parsed,session,rpc,bodyOf,f
  }
  if(req.method!=='POST')throw new ApiError(405,'METHOD_DENIED');
  const b=await bodyOf(req,3000000);
+ if(path==='/trial-templates/delete-file'){
+  fields(b,['operation_id','file_id','expected_revision']);if(!UUID.test(b.operation_id||'')||!UUID.test(b.file_id||'')||!Number.isSafeInteger(b.expected_revision)||b.expected_revision<0||b.expected_revision>2147483646)throw new ApiError(422,'TRIAL_TEMPLATE_FIELDS_INVALID');markWrite();return reply(200,{data:await call('delete_report_template_file',{p_operation:b.operation_id,p_file:b.file_id,p_revision:b.expected_revision})});
+ }
  if(path==='/trial-templates/delete-builtin'){
   fields(b,['operation_id','trial_id','expected_revision']);if(!UUID.test(b.operation_id||'')||!UUID.test(b.trial_id||'')||!Number.isSafeInteger(b.expected_revision)||b.expected_revision<1)throw new ApiError(422,'TRIAL_TEMPLATE_FIELDS_INVALID');markWrite();return reply(200,{data:await call('delete_builtin_trial_template',{p_operation:b.operation_id,p_trial:b.trial_id,p_revision:b.expected_revision})});
  }
