@@ -3,6 +3,8 @@ import {createHash,createHmac} from 'node:crypto';
 import {accountDeletionServiceKey} from './accountDeletion.mjs';
 import {e4LabScope} from '../../src/e4LabScope.mjs';
 import {readStorageBytes,reportAIFields} from './humanReports.mjs';
+import {compactAIContext,conciseAIQuestion,boundedAIHistory,AI_SYSTEM_GUIDE,AI_METHOD_GUIDE} from './aiContext.mjs';
+import {isPendingScheduleSource} from '../../src/pendingScheduleSource.mjs';
 const UUID=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
 const BACKEND='https://dqa-e4-mock-4fbdeebf.onrender.com';
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -109,21 +111,26 @@ export async function handleBusinessAI({path,req,res,parsed,env,fetchImpl,sessio
    let kind=['anomalies','results'].includes(input.source_kind)?'schedules':input.source_kind;
    const list=await rows(kind),wanted=new Set(input.record_ids);let selected=list.filter(r=>wanted.has(r.id)||wanted.has(r.legacy_id)||wanted.has(r.request_id));
    const resolved=new Set(selected.flatMap(r=>[r.id,r.legacy_id,r.request_id]).filter(x=>wanted.has(x)));
-   if(kind==='schedules'&&input.source_kind==='schedules'&&resolved.size<wanted.size){const q=await rows('requests');const waiting=q.filter(r=>r.status==='AWAITING_SCHEDULING'&&wanted.has('SCH-'+r.legacy_id)&&!resolved.has('SCH-'+r.legacy_id));for(const r of waiting){add('requests',r);resolved.add('SCH-'+r.legacy_id);}extra.includes_awaiting_scheduling=waiting.length>0;}
+   if(kind==='schedules'&&input.source_kind==='schedules'&&resolved.size<wanted.size){
+    const q=await rows('requests'),preapproval=await rpc('preapproval_snapshot',{p_tenant:session.tenant},session.access);
+    const waiting=q.filter(r=>isPendingScheduleSource({status:r.status,reviewLevel:r.request_review_level,preapprovalWorkflow:preapproval?.preapproval_requests?.some(p=>p.request_id===r.id&&p.flow_version==='PREAPPROVAL_V2')||false})&&wanted.has('SCH-'+r.legacy_id)&&!resolved.has('SCH-'+r.legacy_id)&&!list.some(s=>s.request_id===r.id&&!['CANCELLED','DRAFT'].includes(s.status)));
+    for(const r of waiting){add('requests',r);resolved.add('SCH-'+r.legacy_id);}extra.includes_awaiting_scheduling=waiting.some(r=>r.status==='AWAITING_SCHEDULING');extra.includes_preapproval_pending=waiting.some(r=>r.status==='AWAITING_LMS_REVIEW');extra.pending_sources_are_not_booked=waiting.length>0;
+   }
    if(wanted.size&&resolved.size!==wanted.size)throw new ApiError(403,'AI_REPORT_SOURCE_MISMATCH');
    counts.selected=wanted.size;selected.forEach(r=>add(kind,r));extra.report_title=input.title;extra.section_titles=input.section_titles;extra.scope='ONLY_SELECTED_AUTHORIZED_RECORDS';
    question=input.purpose||'請依目前已授權的所選來源，製作客製化實驗室報告草稿。';
   }else{
-   question=input.question;const history=await rpc('business_ai_conversation',{p_tenant:session.tenant,p_system:system},session.access);if(Array.isArray(history)&&history.length)extra.history_for_interpretation_only=history;
+   question=input.question;const history=await rpc('business_ai_conversation',{p_tenant:session.tenant,p_system:system},session.access);Object.assign(extra,boundedAIHistory(history));
    const kinds=/借用|borrow/i.test(question)?['borrows']:/資格|訓練|qualification|training/i.test(question)?['qualifications']:/品質|改善|quality/i.test(question)?['quality']:/範本|文件|template|document/i.test(question)?['documents']:/目錄|種類|類型|規範|手法|有哪些試驗|試驗(?:資訊|項目|方法|條件)|高溫|低溫|濕|振動|鹽霧|熱衝擊|機械衝擊|防水|防塵|IPX\d|ESD|EMC|日照|耐候|拉力|跌落|插拔|電壓變動|specification|test (?:catalog|types|methods)/i.test(question)?['trials']:/設備|機台|校驗|保養|equipment/i.test(question)?['equipment']:/物料|庫存|material|stock/i.test(question)?['materials']:/排程|進度|schedule/i.test(question)?['schedules']: /報告|report/i.test(question)?['reports']:['requests'];
    const wanted=question.match(/\b(?:REQ-[A-Za-z0-9-]+|EQ-\d{3}|MAT-\d{3}|SCH-[A-Za-z0-9-]+|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\b/g)||[];
    if(wanted.some(x=>x.startsWith('REQ-')))kinds.splice(0,kinds.length,'requests');
    for(const kind of kinds){const permission={trials:'catalog.read',equipment:'equipment.read',materials:'materials.read',qualifications:'qualifications.read',quality:'quality.read',documents:'catalog.read'}[kind];if(permission&&!can(permission)){counts[kind]=null;extra.coverage='UNAVAILABLE_WITH_CURRENT_ACCESS';continue;}const list=await rows(kind);counts[kind]=list.length;const matched=list.filter(r=>wanted.includes(r.id)||wanted.includes(r.legacy_id)||kind==='trials'&&[r.name,...(r.aliases||[])].some(name=>name&&question.includes(name))||kind==='equipment'&&question.includes(r.name));const detail=matched.length>0;
     const selected=detail?matched:list;selected.forEach(r=>add(kind,r,detail));extra.coverage=detail?'MATCHING_RECORDS_WITH_AUTHORIZED_TOTAL':'COMPLETE';}
-   extra.access_scope='ONLY_CURRENT_AUTHORIZED_RECORDS_NOT_ENTIRE_ORGANIZATION';extra.system_guide='委託與報告的提交、簽名與簽核必須由對應人員操作；AI 僅提供建議或草稿。排程建議先帶入表單，再由使用者確認儲存。排程每批未滿一天也按整天保留，試驗原始工時另行保留，不可把整天占用當成實際量測或試驗時數。報表可預覽與匯出 Excel/PDF，設備容量使用必填空間 U；設備端口支援設定但不代表已連上實機。資料儲存於共用資料庫，個人顯示偏好仍可能保存在瀏覽器。';if(can('catalog.read'))extra.test_method_notes='高溫高濕依來源固定 250H，可跨週末；振動耐久每顆 20H、每次一顆，操作型試驗僅工作日。其他試驗以目錄與案件已核定條件為準。';
+   extra.access_scope='ONLY_CURRENT_AUTHORIZED_RECORDS_NOT_ENTIRE_ORGANIZATION';extra.system_guide=AI_SYSTEM_GUIDE;if(can('catalog.read'))extra.test_method_notes=AI_METHOD_GUIDE;
   }
   const citations=records.map((r,i)=>{const reference='R'+(i+1),source_reference=r.reference,label=r.legacy_id||r.name||r.product_code||source_reference;r.reference=reference;return {reference,source_reference,label};});
-  const context={source:'AUTHORIZED_DATABASE',observed_at:new Date().toISOString(),records,counts,references:['SUMMARY',...citations.map(c=>c.reference)],...extra};
+  question=conciseAIQuestion(engine,question);
+  const context=compactAIContext({source:'AUTHORIZED_DATABASE',observed_at:new Date().toISOString(),records,counts,references:['SUMMARY',...citations.map(c=>c.reference)],...extra});
   if(Buffer.byteLength(JSON.stringify(context))>12000)throw new ApiError(422,'AI_SOURCE_TOO_LARGE');
   claimed=await serviceRpc('claim_business_ai',{p_tenant:session.tenant,p_operation:operation_id,p_actor:identity.id,p_context_sha256:hash(JSON.stringify(context)),p_request_refs:[...requestRefs],p_source_data:{candidates,observed_at:context.observed_at,citations,record_count:records.length}});
   if(!claimed)throw new ApiError(409,'AI_OUTCOME_UNKNOWN',{outcome_unknown:true,operation_id});
