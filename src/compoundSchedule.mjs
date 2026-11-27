@@ -33,7 +33,7 @@ export function compoundTimeline(stages,options){
   if(s.operation==='operator'&&(!working(at)||!working(end,true)||taipeiInput(new Date(at).toISOString()).slice(0,10)!==taipeiInput(new Date(end).toISOString()).slice(0,10)))issues.push({stage:i+1,message:`第 ${i+1} 階段「${s.label}」需人員操作，須完整安排在同一上班時段。`});
   segments.push({...s,start_ms:at,end_ms:end,starts_at:new Date(at).toISOString(),ends_at:new Date(end).toISOString(),equipment_id:options.stageEquipmentIds?.[i]||''});at=end;
  });
- if(!working(at,true))issues.push({stage:stages.length,message:'最後階段的收尾確認須安排在平日作業時段。'});
+ if(!working(at,true))issues.push({stage:stages.length,message:'整串試驗完成點須落在工作日上班時段，請調整起始時間；不可跨至休息時段或假日完成。'});
  return {valid:issues.length===0,issues,segments,starts_at:new Date(start).toISOString(),ends_at:new Date(at).toISOString(),duration_minutes:total};
 }
 export function compoundStartSuggestions(stages,options,{days=21,limit=3}={}){

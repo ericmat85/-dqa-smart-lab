@@ -2,6 +2,7 @@
 from pathlib import Path
 exec(compile(Path(__file__).with_name('verify_preapproval_scheduling.py').read_text().split('\nclass Tests',1)[0],str(Path(__file__)),'exec'))
 import hashlib,uuid
+from contextlib import contextmanager
 normal_fixture=fixture;normal_req=REQ
 G='ec000000-0000-4000-8000-000000000001';compound_req=str(uuid.UUID(hashlib.md5(('project-item:'+G+':1').encode()).hexdigest()))
 REQ=compound_req
@@ -26,12 +27,18 @@ def fixture():
 
 def plan_data(**patch):
  c=dict(start_local=START+'T09:00',shift_start='09:00',shift_end='18:00',preloaded_weekend=True,stage_equipment_ids=[EQS[i] for i in [0,0,1,0,2,1]]);c.update(patch)
- return dict(equipment_ids=EQS,equipment_revisions={id:1 for id in EQS},executor_id=EX,executor_revision=1,start_date=START,end_date=START,sample_code='',note='合成連續排程',preparation_minutes=0,cleanup_minutes=0,sample_space_units=1,compound=c)
+ return dict(equipment_ids=EQS,equipment_revisions={id:1 for id in EQS},executor_id=EX,executor_revision=1,start_date=c['start_local'][:10],end_date=c['start_local'][:10],sample_code='',note='合成連續排程',preparation_minutes=0,cleanup_minutes=0,sample_space_units=1,compound=c)
 def planning(data=None,save=True):
  return 'RESET ROLE;'+auth(3)+f"DO $t$ DECLARE c jsonb;p jsonb;BEGIN SELECT jsonb_build_object('request_id',q.id,'expected_request_revision',q.revision,'expected_draft_revision',0,'data',{literal(data or plan_data())}) INTO c FROM dqa_business.requests q WHERE id='{REQ}';p:=dqa_business.preview_schedule_draft('{T}',c);PERFORM set_config('test.compound_plan',p::text,true);c:=jsonb_set(c,'{{data,end_date}}',p->'end_date');"+(f"PERFORM dqa_business.prepare_schedule_draft('{T}','{op(11)}',c);PERFORM dqa_business.execute_schedule_draft('{T}','{op(11)}',c);" if save else '')+'END $t$;'
 def number_after():return 'RESET ROLE;'+auth(3)+f"SELECT dqa_business.save_preapproval_sample_number('{T}','{op(10)}','{REQ}',q.request_document_version_id,q.revision,0,'COMPOUND-SAMPLE',1) FROM dqa_business.requests q WHERE id='{REQ}';"
 def first():return planning()+number_after()+review(3,'LMS_APPROVE',12,FIRST,'2')
 def query(sql):return subprocess.run(cmd,input='BEGIN;'+fixture()+sql+';ROLLBACK;',text=True,capture_output=True,env=env)
+@contextmanager
+def final_stage(minutes,operation='operator'):
+ global stages
+ original=stages;stages=[*stages[:-1],{**stages[-1],'duration_minutes':minutes,'operation':operation}]
+ try:yield
+ finally:stages=original
 class Tests(unittest.TestCase):
  def ok(self,sql,expected):
   r=query(sql);self.assertEqual(r.returncode,0,r.stderr[-2400:]);self.assertEqual(r.stdout.strip().splitlines()[-1],expected)
@@ -56,6 +63,16 @@ class Tests(unittest.TestCase):
  def test_weekend_start_requires_explicit_preloaded_high_temperature(self):self.deny(planning(plan_data(preloaded_weekend=False)),'COMPOUND_HANDOFF_WINDOW')
  def test_overnight_handoff_is_rejected_without_padding(self):self.deny(planning(plan_data(start_local=START+'T22:00')),'COMPOUND_HANDOFF_WINDOW')
  def test_operator_stage_cannot_cross_shift_end(self):self.deny(planning(plan_data(start_local=START+'T17:30')),'COMPOUND_OPERATOR_WINDOW')
+ def test_final_operator_can_finish_at_the_workday_shift_boundary(self):
+  with final_stage(420):self.ok(planning()+f"SELECT extract(isodow FROM (plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei')::integer,to_char((plan->>'ends_at')::timestamptz AT TIME ZONE 'Asia/Taipei','HH24:MI') FROM dqa_business.schedule_drafts WHERE request_id='{REQ}'",'3|18:00')
+ def test_final_operator_cannot_finish_after_hours(self):
+  with final_stage(480):self.deny(planning(),'COMPOUND_OPERATOR_WINDOW')
+ def test_final_operator_cannot_finish_on_weekend(self):
+  monday=(start+timedelta(days=2)).isoformat()
+  with final_stage(1380):self.deny(planning(plan_data(start_local=monday+'T09:00')),'COMPOUND_OPERATOR_WINDOW')
+ def test_final_continuous_phase_still_requires_a_workday_completion_point(self):
+  monday=(start+timedelta(days=2)).isoformat()
+  with final_stage(1380,'continuous'):self.deny(planning(plan_data(start_local=monday+'T09:00')),'COMPOUND_HANDOFF_WINDOW')
  def test_wrong_device_type_is_rejected(self):self.deny(planning(plan_data(stage_equipment_ids=[EQS[1],EQS[0],EQS[1],EQS[0],EQS[2],EQS[1]])),'PLANNING_EQUIPMENT_REQUIRED')
  def test_complete_sample_batch_must_fit_each_device(self):self.deny('RESET ROLE;'+f"UPDATE dqa_business.equipment SET space_units=1 WHERE id='{EQS[2]}';"+planning({**plan_data(), 'equipment_revisions':{EQS[0]:1,EQS[1]:1,EQS[2]:2},'sample_space_units':2}),'PLANNING_SPACE_INSUFFICIENT')
  def test_device_revision_change_before_signature_prevents_partial_booking(self):
