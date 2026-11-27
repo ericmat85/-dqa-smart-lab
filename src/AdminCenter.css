@@ -62,3 +62,8 @@ html body #root .lms-enterprise .settings-management .admin-card-title .admin-ba
 html body #root .lms-enterprise .settings-management .admin-card-open{position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;border-radius:inherit;background:transparent;font-size:0}
 html body #root .lms-enterprise .settings-management .admin-card-open>span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;line-height:1}
 }
+/* Match the overview surface to the other management panels. */
+html body #root .lms-enterprise .settings-management #admin-module-panel.admin-overview-panel{background:var(--enterprise-card,#fff)!important;border:1px solid var(--enterprise-border,#dce5f1)!important;border-radius:6px!important;padding:0 16px 16px!important;overflow:clip}
+html body #root .lms-enterprise .admin-overview-panel>.admin-home-heading{padding:12px 0!important;margin:0!important}
+html body #root .lms-enterprise .admin-overview-panel .admin-workspace-hero{margin:0 0 18px;border-radius:5px}
+@media(max-width:600px){html body #root .lms-enterprise .settings-management #admin-module-panel.admin-overview-panel{padding:0 12px 12px!important}}

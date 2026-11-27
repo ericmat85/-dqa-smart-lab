@@ -6,11 +6,11 @@ html body #root .rq-request-detail-header h2{font-size:18px;line-height:1.5;marg
 html body #root .rq-request-detail-header>.rq-close{width:36px;height:36px;flex:none;border-radius:8px;border:1px solid var(--enterprise-border,#dfe7f2);background:var(--enterprise-card,#fff);color:inherit}
 html body #root :is(.request-modal-body,.rq-request-detail-body):has(>.unified-request-information){padding:14px 24px 18px;display:block}
 .unified-request-information{min-width:0;color:var(--enterprise-text,var(--text,#17365d))}
-.request-information-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 12px}
+.request-information-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 10px;margin:12px 0}
 html body #root .unified-request-information .mapped-request-document{padding:0;margin:0}
-html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .mapped-request-document button.template-btn.request-document-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;min-width:32px;max-width:32px;height:32px!important;min-height:32px!important;max-height:32px!important;box-sizing:border-box;padding:0!important;border-radius:6px;border:1px solid #0866e8!important;background:linear-gradient(140deg,#1878ff,#0757cc)!important;color:#fff!important;box-shadow:0 3px 8px #0866e826;transition:box-shadow .15s,transform .15s}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .mapped-request-document button.template-btn.request-document-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;min-width:32px;max-width:32px;height:32px!important;min-height:32px!important;max-height:32px!important;box-sizing:border-box;padding:0!important;border-radius:6px;border:1px solid var(--enterprise-border,#dfe7f2)!important;background:var(--enterprise-card,#fff)!important;color:var(--enterprise-primary,#0866e8)!important;box-shadow:none;transition:box-shadow .15s,transform .15s}
 html body #root .mapped-request-document button.request-document-icon>svg{display:block;flex:none;width:21px;height:21px}
-html body #root .mapped-request-document button.request-document-icon:hover{box-shadow:0 4px 12px #0866e840;transform:none}
+html body #root .mapped-request-document button.request-document-icon:hover{background:var(--enterprise-bg,#f1f5fc)!important;box-shadow:none;transform:none}
 @media(prefers-reduced-motion:reduce){html body #root .mapped-request-document button.request-document-icon{transition:none}}
 
 .request-information-status{--information-state:#916000;display:inline-flex;align-items:center;gap:7px;margin-left:auto;box-sizing:border-box;height:32px;min-height:32px;padding:5px 9px;border:1px solid color-mix(in srgb,var(--information-state) 28%,var(--enterprise-border,#dfe7f2));border-radius:6px;background:color-mix(in srgb,var(--information-state) 7%,var(--enterprise-card,#fff));color:var(--information-state);font-size:12px;line-height:1.5;white-space:nowrap}
@@ -89,3 +89,5 @@ html body #root .request-information-history .rq-progress-step:not(:last-child):
  html body #root .request-information-history .rq-progress-step:not(:last-child)::after{top:50%;left:24px;width:2px;height:calc(100% + 8px)}
 }
 @media(max-width:360px){.request-information-signatures{grid-template-columns:minmax(0,1fr)}}
+html body #root .unified-request-information{margin-top:12px}
+html body #root .unified-request-information>.request-information-toolbar{justify-content:flex-end;gap:8px 10px;margin:0 0 12px}
