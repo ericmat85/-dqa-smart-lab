@@ -635,6 +635,7 @@ function DashboardTopbar({dark,onToggle,onMenu,onLogout,onNavigate,currentUser,n
 function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel='返回系統管理' }) {
   const [roles,setRoles]=useState(()=>readCustomRoles());
   const [roleSettingsOpen,setRoleSettingsOpen]=useState(false);
+  const [roleCreateNonce,setRoleCreateNonce]=useState(0);
   const [deleteTarget,setDeleteTarget]=useState(null),[deleteError,setDeleteError]=useState('');
 
   const [showForm, setShowForm] = useState(false);
@@ -1024,7 +1025,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 
 
 
-        <div className="account-heading-actions">{onBack&&backLabel!=='返回系統管理'&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button
+        <div className="account-heading-actions"><button type="button" className="primary-button" onClick={()=>{setRoleSettingsOpen(true);setRoleCreateNonce(n=>n+1);}}><LmsHeaderActionLabel icon="add">建立新角色</LmsHeaderActionLabel></button>{onBack&&backLabel!=='返回系統管理'&&<button type="button" className="template-btn secondary account-back-button" onClick={onBack}><LmsHeaderActionLabel icon="back">{backLabel}</LmsHeaderActionLabel></button>}<button
 
           type="button"
 
@@ -1046,7 +1047,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
 <AccountOverviewStats total={accounts.length} enabled={enabledCount} disabled={disabledCount}/>
 
       <div className="workspace-tab-toolbar account-access-toolbar"><div className="schedule-view-tabs account-access-tabs" role="tablist" aria-label="帳號與權限管理">
-        {[[false,'帳號清單',accounts.length],[true,'角色與權限',BUILTIN_ROLES.length+roles.length]].map(([key,label,count])=><button type="button" key={label} role="tab" id={key?'access-tab-roles':'access-tab-accounts'} aria-selected={roleSettingsOpen===key} aria-controls={key?'access-panel-roles':'access-panel-accounts'} tabIndex={roleSettingsOpen===key?0:-1} onClick={()=>setRoleSettingsOpen(key)} onKeyDown={event=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?false:event.key==='End'?true:!roleSettingsOpen;setRoleSettingsOpen(next);document.getElementById(next?'access-tab-roles':'access-tab-accounts')?.focus();}}}><strong>{label}</strong><span>{count}</span></button>)}
+        {[[false,'帳號清單',accounts.length],[true,'角色與權限',BUILTIN_ROLES.length+roles.length]].map(([key,label,count])=><button type="button" key={label} role="tab" id={key?'access-tab-roles':'access-tab-accounts'} aria-selected={roleSettingsOpen===key} aria-controls={key?'access-panel-roles':'access-panel-accounts'} tabIndex={roleSettingsOpen===key?0:-1} onClick={()=>{setRoleSettingsOpen(key);if(key!==roleSettingsOpen)setRoleCreateNonce(0);}} onKeyDown={event=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?false:event.key==='End'?true:!roleSettingsOpen;setRoleSettingsOpen(next);if(next!==roleSettingsOpen)setRoleCreateNonce(0);document.getElementById(next?'access-tab-roles':'access-tab-accounts')?.focus();}}}><strong>{label}</strong><span>{count}</span></button>)}
       </div>{!roleSettingsOpen&&<CatalogSearchToolbar kind="帳號" label="搜尋帳號" placeholder="搜尋姓名、電子郵件或部門..." value={search} onChange={setSearch} onClear={()=>{setSearch('');setRoleFilter('');setFilter('全部');}} className="account-toolbar"><select aria-label="依角色篩選" value={roleFilter} onChange={event=>setRoleFilter(event.target.value)}><option value="">全部角色</option>{[...BUILTIN_ROLES,...roles.map(role=>role.name)].map(name=><option key={name}>{name}</option>)}</select><select
 
           className="account-role-filter"
@@ -1066,7 +1067,7 @@ function AccountManagement({ accounts, setAccounts,currentUser,onBack,backLabel=
           <option value="已停用">已停用</option>
 
         </select></CatalogSearchToolbar>}</div>
-      <div id="access-panel-roles" role="tabpanel" aria-labelledby="access-tab-roles" hidden={!roleSettingsOpen}>{roleSettingsOpen&&<RoleSettings embedded roles={roles} accounts={accounts} onClose={()=>setRoleSettingsOpen(false)} onSave={setRoles}/>}</div>
+      <div id="access-panel-roles" role="tabpanel" aria-labelledby="access-tab-roles" hidden={!roleSettingsOpen}>{roleSettingsOpen&&<RoleSettings key={roleCreateNonce} initialCreate={roleCreateNonce>0} hideCreateAction embedded roles={roles} accounts={accounts} onClose={()=>setRoleSettingsOpen(false)} onSave={setRoles}/>}</div>
       <div id="access-panel-accounts" role="tabpanel" aria-labelledby="access-tab-accounts" hidden={roleSettingsOpen}>
       {notice && (
 

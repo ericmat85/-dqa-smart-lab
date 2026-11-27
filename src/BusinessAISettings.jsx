@@ -43,7 +43,7 @@ export default function BusinessAISettings({engine,onSaved,preferences,client=bu
  const chosen=models.find(row=>row.id===form?.model);
  const controlsDirty=!!controlsDraft&&Object.keys(data?.control_fields||{}).some(key=>controlsDraft[key]!==data.engine_controls?.[key]);
  if(!admin)return <section className="admin-surface" aria-label={engine+' 模型設定'}><h4>模型與費用設定</h4><p>請由工作區管理者調整金鑰、模型啟用及費用上限。</p></section>;
- return <><section className="admin-surface business-ai-settings" aria-label={engine+' 模型設定'}><div className="admin-section-top"><div><h4>模型與費用設定</h4><p>設定儲存於後端，適用目前工作區的 {engine}。</p></div><button type="button" className="template-btn" disabled={busy} onClick={reload}>重新讀取</button></div>
+ return <><section className="admin-surface business-ai-settings" aria-label={engine+' 模型設定'}><div className="admin-section-top"><div><div className="engine-section-title"><h4>模型與費用設定</h4>{data&&<span className="admin-badge">修訂 {data.revision}</span>}</div><p>設定儲存於後端，適用目前工作區的 {engine}。</p></div><button type="button" className="template-btn" disabled={busy} onClick={reload}>重新讀取</button></div>
  {error&&<p className="management-error" role="alert">{error}</p>}{notice&&<p className="management-notice" role="status">{notice}</p>}
  {form&&data&&<form onSubmit={save}><fieldset disabled={busy||uncertain}>
  <div className="business-ai-enable"><div><strong>模型啟用</strong><small>關閉後停止新的 {engine} 模型請求，既有結果保留。</small></div><button type="button" role="switch" aria-label={engine+' 模型啟用'} aria-checked={form.enabled} className="business-ai-toggle" onClick={()=>change('enabled',!form.enabled)}><span/></button></div>

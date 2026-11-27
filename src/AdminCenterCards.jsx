@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import './AdminCenter.css';
 import './AdminHeroPolish.css';
+import './AdminSurfacePolish.css';
 import LmsSidebarIcon from './LmsSidebarIcon.jsx';
 import {ADMIN_GROUPS,ADMIN_NAV_MODULES} from './adminCenterData.mjs';
 import {canViewAdmin} from './adminCenterStore.mjs';
@@ -14,5 +15,5 @@ export function AdminModuleNav({account,active,onOpen}){
 }
 function tabKeyIndex(event,index,count){const delta={ArrowRight:1,ArrowLeft:-1};if(!['Home','End',...Object.keys(delta)].includes(event.key))return null;event.preventDefault();return event.key==='Home'?0:event.key==='End'?count-1:(index+delta[event.key]+count)%count;}
 export default function AdminCenterCards({account,onOpen}){
- return <section className="admin-center-index" aria-label="系統管理中心">{ADMIN_GROUPS.map((group,index)=><section className="admin-group" key={group} aria-label={group}><h3><span>0{index+1}</span>{group}</h3><div className="admin-card-grid">{ADMIN_NAV_MODULES.filter(m=>m.group===index).map(m=><article key={m.id} className={`admin-module-card admin-tone-${index}`}><span className="admin-card-icon"><LmsSidebarIcon name={m.icon}/></span><div className="admin-card-title"><h4>{m.title}</h4><span className="admin-badge">{m.status}</span></div><p>{m.description}</p><button type="button" className="admin-card-open" disabled={!canViewAdmin(account,m.id)} onClick={()=>onOpen(m.id)} aria-label={`開啟${m.title}`}>{canViewAdmin(account,m.id)?'開啟管理':'目前權限未開放'}<span aria-hidden="true">↗</span></button></article>)}</div></section>)}</section>;
+ return <section className="admin-center-index" aria-label="系統管理中心">{ADMIN_GROUPS.map((group,index)=><section className="admin-group" key={group} aria-label={group}><h3><span>0{index+1}</span>{group}</h3><div className="admin-card-grid admin-summary-surface" style={{'--admin-card-count':Math.min(3,ADMIN_NAV_MODULES.filter(m=>m.group===index).length)}}>{ADMIN_NAV_MODULES.filter(m=>m.group===index).map(m=><article key={m.id} className={`admin-module-card admin-tone-${index}`}><span className="admin-card-icon"><LmsSidebarIcon name={m.icon}/></span><div className="admin-card-title"><h4>{m.title}</h4><span className="admin-badge">{m.status}</span></div><p>{m.description}</p><button type="button" className="admin-card-open" disabled={!canViewAdmin(account,m.id)} onClick={()=>onOpen(m.id)} aria-label={`開啟${m.title}`}>{canViewAdmin(account,m.id)?'開啟管理':'目前權限未開放'}<span aria-hidden="true">↗</span></button></article>)}</div></section>)}</section>;
 }
