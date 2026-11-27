@@ -1,3 +1,5 @@
+import {trialTemplateCatalog} from './trialTemplateDeliveryClient.mjs';
+import {originalBusinessEnabled} from './originalBusiness.mjs';
 import {appStorage} from './originalBusiness.mjs';
 import {addRequestForm,addTrialReportForms,formAssets} from './labFormLayout.mjs';
 import {excelModule} from './reportWorkbook.mjs';
@@ -29,6 +31,7 @@ export async function makeTrialTemplateWorkbook(row,{assets}={}){
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 export async function readTrialTemplateFile(options,storage=appStorage(),{build=makeTrialTemplateWorkbook}={}){
- const first=authorize(options,storage),bytes=await build(first.row),last=authorize({...options,expectedRevision:first.revision},storage);
+ const visible=async()=>{if(originalBusinessEnabled()){const catalog=await trialTemplateCatalog(options.actorId);if((catalog.hidden_builtin_template_ids||[]).includes(options.templateId))throw Error('範本已刪除，請重新讀取列表。');}};
+ const first=authorize(options,storage);await visible();const bytes=await build(first.row);await visible();const last=authorize({...options,expectedRevision:first.revision},storage);
  if(JSON.stringify(last.row)!==JSON.stringify(first.row))throw Error('範本資料已更新，請重新預覽或下載。');return {bytes,name:trialTemplateName(last.row),row:last.row,revision:last.revision};
 }

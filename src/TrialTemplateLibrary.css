@@ -13,3 +13,5 @@ dialog.compact-management-dialog.trial-template-dialog[open],html body #root :is
 html body #root .template-preview-toolbar button.template-print-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:36px;min-width:36px;height:32px!important;min-height:32px!important;max-height:32px!important;padding:0!important;border-radius:6px}
 html body #root .template-preview-toolbar button.template-print-button>svg{display:block;flex:none;width:20px;height:20px}
 @media(max-width:600px){.template-preview-actions{width:100%}}
+
+html body #root .compact-management-dialog.builtin-template-delete-dialog[open]{width:min(460px,calc(100vw - 24px))}.builtin-template-delete-body{padding:16px 20px}.builtin-template-delete-body h4{margin:0 0 10px;font-size:15px;overflow-wrap:anywhere}.builtin-template-delete-body p{font-size:13px;line-height:1.7;margin:8px 0}.builtin-template-delete-dialog>footer{display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--enterprise-border,#dce4ef)}

@@ -22,3 +22,5 @@ html body #root .admin-surface>.admin-surface{border:0;border-top:1px solid var(
 html body #root .settings-management .management-fold-content>:is(section,article,fieldset)+:is(section,article,fieldset){margin-top:14px}
 html body #root .lab-modal>.template-stage-form{border:0;padding:0;margin:8px 0 16px}
 @media(max-width:650px){html body #root .unified-request-information :is(.template-stage-form,.report-case-panel){margin:14px 0}html body #root .request-information-signatures{gap:10px}html body #root .rq-project-item{padding:14px 0}html body #root .admin-control-grid{gap:12px}}
+
+html body #root .compact-management-dialog>header>button{display:inline-flex;align-items:center;justify-content:center;gap:0;line-height:1}

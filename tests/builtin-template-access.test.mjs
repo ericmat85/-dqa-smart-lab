@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {businessClient} from '../src/businessClient.mjs';
+import {configureOriginalBusiness} from '../src/originalBusiness.mjs';
+import {readTrialTemplateFile} from '../src/trialTemplateWorkbook.mjs';
+import {defaultTrialCatalog} from '../src/trialCatalogStore.mjs';
+import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
+import {memoryStorage} from '../src/guidedTourStorage.mjs';
+test('a native reference deleted before or during generation never returns a downloadable file',async()=>{const storage=memoryStorage({'dqa-shared-demo-accounts-v1':JSON.stringify(INITIAL_ACCOUNTS)}),row=defaultTrialCatalog()[0];configureOriginalBusiness({identity:{user:{id:'user'},member:{id:'U001',is_admin:true,permissions:[],systems:['lms'],pages:['archive']}},snapshot:{},storage});let hidden=[row.id],built=0;const previous=businessClient.request;businessClient.request=async()=>({data:{trials:[],files:[],hidden_builtin_template_ids:hidden}});const options={actorId:'U001',system:'lms',templateId:row.id,expectedRevision:0};try{await assert.rejects(()=>readTrialTemplateFile(options,storage,{build:async()=>{built++;return new Uint8Array([1]);}}),/已刪除/);assert.equal(built,0);hidden=[];await assert.rejects(()=>readTrialTemplateFile(options,storage,{build:async()=>{built++;hidden=[row.id];return new Uint8Array([1]);}}),/已刪除/);assert.equal(built,1);hidden=null;await assert.rejects(()=>readTrialTemplateFile(options,storage,{build:async()=>{built++;return new Uint8Array([1]);}}),/列表資料不完整/);assert.equal(built,1);}finally{businessClient.request=previous;}});

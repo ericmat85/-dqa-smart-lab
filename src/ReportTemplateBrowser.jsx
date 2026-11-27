@@ -28,7 +28,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
   ...(defaultTemplateId!=='BLANK'&&workspaceDefault?[{id:'WORKSPACE_DEFAULT',templateRef:workspaceDefault.id,kind:'general',name:'工作區預設委託單',sourceName:workspaceDefault.name,version:workspaceDefault.version,description:`綁定：${workspaceDefault.name}。使用此版本的原始Excel檔案。`,previewLabel:'預覽工作區預設委託單',downloadLabel:'下載工作區預設委託單'}]:[]),
   ...(builtinVisible?[{id:'BLANK',kind:'general',name:'空白電子委託單',version:'A4 · 中英欄位',description:'含試驗規範、判定基準及簽名欄位，適合建立新委託單。',previewLabel:'預覽空白委託單',downloadLabel:'下載空白委託單'}]:[]),
   {id:'GENERAL',kind:'general',name:'一般性能報告範本',version:'V1',description:'一般性能試驗報告的通用 Excel 原稿。',previewLabel:'預覽一般性能報告範本',downloadLabel:'下載範本'},
-  ...catalog.rows.filter(row=>row.profileId!=='COMPOUND_ENVIRONMENT').map(row=>({...row,kind:'trial',aliases:correspondingTrialNames(row,catalog.rows),revision:catalog.revision,previewLabel:`預覽${row.name}範本`,downloadLabel:`下載${row.name}Excel範本`})),
+  ...catalog.rows.filter(row=>!reportBindings?.loading&&!reportBindings?.error&&row.profileId!=='COMPOUND_ENVIRONMENT'&&!(reportBindings?.hidden_builtin_template_ids||[]).includes(row.id)).map(row=>({...row,kind:'trial',aliases:correspondingTrialNames(row,catalog.rows),revision:catalog.revision,previewLabel:`預覽${row.name}範本`,downloadLabel:`下載${row.name}Excel範本`})),
   ...(reportBindings?.files||[]).map(row=>({...row,kind:'upload',cloudReport:true,trialName:reportBindings.trials.find(t=>t.id===row.trial_id)?.name||'原試驗已停用',previewLabel:`預覽${row.name}`,downloadLabel:`下載${row.name}Excel範本`})),
   ...uploads.map(row=>({...row,kind:'upload',trialName:trialName(row),previewLabel:`預覽${row.name}`,downloadLabel:`下載${row.name}Excel範本`}))
  ];
@@ -60,7 +60,7 @@ export default function ReportTemplateBrowser({actorId,system,catalog,uploads,se
   event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?categories.length-1:(index+(event.key==='ArrowRight'?1:-1)+categories.length)%categories.length;
   choose(categories[next][0]);const tab=document.getElementById(`${id}-${categories[next][0]}`);tab?.focus();tab?.scrollIntoView({block:'nearest',inline:'nearest'});
  }
- const invalidated=selected?.id==='WORKSPACE_DEFAULT'&&selected.templateRef!==defaultTemplateId?'預設綁定已更新，請重新開啟預覽。':selected?.kind==='trial'?(selected.revision!==catalog.revision?'範本資料已更新，請關閉後重新開啟預覽。':catalog.error||''):'';
+ const invalidated=selected?.id==='WORKSPACE_DEFAULT'&&selected.templateRef!==defaultTemplateId?'預設綁定已更新，請重新開啟預覽。':selected?.kind==='trial'?((reportBindings?.hidden_builtin_template_ids||[]).includes(selected.id)?'範本已刪除，請關閉預覽。':selected.revision!==catalog.revision?'範本資料已更新，請關閉後重新開啟預覽。':catalog.error||''):'';
  return <section className="report-template-browser" aria-label="委託單與報告範本管理">
   <header className="rtb-heading"><div><h3>報告範本庫</h3><p>依用途找範本，預覽確認後下載 Excel。</p></div><span className="rtb-format">XLSX</span></header>
   <div className="rtb-tabs" role="tablist" aria-label="範本用途分類">{categories.map(([key,label],index)=><button type="button" role="tab" key={key} id={`${id}-${key}`} aria-selected={category===key} aria-controls={`${id}-panel`} tabIndex={category===key?0:-1} onClick={()=>choose(key)} onKeyDown={event=>tabKeyDown(event,index)}>{label}<span>{matching.filter(row=>key==='all'||row.kind===key).length}</span></button>)}</div>

@@ -1,9 +1,7 @@
 /* Wide role workspace with independently scrolling contents and visible exits. */
 html body #root .lms-enterprise .compact-management-dialog.role-editor-dialog[open]{display:flex;flex-direction:column;width:min(1160px,calc(100vw - 32px));max-width:none;height:min(720px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);padding:0;overflow:hidden;border-radius:14px}
 html body #root .lms-enterprise .role-editor-dialog>header{flex:none;gap:16px;padding:12px 20px;min-height:64px;box-sizing:border-box}
-html body #root .lms-enterprise .role-editor-dialog>header>button{position:relative;font-size:0!important;background:var(--enterprise-card);border-radius:8px;color:var(--enterprise-text)}
-html body #root .lms-enterprise .role-editor-dialog>header>button::before,html body #root .lms-enterprise .role-editor-dialog>header>button::after{content:"";position:absolute;top:50%;left:50%;width:18px;height:2px;border-radius:2px;background:currentColor;transform:translate(-50%,-50%) rotate(45deg)}
-html body #root .lms-enterprise .role-editor-dialog>header>button::after{transform:translate(-50%,-50%) rotate(-45deg)}
+html body #root .lms-enterprise .role-editor-dialog>header>button{position:relative;background:var(--enterprise-card);border-radius:8px;color:var(--enterprise-text)}
 html body #root .lms-enterprise .role-editor-dialog>header>button:hover{background:var(--soft);color:#2563eb}
 html body #root .lms-enterprise .role-editor-dialog form.role-editor{display:flex;flex-direction:column;flex:1;min-height:0;height:0;padding:0;margin:0;overflow:hidden;background:var(--enterprise-card)}
 html body #root .lms-enterprise .role-editor-dialog form.role-editor>.role-editor-body{flex:1;min-height:0;margin:0;padding:16px 20px!important;overflow:auto;overscroll-behavior:contain;border:0;border-radius:0;scrollbar-gutter:stable}
