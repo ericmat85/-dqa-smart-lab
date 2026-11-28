@@ -93,7 +93,7 @@ test('new request passes designated manager and two LMS reviews, then schedules 
  await page.getByLabel('每件樣品使用空間 U *',{exact:true}).fill('1');await page.getByRole('button',{name:/AI 自動化排程/}).click();await expect(page.getByRole('dialog',{name:'正在準備排程建議'})).not.toBeVisible({timeout:10000});
  await page.getByRole('button',{name:'儲存排程',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa-schedules-demo-v1'))[0].status)).toBe('已排程');
- await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();await page.getByRole('button',{name:'確認接收',exact:true}).click();await page.getByRole('button',{name:'確認送出',exact:true}).click();
+ await page.goto('/lab/login');await page.getByRole('button',{name:'登入系統'}).click();await page.getByRole('button',{name:/^試驗前準備與確認：/,exact:true}).click();await page.getByRole('button',{name:'確認送出',exact:true}).click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('dqa_lab_demo_requests_v1'))[0].status)).toBe('已排程');
 });
 

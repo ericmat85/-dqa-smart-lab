@@ -62,7 +62,7 @@ test('port configuration saves through existing documents page, survives reload 
  await port.getByRole('button',{name:'檢查端口連線'}).click();await expect(port.getByText('此端口尚未加入服務端允許清單，未送出連線請求。')).toBeVisible();
  await expect(panel.getByRole('button',{name:'儲存簽章方式'})).toBeDisabled();await expect(port.getByRole('button',{name:'送出報告驗章'})).toBeDisabled();expect(s.methodWrites).toHaveLength(0);expect(s.writes).toHaveLength(0);
  await port.getByLabel('端口名稱',{exact:true}).fill('尚未儲存修改');await expect(port.getByRole('button',{name:'檢查端口連線'})).toBeDisabled();
- await page.reload();await panel.getByRole('radio',{name:/數位簽章/}).check();await expect(port.getByLabel('端口名稱',{exact:true})).toHaveValue('合成實驗室簽章端口');
+ await page.reload();await page.getByRole('button',{name:'電子簽章設定',exact:true}).click();await panel.getByRole('radio',{name:/數位簽章/}).check();await expect(port.getByLabel('端口名稱',{exact:true})).toHaveValue('合成實驗室簽章端口');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(s.errors).toEqual([]);
  await port.scrollIntoViewIfNeeded();await captureBrowserEvidence(page,{path:info.outputPath('digital-signature-port.png'),fullPage:true});
 });

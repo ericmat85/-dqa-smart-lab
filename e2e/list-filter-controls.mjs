@@ -1,7 +1,7 @@
 export async function revealListSearch(page){
- await page.locator('.catalog-search-toggle,main input[type=search],.dashboard-content input[type=search],[role=dialog] input').first().waitFor({state:'attached'});
+ await page.locator('.catalog-search-toggle,.workspace-filter-toggle,.rq-filter-disclosure>summary,main input[type=search],.dashboard-content input[type=search],[role=dialog] input').first().waitFor({state:'attached'});
  if(await page.locator('[role=dialog]:visible').count())return;
- for(const button of await page.locator('.catalog-search-toggle[aria-expanded=false]').all())if(await button.isVisible())await button.click();
+ for(const button of await page.locator('.catalog-search-toggle[aria-expanded=false],.workspace-filter-toggle[aria-expanded=false],.rq-filter-disclosure:not([open])>summary').all())if(await button.isVisible())await button.click();
 }
 // Reset through the remaining visible controls after the explicit reset button was removed.
 // These interactions only affect local list filters; they never save application records.

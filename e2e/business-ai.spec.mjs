@@ -140,7 +140,7 @@ test('all twenty FAQs in LMS, laboratory and electronic requests use program ans
  for(const system of ['lms','lab','request']){
   await page.goto('/'+system+'/dashboard');await page.getByRole('button',{name:'展開AI智能助理',exact:true}).click();const panel=page.locator('.intelligent-panel'),faq=panel.locator('.intelligent-examples');
   for(const item of ASSISTANT_DEMOS){
-   await faq.locator('summary').click();await faq.getByRole('button').filter({hasText:item.question}).click();const reply=panel.locator('.intelligent-reply').last();await expect(reply).toHaveAttribute('aria-busy','false');await expect(reply).toContainText('常見問題解答');
+   await faq.locator('summary').click();await faq.getByRole('button').filter({hasText:item.question}).click();const reply=panel.locator('.intelligent-reply').last();await expect(reply).toHaveAttribute('aria-busy','false');if(item.id==='commands'){await expect(reply).toContainText('AI 機器人指令碼');for(const command of ['/demo fill','/demo fill in manager','/demo fill in LV1','/create a demo report','/demo accelerator','/demo cleanup','/system restart'])await expect(reply).toContainText(command);}else await expect(reply).toContainText('常見問題解答');
   }
   await expect(panel.locator('.intelligent-reply').last()).toContainText('資料庫保存');await captureBrowserEvidence(panel,{path:info.outputPath(system+'-program-faq.png')});
  }
