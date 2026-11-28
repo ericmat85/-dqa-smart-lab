@@ -3,10 +3,15 @@ import {findTrialDefinition} from './trialCatalogStore.mjs';
 export const COMPOUND_PROFILE='COMPOUND_ENVIRONMENT';
 export const COMPOUND_NAME='複合式環境試驗';
 export const COMPOUND_LIMIT=20;
+export const COMPOUND_MODES=['CONTINUOUS','DISCONTINUOUS'];
+export const compoundModeLabel=mode=>mode==='DISCONTINUOUS'?'複合型非連續試驗':'複合型連續試驗';
+export const isDiscontinuousCompound=row=>row?.compoundMode==='DISCONTINUOUS'||!row?.compoundMode&&row?.calendarPolicy?.mode==='COMPOUND_DISCONTINUOUS';
+export function compoundStageWindow(segments,index){const pieces=segments?.filter((s,i)=>s.stage_index?s.stage_index===index+1:i===index)||[];return pieces.length?{...pieces[0],ends_at:pieces.at(-1).ends_at}:null;}
+
 export const isCompoundRequest=row=>Array.isArray(row?.compoundStages)&&row.compoundStages.length>0;
 export function compoundItemDefaults(name){const p=trialProfile(name);let row;try{row=findTrialDefinition(name);}catch{/* The protocol validator will report an unavailable catalog. */}const hours=p?.fixed_duration?p.hours:row?.durationHours||p?.hours;return {label:name,durationHours:hours?String(hours):'',operation:p?.mode==='batch'?'continuous':'operator'};}
 export function compoundProtocol(items,trials){
- if(!Array.isArray(items)||items.length<2||items.length>COMPOUND_LIMIT)throw Error('複合試驗須有 2～20 個連續階段。');
+ if(!Array.isArray(items)||items.length<2||items.length>COMPOUND_LIMIT)throw Error('複合試驗須有 2～20 個階段。');
  let quantity=null,total=0;
  const stages=items.map((item,index)=>{const t=trials.find(t=>[t.name,...(t.aliases||[])].includes(item.name)),profile=profileById(t?.profile_code||t?.profileId)||trialProfile(item.name),minutes=Number(item.durationHours)*60;
   if(!t||!profile||t.profile_code===COMPOUND_PROFILE)throw Error(`第 ${index+1} 階段尚無可核對的試驗類型。`);
@@ -43,4 +48,4 @@ export function compoundStartSuggestions(stages,options,{days=21,limit=3}={}){
  const found=[];for(const ms of [...candidates].sort((a,b)=>a-b)){const candidate=taipeiInput(new Date(ms).toISOString());if(compoundTimeline(stages,{...options,startLocal:candidate}).valid){found.push(candidate);if(found.length>=limit)break;}}return found;
 }
 export const profileForCompoundStage=s=>profileById(s.profile_id);
-export function compoundFormFromPlan(plan,equipment){const c=plan?.compound;if(!c)return {};return {startLocal:c.start_local,shiftStart:c.shift_start,shiftEnd:c.shift_end,preloadedWeekend:c.preloaded_weekend,stageEquipmentIds:c.stage_equipment_ids.map(id=>equipment.find(m=>[m.id,m.databaseId].includes(id))?.id||equipment.find(m=>m.id===id)?.legacy_id||'')};}
+export function compoundFormFromPlan(plan,equipment){const c=plan?.compound;if(!c)return {};return {startLocal:c.start_local,shiftStart:c.shift_start,shiftEnd:c.shift_end,preloadedWeekend:c.preloaded_weekend,...(c.stage_start_dates?{stageStartDates:c.stage_start_dates}:{}),stageEquipmentIds:c.stage_equipment_ids.map(id=>equipment.find(m=>[m.id,m.databaseId].includes(id))?.id||equipment.find(m=>m.id===id)?.legacy_id||'')};}

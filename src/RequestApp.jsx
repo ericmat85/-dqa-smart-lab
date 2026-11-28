@@ -442,7 +442,7 @@ export default function RequestApp() {
 </section>
 <section className="rq-entry-card">
   <div className="rq-entry-card-title"><span className="rq-entry-number">4</span><div><b>判定基準與備註</b><small>Acceptance Criteria & Notes</small></div></div>
-  {Array.isArray(form.compoundStages)&&<CompoundProtocolFields stages={form.compoundStages} onChange={compoundStages=>setForm({...form,compoundStages})}/>}
+  {Array.isArray(form.compoundStages)&&<CompoundProtocolFields mode={form.compoundMode} onModeChange={compoundMode=>setForm({...form,compoundMode})} stages={form.compoundStages} onChange={compoundStages=>setForm({...form,compoundStages})}/>}
   {!isProjectEntry(form)&&<>
   <div className="rq-judgement-mode"><label className="rq-label">判定方式</label><div className="rq-radio-row"><label><input type="radio" name="judgementRequired" checked={form.judgementRequired==='需作判定'} onChange={()=>setForm({...form,judgementRequired:'需作判定'})}/> 需作判定</label><label><input type="radio" name="judgementRequired" checked={form.judgementRequired==='不作判定'} onChange={()=>setForm({...form,judgementRequired:'不作判定'})}/> 不作判定</label></div></div>
   <label htmlFor="rq-judgement"><span className="rq-field-heading">判定基準<HelpTip>已依所選試驗項目帶入參考判定基準。此版本為前端示範目錄，正式使用需串接 LMS 核准判定基準資料庫。</HelpTip></span><textarea id="rq-judgement" className="rq-input rq-textarea" value={form.judgementCriteria} onChange={e=>setForm({...form,judgementCriteria:e.target.value})} placeholder="選取試驗項目後自動帶入參考判定基準；請依核准版本確認並可修改…"/></label></>}<div className="rq-entry-grid rq-entry-grid-one"><label>備註 NOTE（非必填）<textarea className="rq-input rq-textarea" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})} placeholder="其他備註"/></label></div>
