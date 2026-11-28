@@ -1,19 +1,24 @@
+import {useWorkspaceImages} from './workspaceImagesContext.mjs';
+import {originalBusinessEnabled} from './originalBusiness.mjs';
+import {prepareWorkspaceImage} from './workspaceImages.mjs';
+import {businessErrorMessage} from './businessClient.mjs';
 import { useState } from 'react';
 import { readDefaultSignature, saveDefaultSignature } from './defaultSignature.mjs';
 
 export default function DefaultSignatureActions({ accountId, value, onChange, beforeApply }) {
   const [message, setMessage] = useState('');
-  const save = () => {
+  const images=useWorkspaceImages(),connected=originalBusinessEnabled(),ready=!connected||images?.data?.member_id===accountId&&!images.loading&&!images.busy&&!images.uncertain;
+  const save = async () => {
     try {
-      saveDefaultSignature(accountId, value);
+      if(connected){const image=await prepareWorkspaceImage(value,'signature');if(!await images.save('signature',image,'signature.png',images.data.images.signature.revision))return;}else saveDefaultSignature(accountId, value);
       setMessage('已儲存為此帳號的預設簽名，下次可直接使用。');
-    } catch {
-      setMessage('無法儲存預設簽名，請確認圖片及瀏覽器儲存空間後再試。');
+    } catch(e) {
+      setMessage(connected?businessErrorMessage(e):'無法儲存預設簽名，請確認圖片及瀏覽器儲存空間後再試。');
     }
   };
   const apply = () => {
     try {
-      const signature = readDefaultSignature(accountId);
+      const signature = connected?images?.data?.member_id===accountId?images.data.images.signature.image:'':readDefaultSignature(accountId);
       if (!signature) { setMessage('尚未儲存預設簽名，請先上傳簽名圖片並儲存。'); return; }
       beforeApply?.();
       onChange(signature);
@@ -24,10 +29,10 @@ export default function DefaultSignatureActions({ accountId, value, onChange, be
   };
   return <div style={{ margin: '10px 0' }}>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-      <button type="button" className="rq-btn rq-btn-small" disabled={!accountId} onClick={apply}>使用預設簽名</button>
-      <button type="button" className="rq-btn rq-btn-small" disabled={!accountId || !value} onClick={save}>儲存為預設簽名</button>
+      <button type="button" className="rq-btn rq-btn-small" disabled={!accountId||!ready} onClick={apply}>使用預設簽名</button>
+      <button type="button" className="rq-btn rq-btn-small" disabled={!accountId || !value||!ready} onClick={save}>儲存為預設簽名</button>
     </div>
-    <small>預設簽名依帳號儲存於此瀏覽器；再次儲存會更新預設圖片。</small>
+    <small>{connected?'預設簽名依目前帳號儲存於資料庫，仍須確認後送出簽核。':'預設簽名依帳號儲存於此瀏覽器；再次儲存會更新預設圖片。'}</small>{connected&&images?.error&&<button type="button" className="rq-btn rq-btn-small" onClick={()=>images.reload()}>重新讀取預設簽名</button>}
     {message && <p role="status" style={{ margin: '6px 0', fontSize: 12 }}>{message}</p>}
   </div>;
 }

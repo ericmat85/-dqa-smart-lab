@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {conditionNominal,conditionFromNominal,conditionRangeLabel} from '../src/trialConditionTolerance.mjs';
+import {schedulingDaysForHours} from '../src/schedulingCalendar.mjs';
+const c={kind:'TEMPERATURE',unit:'°C',lower:58,upper:62};
+test('60 ±2 is exactly58 through62 and saved limits round-trip',()=>{assert.deepEqual(conditionNominal(c),{value:60,tolerance:2});assert.deepEqual(conditionFromNominal(c,{value:'60',tolerance:'2'}),c);assert.equal(conditionRangeLabel(c),'60 ± 2 °C（58～62）');});
+test('negative and zero nominal values, zero tolerance and decimals are valid',()=>{assert.deepEqual(conditionFromNominal(c,{value:-10,tolerance:2}),{...c,lower:-12,upper:-8});assert.deepEqual(conditionFromNominal(c,{value:0,tolerance:0}),{...c,lower:0,upper:0});assert.deepEqual(conditionFromNominal(c,{value:.3,tolerance:.1}),{...c,lower:.2,upper:.4});});
+test('missing, negative, nonfinite and excessive tolerances are rejected',()=>{for(const x of [{value:60,tolerance:''},{value:'',tolerance:2},{value:60,tolerance:-2},{value:Infinity,tolerance:0},{value:1e9,tolerance:1}])assert.throws(()=>conditionFromNominal(c,x));});
+test('legacy one-sided conditions are not silently changed or represented by invented bounds',()=>{assert.deepEqual(conditionNominal({...c,upper:null}),{value:'',tolerance:''});assert.equal(conditionRangeLabel({...c,upper:null}),'58 ～ 未設上限 °C');assert.deepEqual(conditionFromNominal(c,{value:'',tolerance:''}),{...c,lower:null,upper:null});});
+test('whole dates ceil nominal hours by24 without changing the input',()=>{for(const [h,d] of [[.5,1],[24,1],[25,2],[240,10],[250,11],[264,11]])assert.equal(schedulingDaysForHours(h),d);for(const h of [0,-1,NaN,Infinity])assert.throws(()=>schedulingDaysForHours(h));});

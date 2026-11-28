@@ -1,3 +1,4 @@
+import {isWorkspaceReviewer} from './adminReviewRights.mjs';
 import {originalBusinessEnabled,businessIdentity} from './originalBusiness.mjs';
 import {customRole} from './customRoles.mjs';
 // Client-side competition demonstration rules; not an authorization boundary.
@@ -5,6 +6,7 @@ export const ROLE = Object.freeze({ REQUESTER:'委託者', REQUEST_MANAGER:'委�
 const LEVELS = new Map([[ROLE.LEVEL1,1],[ROLE.LEVEL2,2],[ROLE.LEVEL3,3]]);
 export function accessSystem(account, system, storage) {
  if (!account?.id || account.status !== '啟用中') return false;
+ if(isWorkspaceReviewer(account)&&['lms','request'].includes(system))return true;
  if(originalBusinessEnabled()&&account.id===businessIdentity()?.member.id)return (businessIdentity().member.systems||['lms','request','lab']).includes(system);
  const custom=customRole(account,storage);
  if(custom)return custom.builtin?custom.systems.includes(system):system==='lms';
@@ -19,10 +21,12 @@ export function canApproveOperationalRequest(account,applicantId,storage){
  return account.role===ROLE.ADMIN||canReview(account,{status:'待審查',approval:0,participantIds:[applicantId]},storage);
 }
 export function canApproveRequestManager(account, request) {
+ if(isWorkspaceReviewer(account))return !!request&&!request.readOnly;
  return account?.status === '啟用中' && (account.businessIdentity?(account.businessAdmin||account.businessPermissions?.includes('requests.review_manager')):account.role === ROLE.REQUEST_MANAGER) && Boolean(account.id) && request?.supervisorId === account.id && request.ownerId !== account.id;
 }
 export function canReview(account, request, storage) {
  if(request?.readOnly)return false;
+ if(isWorkspaceReviewer(account))return request?.status==='待審查'&&[0,1].includes(request.approval??0);
  const custom=customRole(account,storage);
  const level=account?.businessIdentity?account.businessReviewLevel:custom?custom.level:LEVELS.get(account?.role);
  if(account?.businessIdentity&&!account.businessAdmin&&!account.businessPermissions?.includes('requests.review_lms'))return false;

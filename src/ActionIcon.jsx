@@ -1,7 +1,11 @@
 import './ResourceActions.css';
 const paths={
+ print:'M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6zM17 12h1',
+ expand:'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',
+ link:'m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 1 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0',
  filter:'M3 6h18M6 12h12M9 18h6',
  upload:'M12 17V3m-4 4 4-4 4 4M4 16v5h16v-5',
+ 'report-submit':'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9L14 3ZM14 3v6h6M12 18v-6m-3 3 3-3 3 3',
  'equipment-info':'M6 3h12a1 1 0 0 1 1 1v16H5V4a1 1 0 0 1 1-1ZM5 7h14M8 10h7v6H8zM17 11v4M8 20v2m8-2v2M14 5h.01M17 5h.01',
  'material-info':'m3 6 7-4 7 4v6M3 6v9l7 4v-9m-7-4 7 4 7-4M10 2v8M22 17a5 5 0 1 1-10 0 5 5 0 0 1 10 0M17 17v3m0-6h.01',
  history:'M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v6l4 2',
@@ -16,5 +20,5 @@ const paths={
  download:'M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5',
  edit:'m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-4-4L5 15z',
 };
-export default function ActionIcon({name='info'}){return <svg data-action-icon={name} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]||paths.info}/></svg>;}
+export default function ActionIcon({name='info'}){return <svg data-action-icon={name} width="20" height="20" viewBox="0 0 24 24" fill={name==='sparkles'?'currentColor':'none'} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{name==='link'?<><path d="m10 13 4-4M8 16l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0" strokeWidth="3.4"/><path d="m13 8 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" strokeWidth="3.4"/><path d="m13 8 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" stroke="#fff" strokeWidth="1.6"/></>:<path d={paths[name]||paths.info}/>}</svg>;}
 export function IconAction({icon,label,title=label,danger=false,className='',...props}){return <button type="button" {...props} className={`template-btn secondary icon-action${danger||icon==='delete'?' icon-action-danger':['equipment-info','material-info'].includes(icon)?' icon-action-primary':''} ${className}`} aria-label={label} title={title}><ActionIcon name={icon}/></button>;}

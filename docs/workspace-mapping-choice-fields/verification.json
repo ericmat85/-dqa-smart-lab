@@ -1,0 +1,171 @@
+{
+  "node": {
+    "passed": 943,
+    "failed": 0
+  },
+  "focused": {
+    "passed": 156,
+    "failed": 0
+  },
+  "sql": {
+    "passed": true,
+    "tests": 40,
+    "failures": 0,
+    "errors": 0,
+    "all_mutations_rolled_back": true
+  },
+  "browser": {
+    "passed": 24,
+    "cases": [
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "request and report mappings edit separately, choose a cell in the Excel preview and preview values",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "assigned executor downloads a filled report, not an editable request, and reload does not download again",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "lost mapping acknowledgement is read back without a second save",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "product code example and selected sample source content stay in the live request information",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "submitted request opens a full-window read-only generated preview without Excel or PDF download actions",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "new mapping choices expose nine purpose checks, two judgement checks and five independent source contents",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "simulation controls show the same checkbox and per-source values in the table and Excel without saving",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "request and report mappings edit separately, choose a cell in the Excel preview and preview values",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "assigned executor downloads a filled report, not an editable request, and reload does not download again",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "lost mapping acknowledgement is read back without a second save",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "product code example and selected sample source content stay in the live request information",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "submitted request opens a full-window read-only generated preview without Excel or PDF download actions",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "new mapping choices expose nine purpose checks, two judgement checks and five independent source contents",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "simulation controls show the same checkbox and per-source values in the table and Excel without saving",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "corrupt bound originals never start a browser download",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "blank request library is never offered as a trial report source",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "corrupt bound originals never start a browser download",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "trial-template-delivery.spec.mjs",
+        "title": "blank request library is never offered as a trial report source",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "independent source contents persist in a draft and reload into request information",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "file": "document-cell-mapping.spec.mjs",
+        "title": "independent source contents persist in a draft and reload into request information",
+        "project": "business-mobile",
+        "status": "expected"
+      }
+    ],
+    "source_runs": "22 passing mapping, simulation, form and delivery cases from browser.json, plus 2 final draft source-content persistence cases from source-browser.json after adapting the fixture to the client query-style resource URL. Two batches, not a single clean 24-case run."
+  },
+  "build": "passed",
+  "lint": "passed_with_project_warnings",
+  "schema_sha256": "e245379890fd27cba2901dd337ae7ab1a3ccbaefba910c38141403678ef1782f",
+  "actual_workspace_config_file_and_case_writes": false
+}

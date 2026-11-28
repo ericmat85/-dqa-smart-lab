@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T06:09:28.538247+00:00",
+  "migration": "042_workspace_blank_template_default.sql",
+  "sha256": "6088e0eb2ae5bb2df9b48489debdf2e49e6ec559ffc7790b6fc3a9013b6c894a",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 42,
+  "existing_records_and_templates_preserved": true,
+  "default_bindings_changed": false,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

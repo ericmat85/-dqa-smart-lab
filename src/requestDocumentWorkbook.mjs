@@ -1,3 +1,5 @@
+import {originalBusinessEnabled,businessIdentity} from './originalBusiness.mjs';
+import {mappedCaseDocument} from './documentMappingClient.mjs';
 import {markVirtualWorkbook} from './virtualDocuments.mjs';
 import {excelModule} from './reportWorkbook.mjs';
 import {getSignatureHistory} from './signatureHistory.mjs';
@@ -8,6 +10,7 @@ function addSignature(book,sheet,value,col,row,width=145,height=48){
 }
 // Layout uses only the case's actual signature history; never the reference PDF signatures.
 export async function requestWorkbookBytes(request,{assets}={}){
+ if(originalBusinessEnabled()&&request.documentVersionId){const mapped=await mappedCaseDocument('REQUEST',request.documentVersionId,businessIdentity()?.member?.id);if(mapped)return mapped.bytes;}
  if(!assets&&typeof window!=='undefined')assets=await formAssets(globalThis.fetch,{photos:false});
  const Excel=await excelModule(),book=new Excel.Workbook(),sheet=addRequestForm(book,request,null,assets);
  const records=getSignatureHistory(request).filter(x=>x.signature),requester=records.filter(x=>x.stage==='委託送出'||x.actorId===request.ownerId&&x.decision==='送出').at(-1)||{signature:request.requesterSignature,actor:request.requester,at:request.requesterSignatureAt},supervisor=records.filter(x=>x.stage==='直屬主管簽核'&&!/退回|退件/.test(x.decision||'')).at(-1);

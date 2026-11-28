@@ -3,7 +3,7 @@ export async function handleFinance({markWrite,path,req,res,parsed,session,rpc,b
  const get=req.method==='GET',post=req.method==='POST';
  const call=(name,args={})=>rpc(name,{p_tenant:session.tenant,...args},session.access);
  if(path==='/finance/context'&&get){if([...parsed.searchParams.keys()].some(k=>k!=='search'))throw new ApiError(422,'UNKNOWN_FIELDS');return reply(200,{data:await call('finance_context',{p_search:parsed.searchParams.get('search')||''})});}
- if(path==='/finance/snapshot'&&get){const filter=Object.fromEntries(parsed.searchParams);if(Object.keys(filter).some(k=>!['from','to','project_id','request_id','category','page','year'].includes(k)))throw new ApiError(422,'UNKNOWN_FIELDS');return reply(200,{data:await call('finance_snapshot',{p_filter:filter})});}
+ if(path==='/finance/snapshot'&&get){const filter=Object.fromEntries(parsed.searchParams);if(Object.keys(filter).some(k=>!['from','to','project_id','request_id','category','nature','page','year'].includes(k)))throw new ApiError(422,'UNKNOWN_FIELDS');return reply(200,{data:await call('finance_snapshot',{p_filter:filter})});}
  if(parsed.searchParams.size)throw new ApiError(422,'QUERY_INVALID');
  const match=path.match(/^\/finance\/(result|events|file)\/([a-f0-9-]{36})$/);
  if(match&&get){const data=await call('finance_'+match[1],{[match[1]==='result'?'p_operation':'p_id']:match[2]});if(match[1]!=='file')return reply(200,{data});

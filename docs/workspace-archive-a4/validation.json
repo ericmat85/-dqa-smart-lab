@@ -1,0 +1,29 @@
+{
+  "native": {
+    "expected": 18,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "demo": {
+    "expected": 6,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "regression": {
+    "expected": 8,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "node_report_tests": 43,
+  "node_ci_mode_tests": 3,
+  "build": true,
+  "lint": true,
+  "lint_note": "Warnings retained; no errors.",
+  "database_migration": false,
+  "database_writes": false,
+  "real_account_login": false,
+  "browser_data": "Synthetic workbooks and two-page A4 PDF; original download bytes verified."
+}

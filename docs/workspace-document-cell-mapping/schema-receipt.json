@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T08:13:20.514716+00:00",
+  "migration": "044_document_cell_mapping.sql",
+  "sha256": "c56278596ee8e02bfa82502edb26d485fc8f16855467686faa01fa72e771bd6e",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 44,
+  "existing_records_and_templates_preserved": true,
+  "trial_bindings_changed": false,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

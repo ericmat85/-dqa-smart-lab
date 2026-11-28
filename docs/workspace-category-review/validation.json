@@ -1,0 +1,117 @@
+{
+  "date": "2026-11-25",
+  "browser": {
+    "passed": 20,
+    "failed": 0,
+    "rerun_note": "Initial workflow fixture used the same requester and supervisor; corrected fixture respects self-approval prohibition, then all four workflow cases passed.",
+    "cases": [
+      {
+        "name": "lms 設備 semantic category icons light",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lms 物料 semantic category icons light",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lab 設備 semantic category icons light",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lab 物料 semantic category icons light",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "workflow review, approval and read buttons retain text light",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lms 設備 semantic category icons dark",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lms 物料 semantic category icons dark",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lab 設備 semantic category icons dark",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lab 物料 semantic category icons dark",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "workflow review, approval and read buttons retain text dark",
+        "project": "business-desktop",
+        "status": "passed"
+      },
+      {
+        "name": "lms 設備 semantic category icons light",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lms 物料 semantic category icons light",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lab 設備 semantic category icons light",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lab 物料 semantic category icons light",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "workflow review, approval and read buttons retain text light",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lms 設備 semantic category icons dark",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lms 物料 semantic category icons dark",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lab 設備 semantic category icons dark",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "lab 物料 semantic category icons dark",
+        "project": "business-mobile",
+        "status": "passed"
+      },
+      {
+        "name": "workflow review, approval and read buttons retain text dark",
+        "project": "business-mobile",
+        "status": "passed"
+      }
+    ]
+  },
+  "node": {
+    "passed": 11,
+    "failed": 0
+  },
+  "build": "passed",
+  "lint": "passed with existing warnings",
+  "data": "synthetic local fixtures; no business mutations or model calls"
+}

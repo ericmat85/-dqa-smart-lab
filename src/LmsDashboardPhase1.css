@@ -1,5 +1,5 @@
 /* Phase 1 only: retain all data, shell and assistant behavior. */
-#root .lms-enterprise .live-dashboard{margin-right:64px}
+#root .lms-enterprise .live-dashboard{margin-right:0;min-width:0}
 #root .lms-enterprise .live-dashboard .live-metric-grid>.live-metric{display:grid;grid-template-columns:32px minmax(0,1fr);column-gap:10px;row-gap:2px;min-height:100px;padding:16px;align-content:center}
 #root .lms-enterprise .live-dashboard .live-metric-copy{display:contents}
 #root .lms-enterprise .live-dashboard .live-metric-icon{grid-column:1;grid-row:1/span 2;align-self:center}

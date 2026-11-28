@@ -20,7 +20,7 @@ async function seed(page,{theme='light',actor='DEMO-LEVEL2',paused=false}={}){
 }
 const management=page=>page.getByRole('region',{name:'AI 排程設定與運行監控'});
 async function go(page,name){await page.locator('.sidebar').getByRole('button',{name,exact:true}).click();}
-async function goAI(page){await go(page,'系統管理');await page.getByRole('button',{name:'開啟AI 引擎管理',exact:true}).click();await page.getByRole('button',{name:'開啟AI 排程智慧化',exact:true}).click();}
+async function goAI(page){await go(page,'系統管理');await page.getByRole('button',{name:'開啟AI 引擎管理',exact:true}).click();await page.getByRole('button',{name:'AI 排程智慧化設定',exact:true}).click();}
 async function openSchedule(page){await go(page,'排程管理');await page.locator('tbody tr').filter({hasText:CASE}).getByRole('button',{name:'編輯排程',exact:true}).click();return page.getByRole('dialog',{name:new RegExp('編輯試驗排程.*'+CASE)});}
 
 for(const theme of ['light','dark'])test(`E2 management settings drive the original scheduler and monitor a verified Mock response ${theme}`,async({page,context})=>{

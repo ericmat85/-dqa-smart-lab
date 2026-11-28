@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {groupSchedulesByExecutor,filterScheduleRows} from '../src/scheduleGroups.mjs';
+import {groupSchedulesByEquipment} from '../src/equipmentScheduleGroups.mjs';
 
 test('all laboratory executors appear, including people with no assigned schedules',()=>{
   const accounts=[{id:'a',name:'陳工程師',role:'實驗室工程師'},{id:'b',name:'林工程師',role:'實驗室副工程師'},{id:'admin',name:'管理員',role:'系統管理員'}];
@@ -29,4 +30,16 @@ test('shared filters apply consistently to both list and person groups',()=>{
   assert.equal(filterScheduleRows(rows,'全部','REQ-2')[0].id,'2');
   assert.equal(filterScheduleRows(rows,'未排程','陳')[0].id,'1');
   assert.equal(filterScheduleRows(rows,'已排程','陳').length,0);
+});
+
+test('equipment filtering preserves chronological groups while the main list keeps priority order',()=>{
+ const rows=[
+  {id:'LATE',requestId:'REQ-LATE',equipmentId:'A',status:'已排程',priority:'急件',time:'2099-01-10',end:'2099-01-11'},
+  {id:'NEAR',requestId:'REQ-NEAR',equipmentId:'A',status:'已排程',priority:'一般',time:'2099-01-02',end:'2099-01-03'},
+ ];
+ const grouped=groupSchedulesByEquipment(rows,[{id:'A',name:'試驗箱'}],Date.parse('2098-12-01T00:00:00Z'))[0].rows;
+ assert.deepEqual(filterScheduleRows(grouped,'全部','REQ-',{preserveOrder:true}).map(r=>r.id),['NEAR','LATE']);
+ assert.deepEqual(filterScheduleRows(grouped,'全部','REQ-').map(r=>r.id),['LATE','NEAR']);
+ assert.deepEqual(grouped.map(r=>r.id),['NEAR','LATE']);
+ assert.deepEqual(rows.map(r=>r.id),['LATE','NEAR']);
 });

@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T04:27:03.203006+00:00",
+  "migration": "041_blank_request_template_library.sql",
+  "sha256": "d7aad98493d4534999ee4b90d46b5ecb1992b07883824cdaa70a91cd1ca7c97a",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 41,
+  "existing_records_preserved": true,
+  "new_tables_empty": true,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

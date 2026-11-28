@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "existing_rows_templates_functions_and_public_preserved": true,
+  "new_default_unset": true,
+  "rolled_back": true,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

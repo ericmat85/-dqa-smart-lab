@@ -5,7 +5,8 @@ import {defaultTrialCatalog} from '../src/trialCatalogStore.mjs';
 import {makeTrialTemplateWorkbook} from '../src/trialTemplateWorkbook.mjs';
 import {labTemplateProfile,LAB_SIGNATURE_CELLS,trialProcedure} from '../src/labFormLayout.mjs';
 import {reportToPdf} from '../src/reportPdf.mjs';
-import {validateUploadedTemplate,inspectTemplateZip,saveUploadedTemplate,listUploadedTemplates,readUploadedTemplate} from '../src/reportTemplateStore.mjs';
+import {buildWorkbookView} from '../src/reportWorkbookView.mjs';
+import {validateUploadedTemplate,inspectTemplateZip,saveUploadedTemplate,listUploadedTemplates,readUploadedTemplate,setWorkspaceBlankTemplateDefault,readWorkspaceBlankTemplate} from '../src/reportTemplateStore.mjs';
 import {memoryStorage} from '../src/guidedTourStorage.mjs';import {INITIAL_ACCOUNTS} from '../src/demoAccounts.mjs';
 const signature='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a+s0AAAAASUVORK5CYII=';
 const storage=()=>memoryStorage({'dqa-shared-demo-accounts-v1':JSON.stringify(INITIAL_ACCOUNTS)}),access={actorId:'U001',system:'lms'};
@@ -49,4 +50,35 @@ test('upload, shared readback and downloads recheck permissions and byte integri
  const c=new AbortController();c.abort();await assert.rejects(saveUploadedTemplate(file,{...access,syntheticConfirmed:true,signal:c.signal},s,r),/取消/);
  const revoked={name:'revoked.xlsx',size:bytes.length,async arrayBuffer(){s.setItem('dqa-shared-demo-accounts-v1',JSON.stringify(INITIAL_ACCOUNTS.map(a=>a.id==='U001'?{...a,status:'已停用'}:a)));return bytes.buffer;}};
  await assert.rejects(saveUploadedTemplate(revoked,{...access,syntheticConfirmed:true},s,r),/權限/);
+});
+test('template upload ignores empty formatting and empty merges outside the print area without changing the file',async()=>{
+ const Excel=await excelModule(),book=new Excel.Workbook(),sheet=book.addWorksheet('合成委託單');
+ sheet.getCell('A1').value='空白委託單';sheet.getCell('AQ43').value='簽名欄位';sheet.mergeCells('A2:AR2');sheet.pageSetup.printArea='A1:AR45';
+ sheet.getCell('CK45').font={bold:true};sheet.getCell('CK3000').border={bottom:{style:'thin'}};sheet.mergeCells('CB40:CK40');
+ const bytes=new Uint8Array(await book.xlsx.writeBuffer()),file=new File([bytes],'合成空白委託.xlsx'),s=storage(),r=repo();
+ assert.deepEqual((await validateUploadedTemplate(bytes,file.name)).declaredTrials,[]);
+ const saved=await saveUploadedTemplate(file,{...access,syntheticConfirmed:true,trialId:'BLANK'},s,r),loaded=await readUploadedTemplate(saved.id,access,s,r);
+ assert.deepEqual(loaded.bytes,bytes);const view=await buildWorkbookView(loaded.bytes);
+ assert.equal(view.sheets[0].rows.length,45);assert.equal(view.sheets[0].widths.length,44);
+ assert(view.sheets[0].rows.flatMap(row=>row.cells).some(cell=>cell.address==='AQ43'&&cell.text==='簽名欄位'));
+});
+test('template bounds still reject real distant content, print areas, nonempty merges and image anchors',async()=>{
+ const Excel=await excelModule();
+ for(const configure of [s=>{s.getCell('AW1').value='實際內容';},s=>{s.getCell('A2001').value='實際內容';},s=>{s.pageSetup.printArea='A1:AW45';},s=>{s.mergeCells('AU2:AW2');s.getCell('AU2').value='不可忽略';},(s,b)=>{const id=b.addImage({base64:signature,extension:'png'});s.addImage(id,'AW1:AX3');}]){
+  const book=new Excel.Workbook(),sheet=book.addWorksheet('合成範本');sheet.getCell('A1').value='空白欄位';sheet.pageSetup.printArea='A1:AR45';configure(sheet,book);
+  await assert.rejects(validateUploadedTemplate(new Uint8Array(await book.xlsx.writeBuffer()),'oversized.xlsx'),/實際內容或列印範圍.*超過支援的 2,000 列、48 欄/);
+ }
+});
+
+test('workspace default reads the selected immutable uploaded file and detects a changed binding',async()=>{
+ const s=storage(),r=repo(),bytes=await requestWorkbookBytes({}),saved=await saveUploadedTemplate(new File([bytes],'指定原稿.xlsx'),{...access,syntheticConfirmed:true,trialId:'BLANK'},s,r);let revision=0,defaultTemplateId='BLANK';
+ r.library=async()=>({rows:await r.list(),defaultTemplateId,revision,builtinVisible:true});r.setDefault=async(id,rev,sha,authorize)=>{authorize();assert.equal(rev,revision);assert.equal(sha,r.rows.get(id).sha256);defaultTemplateId=id;revision++;};
+ await setWorkspaceBlankTemplateDefault(saved.id,0,access,s,r);assert.deepEqual((await readWorkspaceBlankTemplate(access,{expectedId:saved.id},s,r)).bytes,bytes);
+ const newer=await saveUploadedTemplate(new File([bytes],'指定原稿.xlsx'),{...access,syntheticConfirmed:true,trialId:'BLANK',version:'V2'},s,r);assert.notEqual(newer.id,saved.id);assert.equal(defaultTemplateId,saved.id);assert.equal((await readWorkspaceBlankTemplate(access,{},s,r)).id,saved.id);
+ const get=r.get;r.get=async id=>{const row=await get(id);defaultTemplateId='BLANK';revision++;return row;};await assert.rejects(readWorkspaceBlankTemplate(access,{expectedId:saved.id},s,r),/預設綁定已更新/);
+});
+test('workspace default cannot bind custom reports or silently fall back from a missing file',async()=>{
+ const s=storage(),r=repo(),bytes=await requestWorkbookBytes({}),saved=await saveUploadedTemplate(new File([bytes],'自訂.xlsx'),{...access,syntheticConfirmed:true,trialId:'CUSTOM'},s,r);r.setDefault=async()=>assert.fail('not allowed');await assert.rejects(setWorkspaceBlankTemplateDefault(saved.id,0,access,s,r),/只能綁定空白/);
+ r.library=async()=>({rows:[],defaultTemplateId:saved.id,revision:1});await assert.rejects(readWorkspaceBlankTemplate(access,{},s,r),/已不存在/);
+ await assert.rejects(setWorkspaceBlankTemplateDefault(saved.id,0,{actorId:'DEMO-LEVEL3',system:'lms'},s,r),/權限/);
 });

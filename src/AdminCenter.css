@@ -62,3 +62,17 @@ html body #root .lms-enterprise .settings-management .admin-card-title .admin-ba
 html body #root .lms-enterprise .settings-management .admin-card-open{position:absolute;inset:0;width:100%;height:100%;padding:0;margin:0;border:0;border-radius:inherit;background:transparent;font-size:0}
 html body #root .lms-enterprise .settings-management .admin-card-open>span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;line-height:1}
 }
+/* Frame only the overview heading and theme hero. */
+html body #root .lms-enterprise .settings-management #admin-module-panel.admin-overview-panel{background:transparent!important;border:0!important;border-radius:0!important;padding:0!important}
+html body #root .lms-enterprise .admin-overview-intro{background:var(--enterprise-card,#fff);border-radius:0 0 6px 6px;padding:0 16px 16px}
+html body #root .lms-enterprise .admin-overview-intro>.admin-home-heading{padding:12px 0!important;margin:0!important}
+html body #root .lms-enterprise .admin-overview-intro .admin-workspace-hero{margin:0!important;border-radius:5px}
+html body #root .lms-enterprise .settings-management .admin-home-content{padding:18px 0 0!important}
+html body #root .lms-enterprise .admin-module-nav{display:flex!important;align-items:stretch;overflow:hidden;border:0!important;min-width:0}
+html body #root .lms-enterprise .admin-module-nav>[role=tablist]{display:flex!important;flex:1;flex-wrap:nowrap!important;min-width:0;overflow-x:auto!important;scrollbar-width:none;scroll-behavior:smooth;border:0!important;margin:0!important}
+html body #root .lms-enterprise .admin-module-nav>[role=tablist]::-webkit-scrollbar{display:none}
+html body #root .lms-enterprise .admin-module-nav [role=tab]{flex:none!important;border-bottom:0!important;box-shadow:none!important}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll{display:grid;place-items:center;flex:0 0 30px;width:30px;min-width:30px;padding:0!important;margin:0;border:0!important;border-radius:0;background:var(--enterprise-tab-bg,#45517c);color:#fff;font-size:25px;line-height:1}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll[hidden]{display:none}
+html body #root .lms-enterprise .admin-module-nav button.admin-tab-scroll:disabled{opacity:.45}
+@media(max-width:600px){html body #root .lms-enterprise .admin-overview-intro{padding:0 12px 12px}}

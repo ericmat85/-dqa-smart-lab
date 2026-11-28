@@ -1,3 +1,4 @@
+import SchedulingCalendarPanel from './SchedulingCalendarPanel.jsx';
 import {ActionTable} from './tableActionIcons.jsx';
 import LmsHeaderActionLabel from './LmsHeaderActionLabel.jsx';
 import {useEffect,useState} from 'react';
@@ -17,15 +18,21 @@ const PHASE={READING:'讀取試驗資料',SESSION:'建立應用程式 Session',U
 const time=v=>new Date(v).toLocaleTimeString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
 const seconds=v=>v===null||v===undefined?'—':(v/1000).toFixed(1)+' 秒';
 const display=v=>v===null||v===undefined?'—':v;
-function SettingsEditor({snapshot,account,onClose,onSaved}){
- const [draft,setDraft]=useState({...snapshot.settings}),[error,setError]=useState('');
- return <CompactDialog title="調整 AI 排程設定" onClose={onClose} className="admin-edit-dialog"><form className="admin-edit-form" onSubmit={e=>{e.preventDefault();try{saveE2Settings(draft,account,{expectedRevision:snapshot.revision});onSaved();onClose();}catch(error){setError(error.message);}}}>
+function SettingsEditor({snapshot,account,onClose,onSaved,inline=false}){
+ const [draft,setDraft]=useState({...snapshot.settings}),[revision]=useState(snapshot.revision),[error,setError]=useState('');
+ const form=<form className="admin-edit-form" onSubmit={e=>{e.preventDefault();try{saveE2Settings(draft,account,{expectedRevision:revision});onSaved();if(!inline)onClose();}catch(error){setError(error.message);}}}>
   <p>儲存於目前瀏覽器，僅套用至之後的新排程請求；既有排程及正在處理的請求維持原內容。</p>
   <label className="admin-checkbox"><input type="checkbox" checked={draft.enabled} onChange={e=>setDraft({...draft,enabled:e.target.checked})}/><span>允許新的自動化排程請求</span></label>
   <div className="admin-form-grid">{[['searchDays','搜尋範圍上限（天）',1,14],['preparationMinutes','準備保留時間下限（分鐘）',0,120],['cleanupMinutes','清理保留時間下限（分鐘）',0,120]].map(([key,label,min,max])=><label key={key}><span>{label}</span><input type="number" aria-label={label} required min={min} max={max} step="1" value={draft[key]} onChange={e=>setDraft({...draft,[key]:e.target.value===''?'':Number(e.target.value)})}/></label>)}</div>
   <p className="e2-management-hint">搜尋不會延後委託交期；試驗工時、設備相容性、容量 U 與操作型試驗的週末限制保持有效。既有準備／清理時間較長時保留較長值。此頁不啟用模型或調高預算。</p>
-  {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" onClick={onClose}>取消</button><button type="submit" className="management-primary">儲存排程設定</button></footer>
- </form></CompactDialog>;
+  {error&&<p role="alert" className="management-error">{error}</p>}<footer><button type="button" className="template-btn" onClick={onClose}>{inline?'還原未儲存變更':'取消'}</button><button type="submit" className="management-primary">儲存排程設定</button></footer>
+ </form>;
+ return inline?form:<CompactDialog title="調整 AI 排程設定" onClose={onClose} className="admin-edit-dialog">{form}</CompactDialog>;
+}
+export function E2InlinePreferences({account}){
+ const [version,setVersion]=useState(0);let snapshot,error;try{snapshot=readE2Settings();}catch(e){error=e.message;}
+ if(!canEditAdmin(account))return <p>目前帳號只能查閱排程偏好。</p>;
+ return <><SchedulingCalendarPanel account={account} compact/><section className="engine-local-preferences" aria-label="E2 本瀏覽器偏好"><header><h4>本瀏覽器排程偏好</h4><small>新排程請求使用</small></header>{error?<p role="alert">{error}</p>:<><SettingsEditor key={version} inline snapshot={snapshot} account={account} onClose={()=>setVersion(v=>v+1)} onSaved={()=>setVersion(v=>v+1)}/><button type="button" className="template-btn" onClick={()=>{if(window.confirm('還原本瀏覽器的排程偏好為預設值？')){try{resetE2Settings(account);setVersion(v=>v+1);}catch(e){window.alert(e.message);}}}}>還原排程預設值</button></>}</section></>;
 }
 export default function E2SchedulingManagement({account,preferencesOnly=false}){
  const [,refresh]=useState(0),[editing,setEditing]=useState(null),[notice,setNotice]=useState(''),[error,setError]=useState(''),[filter,setFilter]=useState('ALL'),[execution,setExecution]=useState('ALL');
@@ -34,7 +41,7 @@ export default function E2SchedulingManagement({account,preferencesOnly=false}){
  const editable=canEditAdmin(account),settings=snapshot?.settings,rows=readE2Activity(account?.id),stats=summarizeE2Activity(rows),latest=rows[0],visible=rows.filter(r=>(filter==='ALL'||r.status===filter||r.assessment===filter)&&(execution==='ALL'||r.execution===execution));
  const durations=rows.filter(r=>r.durationMs!==null).map(r=>r.durationMs).sort((a,b)=>a-b),p95=durations.length?durations[Math.ceil(durations.length*.95)-1]:null;
  return <section id="e2-scheduling-management" className="e4-monitor e2-management" aria-label="AI 排程設定與運行監控">
-  <header className="e4-monitor-heading"><div><span className="e4-monitor-eyebrow">E2 · AI 排程智慧化</span><h3>排程設定與運行監控</h3><p>讀取既有試驗條件、核對資源，再由服務端模型提出候選方案建議。</p></div><span className="e4-monitor-mode">{readError?'設定無法讀取':settings.enabled?'接受新請求':'新請求已暫停'}</span></header>
+  <SchedulingCalendarPanel account={account} compact/><header className="e4-monitor-heading"><div><span className="e4-monitor-eyebrow">E2 · AI 排程智慧化</span><h3>排程設定與運行監控</h3><p>讀取既有試驗條件、核對資源，再由服務端模型提出候選方案建議。</p></div><span className="e4-monitor-mode">{readError?'設定無法讀取':settings.enabled?'接受新請求':'新請求已暫停'}</span></header>
   <div className="e2-management-overview"><article className="e2-settings-card"><div className="e2-settings-heading"><h4>排程偏好</h4><button type="button" className="template-btn" disabled={!editable||!snapshot} onClick={()=>{setError('');setEditing(snapshot);}}><LmsHeaderActionLabel icon="settings">調整排程設定</LmsHeaderActionLabel></button></div>
    {readError?<p role="alert" className="management-error">{readError}</p>:<dl className="e2-setting-values"><div><dt>新請求</dt><dd>{settings.enabled?'允許':'暫停'}</dd></div><div><dt>搜尋範圍上限</dt><dd>{settings.searchDays} 天</dd></div><div><dt>準備保留下限</dt><dd>{settings.preparationMinutes} 分鐘</dd></div><div><dt>清理保留下限</dt><dd>{settings.cleanupMinutes} 分鐘</dd></div></dl>}
    <p className="e2-management-hint">設定限目前瀏覽器，其他分頁會同步；不回寫既有案件。{!editable&&'目前帳號為唯讀，請由具既有管理權限的帳號調整。'}</p>

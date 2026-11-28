@@ -35,3 +35,43 @@ The built-in administrator retains ID `U001`; only its original demo email is
 migrated from `huangxm@example.com` to `level0@example.com`. Custom administrator
 accounts keep their own addresses. Level 2 account-management access is granted
 through the same `canManageAccounts` check used for navigation and the editor.
+
+## Shared workspace colors
+
+`系統管理 → 介面設定 → 頁籤與列表配色` adjusts the primary tab-strip
+background and table-header background independently. Defaults are neutral mist
+blue-gray (`#142D48` / `#D2DCE8`), with stone, indigo and warm-gray presets.
+Hex input accepts exactly six digits. Foreground, search-field and divider colors
+are derived automatically; normal text and search placeholders retain a minimum
+4.5:1 contrast in light and dark themes. Nested tabs keep their original design.
+
+The editor previews a draft locally. Only **儲存設定** changes the workspace;
+**取消** discards the draft, while **還原預設** stages defaults for explicit saving.
+Existing font, language and page-size preferences remain browser-local and keep
+their prior automatic-save behavior.
+
+In database mode, `PreferenceRoot` mounts `WorkspaceAppearanceProvider`, which
+reads `/api/business/access?section=appearance` after authentication without
+blocking business screens. Colors use `workspace_appearance_v1` in the existing
+tenant settings table, through migration 036's two scoped RPC functions. Valid
+workspace members can read; only current tenant administrators can write. The
+server derives the tenant from the session and rejects arbitrary CSS, extra
+fields and invalid revisions. The existing settings revision/audit triggers
+remain in use. Missing settings return defaults without seeding a row.
+
+Saving uses the revision captured when editing began. Concurrent updates return
+409 and preserve the draft until explicit readback; an unknown write outcome
+blocks resubmission until successful readback. Failed initial reads never enable
+saving defaults. Identity changes cancel reads, discard prior-identity colors
+and ignore stale callbacks. Browser focus refreshes the shared settings; other
+systems and new sessions read the same database source. Demo mode uses a
+separate browser-local appearance key and never calls a real write endpoint.
+
+Validation: `node --test tests/workspace-appearance*.test.mjs`,
+`database/tests/verify_workspace_appearance.py` with an isolated local state,
+and `e2e/workspace-appearance.spec.mjs` in business mode. Browser fixtures are
+synthetic; SQL checks cover two-tenant read/write boundaries and persistence.
+Migration 036 adds functions only; it leaves existing business rows and saved
+preferences unchanged. Its rollback revokes the new endpoints while retaining
+preference/audit records. Never replay the initial migrations onto an existing
+workspace.

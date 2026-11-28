@@ -33,5 +33,11 @@
     "deploymentEnabled": {
       "preview/i-render-backend-*": false
     }
+  },
+  "functions": {
+    "api/business/index.js": {
+      "includeFiles": "public/templates/general-performance-v1.xlsx",
+      "maxDuration": 60
+    }
   }
 }

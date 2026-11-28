@@ -1,0 +1,80 @@
+/* Shared rhythm and breadcrumb palette. */
+html body #root :is(.rq-enterprise .rq-main,.lab-enterprise .lab-main,.lms-enterprise .dashboard-content){padding-top:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){background:var(--workspace-color-header-light,#DCE7F1)!important;color:var(--workspace-color-headerText-light,#30465F)!important}
+html body #root :is(.theme-dark,.rq-theme-dark,.lab-theme-dark) :is(.rq-topbar,.lab-global-header,.dashboard-topbar){background:var(--workspace-color-header-dark,#344352)!important;color:var(--workspace-color-headerText-dark,#FFFFFF)!important}
+html body #root :is(.rq-topbar,.lab-global-header,.dashboard-topbar) :is(.workspace-breadcrumbs,.rq-breadcrumbs,.lab-breadcrumbs,.lms-breadcrumbs){color:inherit!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.template-heading,.account-page-heading,.rq-workspace-heading,.lab-workspace-heading,.lms-dashboard-heading,.workspace-subpage-panel>.request-modal-header){min-height:60px!important;margin:0!important;padding:12px 0!important;align-items:center!important}
+/* Collapsed search, light expanded controls. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar{display:flex!important;position:relative;flex:0 0 36px!important;width:36px!important;min-width:36px!important;max-width:36px!important;min-height:36px!important;padding:0!important;margin:0 0 0 auto!important;overflow:visible!important;background:transparent!important;border:0!important;gap:0!important;z-index:15}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.account-access-toolbar){overflow:visible!important;flex-wrap:nowrap!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-category-views,.schedule-views,.archive-page){overflow:visible!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.catalog-search-toggle,.workspace-tab-toolbar>.workspace-filter-toggle){display:inline-flex!important;align-items:center;justify-content:center;position:relative;flex:0 0 36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0!important;border:1px solid var(--workspace-search-border)!important;background:var(--workspace-search-bg)!important;color:var(--workspace-search-text)!important;border-radius:4px!important}
+.catalog-search-toggle>svg{width:18px;height:18px;flex:none}.search-active-dot{position:absolute;right:5px;top:5px;width:6px;height:6px;background:currentColor;border-radius:50%}.search-active-count{position:absolute;right:-3px;top:-4px;font-size:10px!important;min-width:15px!important;height:15px!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-panel{position:absolute;right:0;top:calc(100% + 6px);display:flex;align-items:center;gap:10px;width:min(680px,calc(100vw - 290px));padding:12px!important;background:var(--enterprise-card,#FFFFFF)!important;color:var(--enterprise-text,#17365D)!important;border:1px solid var(--enterprise-border,#D6DEEA)!important;border-radius:4px;box-shadow:0 8px 24px #142D481C;box-sizing:border-box;z-index:30}
+html body #root .catalog-search-panel[hidden]{display:none!important}
+html body #root .catalog-search-panel>.mobile-clearable-search{flex:1 1 260px!important;width:auto!important;min-width:0!important;margin:0!important}
+html body #root .catalog-search-panel :is(input,select){height:36px!important;min-height:36px!important;background:var(--enterprise-input,#F5F7FA)!important;color:var(--enterprise-text,#17365D)!important;border:1px solid var(--enterprise-border,#D6DEEA)!important;box-shadow:none!important;outline:none!important}
+html body #root .catalog-search-panel input{width:100%!important;padding-left:38px!important}
+html body #root .catalog-search-panel select{flex:0 1 145px!important;width:auto!important;max-width:160px!important;min-width:90px!important;margin:0!important;padding:0 8px!important}
+html body #root .catalog-search-panel .catalog-search-icon{color:var(--enterprise-secondary,#6E7F94)!important;background:transparent!important}
+html body #root .rq-filter-disclosure>summary{display:flex!important;align-items:center;justify-content:center;width:36px!important;height:36px!important;min-height:36px!important;padding:0!important;gap:0!important;box-sizing:border-box;list-style:none}
+html body #root .rq-filter-disclosure>summary::after{display:none!important}.rq-filter-disclosure>summary::-webkit-details-marker{display:none}.rq-filter-disclosure>summary>svg{width:18px;height:18px}
+/* A single white system-management frame; original underline tabs inside. */
+html body #root .lms-enterprise :is(.admin-module,.admin-account-workspace,.settings-management){padding:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:var(--enterprise-card,#FFFFFF)!important}
+html body #root .lms-enterprise :is(.admin-module,.admin-account-workspace,.settings-management)>.template-page{padding:0!important;margin:0!important;background:transparent!important;gap:0!important}
+html body #root .lms-enterprise .admin-module-nav{margin:0!important;padding:0!important;border-radius:0!important}
+html body #root .lms-enterprise #admin-module-panel{padding:0!important;margin:0!important;background:var(--enterprise-card,#FFFFFF)!important;border:0!important;border-radius:0!important}
+html body #root .lms-enterprise :is(#admin-module-panel>.template-heading,.panel.account-management>.account-page-heading){padding:12px 16px!important;min-height:60px!important;margin:0!important;background:transparent!important}
+html body #root .lms-enterprise .panel.account-management{background:var(--enterprise-card,#FFFFFF)!important}
+html body #root .lms-enterprise .panel.account-management .account-summary{width:calc(50% - 16px)!important;max-width:100%;margin:0 16px 16px!important;gap:12px!important}
+html body #root .lms-enterprise .panel.account-management .account-access-toolbar{padding:0 16px!important;min-height:42px;gap:12px!important;flex-wrap:nowrap!important}
+html body #root .lms-enterprise .panel.account-management .catalog-search-toggle{background:var(--enterprise-input,#F5F7FA)!important;color:var(--enterprise-text,#17365D)!important;border-color:var(--enterprise-border,#D6DEEA)!important}
+html body #root .lms-enterprise #admin-module-panel>:is(.admin-grid,.admin-metric-grid,.admin-flow-strip,.admin-note,.admin-reset,.management-notice,.management-error,.settings-preferences,.workspace-profile-settings,.interface-settings,.admin-engine-workspace,.system-data-workspace,.equipment-activity-preferences){margin:0 16px 16px!important}
+html body #root .lms-enterprise #admin-module-panel>.admin-table-wrap{padding:0!important;margin:0!important;border-radius:0!important}
+.system-data-tabs{min-height:42px;display:flex;align-items:stretch;gap:20px;border-bottom:1px solid var(--enterprise-border);background:transparent!important;margin:0!important;padding:0!important}
+.system-data-tabs>button{background:transparent!important;color:var(--enterprise-secondary)!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;padding:0 2px!important;min-height:42px!important;display:flex;align-items:center;font-size:13px}
+.system-data-tabs>button[aria-selected=true]{color:var(--enterprise-primary)!important;border-bottom-color:var(--enterprise-primary)!important}
+.system-data-content{padding-top:16px}.system-data-content>:first-child{margin-top:0!important}.system-data-content .workspace-profile-settings{padding:0!important;border:0!important;box-shadow:none!important}
+/* Matching list dimensions and touching report bands. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.live-table,.live-record-table,.template-table,.rq-table,.lab-table,.finance-record-table,.account-table,.role-permission-table,.rtb-table,.admin-table) th{height:40px!important;padding:8px 14px!important;font-size:13px!important;line-height:23px!important;vertical-align:middle!important;box-sizing:border-box}
+html body #root .lms-enterprise .finance-record-table td{padding:8px 14px!important;line-height:20px!important;vertical-align:middle!important}
+html body #root .lms-enterprise .reports-management #management-report-panel{padding:0!important;margin:0!important}
+html body #root .lms-enterprise .reports-management .report-config{margin:0!important}
+html body #root .rq-enterprise .rq-history-list>.rq-panel-head{min-height:42px!important;padding:3px 8px 3px 16px!important;background:var(--workspace-tab-band)!important;color:var(--workspace-tab-text)!important;border:0!important}
+html body #root .rq-enterprise .rq-history-list>.rq-panel-head h2{font-size:13px!important;color:inherit!important;margin:0!important;line-height:24px}
+html body #root .rq-enterprise .rq-history-list>.rq-panel-head>.rq-filter-disclosure{position:relative;z-index:15}
+html body #root .rq-enterprise .rq-history-list .rq-filter-disclosure>summary{background:var(--workspace-search-bg)!important;color:var(--workspace-search-text)!important;border-color:var(--workspace-search-border)!important}
+html body #root .rq-enterprise .rq-history-list .rq-filter-disclosure[open]>.rq-filter-row{position:absolute;right:0;top:calc(100% + 6px);width:min(880px,calc(100vw - 290px));padding:16px!important;background:var(--enterprise-card)!important;color:var(--enterprise-text)!important;border:1px solid var(--enterprise-border);box-shadow:0 8px 24px #142D481C;border-radius:4px}
+html body #root .rq-enterprise .rq-history-list{overflow:visible!important}
+.appearance-example-header{display:flex;align-items:center;min-height:36px;padding:0 14px;background:var(--example-header);color:var(--example-header-text);font-size:12px}.appearance-header-description{font-size:13px;color:var(--enterprise-secondary);margin:8px 0 16px}
+@media(max-width:1000px){html body #root .lms-enterprise .panel.account-management .account-summary{width:calc(100% - 32px)!important}html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-panel,html body #root .rq-enterprise .rq-history-list .rq-filter-disclosure[open]>.rq-filter-row{width:min(680px,calc(100vw - 40px));flex-wrap:wrap}html body #root .catalog-search-panel>.mobile-clearable-search{flex-basis:100%!important}html body #root .catalog-search-panel select{flex:1 1 120px!important;max-width:none!important}}
+
+html body #root .lms-enterprise .admin-module-nav>[role=tablist]{margin:0!important}
+html body #root .lms-enterprise .settings-management>.template-page>.template-heading{padding:12px 16px!important}
+html body #root .catalog-search-panel>.schedule-search-wrap{flex:1 1 260px!important;width:auto!important;min-width:0!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel :is(.schedule-search-wrap,input,select){background:var(--enterprise-input,#F5F7FA)!important;color:var(--enterprise-text,#17365D)!important;border-color:var(--enterprise-border,#D6DEEA)!important;box-shadow:none!important;outline:none!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel input::placeholder{color:var(--enterprise-secondary,#6E7F94)!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel .catalog-search-icon{color:var(--enterprise-secondary,#6E7F94)!important;background:transparent!important}
+/* Override the former inline 32px search presentation inside the dropdown. */
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.account-access-toolbar,.admin-module) .catalog-search-toolbar .catalog-search-panel input{height:36px!important;min-height:36px!important;padding:6px 10px 6px 38px!important;background:var(--enterprise-input,#F5F7FA)!important;color:var(--enterprise-text,#17365D)!important;caret-color:var(--enterprise-text)!important;border:1px solid var(--enterprise-border)!important;box-shadow:none!important;outline:none!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) :is(.workspace-tab-toolbar,.account-access-toolbar,.admin-module) .catalog-search-toolbar .catalog-search-panel .schedule-search-wrap{height:36px!important;min-height:36px!important;max-height:36px!important;border:0!important;border-radius:4px!important;overflow:visible!important;background:transparent!important}
+html body #root :is(.rq-topbar,.lab-global-header,.dashboard-topbar)>nav :is(button,strong){color:inherit!important}
+html body #root :is(.rq-topbar,.lab-global-header,.dashboard-topbar) :is(.menu-button,.rq-mobile-menu,.lab-mobile-menu,.notification-button,.profile-button){color:inherit!important}
+html body #root .system-header-actions{color:inherit!important}
+/* Match management form surfaces to the account page's compact frame. */
+html body #root .lms-enterprise #admin-module-panel>:is(.admin-surface,.admin-stat-grid,.admin-interface-settings,.admin-engine-grid,.admin-actions,.admin-toolbar,.admin-activity-settings){margin:0 16px 16px!important}
+html body #root .lms-enterprise #admin-module-panel .admin-surface{padding:16px!important;border-radius:4px!important;box-shadow:none!important}
+html body #root .lms-enterprise #admin-module-panel .admin-surface h3{margin:0 0 12px!important}
+html body #root .lms-enterprise .system-data-content .data-maintenance{margin:0!important;padding:0!important}
+html body #root .lms-enterprise .system-data-content .data-maintenance-tabs{margin:0 0 16px!important;min-height:42px}
+html body #root .lms-enterprise .system-data-content .data-maintenance>.admin-surface{border:0!important;border-radius:0!important;padding:0!important;background:transparent!important}
+html body #root .lms-enterprise .system-data-content .data-maintenance-fields{gap:12px!important;margin:12px 0!important;max-width:760px}
+html body #root .lms-enterprise .system-data-content .data-maintenance-counts{margin:12px 0!important}
+
+html body #root .lms-enterprise .settings-management .admin-home-content{padding:0 16px 16px!important}html body #root .lms-enterprise .settings-management .admin-workspace-hero{margin:0 0 16px!important;border-radius:4px!important}
+html body #root .catalog-search-panel .schedule-search-wrap{position:relative}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel .catalog-search-icon{position:absolute!important;left:0;top:0;width:34px;height:36px;display:flex;align-items:center;justify-content:center;z-index:1;pointer-events:none}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .workspace-tab-toolbar .catalog-search-toolbar .catalog-search-panel .catalog-search-icon svg{color:inherit!important}
+html body #root :is(.lms-enterprise,.rq-enterprise,.lab-enterprise) .catalog-search-toolbar .catalog-search-panel .mobile-search-clear{color:var(--enterprise-secondary)!important}
+
+.appearance-example-header{gap:8px}.appearance-example-search{width:32px!important;min-width:32px!important;flex:0 0 32px;justify-content:center;padding:0!important;margin:0 6px 0 auto!important}.appearance-example-toolbar{flex-wrap:nowrap!important}.appearance-example-toolbar>div{overflow:hidden}

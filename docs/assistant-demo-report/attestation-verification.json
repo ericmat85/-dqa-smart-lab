@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "node": {
+    "tests": 976,
+    "failures": 0,
+    "focused_rerun": 149
+  },
+  "postgresql": {
+    "passed": true,
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "synthetic_only": true,
+    "actual_postgresql_submission": true,
+    "all_mutations_rolled_back": true
+  },
+  "root_cause": {
+    "enabled": true,
+    "key_length": 32,
+    "preview_cookie_derivation_matches_database": false,
+    "read_only": true
+  },
+  "key_contract": {
+    "policy_enabled": true,
+    "key_size": 32,
+    "existing_database_key_matches_deployment_secret": true,
+    "database_key_rotated": false,
+    "persistent_environment_writes": false,
+    "scope": "deployment-only server secret"
+  },
+  "build": true,
+  "lint": {
+    "errors": 0,
+    "existing_warnings": 107
+  },
+  "live_database_mutations": 0,
+  "actual_case_submissions": 0,
+  "schema_migrations": false,
+  "production_frontend_deploy": false
+}

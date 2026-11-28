@@ -42,7 +42,8 @@ browser_sessions 位於私有 schema，客戶端不能直接讀寫。Cookie 的�
 - BUSINESS_ENABLED=true
 - BUSINESS_SUPABASE_URL：固定專案 HTTPS origin
 - BUSINESS_SUPABASE_ANON_KEY：該專案的匿名／publishable key
-- BUSINESS_COOKIE_KEY：32-byte 隨機金鑰的 base64url 編碼
+- BUSINESS_COOKIE_KEY：32-byte 隨機金鑰的 base64url 編碼，只用於會話 Cookie，可依部署輪替
+- BUSINESS_REPORT_ATTESTATION_KEY：與工作區私有 `human_workflow_policy.report_key` 一致的 32-byte 固定報告驗證金鑰，以 base64url 編碼；僅供 API 伺服器使用，不得從當次部署 Cookie 金鑰重新衍生，也不得使用 VITE 前綴。缺少或格式不符時停止報告提交／封存，回傳設定錯誤。
 - BUSINESS_ORIGIN：可省略，採用 Vercel 自己的 VERCEL_URL；使用固定別名時須明確設定相符 origin。
 
 保留 Vercel 既有 Preview 保護、Production target、main 與 Render。未修改全域環境變數或將管理憑證交給前端。管理者邀請只在使用者明確同意後發送至指定地址，不自動寄送測試郵件或邀請其他人。

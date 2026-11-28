@@ -1,3 +1,4 @@
+import {mappedReportProfile,mappedReportChecks} from './mappedReportProfile.mjs';
 import {assetBytes} from './assetBytes.mjs';
 import {assertReportFileSize} from './reportFilePolicy.mjs';
 import {markVirtualWorkbook,validateWorkbookPurpose,VIRTUAL_SHEET} from './virtualDocuments.mjs';
@@ -41,21 +42,22 @@ async function buildReportTemplate(request={},demo=false,options={}){
 
  sheet.eachRow({includeEmpty:true},row=>{row.eachCell({includeEmpty:true},cell=>{cell.alignment={vertical:'middle',wrapText:true};cell.border={top:{style:'thin',color:{argb:'FFDCE4EF'}},bottom:{style:'thin',color:{argb:'FFDCE4EF'}},left:{style:'thin',color:{argb:'FFDCE4EF'}},right:{style:'thin',color:{argb:'FFDCE4EF'}}};});if(!row.height)row.height=24;});
  sheet.pageSetup={paperSize:9,orientation:'portrait',fitToPage:true,fitToWidth:1,fitToHeight:1,printArea:'A1:I24'};
- applyReportPresentation(book);
+ if(!mappedReportProfile(book))applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
-export async function inspectReport(bytes,requestId,fileName,request){
+export async function inspectReport(bytes,requestId,fileName,request,options={}){
  const checks=[];if(!/\.xlsx$/i.test(fileName))throw Error('請使用 .xlsx 檔案；舊 .xls 請先另存為 .xlsx。');assertReportFileSize(bytes.byteLength);
  const Excel=await excelModule(),book=new Excel.Workbook();try{await book.xlsx.load(bytes);}catch{throw Error('無法讀取 Excel，檔案可能損壞、加密或格式不正確。');}
  const sheet=book.worksheets.find(row=>row.state==='visible'||!row.state);if(!sheet)throw Error('報告沒有可讀取的工作表。');
  if(/篩檢條件|生成來源|上傳作業說明/.test(fileName))throw Error('這是規則／篩檢條件參考表，並非已填寫的試驗報告。請使用「下載本案 Excel 範本」填寫後上傳。');
  book.eachSheet(ws=>reportBounds(ws));
  validateWorkbookPurpose(book,request||{id:requestId});
- const profile=generalProfile(book),labProfile=labTemplateProfile(book);
- if(labProfile){
+ const mapped=mappedReportProfile(book),profile=mapped?null:generalProfile(book),labProfile=mapped?null:labTemplateProfile(book);
+ if(mapped)checks.push(...mappedReportChecks(book,{id:requestId,productCode:request?.productCode,testItems:request?.testItems}));
+ else if(labProfile){
   const cover=book.getWorksheet('報告首頁'),results=book.getWorksheet('結果與照片');
   checks.push({label:'委託編號一致',ok:cover.getCell('I16').text===`DQA-${requestId}`,detail:cover.getCell('I16').text});
-  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0])?.id===findTrialDefinition(cover.getCell('C12').text)?.id&&!!findTrialDefinition(cover.getCell('C12').text))),detail:cover.getCell('C12').text});
+  checks.push({label:'品番與試驗對應委託',ok:(!request?.productCode||cover.getCell('C16').text===request.productCode)&&(!request?.testItems||(request.testItems.length===1&&findTrialDefinition(request.testItems[0],options.storage)?.id===findTrialDefinition(cover.getCell('C12').text,options.storage)?.id&&!!findTrialDefinition(cover.getCell('C12').text,options.storage))),detail:cover.getCell('C12').text});
   checks.push({label:'試驗結果已填寫',ok:Boolean(cover.getCell('A44').text.trim())&&['C12','G12','C16','G16','C20','G20'].some(a=>Boolean(results.getCell(a).text.trim())),detail:'結果摘要與至少一筆試驗觀察須填寫；範本提示及照片不能當成量測證據。'});
   checks.push({label:'工作表皆有對應輸出',ok:book.worksheets.every(s=>[VIRTUAL_SHEET,'委託單','報告首頁','試驗過程','結果與照片','範本資訊','試驗紀錄'].includes(s.name)||/^(規範|判定)續頁\d+$/.test(s.name)),detail:'未辨識工作表不可併入簽核。'});
  }
@@ -68,14 +70,15 @@ export async function inspectReport(bytes,requestId,fileName,request){
  let uncached=false,external=false,formulaError=false;book.eachSheet(ws=>ws.eachRow(row=>row.eachCell(cell=>{if(cell.value&&typeof cell.value==='object'&&cell.value.formula){if(cell.value.result===undefined)uncached=true;if(cell.value.result?.error)formulaError=true;if(/\[[^\]]+\]/.test(cell.value.formula))external=true;}})));
  checks.push({label:'公式無錯誤值',ok:!formulaError,detail:formulaError?'請修正 #REF!、#VALUE! 等公式錯誤後重新上傳':'通過'});
  checks.push({label:'公式具有已計算結果',ok:!uncached,detail:uncached?'請用 Excel 計算並儲存檔案後重新上傳':'通過'});checks.push({label:'無外部活頁簿公式連結',ok:!external,detail:external?'請移除外部檔案公式連結':'通過'});
- return {ok:checks.every(row=>row.ok),checks,sheetName:labProfile?.sheetName||profile?.sheetName||sheet.name,profileId:labProfile?.id||profile?.id||'demo-simple-v1',cells:labProfile?.cells||profile?.cells||{...DEFAULT_SIGNATURE_CELLS},engine:'Demo 規則式防呆檢查'};
+ return {ok:checks.every(row=>row.ok),checks,sheetName:mapped?.sheetName||labProfile?.sheetName||profile?.sheetName||sheet.name,profileId:mapped?.id||labProfile?.id||profile?.id||'demo-simple-v1',cells:mapped?.cells||labProfile?.cells||profile?.cells||{...DEFAULT_SIGNATURE_CELLS},engine:'Demo 規則式防呆檢查'};
 }
 export async function stampReport(bytes,{sheetName,cells=DEFAULT_SIGNATURE_CELLS,level,signature,actor,at}){
  if(!/^data:image\/(png|jpeg);base64,/i.test(signature||''))throw Error('主管電子簽名為必填。');
- const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(bytes);normalizeReportMerges(book);const profile=generalProfile(book),labProfile=labTemplateProfile(book);if(profile)refreshHeaderReferences(book);const sheet=book.getWorksheet(sheetName);if(!sheet)throw Error('指定工作表不存在。');
+ const Excel=await excelModule(),book=new Excel.Workbook();await book.xlsx.load(bytes);normalizeReportMerges(book);const mapped=mappedReportProfile(book),profile=mapped?null:generalProfile(book),labProfile=mapped?null:labTemplateProfile(book);if(profile)refreshHeaderReferences(book);const sheet=book.getWorksheet(sheetName);if(!sheet)throw Error('指定工作表不存在。');
  const target=level==='executor'?cells.executor:cells[`level${level}`];if(!/^[A-Z]{1,2}\d{1,4}$/.test(target||''))throw Error('簽名位置格式錯誤。');const cell=sheet.getCell(target);if(cell.row<20||cell.row>1998||cell.col>48)throw Error('簽名位置須在第 20 列以後，避免覆蓋報告內容。');
  for(const address of Object.values(cells).filter(address=>address!==target)){const other=sheet.getCell(address);if(Math.abs(cell.col-other.col)<3&&Math.abs(cell.row-other.row)<2)throw Error('三方簽名位置不可重疊。');}
- if(level==='executor'&&!profile&&!labProfile)sheet.getCell('E18').value=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
+ if(mapped&&(sheetName!==mapped.sheetName||target!==mapped.cells[level==='executor'?'executor':`level${level}`]))throw Error('自訂報告簽名位置由系統固定。');
+ if(level==='executor'&&!profile&&!labProfile&&!mapped)sheet.getCell('E18').value=new Date(at).toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
  if(labProfile){const expected=labProfile.cells[level==='executor'?'executor':`level${level}`];if(sheetName!==labProfile.sheetName||target!==expected)throw Error('簽名位置由範本固定，不可覆蓋其他欄位。');}
  if(profile){
   const expected=profile.cells[level==='executor'?'executor':`level${level}`];
@@ -85,7 +88,7 @@ export async function stampReport(bytes,{sheetName,cells=DEFAULT_SIGNATURE_CELLS
  const actorCell=labProfile?sheet.getCell(''+String.fromCharCode(64+cell.col)+'59'):profile?cell:sheet.getCell(cell.row+1,cell.col);
  if(profile||labProfile){actorCell.font={size:7};actorCell.alignment={vertical:'bottom',wrapText:true};}
  actorCell.value=`${actor}｜${new Date(at).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false})}`;
- applyReportPresentation(book);
+ if(!mappedReportProfile(book))applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 
@@ -114,7 +117,7 @@ async function createGeneralTemplate(request,demo,{templateBytes,specimenImages}
  sheet.getCell('F50').value='試驗報告版次：T-01｜DQA Demo 圖片簽名，無正式電子簽章效力。';
  for(const row of GENERAL_PAGE_ENDS.slice(0,-1))detail.getRow(row).addPageBreak();
  refreshHeaderReferences(book);book.calcProperties.fullCalcOnLoad=true;
- applyReportPresentation(book);
+ if(!mappedReportProfile(book))applyReportPresentation(book);
  return new Uint8Array(await book.xlsx.writeBuffer());
 }
 

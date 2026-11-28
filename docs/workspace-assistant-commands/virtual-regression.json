@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "tests": 33,
+  "failures": 0,
+  "errors": 0,
+  "all_mutations_rolled_back": true,
+  "native_workflow": true,
+  "cloud_mutations": false
+}

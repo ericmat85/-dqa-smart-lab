@@ -1,9 +1,10 @@
 import test from 'node:test';import {createHmac} from 'node:crypto';import assert from 'node:assert/strict';
 import {createBusinessHandler,COOKIE,openSession} from '../server/business/handler.mjs';
 import {createBusinessClient} from '../src/businessClient.mjs';
+import {spawnSync} from 'node:child_process';
 const A='a0000000-0000-0000-0000-000000000001',U='10000000-0000-0000-0000-000000000001';
 const env={BUSINESS_SUPABASE_SERVICE_ROLE_KEY:'x.'+Buffer.from(JSON.stringify({role:'service_role',ref:'mmazbwzdiizabikmiily'})).toString('base64url')+'.synthetic',BUSINESS_AI_ENABLED:'true',BUSINESS_AI_GATEWAY_SECRET:'FAKE_BUSINESS_AI_TEST_SECRET_1234567890',BUSINESS_AI_BACKEND_URL:'https://dqa-e4-mock-4fbdeebf.onrender.com',BUSINESS_ENABLED:'true',BUSINESS_ORIGIN:'https://preview.test',BUSINESS_SUPABASE_URL:'https://mmazbwzdiizabikmiily.supabase.co',BUSINESS_SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiJ9.'+Buffer.from(JSON.stringify({role:'anon',ref:'mmazbwzdiizabikmiily'})).toString('base64url')+'.synthetic',BUSINESS_COOKIE_KEY:Buffer.alloc(32,7).toString('base64url')};
-function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRevocation=false,maintenanceError=null,mode="ok",admin=true;const operations=new Map();const fetchImpl=async(raw,options={})=>{
+function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRevocation=false,maintenanceError=null,mode="ok",admin=true;let requestRows=null,scheduleRows=[],preapproval=[],history=[],reviewContext=null;const operations=new Map();const fetchImpl=async(raw,options={})=>{
  const url=new URL(raw);calls.push({url,options});assert.equal(options.redirect,'error');
  const body=options.body?JSON.parse(options.body):{};const json=(data,status=200,headers={})=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json',...headers}});
 
@@ -23,11 +24,14 @@ function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRev
  if(aiName==='finish_business_ai'){const op=operations.get(body.p_operation);op.state=body.p_state;op.data=body.p_result;op.error_code=body.p_error;return json(true);}
  if(aiName==='business_ai_result'){const op=operations.get(body.p_operation);return json(op?{state:op.state,engine:op.engine,data:op.data,candidate_source:op.source?.candidates,error_code:op.error_code}:{state:'NOT_FOUND'});}
  if(aiName==='business_ai_overview')return json({records:[]});
- if(aiName==='business_ai_conversation')return json([]);
+ if(aiName==='preapproval_context')return json({...reviewContext,...(mode==='review-stale'&&calls.filter(x=>x.url.pathname.endsWith('/preapproval_context')).length>1?{sample_revision:99}:{})});
+ if(aiName==='preapproval_snapshot')return json({preapproval_requests:preapproval});
+ if(url.pathname==='/rest/v1/schedules')return json(scheduleRows);
+ if(aiName==='business_ai_conversation')return json(history);
  if(aiName==='clear_business_ai_conversation')return json(true);
  if(aiName==='business_ai_schedule_candidates')return json({candidates:[{id:'C1',command:{request_id:requestID},plan:{sample_space_units:2,start_date:'2026-12-01',end_date:'2026-12-11',allocations:[{equipment_id:equipmentID}],executor_label:'合成執行人',calendar:'CONTINUOUS',hours_per_batch:250}}]});
  if(aiName==='validate_business_ai_schedule')return json({valid:true});
- if(url.pathname==='/rest/v1/requests')return json([{id:requestID,legacy_id:'REQ-SYNTHETIC',trial_id:trialID,product_code:'SYNTHETIC',quantity:3,specification:'250 小時',revision:6,status:'AWAITING_SCHEDULING'}]);
+ if(url.pathname==='/rest/v1/requests')return json(requestRows||[{id:requestID,legacy_id:'REQ-SYNTHETIC',trial_id:trialID,product_code:'SYNTHETIC',quantity:3,specification:'250 小時',revision:6,status:'AWAITING_SCHEDULING'}]);
  if(url.pathname==='/rest/v1/trial_definitions')return json([{id:trialID,legacy_id:'TRIAL-SYNTHETIC',name:'高溫高濕',aliases:[],specification:'250 小時',duration_hours:250,revision:1}]);
  if(url.pathname==='/rest/v1/equipment')return json([{id:equipmentID,legacy_id:'EQ-001',name:'合成環境試驗箱',space_units:6,revision:1}]);
  if(['/rest/v1/reports','/rest/v1/request_signatures','/rest/v1/materials'].includes(url.pathname))return json([]);
@@ -56,7 +60,7 @@ function fixture(){const sessions=new Map(),calls=[];let failWrite=false,failRev
  if(['create_request_draft','update_request_draft'].includes(rpc)){if(failWrite)throw new Error('synthetic network failure');if(body.p_data.status)return json({message:'DRAFT_FIELDS_INVALID'},400);return json({id:body.p_id,status:'DRAFT',revision:1});}
  if(url.pathname==='/rest/v1/requests'){assert.equal(url.searchParams.get('tenant_id'),'eq.'+A);return json([] ,200,{'content-range':'*/0'});}
  throw Error('Unexpected upstream '+url.pathname);
- };const handler=createBusinessHandler({env,fetchImpl});return {handler,calls,operations,setAdmin:v=>{admin=v;},setMode:v=>{mode=v;},fetchImpl,setMaintenanceError:v=>{maintenanceError=v;},setFailWrite:v=>{failWrite=v;},setFailRevocation:v=>{failRevocation=v;}};}
+ };const handler=createBusinessHandler({env,fetchImpl});return {handler,calls,operations,setReviewContext:v=>{reviewContext=v;},setRows:rows=>{requestRows=rows;},setSchedules:rows=>{scheduleRows=rows;},setPreapproval:rows=>{preapproval=rows;},setHistory:rows=>{history=rows;},setAdmin:v=>{admin=v;},setMode:v=>{mode=v;},fetchImpl,setMaintenanceError:v=>{maintenanceError=v;},setFailWrite:v=>{failWrite=v;},setFailRevocation:v=>{failRevocation=v;}};}
 async function call(handler,path,options={}){const req={url:options.url||'/api/business'+path,query:options.query,params:options.params,method:options.method||'GET',headers:{...(options.method?{'origin':env.BUSINESS_ORIGIN,'content-type':'application/json'}:{}),...(options.cookie?{cookie:options.cookie}:{}),...options.headers},body:options.body};const headers={};let result;const res={setHeader:(k,v)=>{headers[k.toLowerCase()]=v;},status(status){this.statusCode=status;return this;},json(body){result={status:this.statusCode,body,headers};return result;}};await handler(req,res);return result;}
 async function login(f){const r=await call(f.handler,'/login',{method:'POST',body:{email:'synthetic@example.invalid',password:'synthetic-only'}});assert.equal(r.status,200,JSON.stringify(r.body));return r.headers['set-cookie'].split(';')[0];}
 
@@ -112,3 +116,32 @@ test('lost settings receipt is uncertain and never automatically resubmitted',as
 test('BFF accepts compatible selected models and refuses disabled profiles in provider evidence',async()=>{
  for(const [mode,status] of [['model-sol',200],['model-disabled',502]]){const f=fixture(),cookie=await login(f);f.setMode(mode);const r=await call(f.handler,'/ai/generate',{method:'POST',body:aiBody(),cookie});assert.equal(r.status,status,JSON.stringify(r.body));if(status===200)assert.equal(r.body.data.model,'gpt-6-sol');else assert.equal(r.body.error.code,'AI_PROVIDER_EVIDENCE_REQUIRED');assert.equal(providerCalls(f).length,1);}
 });
+
+test('bulk E4 and E3 keep all 22 authorized sources in a compact signed model packet',async()=>{
+ for(const engine of ['E4','E3']){
+  const f=fixture(),cookie=await login(f),rows=Array.from({length:22},(_,i)=>({id:'ef000000-0000-4000-8000-'+String(i+10).padStart(12,'0'),legacy_id:'REQ-'+String(i).padStart(32,'0'),execution_kind:'REAL',product_code:'VCU-A01',quantity:3,requested_date:'2026-12-08',status:'AWAITING_REQUEST_MANAGER',revision:2}));f.setRows(rows);
+  if(engine==='E4')f.setHistory([{question:'舊問題',reply:'歷史建議'.repeat(1000)},{question:'前次問題',reply:'歷史建議'.repeat(1000)}]);
+  const b=aiBody(engine);b.input=engine==='E4'?{question:'目前委託狀態有幾筆？',language:'zh-TW'}:{source_kind:'requests',record_ids:rows.map(r=>r.legacy_id),title:'試驗進度追蹤',purpose:'整理狀態與待辦',section_titles:['狀態','待辦'],language:'zh-TW'};
+  const result=await call(f.handler,'/ai/generate',{method:'POST',body:b,cookie});assert.equal(result.status,200,JSON.stringify(result.body));const packet=JSON.parse(providerCalls(f)[0].options.body),context=packet.context;
+  assert.equal(context.record_count,22);assert.equal(context.record_tables.reduce((n,t)=>n+t.rows.length,0),22);assert.equal(context.references.length,23);assert.equal(result.body.data.source.record_count,22);assert.ok(Buffer.byteLength(JSON.stringify(context))<4200);assert.equal(f.operations.get(b.operation_id).source.record_count,22);
+  const budget=spawnSync('python',['-c',"import sys,json;sys.path.insert(0,'tests');from test_business_ai import Tests;t=Tests();t.setUp();p=json.load(sys.stdin)\ntry:\n t.generate(p);assert len(t.calls)==1;print('ACTUAL_BACKEND_INPUT_BOUND_ACCEPTED')\nfinally:t.tearDown()"],{cwd:new URL('../',import.meta.url),env:{...process.env,PYTHONDONTWRITEBYTECODE:'1'},input:JSON.stringify(packet),encoding:'utf8',timeout:20000});
+  assert.equal(budget.status,0,budget.stderr);assert.match(budget.stdout,/ACTUAL_BACKEND_INPUT_BOUND_ACCEPTED/);
+ }
+});
+
+test('E3 resolves visible preapproval pending rows and versioned real schedules without substituting foreign sources',async()=>{
+ const f=fixture(),cookie=await login(f),pending={id:requestID,legacy_id:'REQ-PENDING',status:'AWAITING_LMS_REVIEW',request_review_level:0,revision:3},scheduled={id:equipmentID,legacy_id:'SCH-REQ-ACTUAL-V1',request_id:trialID,status:'BOOKED',revision:2};
+ f.setRows([pending]);f.setSchedules([scheduled]);f.setPreapproval([{request_id:requestID,flow_version:'PREAPPROVAL_V2'}]);
+ const b=aiBody('E3');b.input={source_kind:'schedules',record_ids:[scheduled.legacy_id,'SCH-'+pending.legacy_id],title:'排程交班',purpose:'整理目前來源',section_titles:[],language:'zh-TW'};
+ const result=await call(f.handler,'/ai/generate',{method:'POST',body:b,cookie});assert.equal(result.status,200,JSON.stringify(result.body));const context=JSON.parse(providerCalls(f)[0].options.body).context;
+ assert.equal(context.records.length,2);assert.equal(context.includes_awaiting_scheduling,false);assert.equal(context.includes_preapproval_pending,true);assert.equal(context.pending_sources_are_not_booked,true);assert.equal(context.records.find(r=>r.legacy_id===pending.legacy_id).status,'AWAITING_LMS_REVIEW');
+ for(const change of ['missing-preapproval','foreign','active-schedule']){
+  const next=aiBody('E3');next.input={...b.input,record_ids:['SCH-'+pending.legacy_id]};
+  f.setPreapproval(change==='missing-preapproval'?[]:[{request_id:requestID,flow_version:'PREAPPROVAL_V2'}]);f.setSchedules(change==='active-schedule'?[{...scheduled,request_id:requestID}]:[]);if(change==='foreign')next.input.record_ids=['SCH-REQ-FOREIGN'];
+  const denied=await call(f.handler,'/ai/generate',{method:'POST',body:next,cookie});assert.equal(denied.status,403);assert.equal(denied.body.error.code,'AI_REPORT_SOURCE_MISMATCH');
+ }
+ assert.equal(providerCalls(f).length,1);
+});
+
+test('first-stage E1 sees current plan, all sample IDs and unsaved answers, without signature images',async()=>{const f=fixture(),cookie=await login(f),b=aiBody('E1');b.input.first_review={expected_plan_revision:2,sample_revision:1,review_fields:{allowed:'yes',sampleCode:'#RT-1、#DA-2、#BC-3'}};f.setReviewContext({document_id:trialID,can_plan:true,sample_numbers_valid:true,request_revision:6,sample_revision:1,quantity:3,sample_numbers:['#RT-1','#DA-2','#BC-3'],draft:{revision:2,plan:{executor_label:'Synthetic executor'}}});const r=await call(f.handler,'/ai/generate',{method:'POST',body:b,cookie});assert.equal(r.status,200,JSON.stringify(r.body));const sent=JSON.parse(providerCalls(f)[0].options.body).context;assert.equal(sent.first_review.quantity,3);assert.deepEqual(sent.first_review.sample_numbers,['#RT-1','#DA-2','#BC-3']);assert.equal(sent.first_review.review_fields.allowed,'yes');assert.equal(sent.first_review.signature_authenticity,'NOT_VERIFIED');assert.equal(f.calls.filter(x=>x.url.pathname.endsWith('/preapproval_context')).length,2);});
+test('E1 rejects stale plan before dispatch and rechecks sample revision after provider response',async()=>{for(const staleAfter of [false,true]){const f=fixture(),cookie=await login(f),b=aiBody('E1');b.input.first_review={expected_plan_revision:2,sample_revision:1,review_fields:{allowed:'yes'}};f.setReviewContext({document_id:trialID,can_plan:true,sample_numbers_valid:true,request_revision:6,sample_revision:1,quantity:3,sample_numbers:['#RT-1','#DA-2','#BC-3'],draft:{revision:staleAfter?2:3,plan:{}}});if(staleAfter)f.setMode('review-stale');const r=await call(f.handler,'/ai/generate',{method:'POST',body:b,cookie});assert.equal(r.status,409,JSON.stringify(r.body));assert.equal(r.body.error.code,'AI_SOURCE_CHANGED');assert.equal(providerCalls(f).length,staleAfter?1:0);}});

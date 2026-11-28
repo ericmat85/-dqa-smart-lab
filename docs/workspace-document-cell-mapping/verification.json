@@ -1,0 +1,136 @@
+{
+  "node": {
+    "passed": 929,
+    "failed": 0
+  },
+  "focused_api_and_mapping": {
+    "passed": 137,
+    "failed": 0,
+    "includes_signature_and_upload_validation": true
+  },
+  "sql": {
+    "passed": true,
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "all_mutations_rolled_back": true
+  },
+  "browser": {
+    "passed": 18,
+    "cases": [
+      {
+        "title": "request and report mappings edit separately, choose a cell in the Excel preview and preview values",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "assigned executor downloads a filled report, not an editable request, and reload does not download again",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "lost mapping acknowledgement is read back without a second save",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "product code example and selected sample source content stay in the live request information",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "request and report mappings edit separately, choose a cell in the Excel preview and preview values",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "assigned executor downloads a filled report, not an editable request, and reload does not download again",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "lost mapping acknowledgement is read back without a second save",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "product code example and selected sample source content stay in the live request information",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "corrupt bound originals never start a browser download",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "blank request library is never offered as a trial report source",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "trial binding pins the original submitted version and automatically dispatches it only once to the executor",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "binding acknowledgement loss is recovered without uploading a duplicate version and read-only accounts cannot bind",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "corrupt bound originals never start a browser download",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "blank request library is never offered as a trial report source",
+        "file": "trial-template-delivery.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      },
+      {
+        "title": "submitted request opens a full-window read-only generated preview without Excel or PDF download actions",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-desktop",
+        "status": "expected"
+      },
+      {
+        "title": "submitted request opens a full-window read-only generated preview without Excel or PDF download actions",
+        "file": "document-cell-mapping.spec.mjs",
+        "project": "business-mobile",
+        "status": "expected"
+      }
+    ],
+    "source_runs": "16 passing mapping/delivery/source-input cases from browser.json; final 2 read-only preview cases from readonly-browser.json after correcting the fixture phase to the LMS review list. Two batches, not one clean 18-case run."
+  },
+  "build": "passed",
+  "lint": "passed_with_project_warnings",
+  "schema_source_sha256": "c56278596ee8e02bfa82502edb26d485fc8f16855467686faa01fa72e771bd6e",
+  "actual_workspace_mapping_binding_upload_and_case_writes": false
+}

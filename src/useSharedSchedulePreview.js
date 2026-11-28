@@ -6,7 +6,7 @@ import {scheduleDraftCommand} from './sharedScheduleDrafts.mjs';
 export default function useSharedSchedulePreview({editing,form,references}){
  let key=null;
  try{
-  if(editing?.businessDatabase&&form&&/^\d{4}-\d{2}-\d{2}$/.test(form.time||'')&&String(form.sampleCode||'').trim()){
+  if(editing?.businessDatabase&&form&&/^\d{4}-\d{2}-\d{2}$/.test(form.time||'')&&(editing.preapprovalPlanning||String(form.sampleCode||'').trim())){
    const command=scheduleDraftCommand(editing,{...form,end:form.time},references);
    key=JSON.stringify(command);
   }
@@ -21,7 +21,7 @@ export default function useSharedSchedulePreview({editing,form,references}){
    try{
     const command=JSON.parse(key),{data}=await businessClient.request('/planning/preview',{method:'POST',body:{command},signal:AbortSignal.any([controller.signal,AbortSignal.timeout(20000)])});
     if(!active||current.current!==key)return;
-    if(data?.scheduling_unit!=='DAY'||!Number.isSafeInteger(data.scheduling_days)||data.scheduling_days<1||data.scope!=='DRAFT_ONLY'||data.reserved!==false||data.start_date!==command.data.start_date||!/^\d{4}-\d{2}-\d{2}$/.test(data.end_date||'')||data.end_date<data.start_date||data.sample_space_units!==command.data.sample_space_units||!Number.isFinite(Number(data.hours_per_batch))||Number(data.hours_per_batch)<=0)throw Error('排程計算回應格式無法確認，請重新開啟排程。');
+    if(!['DAY','MINUTE'].includes(data?.scheduling_unit)||!Number.isSafeInteger(data.scheduling_days)||data.scheduling_days<1||data.scope!=='DRAFT_ONLY'||data.reserved!==false||data.start_date<command.data.start_date||!/^\d{4}-\d{2}-\d{2}$/.test(data.end_date||'')||data.end_date<data.start_date||data.sample_space_units!==command.data.sample_space_units||!Number.isFinite(Number(data.hours_per_batch))||Number(data.hours_per_batch)<=0)throw Error('排程計算回應格式無法確認，請重新開啟排程。');
     setState({key,busy:false,plan:data,error:''});
    }catch(error){if(active&&current.current===key)setState({key,busy:false,plan:null,error:error.code?businessErrorMessage(error):error.message});}
   },250);

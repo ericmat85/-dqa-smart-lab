@@ -1,0 +1,13 @@
+# Management surfaces and E1–E4 settings refinement
+
+Management overview section titles now have 12 px of space above and below. This removes the accumulated hero/content/group margins. Function modules reuse the account-summary design: a rounded shared surface, transparent cells, subtle separators, consistent icons and aligned actions. Two-module groups use the whole row; mobile groups become vertically divided lists. Existing module destinations and permission checks remain intact.
+
+「建立新角色」is a persistent account-page heading action on both the account and role tabs. The native manager retains its existing loading, pending-operation and write guards. The demonstration manager opens its existing role editor from either tab, avoids duplicating the action in the embedded role list and resets cancelled create requests when changing tabs. No role is saved until the existing form is submitted.
+
+E1–E4 use the same page layout and segmented engine navigation, with all four tabs visible in a two-column layout on mobile. Connection/model/budget/request counts share an account-style summary strip. Model and cost settings show the actual loaded revision; related fields use quieter surfaces, consistent labels and spacing. Dedicated controls retain their separate dialog and save operation. The dialog uses a wider desktop layout and consistent 40 px controls, while browser-only preferences remain a separate section. Recent requests have their own heading, actual count and keyboard-scrollable table.
+
+This is interface work. Model choices, API-key handling, costs, quota ledgers, revision guards, unknown-result read-back, source permissions and manual confirmation are unchanged. Tests use synthetic settings and do not call a paid model or change actual credentials, budgets or roles.
+
+Validation includes desktop/mobile section spacing and destinations; opening/cancelling role creation from both tabs; all four engine settings/control dialogs; 320 px, dark mobile and wide desktop layouts; existing independent-control saves, unsaved credential/budget preservation, unknown acknowledgements and browser-only preferences. The demonstration role entry is checked separately. Build, lint and relevant account-operation/engine-preference tests are recorded with the protected Preview evidence.
+
+No database or schema changes are required. Migrations through 052 are already installed and must not be replayed. The previously bound shared COLONG IE logo, browser hero backgrounds and document preview behavior remain in place. Delivery remains on PR 49's protected Preview branch; Main, Production frontend, SSO, persistent environment settings and Render are preserved.

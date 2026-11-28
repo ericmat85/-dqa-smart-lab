@@ -59,8 +59,8 @@ test('preview resource conflict preserves inputs without creating a draft',async
 test('a late calculation cannot overwrite a newer form result',async({page})=>{
  const s=state();await install(page,s);const d=await editor(page);await fill(d);s.previewDelay=true;
  await d.getByLabel(/每件樣品使用空間/).fill('1');await expect.poll(()=>typeof s.releasePreview).toBe('function');const releaseOld=s.releasePreview;
- s.previewDelay=false;s.previewEnd=day(start+11*86400000);await d.getByLabel(/^樣品編號/).fill('SMP-NEWER');await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);
- releaseOld();await page.waitForTimeout(500);await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);expect(s.writes[0].command.data.end_date).toBe(s.previewEnd);expect(s.writes[0].command.data.sample_code).toBe('SMP-NEWER');expect(s.errors).toEqual([]);
+ s.previewDelay=false;s.previewEnd=day(start+11*86400000);await expect(d.getByLabel(/^樣品編號/)).toHaveCount(0);await d.getByLabel('排程備註',{exact:true}).fill('較新的排程備註');await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);
+ releaseOld();await page.waitForTimeout(500);await expect(d.getByLabel(/^預計完成日期/)).toHaveValue(s.previewEnd);await d.getByRole('button',{name:'儲存排程草稿',exact:true}).click();await expect(d).toHaveCount(0);expect(s.writes[0].command.data.end_date).toBe(s.previewEnd);expect(s.writes[0].command.data.sample_code).toBe(s.previews[0].command.data.sample_code);expect(s.writes[0].command.data.note).toBe('較新的排程備註');expect(s.errors).toEqual([]);
 });
 
 

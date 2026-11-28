@@ -1,0 +1,157 @@
+/* Shared mobile density. Desktop layouts and printable documents keep their own type scale. */
+@media screen and (max-width:900px){
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise){
+    --mobile-body:calc(14px * var(--ui-font-scale,1));
+    --mobile-caption:calc(12px * var(--ui-font-scale,1));
+    --mobile-title:calc(20px * var(--ui-font-scale,1));
+    --mobile-section:calc(15px * var(--ui-font-scale,1));
+    --mobile-value:calc(22px * var(--ui-font-scale,1));
+    font-size:var(--mobile-body);
+    line-height:1.55;
+  }
+
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.dashboard-content,.rq-main,.lab-main){
+    padding-top:12px;
+    padding-left:12px;
+    padding-right:12px;
+    min-width:0;
+  }
+  html body #root .dashboard-shell.lms-enterprise .dashboard-content>.panel:not(.settings-management):not(.account-management){padding:12px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.template-heading,.account-page-heading,.management-heading,.lms-dashboard-heading,.rq-workspace-heading,.lab-workspace-heading,.rq-editor-topline){
+    gap:8px;
+    margin-bottom:12px;
+  }
+  html body #root .dashboard-shell.lms-enterprise :is(.template-heading,.account-page-heading,.management-heading){min-height:44px!important}
+  html body #root .dashboard-shell.lms-enterprise :is(#admin-module-panel>.template-heading,.panel.account-management>.account-page-heading){min-height:44px!important;padding-block:6px!important}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.template-heading,.account-page-heading,.management-heading,.lms-dashboard-heading,.rq-workspace-heading,.lab-workspace-heading,.rq-form-header) :is(h1,h2){
+    margin-block:0!important;
+    font-size:var(--mobile-title)!important;
+    font-weight:650;
+    line-height:1.4!important;
+    letter-spacing:0;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(h1,h2)>.lms-sidebar-icon{
+    width:20px;height:20px;flex-basis:20px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-panel>header,.rq-panel-head,.lab-panel-heading,.admin-surface>header,.engine-controls-workspace>header) :is(h2,h3){
+    font-size:var(--mobile-section)!important;line-height:1.5;margin:0;font-weight:650;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.template-heading,.rq-workspace-heading,.lab-workspace-heading)>div>p{
+    font-size:var(--mobile-caption);line-height:1.6;margin:4px 0 0;
+  }
+
+  /* Keep controls easy to tap; density comes from spacing rather than scaling the page. */
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.management-primary,.template-btn,.rq-btn,.lab-primary,.lab-secondary){
+    min-height:32px;font-size:var(--mobile-caption);line-height:1.4;padding:6px 10px;gap:6px;max-width:100%;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]):not([type=hidden]),select,textarea){
+    min-width:0;max-width:100%;font-size:max(16px,calc(16px * var(--ui-font-scale,1)))!important;line-height:1.4;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]):not([type=hidden]),select){
+    height:38px!important;min-height:38px!important;padding:6px 8px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(textarea.rq-input,.admin-form-grid textarea,.trial-catalog-editor textarea){min-height:76px;padding:8px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.admin-form-grid,.trial-catalog-form-grid,.business-ai-grid,.template-form-grid,.lab-form-grid){gap:10px!important}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.admin-form-grid,.trial-catalog-form-grid,.template-form-grid,.lab-form-grid)>label{
+    font-size:var(--mobile-caption);line-height:1.5;gap:5px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.template-info,.template-notice,.management-notice,.lab-notice){
+    padding:10px 12px;font-size:var(--mobile-caption);line-height:1.6;margin-block:10px;
+  }
+
+  /* One row rhythm for lists; each table retains its own horizontal scrolling and columns. */
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.template-table,.live-record-table,.rq-table,.lab-table,.admin-table) :is(th,td){
+    padding:7px 10px;font-size:var(--mobile-caption);line-height:1.5;vertical-align:middle;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .data-pagination{
+    padding:8px 10px;gap:6px;font-size:var(--mobile-caption);
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .data-pagination button{min-width:36px;min-height:36px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.workspace-primary-tabs,.admin-nav-scroll,[role=tablist])>[role=tab]{
+    min-height:36px;padding:8px 10px;font-size:var(--mobile-caption);gap:6px;
+  }
+
+  /* Compact, independent dashboard summaries. */
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard :is(.live-metric-grid,.live-dashboard-charts,.live-dashboard-tables){gap:10px;margin-bottom:10px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel{padding:12px;border-radius:8px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-panel>header{margin-bottom:10px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-dashboard-charts>.live-panel{min-height:220px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-bar-chart{height:174px;padding-block:20px 28px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard :is(.live-chart-ticks,.live-bars,.live-bar-column){height:126px}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-bar-slot{height:126px!important}
+  html body #root .dashboard-shell.lms-enterprise .live-dashboard .live-composition{min-height:174px;gap:12px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-grid,.summary-tiles,.lab-dashboard-stats,.rq-kpis){gap:10px;margin-bottom:12px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-grid>.live-metric,.summary-tiles>.summary-tile,.lab-dashboard-stats>.lab-stat-card,.rq-kpis>button){
+    min-height:60px!important;padding:8px 10px!important;box-shadow:none;border-radius:8px;gap:2px 8px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-icon,.lab-stat-icon,.rq-kpi-icon){
+    width:28px;height:28px;flex-basis:28px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-copy>span,.lab-stat-card>div>span,.summary-tile>span,.rq-kpis>button>span){font-size:var(--mobile-caption);line-height:1.4}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-copy strong,.summary-tile>strong,.lab-stat-card strong,.rq-kpis>button>strong){
+    font-size:var(--mobile-value);line-height:1.15;margin:0;font-variant-numeric:tabular-nums;
+  }
+  html body #root .lab-shell.lab-enterprise .lab-main>.scheduling-calendar-panel{margin:10px 0 12px;padding:0}
+  html body #root .lab-shell.lab-enterprise .lab-main>.scheduling-calendar-panel>summary{padding:10px 12px;gap:4px;font-size:var(--mobile-caption)}
+  html body #root .lab-shell.lab-enterprise .lab-dashboard-overview>.lab-panel-heading{padding:10px 12px}
+  html body #root .dashboard-shell.lms-enterprise .settings-management :is(.admin-module-groups,.admin-card-grid){gap:10px}
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-module-card{padding:10px 12px!important;gap:4px 10px;min-height:60px!important}
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-module-card h4{font-size:var(--mobile-body);line-height:1.5}
+  html body #root .dashboard-shell.lms-enterprise .admin-module-content :is(.admin-surface,.admin-interface-panel,.business-ai-block,.e4-monitor){padding:12px!important}
+  html body #root .dashboard-shell.lms-enterprise .admin-module-content :is(.admin-section-top,.e4-monitor-heading,.engine-controls-workspace>header){gap:8px!important;margin-bottom:10px}
+  html body #root .dashboard-shell.lms-enterprise .admin-module-content .e4-monitor-heading h3{font-size:var(--mobile-section)!important}
+
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-workspace-hero{padding:16px!important;min-height:180px!important;gap:12px}
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-workspace-hero h3{font-size:var(--mobile-title);line-height:1.4;margin-block:8px}
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-hero-meta{margin-top:10px;gap:8px}
+  html body #root .dashboard-shell.lms-enterprise .settings-management .admin-hero-status{margin-top:12px;padding-top:10px}
+  html body #root .dashboard-shell.lms-enterprise .admin-polished-engine-page .e4-monitor-stats>article{padding:10px!important;gap:5px}
+  html body #root .dashboard-shell.lms-enterprise .admin-polished-engine-page .e4-monitor-stats strong{font-size:calc(18px * var(--ui-font-scale,1))!important;line-height:1.35}
+  html body #root .dashboard-shell.lms-enterprise .admin-polished-engine-page .e4-monitor-stats small{line-height:1.5}
+
+  /* Short form fields share rows; narrative, image and signing sections keep full width. */
+  html body #root .rq-app.rq-enterprise .rq-editor-page :is(.rq-entry-card,.rq-editor-sidebar section){padding:12px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card-title{padding-bottom:8px;margin-bottom:10px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card-title b{font-size:var(--mobile-section);line-height:1.5}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-form-body{gap:10px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid{gap:10px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid>label{gap:5px;font-size:var(--mobile-caption)!important;line-height:1.5;font-weight:500}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid>label>small{font-size:calc(11px * var(--ui-font-scale,1));line-height:1.5}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid-one{margin-top:10px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-field{margin-bottom:10px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card:first-child>.rq-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps{min-height:50px;padding:2px 4px;box-shadow:none}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-floating-steps a{min-height:44px}
+
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.compact-management-dialog,.account-editor-dialog,.role-editor-dialog,.trial-catalog-editor,.equipment-port-dialog)>header{
+    padding:12px;gap:8px;
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.compact-management-dialog,.account-editor-dialog,.role-editor-dialog,.trial-catalog-editor,.equipment-port-dialog)>header :is(h2,h3){font-size:calc(16px * var(--ui-font-scale,1));line-height:1.5}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) .compact-management-dialog>header>button{width:40px;min-width:40px;height:40px;min-height:40px;padding:0}
+  html body #root .dashboard-shell.lms-enterprise .batch-schedule-body{padding:12px}
+  html body #root .dashboard-shell.lms-enterprise :is(.batch-schedule-intro,.batch-schedule-summary,.batch-job-input>p,.batch-result>p,.batch-result small){font-size:var(--mobile-caption);line-height:1.6}
+  html body #root .dashboard-shell.lms-enterprise .batch-schedule-summary{padding:10px 12px;margin-bottom:12px;gap:8px 12px}
+  html body #root .dashboard-shell.lms-enterprise :is(.batch-job-inputs,.batch-schedule-results,.batch-schedule-settings){gap:10px}
+  html body #root .dashboard-shell.lms-enterprise :is(.batch-job-input,.batch-result){padding:12px}
+  html body #root .dashboard-shell.lms-enterprise .batch-result-dates{font-size:var(--mobile-body);padding:6px 0}
+  html body #root .dashboard-shell.lms-enterprise .batch-schedule-footer{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));gap:8px}
+}
+
+@media screen and (max-width:600px){
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise){
+    --mobile-body:calc(13px * var(--ui-font-scale,1));
+    --mobile-title:calc(18px * var(--ui-font-scale,1));
+    --mobile-section:calc(14px * var(--ui-font-scale,1));
+  }
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.dashboard-content,.rq-main,.lab-main){padding-top:10px}
+  html body #root :is(.dashboard-shell.lms-enterprise,.rq-app.rq-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-grid,.lab-dashboard-stats){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html body #root :is(.dashboard-shell.lms-enterprise,.lab-shell.lab-enterprise) :is(.live-metric-grid,.lab-dashboard-stats)>:last-child:nth-child(odd){grid-column:1/-1;min-height:48px!important}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-grid>label:has(>input[readonly]),
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card:first-child>.rq-entry-grid>label:last-child:nth-child(odd){grid-column:1/-1}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions{gap:6px}
+  html body #root .rq-app.rq-enterprise .rq-editor-page .rq-editor-top-actions>.rq-btn{padding-inline:8px}
+}
+@media screen and (max-width:359px){
+  /* Avoid squeezing the short fields when the user chooses a larger reading size. */
+  html[data-ui-font=large] body #root .rq-app.rq-enterprise .rq-editor-page .rq-entry-card:first-child>.rq-entry-grid{grid-template-columns:minmax(0,1fr)}
+}

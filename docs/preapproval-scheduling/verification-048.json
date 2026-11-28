@@ -1,0 +1,120 @@
+{
+  "passed": true,
+  "scope": "048 schedule → number → signature and preflight → acceleration",
+  "node": {
+    "passed": true,
+    "tests": 966,
+    "failures": 0,
+    "source": "local/node-final.log",
+    "focused_route_rerun_passed": 132
+  },
+  "sql": {
+    "passed": true,
+    "suites": [
+      {
+        "suite": "request_workflow",
+        "passed": true,
+        "tests": 40,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "local_only": true
+      },
+      {
+        "suite": "virtual_request_execution",
+        "passed": true,
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "native_workflow": true,
+        "cloud_mutations": false
+      },
+      {
+        "suite": "template_stage_fields",
+        "passed": true,
+        "tests": 28,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true
+      },
+      {
+        "suite": "human_workflow",
+        "passed": true,
+        "tests": 38,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "storage_api_tested": false,
+        "time_travel_only_in_operator_fixtures": true
+      },
+      {
+        "suite": "trial_stop",
+        "passed": true,
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "cloud_mutations": false
+      },
+      {
+        "suite": "whole_day_schedule",
+        "passed": true,
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "local_only": true
+      },
+      {
+        "suite": "sequence",
+        "passed": true,
+        "tests": 25,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true
+      },
+      {
+        "suite": "schedule_drafts",
+        "passed": true,
+        "tests": 31,
+        "failures": 0,
+        "errors": 0,
+        "all_mutations_rolled_back": true,
+        "local_only": true
+      }
+    ],
+    "tests": 227,
+    "network": "none",
+    "all_mutations_rolled_back": true
+  },
+  "browser": {
+    "passed": true,
+    "new_sequence_tests": 14,
+    "flaky": 0,
+    "fixtures_only": true,
+    "desktops_and_mobile": true,
+    "shared_schedule_regression": 26,
+    "total": 40
+  },
+  "build_lint": {
+    "passed": true,
+    "build": "local/build-release.log",
+    "lint": "local/lint-final.log",
+    "existing_warnings": 107,
+    "errors": 0,
+    "diff_check": true
+  },
+  "cloud_rollback_probe": {
+    "passed": true,
+    "existing_rows_functions_and_public_preserved": true,
+    "existing_private_tables_preserved": true,
+    "existing_cases_not_backfilled": true,
+    "rolled_back": true,
+    "templates_deleted": false,
+    "business_records_modified": false
+  },
+  "migration_sha256": "1c52d9e3e27d41fe8c91fd730eb7a178c357a0fbe3a7798fa8a1ac6b530bdb87",
+  "delivery": "PR49 protected Preview only; no production frontend deployment, main merge, persistent environment, SSO or Render settings change; actual release receipts retained separately",
+  "actual_case_operations": false
+}

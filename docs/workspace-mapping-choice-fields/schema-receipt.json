@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T09:05:52.302239+00:00",
+  "migration": "045_mapping_choice_fields.sql",
+  "sha256": "e245379890fd27cba2901dd337ae7ab1a3ccbaefba910c38141403678ef1782f",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 45,
+  "existing_records_and_templates_preserved": true,
+  "trial_bindings_changed": false,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

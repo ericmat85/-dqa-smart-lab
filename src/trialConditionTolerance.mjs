@@ -1,0 +1,6 @@
+const clean=n=>Number(n.toPrecision(15));
+export function conditionNominal(c){return c.lower!==null&&c.upper!==null?{value:clean((c.lower+c.upper)/2),tolerance:clean((c.upper-c.lower)/2)}:{value:'',tolerance:''};}
+export function conditionFromNominal(c,input){const raw=[input.value,input.tolerance];if(raw.every(x=>x===''))return {...c,lower:null,upper:null};if(raw.some(x=>x===''||x===null||x===undefined))throw Error('請同時填寫數值與正負差。');const value=Number(input.value),tolerance=Number(input.tolerance);if(!Number.isFinite(value)||!Number.isFinite(tolerance)||tolerance<0)throw Error('正負差必須為大於或等於 0 的數字。');const lower=clean(value-tolerance),upper=clean(value+tolerance);if(!Number.isFinite(lower)||!Number.isFinite(upper)||Math.abs(lower)>1e9||Math.abs(upper)>1e9)throw Error('容許範圍超出可設定的數值。');return {...c,lower,upper};}
+export function conditionRangeLabel(c){if(c.lower!==null&&c.upper!==null){const {value,tolerance}=conditionNominal(c);return `${value} ± ${tolerance} ${c.unit}（${c.lower}～${c.upper}）`;}return `${c.lower??'未設下限'} ～ ${c.upper??'未設上限'} ${c.unit}`;}
+
+export function resolveConditionEdits(conditions,edits={}){return conditions.map((c,i)=>edits[i]?conditionFromNominal(c,edits[i]):c);}

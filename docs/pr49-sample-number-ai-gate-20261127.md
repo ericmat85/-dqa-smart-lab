@@ -1,0 +1,17 @@
+# PR49: sample groups and first-stage review
+
+Each sample now receives its own server-issued code, for example `#RT-1、#DA-2、#BC-3`. The two uppercase letters in each prefix differ. A shuffled pool avoids repeated prefixes within a group of up to 650 samples; larger supported quantities reuse prefixes with distinct workspace serial numbers. All 1–1,000 samples are retained.
+
+Generate and save the complete group atomically after saving the schedule. The saved group cannot be edited or appended. Before first-stage approval the reviewer can delete the whole group and generate a new one. Deletion retires the allocation history; serial numbers are not reused. The first signature locks the group. Replanning before that signature preserves the saved codes without another sample confirmation.
+
+The database checks the current document, quantity, complete allocation group, request/sample/draft revisions, actor, tenant, workflow stage, and active case. Both preparation and execution of the first approval enforce the group. Operation receipts prevent duplicate generation after lost acknowledgements. Old free-text assignment cannot bypass generation. Existing business rows are not backfilled or rewritten.
+
+The first-stage AI switch defaults off. Turning it on does not make a model call. Pressing approve validates the ordinary required fields, signature, permission, schedule and complete sample group before invoking E1. E1 receives authorized current request/trial/signature metadata, schedule, every sample code, and current checklist answers; signature images are excluded. The server rechecks plan/sample/document/request revisions after the provider returns. Existing model, budget, token and source-size limits remain.
+
+Findings are displayed for human review. The reviewer must acknowledge them and press approve again; an unchanged result is reused without a second paid call. Source, actor, plan, group, manual answer, comment or signature changes invalidate the result and confirmation. Errors and cancellations never become successful local fallback checks. Turning AI off skips AI only; database safeguards remain mandatory. Isolated local demonstrations explicitly identify their rule-based checks.
+
+For administrator submissions, the direct supervisor defaults to the current administrator even if the membership directory assigns another supervisor. The submitted request and frozen document record the same real identity. A constrained server-created document marker permits this exception without changing directory assignments or ordinary-role self-review rules. Revoking administrator rights removes review privileges without invalidating historical signed documents.
+
+Migration 054 follows installed 001–053. Its deployment bundle checks the exact migration ledger and function definitions, preserves existing records and function grants, verifies the public schema fingerprint, and probes the transaction with rollback before application. Never replay a migration with an unknown outcome.
+
+Demo form-fill actions are exposed through the assistant's exact commands. `/demo fill` selects the current supported form, `/demo fill in manager` fills a virtual request-manager form, `/demo fill in LV1` fills a virtual first-review checklist, `/demo create trial` builds the isolated orphan-case demonstration, and `/create a demo report` prepares the current virtual report. These commands do not save, sign an actual decision, or submit a report automatically. Existing live authorization, revision, cancellation and overwrite checks remain.

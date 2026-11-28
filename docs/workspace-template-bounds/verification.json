@@ -1,0 +1,43 @@
+{
+  "program_and_api": {
+    "passed": 899,
+    "failed": 0
+  },
+  "native_browser": {
+    "startTime": "2026-11-25T05:24:38.576Z",
+    "duration": 227094.364,
+    "expected": 28,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "original_file_browser": {
+    "startTime": "2026-11-25T05:27:14.767Z",
+    "duration": 45155.431000000004,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "original_file": {
+    "validation": "passed",
+    "bytes": 29540,
+    "binding": "BLANK",
+    "preview": [
+      {
+        "rows": 45,
+        "columns": 44
+      }
+    ],
+    "originalBytesUnchanged": true,
+    "liveDatabaseWrites": false,
+    "attachedWorkbookCommitted": false
+  },
+  "build": true,
+  "lint": {
+    "passed": true,
+    "existing_project_warnings": true
+  },
+  "database_migrations": false,
+  "live_database_writes": false
+}

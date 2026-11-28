@@ -1,3 +1,4 @@
+import {formatSampleSources} from './requestChoiceFields.mjs';
 import {assetBytes} from './assetBytes.mjs';
 // PDF-reference layout. Template signatures and measured results start empty.
 import {getTestReference} from './trialCatalogData.mjs';
@@ -35,7 +36,7 @@ export function addRequestForm(book,request={},row=null,assets){
  const pairs=[['產品代碼',request.productCode||request.product,'產品類型',request.productType],['客戶名稱',request.customer,'客戶品番',request.customerPartNo||request.customerPart],['需求日期',request.dueDate||request.requestedDate,'測試數量',request.quantity]];
  pairs.forEach(([a,b,c,d],i)=>{const n=5+i;area(s,`A${n}:B${n}`,a,{fill:true});area(s,`C${n}:F${n}`,b);area(s,`G${n}:H${n}`,c,{fill:true});area(s,`I${n}:L${n}`,d);s.getRow(n).height=19;});
  area(s,'A8:B11','試驗目的\nTest intention',{fill:true,center:true});area(s,'C8:L11',list(request.purpose||request.intent)||'□ 新產品 New Product    □ 設計變更 Design Change    □ 量產品 Mass Product\n□ 手工品 EV    □ 型物品 DV    □ 本型本工程 PV\n□ 再現試驗    □ 定期抽測    □ 其他：');
- area(s,'A12:B14','樣品來源\nSample source',{fill:true,center:true});area(s,'C12:L14',list(request.sampleSource)||'□ 社內 In-house    □ 海外廠 Overseas    □ 客戶 Customer\n□ 廠商 Supplier    □ 競品 Competing products');
+ area(s,'A12:B14','樣品來源\nSample source',{fill:true,center:true});area(s,'C12:L14',formatSampleSources(request)||'□ 社內 In-house    □ 海外廠 Overseas    □ 客戶 Customer\n□ 廠商 Supplier    □ 競品 Competing products');
  area(s,'A15:B18','樣品資訊\nSample info',{fill:true,center:true});area(s,'C15:L18',`製品版次 Product version：${request.productVersion||''}       PCBA 版次：${request.pcbaVersion||''}\n軟體版次 Software version：${request.softwareVersion||''}\n製造日期 Date of manufacture：${request.manufactureDate||''}\n其他說明：${request.sampleNote||''}`);
  area(s,'A19:B34','試驗規範／\n試驗手法\nTest Specification\n/ Test Method',{fill:true,center:true});area(s,'C19:L21',`試驗項目 Test item：${list(request.testItems)||row?.name||''}`,{bold:true});area(s,'C22:L34',addEvidenceContinuations(book,request.specification||row?.specification||'',assets));
  area(s,'A35:B40','判定基準\nJudgment criteria',{fill:true,center:true});area(s,'C35:D40','□ 需作判定\n□ 不作判定',{center:true});area(s,'E35:L40',addEvidenceContinuations(book,request.judgementCriteria||request.judgment||row?.acceptance||'',assets,'判定續頁',250));
@@ -72,7 +73,7 @@ export function trialProcedure(row){
 export function addTrialReportForms(book,row,{request={},assets,demo=false}={}){
  const ref=getTestReference(row.name),cover=sheet(book,'報告首頁','試驗報告單\nTest Report',assets,2),process=sheet(book,'試驗過程',`${row.name}\nTest Procedure`,assets,3),results=sheet(book,'結果與照片',`${row.name}\nTest Results & Photo Record`,assets,4);
  area(cover,'A5:B8','試驗目的\nTest intention',{fill:true});area(cover,'C5:L8',list(request.purpose||request.intent)||'□ 新產品    □ 設計變更    □ 量產品    □ 再現試驗    □ 定期抽測');
- area(cover,'A9:B11','樣品來源\nSample source',{fill:true});area(cover,'C9:L11',list(request.sampleSource)||'□ 社內    □ 海外廠    □ 客戶    □ 廠商    □ 競品');
+ area(cover,'A9:B11','樣品來源\nSample source',{fill:true});area(cover,'C9:L11',formatSampleSources(request)||'□ 社內    □ 海外廠    □ 客戶    □ 廠商    □ 競品');
  for(const [n,a,b,c,d]of [[12,'試驗項目',request.testItems?.length===1?request.testItems[0]:row.name,'客戶',request.customer],[14,'品名',request.productName||request.productCode,'報告日期',request.reportDate],[16,'品番',request.productCode,'報告編號',request.id?`DQA-${request.id}`:'']]){area(cover,`A${n}:B${n+1}`,a,{fill:true});area(cover,`C${n}:F${n+1}`,b);area(cover,`G${n}:H${n+1}`,c,{fill:true});area(cover,`I${n}:L${n+1}`,d);}
  area(cover,'A18:B21','樣品資訊\nSample note',{fill:true});area(cover,'C18:L21',`委託編號：${request.id||''}    樣品數：${request.quantity||''}\n樣品編號：${request.execution?.sampleCode||''}\n設備：${request.execution?.equipment||''}    規範版本：${row.version}\n試驗期間：${request.execution?.plannedStart||''} ～ ${request.execution?.completedAt||request.execution?.plannedEnd||''}`,{size:8});
  area(cover,'A22:L23','試驗基準 Test Conditions',{fill:true,bold:true,center:true});area(cover,'A24:L32',addEvidenceContinuations(book,request.specification||row.specification,assets));

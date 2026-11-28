@@ -1,0 +1,11 @@
+{
+  "attempted_at": "2026-11-25T07:08:48.394532+00:00",
+  "migration": "043_trial_template_delivery.sql",
+  "sha256": "fe74b40d453915afda33f2328ab92a6c8072f771b65e78c9ec634c6062fa278f",
+  "outcome": "COMMITTED_VERIFIED",
+  "migrations": 43,
+  "existing_records_and_templates_preserved": true,
+  "trial_bindings_changed": false,
+  "templates_deleted": false,
+  "business_records_modified": false
+}

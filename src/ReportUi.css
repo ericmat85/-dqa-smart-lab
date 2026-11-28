@@ -20,3 +20,6 @@
 .report-return-form>label{display:flex;flex-direction:column;gap:6px;font-size:12px}
 .report-return-form textarea{box-sizing:border-box;width:100%;min-height:80px;margin:0 0 10px}
 @media(max-width:620px){#root .rq-case-detail>.report-case-panel{padding:12px}#root .report-prearchive-preview>.workbook-view{padding:10px}}
+/* Report events and approval events use the same compact history frame. */
+html body #root :is(.request-information-history,.report-case-panel) details.request-information-audit{margin:10px 0;padding:9px 12px;border:1px solid var(--enterprise-border,#dfe7f2);border-radius:5px;background:var(--enterprise-card,var(--surface,#fff))!important;color:var(--enterprise-text,var(--text,#17365d))}
+html body #root :is(.request-information-history,.report-case-panel) details.request-information-audit>summary{margin:0;padding:0;font-size:12px;line-height:1.6;font-weight:600;background:transparent!important;cursor:pointer}
