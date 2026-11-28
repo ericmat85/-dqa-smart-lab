@@ -30,7 +30,16 @@ export function failedBrowserTests(report){
 const commandText=value=>String(value??'').slice(0,300).replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A');
 const property=value=>commandText(value).replace(/:/g,'%3A').replace(/,/g,'%2C');
 export function browserFailureAnnotations(report){
- return failedBrowserTests(report).slice(0,40).map(f=>`::error file=${property(f.file)},line=${Number.isSafeInteger(Number(f.line))&&Number(f.line)>0?Number(f.line):1},title=Browser test failure (${property(f.project||'default')})::${commandText(f.title)} — ${commandText(f.status)}`);
+ const failures=failedBrowserTests(report),visible=failures.slice(0,40);
+ const individual=visible.slice(0,9).map(f=>`::error file=${property(f.file)},line=${Number.isSafeInteger(Number(f.line))&&Number(f.line)>0?Number(f.line):1},title=Browser test failure (${property(f.project||'default')})::${commandText(f.title)} — ${commandText(f.status)}`);
+ // GitHub accepts ten error annotations per step. Keep the full bounded list
+ // in the first annotation, then retain file links for the first nine cases.
+ if(failures.length>9){
+  const lines=visible.map(f=>`${commandText(String(f.file||'unknown').slice(0,160))}:${Number.isSafeInteger(Number(f.line))&&Number(f.line)>0?Number(f.line):1} ${commandText(String(f.project||'default').slice(0,60))} — ${commandText(f.title)} — ${commandText(f.status)}`);
+  if(failures.length>40)lines.push(`${failures.length-40} additional failures; see the job summary.`);
+  individual.unshift('::error title=Browser failure list::'+lines.join('%0A'));
+ }
+ return individual;
 }
 export async function publishBrowserSummary({reportPath,summaryPath,outcome,annotations=false}){
  let report,unavailable=false;try{report=JSON.parse(await readFile(reportPath,'utf8'));}catch{unavailable=true;}

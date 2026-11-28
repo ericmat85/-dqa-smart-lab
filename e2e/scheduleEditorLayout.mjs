@@ -2,6 +2,8 @@ import {expect} from '@playwright/test';
 export async function assertScheduleEditorLayout(page,dialog){
  const viewport=page.viewportSize();
  await expect.poll(async()=>(await dialog.boundingBox())?.width||0).toBeGreaterThanOrEqual(viewport.width-32);
+ // Wait for the entrance animation before measuring the viewport edge.
+ await expect.poll(async()=>{const bounds=await dialog.boundingBox();return bounds?bounds.y+bounds.height:Infinity;}).toBeLessThanOrEqual(viewport.height+1);
  const box=await dialog.boundingBox();
  expect(box.width).toBeGreaterThanOrEqual(viewport.width-32);
  expect(box.height).toBeGreaterThanOrEqual(viewport.height-32);
