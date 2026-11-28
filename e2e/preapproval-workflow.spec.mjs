@@ -1,3 +1,5 @@
+import {batchGateway} from '../tests/helpers/batchScheduleGateway.mjs';
+import {PEOPLE,id as fixtureId} from './fixtures/preapproval-workflow.mjs';
 import {test,expect} from '@playwright/test';
 import {SIG,lmsOpen,upload} from './fixtures/preapproval-workflow.mjs';
 import {fixture,plan,number,fillNumbers} from './fixtures/preapproval-review-ui.mjs';
@@ -14,3 +16,19 @@ test('first supervisor sees and rejects cancellation in the existing scheduling 
 test('saved group stays fixed through schedule edits, with explicit whole-group delete/rebuild before approval',async({page})=>{const s=await fixture(page);await lmsOpen(page);await plan(page,false);await number(page);const first=s.code;await expect(page.getByRole('button',{name:'儲存樣品編號',exact:true})).toHaveCount(0);await plan(page,false);expect(s.code).toBe(first);expect(s.numberWrites).toHaveLength(1);await page.getByRole('button',{name:'刪除整組編號',exact:true}).click();await expect(page.getByRole('button',{name:'儲存樣品編號',exact:true})).toBeVisible();await number(page,6);expect(s.code).not.toBe(first);expect(s.numberWrites.map(r=>r.action)).toEqual(['SAVE','DELETE','SAVE']);expect(s.errors).toEqual([]);});
 
 test('manual sample fields match quantity and show repeated letters and duplicate entries before any save',async({page})=>{const s=await fixture(page);await lmsOpen(page);await plan(page,false);await expect(page.getByRole('textbox',{name:/樣品 [1-3] 編號/})).toHaveCount(3);await page.getByLabel('樣品 1 編號',{exact:true}).fill('RR-2');await page.getByLabel('樣品 2 編號',{exact:true}).fill('ST-3');await page.getByLabel('樣品 3 編號',{exact:true}).fill('ST-3');await page.getByRole('button',{name:'儲存樣品編號',exact:true}).click();await expect(page.getByText(/兩個英文字母不可相同/)).toBeVisible();await expect(page.getByText('編號與第 2 件樣品重複。',{exact:true})).toBeVisible();expect(s.numberWrites).toHaveLength(0);await number(page);expect(s.numberWrites[0].sample_numbers).toEqual(['#RT-1','#DA-2','#BC-3']);expect(s.errors).toEqual([]);});
+
+for(const outsourced of [false,true])test(`administrator can automate ${outsourced?'outsourced':'internal'} scheduling inside first review and continue sample entry`,async({page},info)=>{
+ const s=await fixture(page,{admin:true,outsourced}),g=await batchGateway();
+ try{
+  g.state.onPrepare=packet=>{for(const job of packet.jobs){job.legacy_id=s.rows[0].legacy_id;job.priority=outsourced?'委外':'一般';job.equipment_labels=outsourced?[]:['恆溫恆濕機 合成'];if(job.plan){job.plan={...job.plan,end_date:new Date(Date.parse(job.plan.start_date+'T00:00:00Z')+10*86400000).toISOString().slice(0,10),scheduling_days:11,hours_per_batch:250,executor_label:PEOPLE.owner.display_name,outsourced};}}};
+  g.state.onSave=packet=>{const job=packet.jobs[0];s.draft={id:fixtureId(900),request_id:s.rows[0].id,document_version_id:s.rows[0].request_document_version_id,request_revision:s.rows[0].revision,revision:1,plan:{...job.plan,outsourced,executor_id:PEOPLE.owner.id,allocations:outsourced?[]:[{equipment_id:fixtureId(301),equipment_name:'恆溫恆濕機 合成',quantity:3,space_units:3}],sample_code:'',scope:'DRAFT_ONLY',flow_version:'PREAPPROVAL_V2'}};};
+  await page.route('**/api/business/schedule-batches/**',async route=>{const req=route.request(),response=await g.transport(new URL(req.url()).pathname,{method:req.method(),body:req.postDataJSON()||undefined});await route.fulfill({status:response.status,contentType:'application/json',body:await response.text()});});
+  await lmsOpen(page);await page.getByRole('button',{name:'編輯排程',exact:true}).click();const editor=page.getByRole('dialog',{name:'編輯試驗排程｜REQ-SYNTHETIC-1',exact:true});
+  await expect(editor.getByRole('button',{name:'自動化排程',exact:true})).toBeEnabled();await editor.getByRole('button',{name:'自動化排程',exact:true}).click();const batch=page.getByRole('dialog',{name:'自動化排程',exact:true});
+  if(!outsourced)await batch.getByLabel('樣品空間 REQ-SYNTHETIC-1',{exact:true}).fill('1');else await expect(batch.getByLabel('樣品空間 REQ-SYNTHETIC-1',{exact:true})).toBeDisabled();
+  await batch.getByRole('button',{name:'產生批次安排',exact:true}).click();await expect(batch.getByRole('button',{name:'儲存 1 筆草稿',exact:true})).toBeEnabled();expect(s.draft).toBeFalsy();
+  await batch.getByRole('button',{name:'儲存 1 筆草稿',exact:true}).click();await expect(batch.getByRole('button',{name:'完成',exact:true})).toBeVisible();await batch.screenshot({path:info.outputPath(outsourced?'admin-outsourced-automation.png':'admin-internal-automation.png')});
+  if(outsourced)await expect(batch).toContainText('委外，不占用內部設備空間');await batch.getByRole('button',{name:'完成',exact:true}).click();await expect(editor).toHaveCount(0);await number(page);
+  expect(s.draft.plan.executor_id).toBe(PEOPLE.owner.id);expect(s.draft.plan.allocations.length).toBe(outsourced?0:1);expect(g.state.executions).toBe(1);expect(s.rows[0].request_review_level).toBe(0);expect(s.errors).toEqual([]);
+ }finally{await g.close();}
+});

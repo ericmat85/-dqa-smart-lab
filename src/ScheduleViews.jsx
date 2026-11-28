@@ -47,7 +47,7 @@ export default function ScheduleViews({rows,accounts,equipment=[],now,status,sea
 function EquipmentScheduleBoard({groups,now,status,search,onRequest,onEdit,canEdit=true,selection}){
  const [collapsed,setCollapsed]=useState({});
  const query=search.trim().toLowerCase();
- const visible=groups.map(group=>({...group,items:filterScheduleRows(group.rows,status,`${group.name} ${group.key}`.toLowerCase().includes(query)?'':search)})).filter(group=>group.items.length||!query&&status==='全部');
+ const visible=groups.map(group=>({...group,items:filterScheduleRows(group.rows,status,`${group.name} ${group.key}`.toLowerCase().includes(query)?'':search,{preserveOrder:true})})).filter(group=>group.items.length||!query&&status==='全部');
  const format=value=>new Date(value).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
  return <div className="equipment-schedule-board">
   <div className="equipment-schedule-intro"><div><div className="help-title-row"><h3>依設備掌握試驗安排</h3><HelpTip>進行中的試驗優先，其次為即將開始的安排；尚未設定時間的試驗置於最後。時間均為台灣時間。</HelpTip></div></div></div>

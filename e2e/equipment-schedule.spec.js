@@ -20,7 +20,7 @@ for(const width of [1366,375])test(`equipment schedule grouping, chronological o
  await expect(panel.locator('.equipment-schedule-kpis')).toHaveCount(0);await expect(panel.getByRole('button',{name:/全部展開|全部收合/})).toHaveCount(0);
  await expect(cards.first().locator('tbody tr').first()).toContainText('REQ-NEAR');await expect(cards.first().locator('tbody tr').last()).toContainText('REQ-LATE');
  await page.setViewportSize({width,height:900});
- await expect(tab).toHaveCSS('color','rgb(15, 23, 42)');
+ await expect(tab).toHaveCSS('color','rgb(23, 37, 59)');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeHidden();
  await cards.first().locator('.equipment-schedule-header').click();await expect(cards.first().locator('.schedule-table-region')).toBeVisible();

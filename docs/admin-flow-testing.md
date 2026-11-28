@@ -14,6 +14,8 @@ npm run test:admin-flow
 - `human-flow`：預約、接收與下載報告單、完成試驗、上傳報告、報告簽核及 PDF 封存。
 - `original-business`：登入、草稿儲存及連線恢復。
 
-這些檔案共 122 個案例；並非每個案例都由同一個管理員完成。原生資料庫的跨階管理員權限與一般角色限制，另由 `database/tests/verify_workspace_admin_acceptance.py` 在隔離資料庫內回滾驗證。
+這些檔案共 126 個案例；並非每個案例都由同一個管理員完成。原生資料庫的跨階管理員權限與一般角色限制，另由 `database/tests/verify_workspace_admin_acceptance.py` 在隔離資料庫內回滾驗證。
 
 可加上 `-- --project=business-desktop` 只跑桌面，或 `-- --list` 列出案例。原有完整 CI 繼續執行所有版面、導覽及其他功能測試；此指令不跳過或取代它們。GitHub 失敗註記會列出測試名稱與檔案，原始 API 回應及錯誤內容不會寫入註記。
+
+管理員自動排程卡點與同一管理員委外完整驗收，見 [管理員排程與委外驗收](admin-scheduling-outsourced-acceptance.md)。
