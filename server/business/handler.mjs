@@ -1,3 +1,4 @@
+import {validProjectCompound} from './projectCompound.mjs';
 import {handleScheduleBatches} from './scheduleBatches.mjs';
 import {handleSpecificationParameters} from './specificationParameters.mjs';
 import {parseParameterCatalog,DEFAULT_SPEC_PARAMETERS} from '../../src/specificationParameters.mjs';
@@ -291,7 +292,7 @@ export function createBusinessHandler({env=process.env,fetchImpl=globalThis.fetc
     if(!UUID.test(body.operation_id||'')||!c||typeof c!=='object'||Array.isArray(c))throw new ApiError(422,'PROJECT_FIELDS_INVALID');
     fields(c,['name','execution_kind','submit','common','items']);
     if(typeof c.name!=='string'||!c.name.trim()||c.name.length>100||!['REAL','VIRTUAL'].includes(c.execution_kind)||typeof c.submit!=='boolean'||!Array.isArray(c.items)||c.items.length<1||c.items.length>100||!c.common||typeof c.common!=='object'||Array.isArray(c.common))throw new ApiError(422,'PROJECT_FIELDS_INVALID');
-    for(const item of c.items){if(!item||typeof item!=='object'||Array.isArray(item))throw new ApiError(422,'PROJECT_FIELDS_INVALID');fields(item,['trial_id','name','quantity','specification','acceptance','judgementRequired']);if(!UUID.test(item.trial_id||'')||typeof item.name!=='string'||!['需作判定','不作判定'].includes(item.judgementRequired)||![item.specification,item.acceptance].every(x=>typeof x==='string'&&x.length<=3000)||item.quantity!==null&&(!Number.isSafeInteger(item.quantity)||item.quantity<1||item.quantity>999999))throw new ApiError(422,'PROJECT_FIELDS_INVALID');}
+    for(const item of c.items){if(!item||typeof item!=='object'||Array.isArray(item))throw new ApiError(422,'PROJECT_FIELDS_INVALID');fields(item,['trial_id','name','quantity','specification','acceptance','judgementRequired','compound']);if(item.compound!==undefined&&!validProjectCompound(item.compound))throw new ApiError(422,'PROJECT_FIELDS_INVALID');if(!UUID.test(item.trial_id||'')||typeof item.name!=='string'||!['需作判定','不作判定'].includes(item.judgementRequired)||![item.specification,item.acceptance].every(x=>typeof x==='string'&&x.length<=3000)||item.quantity!==null&&(!Number.isSafeInteger(item.quantity)||item.quantity<1||item.quantity>999999))throw new ApiError(422,'PROJECT_FIELDS_INVALID');}
     dispatchedWrite=true;return reply(200,{data:await rpc(path.endsWith('/prepare')?'prepare_project_request':'execute_project_request',{p_tenant:session.tenant,p_operation:body.operation_id,p_command:c},session.access)});
    }
    if(path.startsWith('/workflow/')){
