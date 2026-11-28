@@ -18,6 +18,7 @@ import LabApp from "./LabApp.jsx";
 import "./App.css";
 import "./SystemThemeAccents.css";
 import "./UnifiedLoginForm.css";
+import "./MobileDensity.css";
 
 function getPath() {
   return window.location.pathname.replace(/\/+$/, "") || "/";
