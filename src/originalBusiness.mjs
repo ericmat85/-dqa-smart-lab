@@ -13,6 +13,7 @@ const preference=/^dqa-(?:ui-preferences-v\d+|theme(?:-|$)|remember(?:ed)?(?:-|$
 const collections={electronic:'dqa-request-demo-v2',reviews:'dqa-lms-reviews-v1',schedules:'dqa-schedules-demo-v1',equipment:'dqa-equipment-demo-v1',materials:'dqa-materials-demo-v1',borrows:'dqa-borrow-requests-v1',labOperations:'dqa-lab-operations-v1',labWorkItems:'dqa_lab_demo_requests_v1',labAudit:'dqa_lab_demo_audit_v1',accounts:'dqa-shared-demo-accounts-v1'};
 const currentSystem=()=>typeof location==='undefined'?'lms':location.pathname.split('/')[1];
 export const originalBusinessEnabled=()=>enabled;
+export const originalTrialDetails=id=>structuredClone((raw.trials||[]).find(t=>t.id===id)?.editor_details||{});
 export const originalTrialConditions=id=>structuredClone((raw.trials||[]).find(t=>t.id===id)?.editor_details?.conditions||[]);
 export const equipmentActivityData=()=>structuredClone(raw.equipment_activity||null);
 export const businessIdentity=()=>me;

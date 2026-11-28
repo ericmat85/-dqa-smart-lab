@@ -1,6 +1,6 @@
 import {findTrialDefinition} from './trialCatalogStore.mjs';
-import {capabilityCompatibility} from './equipmentCapabilities.mjs';
-import {appStorage,originalBusinessEnabled,originalTrialConditions} from './originalBusiness.mjs';
+import {trialEquipmentCompatibility,subTrialEquipmentCoverage} from './equipmentCapabilities.mjs';
+import {appStorage,originalBusinessEnabled,originalTrialDetails} from './originalBusiness.mjs';
 import {equipmentSpaceUnits} from './equipmentSpace.mjs';
 import {trialProfile,profileEquipmentMatches,trialExecution,sequentialAllocations,operationBuffersAllowed} from './trialProfiles.mjs';
 import {explicitHours} from './trialSourceFacts.mjs';
@@ -20,7 +20,8 @@ export function readScheduleEquipment(storage=appStorage()) {
 export const dateOnly=value=>value?String(value).slice(0,10):'';
 const day=value=>isCalendarDate(dateOnly(value))?Date.parse(`${dateOnly(value)}T00:00:00Z`):NaN;
 const addDays=(value,days)=>new Date(day(value)+days*86400000).toISOString().slice(0,10);
-export const equipmentConditionFit=(title,machine,trialId,sources)=>capabilityCompatibility(machine,Array.isArray(sources)?sources.find(r=>r.trial_id===trialId)?.conditions||[]:originalBusinessEnabled()&&trialId?originalTrialConditions(trialId):findTrialDefinition(title)?.definitionDetails?.conditions||[]);
+export const trialConditionSource=(title,trialId,sources)=>Array.isArray(sources)?sources.find(r=>r.trial_id===trialId)||{}:originalBusinessEnabled()&&trialId?originalTrialDetails(trialId):findTrialDefinition(title)?.definitionDetails||{};
+export const equipmentConditionFit=(title,machine,trialId,sources)=>trialEquipmentCompatibility(machine,trialConditionSource(title,trialId,sources));
 export function equipmentMatches(title,equipment){return profileEquipmentMatches(trialProfile(title),equipment);}
 function sampleQuantity(value) {
   const quantity=Number(value);
@@ -113,6 +114,7 @@ export function validateSchedule({editing,form,equipment,accounts,rows,today,req
    if(!equipmentMatches(editing.title,machine))throw Error('此設備類型不適用目前試驗，請改選適用設備。');
    const fit=equipmentConditionFit(editing.title,machine,editing.trialDatabaseId,editing.conditionSources);if(!fit.compatible)throw Error(fit.reason);validateConditions(machine,form.conditions||editing.conditions);
   }
+  const coverage=subTrialEquipmentCoverage(machines,trialConditionSource(editing.title,editing.trialDatabaseId,editing.conditionSources));if(!coverage.compatible)throw Error(coverage.reason);
   const quantity=sampleQuantity(editing.quantity);
   const allocations=allocateSamples(machines,form,quantity,requirePhysicalVolume,ruled?profile:null);
   const executors=enabledExecutors(accounts);

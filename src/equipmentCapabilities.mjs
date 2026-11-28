@@ -1,3 +1,4 @@
+import {trialConditionGroups} from './trialDefinitionDetails.mjs';
 import {TRIAL_CONDITIONS} from './trialDefinitionDetails.mjs';
 const normalUnit=u=>({kN:'N',kHz:'Hz',MPa:'kPa'})[u]||u;
 const factor=u=>['kN','kHz','MPa'].includes(u)?1000:1;
@@ -18,3 +19,18 @@ export function capabilityCompatibility(machine,requirements=[]){
  return {compatible:reasons.length===0,reasons,reason:reasons.join('；')};
 }
 export const capabilityLabel=r=>(TRIAL_CONDITIONS.find(t=>t.id===r.kind)?.label||r.kind)+'：'+r.lower+'～'+r.upper+' '+r.unit;
+
+export function conditionGroupCompatibility(machine,group={}){
+ const ids=[machine?.id,machine?.databaseId,machine?.legacy_id];
+ if(group.equipment_ids?.length&&!group.equipment_ids.some(id=>ids.includes(id)))return {compatible:false,reasons:['未列入此試驗的適用設備'],reason:'未列入此試驗的適用設備'};
+ return capabilityCompatibility(machine,group.conditions||[]);
+}
+export function trialEquipmentCompatibility(machine,details={}){
+ const groups=trialConditionGroups(details),results=groups.map(g=>({group:g,...conditionGroupCompatibility(machine,g)}));
+ if(results.some(r=>r.compatible))return {compatible:true,reasons:[],reason:''};
+ const reasons=results.flatMap(r=>r.reasons.map(x=>(r.group.name?r.group.name+'：':'')+x));return {compatible:false,reasons,reason:reasons.join('；')};
+}
+export function subTrialEquipmentCoverage(machines,details={}){
+ const missing=(details.sub_trials||[]).filter(g=>!machines.some(m=>conditionGroupCompatibility(m,g).compatible));
+ return {compatible:missing.length===0,reason:missing.map(g=>g.name+' 尚未選擇符合條件的適用設備').join('；')};
+}
